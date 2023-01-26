@@ -1,0 +1,32 @@
+###
+# @copyright Copyright (C) 2022 Spyrosoft Solutions. All rights reserved.
+# THIS FILE WAS GENERATED AUTOMATICALLY. DO NOT CHANGE IT.
+###
+version: '3.9'
+
+x-project_config: &project_config
+  USER_NAME: ${USER_NAME}
+  USER_PASSWORD: ${USER_PASSWORD}
+  GID_NUMBER: ${GID_NUMBER}
+  UID_NUMBER: ${UID_NUMBER}
+  DOCKER_IMAGE_ROOT: ${DOCKER_IMAGE_ROOT}
+  CONAN_LOGIN_USERNAME: ${CONAN_LOGIN_USERNAME}
+  CONAN_PASSWORD: ${CONAN_PASSWORD}
+
+services:
+  {{ project.name }}_dev:
+    image: {{ project.docker_image_tag }}
+    platform: linux/amd64
+    build:
+      context: .
+      args:
+        <<: *project_config
+    privileged: true
+    volumes:
+      - ..:/workspace
+      - /dev:/dev
+    command: sleep infinity 
+  {% if project.in_repo_conan_cache %}
+    environment:
+      - CONAN_USER_HOME=/workspace
+  {% endif %}

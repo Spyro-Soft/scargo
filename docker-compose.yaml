@@ -1,0 +1,27 @@
+---
+version: '3.9'
+
+x-project_config: &project_config
+  USER_NAME: ${USER_NAME}
+  USER_PASSWORD: ${USER_PASSWORD}
+  GID_NUMBER: ${GID_NUMBER}
+  UID_NUMBER: ${UID_NUMBER}
+  DOCKER_IMAGE_ROOT: ${DOCKER_IMAGE_ROOT}
+  CONAN_USERNAME: ${CONAN_USERNAME}
+  CONAN_PASS_KEY: ${CONAN_PASS_KEY}
+
+services:
+  scargo-dev:
+    image: harbor.spyrosoft.it/cdf/scargo-dev:4.8
+    platform: linux/amd64
+    build:
+      context: ./ci/
+      args:
+        <<: *project_config
+    volumes:
+      - .:/repo
+      - /tmp/.X11-unix:/tmp/.X11-unix
+      - ~/.Xauthority:/root/.Xauthority
+    environment:
+      DISPLAY: ${DISPLAY}
+      XAUTHORITY: ${XAUTHORITY}

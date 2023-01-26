@@ -1,0 +1,149 @@
+# Overview
+
+<Add project overview here>
+
+# Set the docker environment
+
+`scargo update`
+
+# Run docker environment
+
+`scargo docker run`
+
+# Basic work with project
+
+scargo clean -> scargo build -> scargo check -> scargo test
+
+- `build`: Compile the project.
+- `clean`: Clean build directory.
+- `check`: Check sources.
+- `fix`: Fix problems reported by chosen checkers in the source directory.
+- `doc`: Generate project documentation.
+- `docker`: Manage the docker environment for your project.
+- `publish`: Publish lib or binary to conan artifactory.
+- `update`: Read scargo.toml and generate CMakeLists.txt.
+- `gen`: Generate certificate and other artifacts for chosen targets
+{% if project.target.family != 'x86' %}
+- `flash`: flash microcontroller board
+{% endif %}
+
+First position yourself in the project directory.
+
+IMPORTANT! If you make any changes to the configuration in the scargo.toml file, then scargo update` command needs to be triggered to apply those changes to the project.
+
+## Publish lib or bin using conan
+
+Please set the `CONAN_LOGIN_USERNAME=""` and `CONAN_PASSWORD=""` parameters in .devcontainer/.env file with your conan credential.
+and run:
+
+`scargo docker build`
+or
+`cd .devcontainer && docker-compose build`
+
+to update the environment with your credential.
+
+# Project dependencies
+
+## Working with docker (recommended)
+
+- python3
+- pip
+- scargo
+- docker
+- docker-compose version 1.29.2
+
+{% if project.target.family == "esp32" %}
+# ESP32 configure
+At the beginning of a project is strongly recommended to configure the project using `idf.py menuconfig`
+In the console please run `idf.py menuconfig` and configure at least the following options:
+- Bootloader config -> Bootloader Optimization Level ...  (O2 is recommended)
+- Serial Flasher Config -> Flash Size ... (e.g. for wroom is 4MB)
+- Partition Table -> Partition Table ... -> Custom Partition Table CSV
+
+## Simulation with qemu
+To use qemu, a single image with all partitions is needed. You can generate it with the following command: 
+
+`scargo gen -b` 
+
+or it can be generated based on data from build/flasher_args.json but spiffs partition needs to be added manually to the file.
+
+`esptool.py --chip esp32 merge_bin --fill-flash-size 4MB -o build/flash_image.bin @flash_args`
+
+Then run qemu simulation:
+
+`qemu-system-xtensa -nographic -machine esp32 -drive file=build/flash_image.bin,if=mtd,format=raw`
+
+Stop qemu using `pkill qemu` command in the terminal
+
+## Working directly with IDF
+
+(0) idf.py fullclean
+
+1. idf.py all
+2. idf.py flash
+3. idf.py monitor
+
+idf.py clean
+idf.py build
+or
+idf.py app
+idf.py app-flash
+
+idf.py menuconfig
+
+## Create fs and manage image
+
+Create image:
+`scargo gen --fs`
+or
+`$IDF_PATH/components/spiffs/spiffsgen.py 24576 main/fs build/spiffs.bin`
+
+Write to partition 'spiffs' the contents of a file named 'spiffs.bin':
+`scargo flash --fs`
+or
+`parttool.py write_partition --partition-name=spiffs --input "build/spiffs.bin"`
+
+Erase partition with name 'storage':
+`parttool.py erase_partition --partition-name=spiffs`
+
+Read partition with type 'data' and subtype 'spiffs' and save to file 'spiffs.bin':
+`parttool.py read_partition --partition-type=data --partition-subtype=spiffs --output "build/spiff.bin"`
+
+Print the size of the default boot partition:
+`parttool.py get_partition_info --partition-boot-default --info size`
+
+## Potential issues
+
+idf.py set-target esp32c3 - set up esp32 uC target example with esp32c3
+
+
+## Debug
+
+### debug in the console
+
+idf.py flash monitor openocd gdbgui
+
+### debug in vsc
+
+- run `idf.py openocd` or `openocd -c \"set ESP_RTOS none\" -f board/esp32-wrover-kit-3.3v.cfg`
+- run debug in vscode
+
+{% elif project.target.family == "stm32" %}
+# STM32 configure
+The model of the microcontroller is taken from the model set in scargo.toml file e.g.:  
+`[stm32] -> chip = "STM32L496AGI6"`
+Please change is according to your needs.
+
+Some of the external dependencies such as CMSIS or HAL are added to the project configuration by default. They will be managed by cmake.
+We call stm32-cmake functions for fetch content. Please check the stm32-cmake project to get knowledge of how to use HAL and CMSIS dependencies (https://github.com/ObKo/stm32-cmake#hal)
+
+## Debug
+
+### debug in the console
+
+openocd gdb
+
+### debug in vsc
+
+- run debug in vscode
+{% endif %}

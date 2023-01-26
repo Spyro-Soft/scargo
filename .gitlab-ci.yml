@@ -1,0 +1,143 @@
+image: harbor.spyrosoft.it/cdf/scargo-dev:4.8
+
+stages:
+  - build
+  - check
+  - test
+  - docu
+  - publish
+
+.merge_request:
+  rules:
+    - if: $CI_COMMIT_MESSAGE =~ /(?i)^(WIP:|Draft:)/
+      when: never
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event" && $CI_MERGE_REQUEST_TITLE =~ /^(WIP:|Draft:)/'
+      when: never
+    - when: always
+
+.merge_request_main:
+  rules:
+    - if: $CI_COMMIT_MESSAGE =~ /(?i)^(WIP|Draft:)/ 
+      when: never
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event" && $CI_MERGE_REQUEST_TITLE =~ /^(WIP|Draft:)/'
+      when: never
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event" && $CI_MERGE_REQUEST_TARGET_BRANCH_NAME =~ /^(master|main)$/'
+      when: always
+    - when: never
+
+workflow:
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+    - if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH'
+    
+#______________________________________________________________________________________________BUILD
+debug:
+  stage: build
+  extends: .merge_request
+  script:
+    - ./build.py --build_all
+
+#template
+.release:
+  stage: build
+  only:
+    refs:
+      - master
+  script:
+    - ./build.py --build_all 
+  artifacts:
+    expire_in: 1 hour
+    paths:
+      - out/program
+
+#_______________________________________________________________________________________________UNIT TESTS
+unit test:
+  stage: test
+  extends: .merge_request
+  allow_failure: false
+  script:
+    - ./run.py -u
+
+#_______________________________________________________________________________________________INTEGRATION TESTS
+integration test:
+  stage: test
+  extends: .merge_request
+  allow_failure: false
+  script:
+    -  ./run.py -t
+
+#______________________________________________________________________________________________COPYRIGHTS
+copy rights:
+  stage: check
+  extends: .merge_request
+  allow_failure: true
+  script:
+    -  ./common_dev/scripts/copyrights.py -C scargo/
+
+#______________________________________________________________________________________________TODO
+todo:
+  stage: check
+  extends: .merge_request
+  allow_failure: true
+  script:
+    -  ./common_dev/scripts/todo_check.py -C scargo -C tests
+
+#______________________________________________________________________________________________FORMAT
+black:
+  stage: check
+  extends: .merge_request
+  allow_failure: false
+  script:
+    - black --check --diff scargo tests common_dev run.py build.py clean.py
+
+isort:
+  stage: check
+  extends: .merge_request
+  allow_failure: false
+  script:
+    - isort --profile=black --check --diff scargo tests common_dev run.py build.py clean.py
+#______________________________________________________________________________________________CYCLOMATIC
+cyclomatic:
+  stage: check
+  extends: .merge_request
+  allow_failure: true
+  script:
+    -  ./common_dev/scripts/cyclomatic.py
+
+#______________________________________________________________________________________________DOCU
+docu:
+  stage: docu
+  extends: .merge_request
+  allow_failure: false
+  script:
+    - make -C./docs html
+
+#______________________________________________________________________________________________LINT
+pylint:
+  stage: check
+  extends: .merge_request
+  allow_failure: false
+  script:
+    - ./common_dev/scripts/pylintchecker.py -c scargo/ -s 9.5 --exclude=tests/
+#______________________________________________________________________________________________CHECK_TAG
+check_tag:
+  stage: publish
+  extends: .merge_request_main
+  script:
+    - git config --global --add safe.directory "${CI_PROJECT_DIR}"
+    - git fetch --tags
+    - tag=release_$(grep -w __version__ scargo/scargo_src/global_values.py | grep -Eo "[[:digit:]]+\.[[:digit:]]+\.[[:digit:]]+")
+    - if [[ $(git tag -l "$tag") ]]; then echo "tag $tag exist"; exit 1; else echo "tag $tag does not exist "; fi  
+
+#______________________________________________________________________________________________RELEASING
+releasing:
+  stage: publish
+  image: registry.gitlab.com/gitlab-org/release-cli:latest
+  only:
+    - master
+    - main
+  script:
+    - tag=release_$(grep -w __version__ scargo/scargo_src/global_values.py | grep -Eo "[[:digit:]]+\.[[:digit:]]+\.[[:digit:]]+")
+    - echo "this is release"
+    - echo $tag
+    - release-cli create --name "${tag}" --description "${CI_COMMIT_TAG_MESSAGE:-No release notes.}" --tag-name "${tag}"

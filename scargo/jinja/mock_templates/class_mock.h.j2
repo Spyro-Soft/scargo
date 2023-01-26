@@ -1,0 +1,28 @@
+/**
+ * @copyright Copyright (C) 2021 Spyrosoft Solutions. All rights reserved.
+ */
+
+#pragma once
+
+#include "gtest/gtest.h"
+#include <gmock/gmock.h>
+#include <static_mock.h>
+#include <memory>
+#include "{{header.name}}"
+
+{% if header.namespaces %}
+{% for namespace in header.namespaces %}
+using namespace {{namespace.name}};
+{% endfor %}
+{% endif %}
+
+{% for cls in header.classes %}
+class {{cls.mock_name}} : public StaticMock<{{cls.mock_name}}>
+{
+public:
+    {% for method in cls.methods %}
+    MOCK_METHOD({{method.return_type|replace("static", "")|replace("virtual", "")}}, {{method.name}}, ({{method.get_arg_types()|trim}}), ({{method.get_specifiers()|trim}}));
+    {% endfor %}
+};
+
+{% endfor %}

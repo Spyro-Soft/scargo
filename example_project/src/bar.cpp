@@ -1,0 +1,7 @@
+//
+// Copyright
+//
+
+void bar()
+{
+}

@@ -1,0 +1,17 @@
+project( {{ config.project.name }}
+    {% if config.project.version %}
+    VERSION {{ config.project.version }}
+    {% endif %}
+    {% if config.project.description %}
+    DESCRIPTION "{{ config.project.description }}"
+    {% endif %}
+    {% if config.project.homepage_url %}
+    HOMEPAGE_URL "{{ config.project.homepage_url }}"
+    {% endif %}
+    LANGUAGES C CXX ASM
+)
+
+if(EXISTS ${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
+    include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
+    conan_basic_setup()
+endif()

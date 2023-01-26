@@ -1,0 +1,2 @@
+class MockNotImplemented(Exception):
+    pass

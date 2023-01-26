@@ -1,0 +1,4 @@
+{% if config.project.bin_name %}
+idf_component_register(SRCS "{{config.project.bin_name|lower}}.cpp"
+                    INCLUDE_DIRS "")
+{% endif %}                    

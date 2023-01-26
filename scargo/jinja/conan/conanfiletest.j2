@@ -1,0 +1,40 @@
+from conans import CMake, ConanFile, tools
+
+
+class {{ config.project.name|capitalize|replace("-", "") }}TestConan(ConanFile):
+    name = "{{ config.project.name }}_test"
+    version = "{{ config.project.version }}"
+    settings = "os", "compiler", "build_type", "arch"
+    description = "Tests for {{ config.project.name }}"
+    url = "{{ config.project.homepage_url }}"
+    generators = "cmake_find_package", "cmake"
+
+    def build(self):
+        cmake = CMake(self)
+        cmake.configure()
+        cmake.build()
+
+    def test(self):
+        target_test = "RUN_TESTS" if self.settings.os == "Windows" else "test"
+        self.cmake.build(target=target_test)
+
+    {% if config.dependencies.test or config.dependencies.general %}
+    def requirements(self):
+        {% for dep in config.dependencies.test %}
+        self.requires("{{ dep }}")
+        {% endfor %}
+        {% for dep in config.dependencies.general %}
+        self.requires("{{ dep }}")
+        {% endfor %}
+    {% endif %}
+
+    {% if config.dependencies.build or config.dependencies.tool %}
+    def build_requirements(self):
+        {% for dep in config.dependencies.build %}
+        self.requires("{{ dep }}")
+        {% endfor %}
+        {% for tool_dep in config.dependencies.tool %}
+        self.tool_requires("{{ tool_dep }}")
+        {% endfor %}
+    {% endif %}
+

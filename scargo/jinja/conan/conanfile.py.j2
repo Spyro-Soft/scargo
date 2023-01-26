@@ -1,0 +1,47 @@
+from conans import CMake, ConanFile, tools
+
+
+class {{ config.project.name|capitalize|replace("-", "") }}Conan(ConanFile):
+    name = "{{ config.project.name }}"
+    version = "{{ config.project.version }}"
+    settings = "os", "compiler", "build_type", "arch"
+    description = "{{ config.project.description }}"
+    url = "{{ config.project.homepage_url }}"
+    generators = "cmake_find_package", "cmake"
+
+    def package(self):
+        self.copy("*", src='build/Debug/bin/', dst='bin', keep_path=False)
+        self.copy("*", src='build/Debug/lib/', dst='lib', keep_path=False)
+
+    def package_info(self):
+        self.cpp_info.libs = tools.collect_libs(self)
+
+    def build(self):
+        cmake = CMake(self)
+        cmake.configure()
+        cmake.build()
+
+    def source(self):
+        {% if config.project.target.family == "stm32" %}
+        git = tools.Git(folder="third-party/stm32-cmake")
+        git.clone("https://github.com/ObKo/stm32-cmake.git", "master")
+        {% else %}
+        pass
+        {% endif %}
+
+    {% if config.dependencies.build or config.dependencies.tool %}
+    def build_requirements(self):
+        {% for dep in config.dependencies.build %}
+        self.requires("{{ dep }}")
+        {% endfor %}
+        {% for tool_dep in config.dependencies.tool %}
+        self.tool_requires("{{ tool_dep }}")
+        {% endfor %}
+
+    {% endif %}
+    {% if config.dependencies.general %}
+    def requirements(self):
+        {% for dep in config.dependencies.general %}
+        self.requires("{{ dep }}")
+        {% endfor %}
+    {% endif %}

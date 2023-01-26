@@ -1,0 +1,43 @@
+//
+// Copyright
+//
+
+#include <cstdio>
+{% if target.family == "esp32" %}
+#include <freertos/FreeRTOS.h>
+#include <freertos/task.h>
+#include <esp_log.h>
+
+extern "C"
+{
+    void app_main(void);
+}
+
+/**
+ * @brief Main freeRTOS task
+ *
+ */
+void app_main(void)
+{
+    for (;;)
+    {
+        vTaskDelay(pdMS_TO_TICKS(50));
+    }
+}
+{% else %}
+/**
+ * @brief This is example function doc
+ *
+ * @return int 0 if all good
+ */
+int main()
+{
+    {% if target.family != "x86" %}
+    while (true)
+        ;
+    {% else %}
+    printf("Hello World!\n");
+    return 0;
+    {% endif %}
+}
+{% endif %}

@@ -1,0 +1,8 @@
+ARG SSH_PORT
+
+ENV DEBIAN_FRONTEND noninteractive
+
+# configure wxWidget
+RUN apt update --fix-missing && \
+    apt install -y adwaita-icon-theme-full libwxgtk3.0-gtk3-dev dbus-x11 \ 
+    bzr lib32z1 libncurses5:amd64 usbutils xterm minicom

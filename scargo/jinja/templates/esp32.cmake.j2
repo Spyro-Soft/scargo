@@ -1,0 +1,12 @@
+{% if config.esp32.extra_component_dirs %}
+set(EXTRA_COMPONENT_DIRS 
+{% for dirs in config.esp32.extra_component_dirs %}
+    {{ dirs }}
+{% endfor %}
+)
+{% endif %}
+set(IDF_TARGET {{ config.project.target.id }})
+
+include($ENV{IDF_PATH}/tools/cmake/project.cmake)
+
+{% include 'project.cmake.j2' %}

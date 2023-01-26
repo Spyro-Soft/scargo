@@ -1,0 +1,134 @@
+image: common_scargo_project-dev:1.0
+stages:
+  - build
+  - test
+  - check
+  - docu
+#  - deploy
+
+.merge_request:
+  rules:
+    - if: $CI_COMMIT_MESSAGE =~ /(?i)^(WIP:)/
+      when: never
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event" && $CI_MERGE_REQUEST_TITLE =~ /^(WIP:)/'
+      when: never
+    - when: always
+
+#______________________________________________________________________________________________BUILD
+debug:
+  stage: build
+  extends: .merge_request
+  script:
+    - scargo build
+  artifacts:
+    paths:
+      - build/Debug/
+    when: always
+
+#_______________________________________________________________________________________________TEST
+tests:
+  stage: test
+  extends: .merge_request
+  allow_failure: true
+  script:
+    - scargo test
+  artifacts:
+    paths:
+      - build/doc/ut_coverage_html
+
+#______________________________________________________________________________________________CLANG_FORMAT
+clang format:
+  stage: check
+  extends: .merge_request
+  allow_failure: false
+  script:
+    - scargo check --clang-format
+  artifacts:
+    paths:
+      - build/clang_format.log
+    when: always
+
+#______________________________________________________________________________________________CPPCHECK
+cpp check:
+  stage: check
+  extends: .merge_request
+  allow_failure: false
+  script:
+    - scargo check --cppcheck
+  artifacts:
+    paths:
+      - build/cpp_check.log
+    when: always
+
+#______________________________________________________________________________________________CLANG_TIDY
+clang tidy:
+   stage: check
+   extends: .merge_request
+   allow_failure: true
+   script:
+    - scargo check --clang-tidy
+   artifacts:
+     paths:
+       - build/filtered_compile_commands
+
+#______________________________________________________________________________________________TODO
+todo:
+  stage: check
+  extends: .merge_request
+  allow_failure: true
+  script:
+    - scargo check --todo
+  artifacts:
+    paths:
+      - build/todo.log
+    when: always
+
+#______________________________________________________________________________________________CYCLOMATIC
+cyclomatic:
+  stage: check
+  extends: .merge_request
+  allow_failure: true
+  script:
+    - scargo check --cyclomatic
+  artifacts:
+    paths:
+      - build/cyclomatic.log
+    when: always
+
+#______________________________________________________________________________________________PRAGMA_CHECK
+pragma once:
+  stage: check
+  extends: .merge_request
+  allow_failure: false
+  script:
+    - scargo check --pragma
+  artifacts:
+    paths:
+      - build/pragma_once.log
+    when: always
+
+#______________________________________________________________________________________________COPYRIGHTS
+copy rights:
+  stage: check
+  extends: .merge_request
+  allow_failure: true
+  script:
+    - scargo check --copyright
+  artifacts:
+    paths:
+      - build/copy_rights.log
+    when: always
+
+#______________________________________________________________________________________________DOCU
+docu:
+  stage: docu 
+  extends: .merge_request
+  allow_failure: true
+  script:
+    - scargo doc
+  artifacts:
+    paths:
+      - build/doc
+    when: always
+
+#_____________________________________________________________________________________________DEPLOY

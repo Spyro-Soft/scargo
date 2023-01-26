@@ -1,0 +1,18 @@
+list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/third-party/stm32-cmake/cmake)
+
+set(STM32_CHIP {{ config.stm32.chip }})
+set(CMAKE_TOOLCHAIN_FILE ${CMAKE_CURRENT_SOURCE_DIR}/third-party/stm32-cmake/cmake/stm32_gcc.cmake)
+{% if config.project.build_env == "native" %}
+set(STM32_TOOLCHAIN_PATH $ENV{HOME}/arm-gnu-toolchain-12.2.mpacbti-bet1-x86_64-arm-none-eabi)
+{% elif config.project.build_env == "docker" %}
+set(STM32_TOOLCHAIN_PATH /opt/gcc-arm-none-eabi)
+{% endif %}
+set(STM32_TARGET_TRIPLET arm-none-eabi)
+
+include(third-party/stm32-cmake/cmake/stm32/common.cmake)
+stm32_get_chip_info(${STM32_CHIP} FAMILY STM32_FAMILY DEVICE STM32_DEVICE TYPE STM32_TYPE)
+
+message("Fetching stm32 cube for stm32 ${STM32_FAMILY} family")
+stm32_fetch_cube(${STM32_FAMILY})
+
+{% include 'project.cmake.j2' %}

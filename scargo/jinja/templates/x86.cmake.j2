@@ -1,0 +1,8 @@
+{% include 'project.cmake.j2' %}
+
+{% if config.project.cc %}
+set(CMAKE_C_COMPILER   "{{ config.project.cc }}")
+{% endif %}
+{% if config.project.cxx %}
+set(CMAKE_CXX_COMPILER "{{ config.project.cxx }}")
+{% endif %}

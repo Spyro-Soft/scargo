@@ -1,0 +1,14 @@
+include scargo/*
+include scargo/certs/*
+include scargo/env/*
+include scargo/jinja/conan/*
+include scargo/jinja/cpp/*
+include scargo/jinja/docker/*
+include scargo/jinja/mock_templates/*
+include scargo/jinja/mock_utils/*
+include scargo/jinja/test_templates/static_mock/*
+include scargo/jinja/templates/*
+include scargo/jinja/test_templates/**
+include scargo/jinja/ut_templates/*
+include scargo/templates/*
+prune tests

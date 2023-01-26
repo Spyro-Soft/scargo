@@ -1,0 +1,111 @@
+[project]
+name = "{{ data.project_name }}"
+version = "0.1.0"
+description = "Project description."
+homepage-url = "www.hello-world.com"
+
+{% if data.bin_name %}
+bin_name = "{{ data.bin_name }}"
+{% endif %}
+{% if data.lib_name %}
+lib_name = "{{ data.lib_name }}"
+{% endif %}
+target = "{{ data.target.id }}"
+build-env = "{{ data.build_env }}"
+docker-file = ".devcontainer/Dockerfile-custom"
+docker-image-tag = "{{ data.docker_image_tag }}"
+
+cc  = "{{ data.cc }}"
+cxx = "{{ data.cxx }}"
+cxxstandard = "17"
+
+cflags   = "{{ data.cflags }}"
+cxxflags = "{{ data.cxxflags }}"
+
+in-repo-conan-cache = false
+
+[profile.Debug]
+cflags   = "-g"
+cxxflags = "-g"
+
+[profile.Release]
+cflags   = "-O3 -DNDEBUG"
+cxxflags = "-O3 -DNDEBUG"
+
+[profile.RelWithDebInfo]
+cflags   = "-O2 -g -DNDEBUG"
+cxxflags = "-O2 -g -DNDEBUG"
+
+[profile.MinSizeRel]
+cflags   = "-Os -DNDEBUG"
+cxxflags = "-Os -DNDEBUG"
+
+[check]
+exclude = []
+
+[check.pragma]
+exclude = []
+
+[check.copyright]
+description = "Copyright"
+exclude = []
+
+[check.todo]
+exclude = []
+
+[check.clang-format]
+exclude = []
+
+[check.clang-tidy]
+exclude = []
+
+[check.cyclomatic]
+exclude = []
+
+[tests]
+cc  = "gcc"
+cxx = "g++"
+
+cflags   = "-Wall -Wextra -Og --coverage -fkeep-inline-functions -fkeep-static-consts"
+cxxflags = "-Wall -Wextra -Og --coverage -fkeep-inline-functions -fkeep-static-consts"
+
+gcov-executable = "" # Empty string -> use default gcov executable
+
+# conan dependencies "lib_name/version"
+[dependencies]
+general = [
+]
+build = [
+]
+tool = [
+]
+test = [
+    "gtest/1.12.1"
+]
+
+[conan.repo]
+gitlab = "https://git.spyrosoft.it/api/v4/projects/159/packages/conan"
+
+{% if data.target.family == "esp32" %}
+[esp32]
+extra_component_dirs=[]
+partitions = [
+    "nvs,      data, nvs,     0x9000,  0x4000,",
+    "otadata,  data, ota,     0xd000,  0x2000,",
+    "phy_init, data, phy,     0xf000,  0x1000,",
+    "ota_0,    app,  ota_0,   0x10000, 0x180000,",
+    "ota_1,    app,  ota_1,   0x190000,0x180000,",
+    "spiffs,   data, spiffs,  0x310000,0x6000,"
+]
+{% elif data.target.family == "stm32" %}
+[stm32]
+chip = "STM32L496AG"
+flash-start = 0x08000000
+{% endif %}
+
+[scargo]
+console-log-level = "INFO"
+file-log-level = "WARNING"
+update-exclude = [
+
+]

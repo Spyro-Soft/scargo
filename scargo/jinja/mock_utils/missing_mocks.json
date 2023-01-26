@@ -1,0 +1,16 @@
+{
+   "missing_mocks":[
+      "example/path/to/source/cpp/file.h"
+   ],
+   "missing_classes":{
+      "example/path/to/source/cpp/file.h":[
+         "MissingClassName",
+         "SecondMissingClassInFile"
+      ]
+   },
+   "missing_methods":{
+      "example/path/to/source/cpp/file.h":[
+         "exampleMethodThatIsNotMocked"
+      ]
+   }
+}

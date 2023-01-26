@@ -1,0 +1,66 @@
+/**
+ * @copyright Copyright (C) 2021 Spyrosoft Solutions. All rights reserved.
+ */
+#pragma once
+
+{% if header.directives %}
+#ifndef {{ header.directives[0] }}
+#define {{ header.directives[0] }}
+{% endif %}
+{% for include in header.includes %}
+{% if 'std' in include %}{{include}}{% endif %}
+{% endfor %}
+
+{% if header.c_style_header %}
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+{% for cls in header.classes %}
+{% for method in cls.methods %}
+{{method.return_type}} {{method.name}}({{method.get_arg_types()}});
+{% endfor %}
+{% endfor %}
+
+#ifdef __cplusplus
+}
+#endif
+
+{% else %}
+
+{% for ns in header.namespaces %}
+namespace {{ns.name}} {
+{% endfor %}
+
+{% for cls in header.one_line_classes %}
+{{cls}}
+{% endfor %}
+
+{% for cls in header.classes %}
+{% if cls.name %}class {{cls.name}} {
+public:
+{% endif %}
+{% for method in cls.methods %}
+{% if cls.name %}    {% endif %}{{method.return_type}} {{method.name}}({{method.get_arg_types()}});
+{% endfor %}
+{% for constructor in cls.constructors %}
+{% if not 'delete' in constructor %}
+    {{constructor}}
+{% endif %}
+{% endfor %}
+{% if cls.destructor %}
+    {{cls.destructor}};
+{% endif %}
+{% if cls.name %}
+};
+{% endif %}
+{% endfor %}
+
+{% for ns in header.namespaces %}
+} // {{ns.name}}
+{% endfor %}
+{% endif %}
+
+{% if header.directives %}
+#endif
+{% endif %}

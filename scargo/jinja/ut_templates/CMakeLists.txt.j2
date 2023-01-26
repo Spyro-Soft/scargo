@@ -1,0 +1,35 @@
+# #
+# Copyright (C) 2022 Spyrosoft Solutions. All rights reserved.
+# #
+
+cmake_minimum_required(VERSION 3.22)
+set(UTEST_NAME {{ utest_name }})
+
+set(TEST_SRCS
+{% for src in src_files %}
+    ${PROJECT_ROOT_DIR}/{{ src }}
+{% endfor %}
+)
+
+set(UT_SRCS
+{% for ut in ut_files %}
+    {{ ut }}
+{% endfor %}
+)
+
+add_executable(${UTEST_NAME}
+    ${TEST_SRCS}
+    ${UT_SRCS}
+)
+
+target_link_libraries(${UTEST_NAME}
+    ${CONAN_LIBS}
+)
+
+add_test(NAME ${UTEST_NAME} 
+        COMMAND  $<TARGET_FILE:${UTEST_NAME}>)
+  
+target_include_directories(${UTEST_NAME}
+    PRIVATE
+        ${SOURCES_DIR}
+)

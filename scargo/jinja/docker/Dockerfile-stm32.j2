@@ -1,0 +1,28 @@
+WORKDIR /opt/
+
+# pull the gcc-arm-none-eabi tarball, add path to tar file
+RUN wget https://armkeil.blob.core.windows.net/developer/Files/downloads/gnu-rm/10.3-2021.10/gcc-arm-none-eabi-10.3-2021.10-x86_64-linux.tar.bz2 && \
+    tar -xvf gcc-arm-none-eabi-10.3-2021.10-x86_64-linux.tar.bz2 && \
+    rm gcc-arm-none-eabi-10.3-2021.10-x86_64-linux.tar.bz2 && \
+    mv gcc-arm-none-eabi-10.3-2021.10 gcc-arm-none-eabi
+
+RUN apt-get update -q -y && \
+    apt-get install -y git make cmake libusb-1.0-0-dev bzr libncurses5:amd64 \
+                       openocd gdb-multiarch usbutils xterm minicom stlink-tools
+                           
+# Set up the compiler path
+ENV PATH $PATH:/opt/gcc-arm-none-eabi/bin
+
+RUN curl -sL https://aka.ms/InstallAzureCLIDeb | sudo bash && \
+    apt-get update && \
+    apt-get install -y ca-certificates curl apt-transport-https lsb-release gnupg && \
+    curl -sL https://packages.microsoft.com/keys/microsoft.asc | \
+    gpg --dearmor | \
+    tee /etc/apt/trusted.gpg.d/microsoft.gpg > /dev/null && \
+    AZ_REPO=$(lsb_release -cs) && \
+    echo "deb [arch=amd64] https://packages.microsoft.com/repos/azure-cli/ $AZ_REPO main" | \
+    tee /etc/apt/sources.list.d/azure-cli.list && \ 
+    apt-get update && \
+    apt-get install azure-cli 
+
+ENV LC_ALL=C

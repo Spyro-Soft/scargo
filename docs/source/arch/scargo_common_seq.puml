@@ -1,0 +1,19 @@
+hide footbox
+
+autoactivate on
+
+hide unlinked
+
+actor user
+participant scargo #Application
+participant sc_new #Application
+participant sc_update #Application
+participant sc_build #Application
+participant conan #Implementation
+participant cmake #Implementation
+participant esp_idf #Implementation
+participant storage #Physical [
+    <<local storage>>
+    my_project_1
+]
+participant "package repository" as pkg_repo #Strategy

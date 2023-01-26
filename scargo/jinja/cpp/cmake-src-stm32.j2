@@ -1,0 +1,69 @@
+stm32_fetch_cmsis(${STM32_FAMILY})
+# stm32_fetch_hal(${STM32_FAMILY})
+
+find_package(CMSIS COMPONENTS STM32${STM32_FAMILY} REQUIRED)
+# find_package(HAL COMPONENTS STM32${STM32_FAMILY} REQUIRED)
+# set(CMAKE_INCLUDE_CURRENT_DIR TRUE)
+
+STRING(TOLOWER ${STM32_FAMILY} STM32_FAMILY_LOWER)
+SET(HAL_CONFIG_FILE ${CMAKE_CURRENT_SOURCE_DIR}/stm32${STM32_FAMILY_LOWER}xx_hal_conf.h)
+if(NOT EXISTS HAL_CONFIG_FILE AND DEFINED STM32_HAL_${STM32_FAMILY}_PATH)
+    set(HAL_CONFIG_FILE_TEMPLATE ${STM32_HAL_L4_PATH}/Inc/stm32${STM32_FAMILY_LOWER}xx_hal_conf_template.h)
+    configure_file(${HAL_CONFIG_FILE_TEMPLATE} ${HAL_CONFIG_FILE} COPYONLY)
+else()
+set(HAL_CONFIG_FILE "")
+endif()
+
+
+{% if  config.project.bin_name %}
+add_executable(${PROJECT_NAME}
+     {{ config.project.bin_name|lower }}.cpp
+)
+{% elif config.project.lib_name%}
+add_library(${PROJECT_NAME}
+     {{ config.project.lib_name|lower }}.cpp
+     {{ config.project.lib_name|lower }}.h
+)
+{% endif %}
+
+target_link_libraries(${PROJECT_NAME}
+    CMSIS::STM32::${STM32_DEVICE}
+    # HAL::STM32::${STM32_FAMILY}
+    STM32::NoSys
+    STM32::Nano
+)
+
+{# 
+conan_basic_setup() adjusts output directories which should not be switched off
+because we rely on it for packaging. This creates a problem for functions in
+stm32-cmake/cmake/common.cmake because it searches in different directory for
+targets. This should be fixed in the future and when fixed use them instead of
+add_custom_target and add_custom command functions bellow.
+
+    stm32_print_size_of_target(${PROJECT_NAME})
+    stm32_generate_binary_file(${PROJECT_NAME})
+    stm32_generate_hex_file(${PROJECT_NAME})
+#}
+add_custom_target(${PROJECT_NAME}_always_display_size
+    ALL COMMAND ${CMAKE_SIZE} $<TARGET_FILE:${PROJECT_NAME}>
+    COMMENT "Target Sizes: "
+    DEPENDS $<TARGET_FILE:${PROJECT_NAME}>
+)
+
+{% if  config.project.bin_name %}
+add_custom_command(
+    TARGET ${PROJECT_NAME}
+    POST_BUILD
+    COMMAND ${CMAKE_OBJCOPY} -O binary $<TARGET_FILE:${PROJECT_NAME}> ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${PROJECT_NAME}.bin
+    BYPRODUCTS ${PROJECT_NAME}.bin
+    COMMENT "Generating binary file ${CMAKE_PROJECT_NAME}.bin"
+)
+
+add_custom_command(
+    TARGET ${PROJECT_NAME}
+    POST_BUILD
+    COMMAND ${CMAKE_OBJCOPY} -O ihex $<TARGET_FILE:${PROJECT_NAME}> ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${PROJECT_NAME}.hex
+    BYPRODUCTS ${PROJECT_NAME}.hex
+    COMMENT "Generating hex file ${CMAKE_PROJECT_NAME}.hex"
+)
+{% endif %}

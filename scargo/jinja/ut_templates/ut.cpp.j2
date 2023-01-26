@@ -1,0 +1,41 @@
+/**
+ * @copyright Copyright (C) 2022 Spyrosoft Solutions. All rights reserved.
+ */
+
+#include <gtest/gtest.h>
+#include <memory>
+{% for inc in header.includes %}
+// #include {{inc}}
+{% endfor %}
+// #include "{{header.name}}"
+
+{% if header.namespaces %}
+{% for namespace in header.namespaces %}
+// using namespace {{namespace}};
+{% endfor %}
+{% endif %}
+using namespace ::testing;
+
+{% if header.classes %}
+{% for cls in header.classes %}
+class {{cls}}Test : public Test
+{
+public:
+    void SetUp() override
+    {
+    }
+
+    void TearDown() override
+    {
+    }
+};
+{% endfor %}
+{% endif %}
+
+{% if header.classes %}
+{% for cls in header.classes %}
+TEST_F({{cls}}Test, exampleTest)
+{
+}
+{% endfor %}
+{% endif %}

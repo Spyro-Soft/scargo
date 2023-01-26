@@ -1,0 +1,15 @@
+{% if config.project.bin_name %}
+add_executable({{ config.project.bin_name|lower }})
+target_sources({{ config.project.bin_name|lower }} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/{{ config.project.bin_name|lower }}.cpp)
+target_include_directories({{ config.project.bin_name|lower }} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR} ${CONAN_LIB_DIRS})
+
+target_link_libraries({{ config.project.bin_name|lower }} ${CONAN_LIBS})
+
+{% endif %}
+{% if config.project.lib_name %}
+add_library({{ config.project.lib_name|lower }} STATIC ${CMAKE_CURRENT_SOURCE_DIR}/{{ config.project.lib_name|lower }}.cpp)
+target_include_directories({{ config.project.lib_name|lower }} PRIVATE ${CONAN_INCLUDES})
+configure_file({{ config.project.lib_name|lower }}.h ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/{{ config.project.lib_name|lower }}.h COPYONLY)
+
+target_link_libraries({{ config.project.lib_name|lower }} ${CONAN_LIBS})
+{% endif %}
