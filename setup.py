@@ -38,7 +38,7 @@ def main():
     A Python-based, open-source, platform-independent utility manage C/C++ package and \
     software development life cycle.
     
-    The scargo project is `hosted on github <https://git.spyrosoft.it/it-11475/scargo>`_.
+    The scargo project is `hosted on github <https://github.com/Spyro-Soft/scargo>`_.
     
     Documentation
     -------------
@@ -63,12 +63,11 @@ def main():
         version=version_str,
         description="C/C++ package manager and software development life cycle which base on RUST cargo idea.",
         long_description=long_description,
-        url="https://git.spyrosoft.it/it-11475/scargo",
-        # TODO update this values
+        url="https://github.com/Spyro-Soft/scargo",
         project_urls={
-            "Documentation": "https://git.spyrosoft.it/it-11475/scargo",
-            "Source": "https://git.spyrosoft.it/it-11475/scargo",
-            "Tracker": "https://git.spyrosoft.it/it-11475/scargo",
+            "Documentation": "https://github.com/Spyro-Soft/scargo/tree/main/docs",
+            "Source": "https://github.com/Spyro-Soft/scargo/tree/main/scargo",
+            "Tracker": "https://github.com/Spyro-Soft/scargo/issues",
         },
         author="Spyrosoft Solutions S.A.",
         author_email="aak@spyro-soft.com",
