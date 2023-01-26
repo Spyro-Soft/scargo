@@ -73,12 +73,13 @@ general = [
 build = [
 ]
 tool = [
+    "gtest/cci.20210126"
 ]
 
 [conan.repo]
-gitlab = "https://git.spyrosoft.it/api/v4/projects/159/packages/conan"
+# gitlab = "https://git.spyrosoft.it/api/v4/projects/159/packages/conan"
 
 
 [scargo]
-version = "1.2.13"
+version = "1.0.0"
 

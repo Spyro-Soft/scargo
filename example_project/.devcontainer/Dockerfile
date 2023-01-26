@@ -14,7 +14,6 @@ RUN apt update --fix-missing && \
     scons build-essential pkg-config \ 
     unzip graphviz nano vim && \
     apt -y install sudo && \
-    mkdir /repo && \
     update-alternatives --install /usr/bin/python python /usr/bin/python3 1 && \
     update-alternatives --install /usr/bin/pip pip /usr/bin/pip3 1
 
@@ -34,7 +33,6 @@ ENV DEBIAN_FRONTEND noninteractive
 RUN apt update --fix-missing && \
     apt install -y adwaita-icon-theme-full libwxgtk3.0-gtk3-dev dbus-x11 \ 
     bzr lib32z1 libncurses5:amd64 usbutils xterm minicom
-RUN chmod 777 /opt
 WORKDIR /opt
 
 FROM x86 AS custom_example_project
@@ -76,9 +74,9 @@ COPY requirements.txt requirements.txt
 RUN pip3 install -r requirements.txt && \
     rm requirements.txt
 
-ENV SCARGO_VERSION="release_1.3.4"
+ENV SCARGO_VERSION="release_1.0.0"
 ENV SCARGO_PATH="/opt/scargo"
-ENV SCARGO_REPO_URL="https://git.spyrosoft.it/it-11475/scargo.git"
+ENV SCARGO_REPO_URL="https://github.com/Spyro-Soft/scargo.git"
 RUN git clone --single-branch --branch ${SCARGO_VERSION} ${SCARGO_REPO_URL} ${SCARGO_PATH} && \
     cd scargo && pip install . 
 
