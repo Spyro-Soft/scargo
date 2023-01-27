@@ -1,0 +1,76 @@
+name: CI
+on:
+  pull_request:
+    branches: 
+      - develop
+      - main
+      - 'releases/**'
+
+# Sets permissions of the GITHUB_TOKEN to allow deployment to GitHub Pages
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    container:
+      image: spyrosoftsa/scargo-dev:1.0
+      options: --user root
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+      - name: Check copyright
+        continue-on-error: true
+        run: ./common_dev/scripts/copyrights.py -C scargo/
+      - name: Check TODO
+        continue-on-error: true
+        run: ./common_dev/scripts/todo_check.py -C scargo -C tests
+      - name: Check with Black
+        run: black --check --diff scargo tests common_dev run.py build.py clean.py
+      - name: Check isort
+        run: isort --profile=black --check --diff scargo tests common_dev run.py build.py clean.py
+      - name: Check Cyclomatic
+        continue-on-error: true
+        run: ./common_dev/scripts/cyclomatic.py
+      - name: Run pylint
+        run: ./common_dev/scripts/pylintchecker.py -c scargo/ -s 9.5 --exclude=tests/
+  test:
+    runs-on: ubuntu-latest
+    container:
+      image: spyrosoftsa/scargo-dev:1.0
+      options: --user root
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+      - name: Unit tests
+        run: ./run.py -u
+      - name: Integration tests 
+        run: ./run.py -t
+  docs:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    container:
+      image: spyrosoftsa/scargo-dev:1.0
+      options: --user root
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+      - name: Setup Pages
+        uses: actions/configure-pages@v3
+      - name: Generate HTML documentation
+        run: ./run.py --doc
+      - name: Upload artifacts
+        uses: actions/upload-pages-artifact@v1
+        with:
+          # Upload entire repository
+          path: './build/src_doc/html'
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v1
+      
+

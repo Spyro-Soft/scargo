@@ -38,7 +38,7 @@ def main():
     A Python-based, open-source, platform-independent utility manage C/C++ package and \
     software development life cycle.
     
-    The scargo project is `hosted on github <https://github.com/Spyro-Soft/scargo>`_.
+    The scargo project is `hosted on github <https://spyro-soft.github.io/scargo/>`_.
     
     Documentation
     -------------
