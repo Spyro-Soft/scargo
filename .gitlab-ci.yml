@@ -1,4 +1,4 @@
-image: harbor.spyrosoft.it/cdf/scargo-dev:4.8
+image: spyrosoftsa/scargo-dev:1.0
 
 stages:
   - build

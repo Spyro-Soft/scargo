@@ -6,6 +6,9 @@ stages:
   - docu
   - publish
 
+variables:
+  GIT_SUBMODULE_STRATEGY: recursive
+
 .merge_request:
   rules:
     - if: $CI_COMMIT_MESSAGE =~ /(?i)^(WIP|Draft:)/
@@ -36,7 +39,8 @@ debug:
     - scargo build
   artifacts:
     paths:
-      - build/Debug/
+      - build/Debug/bin
+      - build/Debug/lib
     when: always
 
 #_______________________________________________________________________________________________TEST

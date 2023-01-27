@@ -23,13 +23,21 @@ set(CMAKE_CXX_STANDARD 17)
 
 set(CMAKE_C_FLAGS   "-Wall -Wextra")
 set(CMAKE_CXX_FLAGS "-Wall -Wextra")
+# Debug
 set(CMAKE_C_FLAGS_DEBUG   "-g")
 set(CMAKE_CXX_FLAGS_DEBUG "-g")
+
+# Release
 set(CMAKE_C_FLAGS_RELEASE   "-O3 -DNDEBUG")
 set(CMAKE_CXX_FLAGS_RELEASE "-O3 -DNDEBUG")
+
+# RelWithDebInfo
 set(CMAKE_C_FLAGS_RELWITHDEBINFO   "-O2 -g -DNDEBUG")
 set(CMAKE_CXX_FLAGS_RELWITHDEBINFO "-O2 -g -DNDEBUG")
+
+# MinSizeRel
 set(CMAKE_C_FLAGS_MINSIZEREL   "-Os -DNDEBUG")
 set(CMAKE_CXX_FLAGS_MINSIZEREL "-Os -DNDEBUG")
+
 
 add_subdirectory(src)

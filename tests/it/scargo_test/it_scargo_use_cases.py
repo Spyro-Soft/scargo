@@ -131,7 +131,7 @@ def test_build_with_extra_dependencies(capfd):
     )
     assert new_command_result.exit_code == 0
 
-    add_libs_to_toml_file("demo_lib/0.1.0", "zlib/1.2.13")
+    add_libs_to_toml_file("zlib/1.2.13")
 
     update_command_result = runner.invoke(cli, ["update"])
     assert update_command_result.exit_code == 0
@@ -140,9 +140,6 @@ def test_build_with_extra_dependencies(capfd):
     assert build_command_result.exit_code == 0
     captured = capfd.readouterr()
 
-    assert re.findall(
-        r"Requirements((.|\n)*)(demo_lib/0.1.0)((.|\n)*)Packages", captured.out
-    )
     assert re.findall(
         r"Requirements((.|\n)*)(zlib/1.2.13)((.|\n)*)Packages", captured.out
     )

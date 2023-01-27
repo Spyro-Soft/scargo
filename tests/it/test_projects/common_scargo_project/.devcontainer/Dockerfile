@@ -93,9 +93,9 @@ COPY requirements.txt requirements.txt
 RUN pip3 install -r requirements.txt && \
     rm requirements.txt
 
-ENV SCARGO_VERSION="release_1.2.13"
+ENV SCARGO_VERSION="release_1.0.0"
 ENV SCARGO_PATH="/opt/scargo"
-ENV SCARGO_REPO_URL="https://git.spyrosoft.it/it-11475/scargo.git"
+ENV SCARGO_REPO_URL="https://github.com/Spyro-Soft/scargo.git"
 RUN git clone --single-branch --branch ${SCARGO_VERSION} ${SCARGO_REPO_URL} ${SCARGO_PATH} && \
     cd scargo && pip install . 
 

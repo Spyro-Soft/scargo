@@ -19,5 +19,5 @@ class Example_projectTestConan(ConanFile):
         self.cmake.build(target=target_test)
 
     def requirements(self):
-        self.requires("gtest/1.12.1")
+        self.requires("gtest/cci.20210126")
 

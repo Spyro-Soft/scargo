@@ -10,29 +10,29 @@ build-env = "docker"
 docker-file = ".devcontainer/Dockerfile-custom"
 docker-image-tag = "common_scargo_project_path-dev:1.0"
 
-cc  = "gcc"
+cc = "gcc"
 cxx = "g++"
 cxxstandard = "17"
 
-cflags   = "-Wall -Wextra"
+cflags = "-Wall -Wextra"
 cxxflags = "-Wall -Wextra"
 
 in-repo-conan-cache = false
 
 [profile.Debug]
-cflags   = "-g"
+cflags = "-g"
 cxxflags = "-g"
 
 [profile.Release]
-cflags   = "-O3 -DNDEBUG"
+cflags = "-O3 -DNDEBUG"
 cxxflags = "-O3 -DNDEBUG"
 
 [profile.RelWithDebInfo]
-cflags   = "-O2 -g -DNDEBUG"
+cflags = "-O2 -g -DNDEBUG"
 cxxflags = "-O2 -g -DNDEBUG"
 
 [profile.MinSizeRel]
-cflags   = "-Os -DNDEBUG"
+cflags = "-Os -DNDEBUG"
 cxxflags = "-Os -DNDEBUG"
 
 [check]
@@ -58,23 +58,25 @@ exclude = []
 exclude = []
 
 [tests]
-cc  = "gcc"
+cc = "gcc"
 cxx = "g++"
 
-cflags   = "-Wall -Wextra -Og --coverage -fkeep-inline-functions -fkeep-static-consts"
+cflags = "-Wall -Wextra -Og --coverage -fkeep-inline-functions -fkeep-static-consts"
 cxxflags = "-Wall -Wextra -Og --coverage -fkeep-inline-functions -fkeep-static-consts"
 
 gcov-executable = "" # Empty string -> use default gcov executable
 
 # conan dependencies "lib_name/version"
 [dependencies]
-general = [
-]
-build = [
-]
-tool = [
-]
+general = []
+build = []
+tool = []
+test = ["gtest/cci.20210126"]
 
 [conan.repo]
-gitlab = "https://git.spyrosoft.it/api/v4/projects/159/packages/conan"
+# gitlab = "https://git.spyrosoft.it/api/v4/projects/159/packages/conan"
 
+[scargo]
+console-log-level = "INFO"
+file-log-level = "WARNING"
+update-exclude = []

@@ -29,6 +29,11 @@ def run_scargo_again_in_docker(project_config: ProjectConfig) -> None:
     relative_path = Path.cwd().absolute().relative_to(project_path)
 
     cmd_args = " ".join(sys.argv[1:])
+
+    entrypoint = ""
+    if project_config.target.family == "esp32":
+        entrypoint = "/opt/esp/entrypoint.sh"
+
     cmd = f'/bin/bash -c "scargo version || true; cd {relative_path} && scargo {cmd_args}"'
 
     docker_tag = project_config.docker_image_tag
@@ -42,6 +47,7 @@ def run_scargo_again_in_docker(project_config: ProjectConfig) -> None:
             f"{docker_tag}",
             cmd,
             volumes=[str(project_path) + ":/workspace/", "/dev/:/dev/"],
+            entrypoint=entrypoint,
             privileged=True,
             detach=True,
             remove=True,

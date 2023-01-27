@@ -12,7 +12,7 @@ x-project_config: &project_config
 
 services:
   scargo-dev:
-    image: harbor.spyrosoft.it/cdf/scargo-dev:4.8
+    image: spyrosoftsa/scargo-dev:1.0
     platform: linux/amd64
     build:
       context: ./ci/
