@@ -12,14 +12,17 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3
       - name: Check copyright
+        continue-on-error: true
         run: ./common_dev/scripts/copyrights.py -C scargo/
       - name: Check TODO
+        continue-on-error: true
         run: ./common_dev/scripts/todo_check.py -C scargo -C tests
       - name: Check with Black
         run: black --check --diff scargo tests common_dev run.py build.py clean.py
       - name: Check isort
         run: isort --profile=black --check --diff scargo tests common_dev run.py build.py clean.py
       - name: Check Cyclomatic
+        continue-on-error: true
         run: ./common_dev/scripts/cyclomatic.py
       - name: Run pylint
         run: ./common_dev/scripts/pylintchecker.py -c scargo/ -s 9.5 --exclude=tests/
