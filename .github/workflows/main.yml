@@ -70,8 +70,8 @@ jobs:
         with:
           # Upload entire repository
           path: './build/src_doc/html'
-      - name: Deploy to GitHub Pages
-        id: deployment
-        uses: actions/deploy-pages@v1
+      # - name: Deploy to GitHub Pages
+      #   id: deployment
+      #   uses: actions/deploy-pages@v1
       
 
