@@ -1,7 +1,10 @@
 name: CI
 on:
-  push:
-    branches: [ feature/github-cicd ]
+  pull_request:
+    branches: 
+      - develop
+      - main
+      - 'releases/**'
 
 # Sets permissions of the GITHUB_TOKEN to allow deployment to GitHub Pages
 permissions:
