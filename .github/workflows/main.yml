@@ -13,3 +13,25 @@ jobs:
         uses: actions/checkout@v3
       - name: Preliminary check of our container with full build
         run: ./build.py --build_all
+  check:
+    runs-on: ubuntu-latest
+    container:
+      image: spyrosoftsa/scargo-dev:1.0
+      options: --user root
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+      - name: Check copyright
+        run: ./common_dev/scripts/copyrights.py -C scargo/
+      - name: Check TODO
+        run: ./common_dev/scripts/todo_check.py -C scargo -C tests
+      - name: Check with Black
+        run: black --check --diff scargo tests common_dev run.py build.py clean.py
+      - name: Check isort
+        run: isort --profile=black --check --diff scargo tests common_dev run.py build.py clean.py
+      - name: Check Cyclomatic
+        run: ./common_dev/scripts/cyclomatic.py
+      - name: Run pylint
+        run: ./common_dev/scripts/pylintchecker.py -c scargo/ -s 9.5 --exclude=tests/
+
+  
