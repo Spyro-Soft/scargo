@@ -4,7 +4,12 @@ from utils import get_project_name, get_project_version
 
 from scargo import cli
 
-PRECONDITIONS = ["precondition_regression_tests", "precondition_regular_tests"]
+PRECONDITIONS = [
+    "precondition_regression_tests",
+    "precondition_regular_tests",
+    "precondition_regression_tests_esp32",
+    "precondition_regression_tests_stm32",
+]
 
 
 @pytest.mark.parametrize("precondition", PRECONDITIONS)

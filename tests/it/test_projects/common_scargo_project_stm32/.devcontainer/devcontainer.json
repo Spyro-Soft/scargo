@@ -1,0 +1,6 @@
+{
+  "name": "common_scargo_project_stm32_dev",
+  "dockerComposeFile": "docker-compose.yaml",
+  "service": "common_scargo_project_stm32_dev",
+  "workspaceFolder": "/workspace"
+}
