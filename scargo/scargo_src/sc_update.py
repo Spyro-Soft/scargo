@@ -86,17 +86,6 @@ def scargo_update(config_file_path: Path) -> None:
             for line in partitions:
                 out.write(line + "\n")
             out.write("\n")
-        try:
-            sdkconfig = Path("sdkconfig")
-            if not sdkconfig.exists():
-                command = f"idf.py set-target {target.id}"
-                logger.info("Running cmd: %s", command)
-                subprocess.check_call(command, shell=True, cwd=project_path)
-        except subprocess.CalledProcessError:
-            logger.error(
-                "idf.py set-target %s not available yet. Please try again manually",
-                target.id,
-            )
 
     generate_cicd(project_config=project_config)
     generate_tests(target, config.tests)

@@ -17,85 +17,10 @@ scargo can:
 # Installation
 To install scargo with pip in your top directory run `pip install -e .[dev]`
 
-To prepare docker development environment run `./ci/setup.sh`
+To prepare dockerized development environment run `./ci/setup.sh`
 
 # Working with scargo
-
-* `new`: Create new scargo project template.
-* `update`: Read scargo.toml and generate CMakeLists.txt.
-* `build`: Compile project.
-* `clean`: Clean build directory.
-* `check`: Check sources.
-* `fix`: Fix problems reported by chosen checkers in source directory.
-* `doc`: Generate project documentation.
-* `docker`: Manage docker environment for your project.
-
-First enter the working directory.
-
-We are going to create a new project. There can be multiple bin but only one lib.
-Project will be named `expro` and it will have two targets.
-One target is an executable with name `foo`.
-Another target is a library with name `bar`.
-The command is:
-
-    $ scargo new expro --bin foo --lib bar
-
-This command creates directory `expro` and template files inside.
-
-Enter this directory:
-
-    $ cd expro
-
-The content of this directory:
-
-    $ tree
-    .
-    ├── CMakeLists.txt
-    ├── conanfile.py
-    ├── LICENSE
-    ├── README.md
-    ├── scargo.lock
-    ├── scargo.toml
-    ├── src
-    │   ├── bar.cpp
-    │   ├── bar.h
-    │   ├── CMakeLists.txt
-    │   └── foo.cpp
-    └── tests
-        ├── CMakeLists.txt
-        ├── it
-        │   └── CMakeLists.txt
-        ├── mocks
-        │   ├── CMakeLists.txt
-        │   └── static_mock
-        │       ├── CMakeLists.txt
-        │       └── static_mock.h
-        └── ut
-            └── CMakeLists.txt
-    
-    6 directories, 16 files
-
-Please look into file `scargo.toml`.
-
-To generate or update the `CMakeLists.txt` of new options from toml file:
-
-    $ scargo update
-
-Compile project:
-
-    $ scargo build
-
-This compiles project in debug mode. Output files are in `build/Debug` directory.
-
-If you'd like to build in release mode:
-
-    $ scargo build --profile Release
-
-Output files are in `build/Release` directory.
-
-To clean build directory:
-
-    $ scargo clean
+You can find all information on how to work with scargo on official documentation webpage: https://spyro-soft.github.io/scargo/index.html
 
 # Project dependencies
 ## Working with docker (recommended)
