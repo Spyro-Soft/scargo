@@ -1,0 +1,12 @@
+name: CI
+on:
+  push:
+    branches: [ feature/github-cicd ]
+jobs:
+  container-test-job:
+    runs-on: ubuntu-latest
+    container:
+      image: spyrosoftsa/scargo-dev:1.0
+    steps:
+      - name: Preliminary check of our container with full build
+        run: ./build.py --build_all
