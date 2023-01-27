@@ -26,5 +26,15 @@ jobs:
         run: ./common_dev/scripts/cyclomatic.py
       - name: Run pylint
         run: ./common_dev/scripts/pylintchecker.py -c scargo/ -s 9.5 --exclude=tests/
-
-  
+  test:
+    runs-on: ubuntu-latest
+    container:
+      image: spyrosoftsa/scargo-dev:1.0
+      options: --user root
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+      - name: Unit tests
+        run: ./run.py -u
+      - name: Integration tests 
+        run: ./run.py -t
