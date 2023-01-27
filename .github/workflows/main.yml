@@ -65,11 +65,11 @@ jobs:
         uses: actions/configure-pages@v3
       - name: Generate HTML documentation
         run: ./run.py --doc
-      - name: Upload artifacts
-        uses: actions/upload-pages-artifact@v1
-        with:
-          # Upload entire repository
-          path: './build/src_doc/html'
+      # - name: Upload artifacts
+      #   uses: actions/upload-pages-artifact@v1
+      #   with:
+      #     # Upload entire repository
+      #     path: './build/src_doc/html'
       # - name: Deploy to GitHub Pages
       #   id: deployment
       #   uses: actions/deploy-pages@v1
