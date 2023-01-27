@@ -61,17 +61,20 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v3
-      - name: Setup Pages
-        uses: actions/configure-pages@v3
       - name: Generate HTML documentation
         run: ./run.py --doc
-      # - name: Upload artifacts
-      #   uses: actions/upload-pages-artifact@v1
-      #   with:
-      #     # Upload entire repository
-      #     path: './build/src_doc/html'
-      # - name: Deploy to GitHub Pages
-      #   id: deployment
-      #   uses: actions/deploy-pages@v1
+      - name: Setup Pages
+        uses: actions/configure-pages@v3
+        if: github.head_ref == 'refs/heads/main'
+      - name: Upload artifacts
+        uses: actions/upload-pages-artifact@v1
+        with:
+          # Upload entire repository
+          path: './build/src_doc/html'
+        if: github.head_ref == 'refs/heads/main'
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v1
+        if: github.head_ref == 'refs/heads/main'
       
 
