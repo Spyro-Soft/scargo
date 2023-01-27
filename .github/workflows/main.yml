@@ -3,16 +3,6 @@ on:
   push:
     branches: [ feature/github-cicd ]
 jobs:
-  container-test-job:
-    runs-on: ubuntu-latest
-    container:
-      image: spyrosoftsa/scargo-dev:1.0
-      options: --user root
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v3
-      - name: Preliminary check of our container with full build
-        run: ./build.py --build_all
   check:
     runs-on: ubuntu-latest
     container:
