@@ -3,7 +3,6 @@ on:
   pull_request:
     branches:
       - main
-      - 'env/main'
     types: [closed]
 
 # Sets permissions of the GITHUB_TOKEN to allow deployment to GitHub Pages

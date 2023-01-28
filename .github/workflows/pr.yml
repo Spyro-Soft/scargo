@@ -5,7 +5,7 @@ on:
       - develop
       - main
       - 'releases/**'
-      - 'env/main'
+      - 'env/test'
 
 jobs:
   call-workflow:
