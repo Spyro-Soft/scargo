@@ -30,7 +30,7 @@ jobs:
         run: ./common_dev/scripts/cyclomatic.py
       - name: Run pylint
         run: ./common_dev/scripts/pylintchecker.py -c scargo/ -s 9.5 --exclude=tests/
-  test:
+  tests:
     runs-on: ubuntu-latest
     container:
       image: spyrosoftsa/scargo-dev:1.0
@@ -42,7 +42,7 @@ jobs:
         run: ./run.py -u
       - name: Integration tests
         run: ./run.py -t
-  docs:
+  documentation:
     runs-on: ubuntu-latest
     container:
       image: spyrosoftsa/scargo-dev:1.0

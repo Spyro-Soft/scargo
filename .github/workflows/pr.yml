@@ -5,8 +5,7 @@ on:
       - develop
       - main
       - 'releases/**'
-      - 'env/test'
-      - 'bugfix/ILAB-2273'
+      - 'env/main'
 
 jobs:
   call-workflow:

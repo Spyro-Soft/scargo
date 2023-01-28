@@ -3,7 +3,7 @@ on:
   push:
     branches:
       - main
-      - 'env/main_test'
+      - 'env/main'
 
 # Sets permissions of the GITHUB_TOKEN to allow deployment to GitHub Pages
 permissions:
@@ -14,7 +14,7 @@ permissions:
 jobs:
   call-workflow:
     uses: ./.github/workflows/workflow-common.yml
-  docs:
+  documentation-release:
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
