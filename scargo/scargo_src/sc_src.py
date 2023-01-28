@@ -1,3 +1,6 @@
+# #
+# @copyright Copyright (C) 2023 SpyroSoft Solutions S.A. All rights reserved.
+# #
 """feature function for scargo"""
 import glob
 import os

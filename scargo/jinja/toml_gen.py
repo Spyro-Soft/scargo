@@ -1,4 +1,8 @@
 #!/usr/bin/env python3
+# #
+# @copyright Copyright (C) 2023 SpyroSoft Solutions S.A. All rights reserved.
+# #
+
 """Generate toml for scargo project"""
 import os
 
