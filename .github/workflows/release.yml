@@ -1,0 +1,42 @@
+name: release
+on:
+  push:
+    branches:
+      - main
+      - 'env/main_test'
+
+# Sets permissions of the GITHUB_TOKEN to allow deployment to GitHub Pages
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+jobs:
+  call-workflow:
+    uses: ./.github/workflows/workflow-common.yml
+  docs:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    container:
+      image: spyrosoftsa/scargo-dev:1.0
+      options: --user root
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+      - name: Generate HTML documentation
+        run: ./run.py --doc
+      - name: Setup Pages
+        uses: actions/configure-pages@v3
+        if: github.head_ref == 'refs/heads/main'
+      - name: Upload artifacts
+        uses: actions/upload-pages-artifact@v1
+        with:
+          # Upload entire repository
+          path: "./build/src_doc/html"
+        if: github.head_ref == 'refs/heads/main'
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v1
+        if: github.head_ref == 'refs/heads/main'
