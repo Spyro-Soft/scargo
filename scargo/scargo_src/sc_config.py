@@ -1,3 +1,6 @@
+# #
+# @copyright Copyright (C) 2023 SpyroSoft Solutions S.A. All rights reserved.
+# #
 from enum import Enum
 from pathlib import Path
 from typing import Dict, List, Optional

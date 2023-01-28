@@ -1,3 +1,8 @@
+# #
+# @copyright Copyright (C) 2023 SpyroSoft Solutions S.A. All rights reserved.
+# #
+
+
 def is_multiline(line):
     line = line.rstrip()
     if line.endswith("="):

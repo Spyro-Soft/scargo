@@ -153,7 +153,6 @@ def test_new_project_target_stm32():
 def test_new_project_target_esp32(fp):
     runner = CliRunner()
     fp.register("docker-compose build ")
-    fp.register("idf.py set-target esp32")
     fp.register("git init -q")
     result = runner.invoke(cli, ["new", pytest.new_test_project_name, "--target=esp32"])
 

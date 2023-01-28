@@ -1,5 +1,5 @@
 # #
-# Copyright (C) 2021 Spyrosoft Solutions. All rights reserved.
+# @copyright Copyright (C) 2023 SpyroSoft Solutions S.A. All rights reserved.
 # #
 
 cmake_minimum_required(VERSION 3.14)
