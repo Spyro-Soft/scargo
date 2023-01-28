@@ -1,4 +1,8 @@
 #!/usr/bin/env python
+# #
+# @copyright Copyright (C) 2023 SpyroSoft Solutions S.A. All rights reserved.
+# #
+
 
 """Publish conan package into repository"""
 import os

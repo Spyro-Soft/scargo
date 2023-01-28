@@ -1,3 +1,7 @@
+# #
+# @copyright Copyright (C) 2023 SpyroSoft Solutions S.A. All rights reserved.
+# #
+
 """Run feature depending on provided args"""
 import os
 import subprocess

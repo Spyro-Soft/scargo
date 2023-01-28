@@ -20,14 +20,14 @@ Please check the stm32-cmake project to get a knowledge how to use HAL and CMSIS
 To use it in your cmake libraries please add proper includes in target_link_libraries to your CMakeLists.txt file as in the following example:
 ::
 
-target_link_libraries(${PROJECT_NAME}
-    CMSIS::STM32::${STM32_TYPE}
-    HAL::STM32::${STM32_FAMILY}::PWREx
-    HAL::STM32::${STM32_FAMILY}::RCC
-    HAL::STM32::${STM32_FAMILY}::RCCEx
-    HAL::STM32::${STM32_FAMILY}::CORTEX
-    bsp
-)
+    target_link_libraries(${PROJECT_NAME}
+        CMSIS::STM32::${STM32_TYPE}
+        HAL::STM32::${STM32_FAMILY}::PWREx
+        HAL::STM32::${STM32_FAMILY}::RCC
+        HAL::STM32::${STM32_FAMILY}::RCCEx
+        HAL::STM32::${STM32_FAMILY}::CORTEX
+        bsp
+    )
 
 Generate a certs
 ---------------------

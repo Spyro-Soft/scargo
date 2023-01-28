@@ -1,4 +1,4 @@
-.. _scargo_test:
+.. _scargo_gen:
 
 Generate C/C++ project source code or artifacts
 -----------------------------------------------

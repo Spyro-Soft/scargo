@@ -1,3 +1,7 @@
+# #
+# @copyright Copyright (C) 2023 SpyroSoft Solutions S.A. All rights reserved.
+# #
+
 import subprocess
 from pathlib import Path
 
