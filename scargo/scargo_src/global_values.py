@@ -6,7 +6,7 @@
 import pkgutil
 from pathlib import Path
 
-__version__ = "1.0.0"
+__version__ = "1.0.1"
 
 DESCRIPTION = "C/C++ package and software development life cycle manager based on RUST cargo idea."
 
