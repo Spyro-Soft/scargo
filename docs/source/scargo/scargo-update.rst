@@ -2,6 +2,9 @@
 
 Update project configuration: update
 -------------------------------------
+.. image:: ../_static/scargo_toml_update.gif
+   :alt: scargo update after scargo.toml modification
+   :align: center
 
 Usage
 ^^^^^

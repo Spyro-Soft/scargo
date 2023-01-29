@@ -2,8 +2,8 @@
 
 Build C/C++ project: build
 ---------------------------
-.. image:: ../_static/scargo_clean_build_docer.gif
-   :alt: StreamPlayer
+.. image:: ../_static/scargo_clean_build_docker.gif
+   :alt: scargo clean and build example
    :align: center
    
 Usage

@@ -2,6 +2,9 @@
 
 Test C/C++ project source code
 ------------------------------
+.. image:: ../_static/scargo_flow_docker.gif
+   :alt: scargo x86 flow
+   :align: center
 
 Usage
 ^^^^^

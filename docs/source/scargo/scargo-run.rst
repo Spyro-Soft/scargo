@@ -2,6 +2,9 @@
 
 Run C/C++ project binary (x86 only)
 -----------------------------------
+.. image:: ../_static/scargo_flow_docker.gif
+   :alt: scargo x86 flow
+   :align: center
 
 Usage
 ^^^^^
