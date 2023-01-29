@@ -2,6 +2,9 @@
 
 Check C/C++ project with static tool analyzers: check
 -----------------------------------------------------
+.. image:: ../_static/scargo_check_fix_docker.gif
+   :alt: StreamPlayer
+   :align: center
 
 Usage
 ^^^^^

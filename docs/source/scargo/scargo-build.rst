@@ -2,7 +2,10 @@
 
 Build C/C++ project: build
 ---------------------------
-
+.. image:: ../_static/scargo_clean_build_docer.gif
+   :alt: StreamPlayer
+   :align: center
+   
 Usage
 ^^^^^
 ::
