@@ -2,6 +2,9 @@
 
 Debug C/C++ project binary (x86 and stm32 supported)
 ----------------------------------------------------
+.. image:: ../_static/scargo_debug_docer.gif
+   :alt: StreamPlayer
+   :align: center
 
 Usage
 ^^^^^
