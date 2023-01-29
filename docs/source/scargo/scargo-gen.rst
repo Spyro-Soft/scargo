@@ -2,9 +2,6 @@
 
 Generate C/C++ project source code or artifacts
 -----------------------------------------------
-.. image:: ../_static/scargo_esp32_flow.gif
-   :alt: scargo esp32 flow
-   :align: center
 
 Usage
 ^^^^^
