@@ -1,5 +1,8 @@
 # Scargo 
 Scargo project was written by Spyrosoft team. Find more information at [spyro-soft.com](https://spyro-soft.com/career).
+<p align="center">
+    <img src="docs/source/_static/spyrosoft_solutions_logo_color.png" alt="drawing" width="200"/>
+</p>
 
 # Overview
 This is the documentation for scargo - a Python-based package manager based on RUST cargo idea.
