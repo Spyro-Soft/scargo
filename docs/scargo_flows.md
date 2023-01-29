@@ -1,6 +1,8 @@
-New Project x86 dev flow
-------------------------
+# Scargo flows
 
+## New Project x86 dev flow
+
+```console
 scargo -h
 scargo new -h
 scargo new my_project --target x86
@@ -14,12 +16,13 @@ scargo check
 scargo test
 scargo run
 exit
+```
 
-Debug existing
---------------
+## Debug existing
 
+```console
 ls
-scargo docker run 
+scargo docker run
 scargo debug
 tui enable
 b main()
@@ -27,3 +30,4 @@ r
 n
 n
 exit
+```
