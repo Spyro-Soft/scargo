@@ -21,6 +21,7 @@ To prepare dockerized development environment run `./ci/setup.sh`
 
 # Working with scargo
 You can find all information on how to work with scargo on official documentation webpage: https://spyro-soft.github.io/scargo/index.html
+![](docs/source/_static/scargo_flow_docker.gif)
 
 # Project dependencies
 ## Working with docker (recommended)
