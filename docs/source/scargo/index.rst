@@ -68,6 +68,5 @@ See also
    :maxdepth: 1
 
    Scargo Toml file configuration <scargo-toml>
-   ESP32 support <scargo-esp32>
-   STM32 support <scargo-stm32>
+
    

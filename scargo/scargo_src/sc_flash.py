@@ -28,7 +28,7 @@ def flash_esp32(
     config: Config, app: bool, fs: bool, flash_profile: str = "Debug"
 ) -> None:
     project_path = get_project_root()
-    out_dir = get_project_root / "build" / flash_profile
+    out_dir = project_path / "build" / flash_profile
     target = config.project.target
     command = ""
     try:
@@ -36,7 +36,7 @@ def flash_esp32(
             app_name = config.project.name
             app_path = out_dir / f"{app_name}.bin"
             command = (
-                f"parttool.py write_partition --partition-name=app --input {app_path}"
+                f"parttool.py write_partition --partition-name=ota_0 --input {app_path}"
             )
             subprocess.check_call(command, shell=True, cwd=project_path)
         elif fs:
