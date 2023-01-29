@@ -41,6 +41,24 @@ ctrl+]
 exit
 ```
 
+
+## New Project stm32 dev flow
+
+```console
+scargo -h
+scargo new -h
+scargo new my_project_stm32 --target stm32
+cd my_project_stm32
+git add .
+git commit -m 'Initial commit'
+scargo docker run
+scargo build
+scargo check
+scargo test
+#scargo flash
+exit
+```
+
 ## Clean and build x86
 
 ```console
