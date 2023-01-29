@@ -16,7 +16,7 @@ To configure your project for chosen STM32 chipset, usage please change it in sc
 Add and use the external dependencies
 -------------------------------------
 Some of the external dependencies such as CMSIS or HAL are added to the project configuration by default. They will be managed by conan.
-Please check the stm32-cmake project to get a knowledge how to use HAL and CMSIS dependencies (https://github.com/ObKo/stm32-cmake#hal)
+Please check the stm32-cmake project to get knowledge how to use HAL and CMSIS dependencies (https://github.com/ObKo/stm32-cmake#hal)
 To use it in your cmake libraries please add proper includes in target_link_libraries to your CMakeLists.txt file as in the following example:
 ::
 

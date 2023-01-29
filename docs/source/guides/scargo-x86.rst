@@ -1,3 +1,5 @@
+.. _scargo_x86:
+
 Creating and working with x86 cpp project
 =========================================
 .. image:: ../_static/scargo_flow_docker.gif
@@ -10,14 +12,14 @@ Creating x86 cpp project
 
 To create *Hello world* x86 cpp project we will use :doc:`scargo new command </scargo/scargo-new>`:
 
-Open command line and run: ::
+Open the command line and run: ::
     
     scargo new --target x86 --bin hello_world hello_world_project
 
-This will create new dockerized x86 cpp project inside hello_world_project directory.
-If you want to create native project you can add *--no-docker* argument.
+This will create a new dockerized x86 cpp project inside hello_world_project directory.
+If you want to create a native project you can add *--no-docker* argument.
 
-This how the project directory will look like: ::
+This is how the project directory will look like: ::
 
     └── hello_world_project
         ├── CMakeLists.txt
@@ -43,8 +45,8 @@ This how the project directory will look like: ::
 
 
 For scargo the most important file is *scargo.toml*. This is the file in which you write your project configuration.
-If you want to update some settings in *scargo.toml* make sure you run scargo update command to update project with
-newly modified configuration.
+If you want to update some settings in *scargo.toml* make sure you run scargo update command to update the project with
+the newly modified configuration.
 
 More on this can be read in :doc:`/scargo/scargo-toml`
 
@@ -68,8 +70,8 @@ To run the binary we can simply use :doc:`scargo run command </scargo/scargo-run
     
     scargo run --profile Release --skip-build
 
-After running the command we will see *Hello world!* text in terminal.
-If project wasn't build for the profile that we want to run, scargo will automatically build it first.
+After running the command we will see *Hello world!* text in the terminal.
+If the project wasn't built for the profile that we want to run, scargo will automatically build it first.
 
 Debugging
 ---------
