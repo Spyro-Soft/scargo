@@ -7,6 +7,8 @@ from utils import add_libs_to_toml_file
 
 from scargo import cli
 
+TARGET = ["x86", "stm32", "esp32"]
+
 
 def test_new_project_with_build():
     runner = CliRunner()
@@ -160,9 +162,6 @@ def test_build_fail_with_incorrect_dependencies():
 
     build_command_result = runner.invoke(cli, ["build"])
     assert build_command_result.exit_code != 0
-
-
-TARGET = ["x86", "stm32", "esp32"]
 
 
 @pytest.mark.parametrize("target", TARGET)
