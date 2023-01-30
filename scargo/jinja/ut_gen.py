@@ -9,6 +9,7 @@ from typing import List, Sequence
 from scargo.jinja.base_gen import BaseGen
 from scargo.jinja.mock_utils.cmake_utlis import add_subdirs_to_cmake
 from scargo.scargo_src.global_values import SCARGO_PGK_PATH
+from scargo.scargo_src.sc_config import Config
 from scargo.scargo_src.utils import get_project_root
 
 HEADER_EXTENSIONS = (".h", ".hpp")
@@ -30,10 +31,11 @@ class HeaderDescriptor:
 
 
 class _UnitTestsGen(BaseGen):
-    def __init__(self):
+    def __init__(self, config: Config):
         template_dir = Path(SCARGO_PGK_PATH, "jinja", "ut_templates")
         BaseGen.__init__(self, template_dir)
 
+        self._config = config
         self._project_path = get_project_root()
         self._ut_dir = self._project_path / "tests/ut"
 
@@ -108,7 +110,7 @@ class _UnitTestsGen(BaseGen):
         """
         input_src_path = input_src_path.absolute()
         relative_to_src = input_src_path.relative_to(
-            self._project_path.absolute() / "src"
+            self._project_path.absolute() / self._config.project.target.source_dir
         )
         return Path(self._ut_dir, relative_to_src).with_name(
             f"ut_{input_src_path.stem}.cpp"
@@ -168,6 +170,6 @@ class _UnitTestsGen(BaseGen):
         return [child for child in workdir.iterdir() if child.suffix in extensions]
 
 
-def generate_ut(input_path: Path, force=False):
-    ut_gen = _UnitTestsGen()
+def generate_ut(input_path: Path, config: Config, force=False):
+    ut_gen = _UnitTestsGen(config)
     ut_gen.generate_tests(input_path, force)
