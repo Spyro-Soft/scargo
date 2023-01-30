@@ -84,7 +84,7 @@ def pytest_collection_modifyitems(config, items):
     if config.getoption("--nightly"):
         # --nightly given in cli: do not skip slow tests
         return
-    skip_nightly= pytest.mark.skip(reason="Need --nightly option to run")
+    skip_nightly = pytest.mark.skip(reason="Need --nightly option to run")
     for item in items:
         if "nightly" in item.keywords:
             item.add_marker(skip_nightly)
