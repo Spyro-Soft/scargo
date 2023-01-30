@@ -160,3 +160,38 @@ def test_build_fail_with_incorrect_dependencies():
 
     build_command_result = runner.invoke(cli, ["build"])
     assert build_command_result.exit_code != 0
+
+
+TARGET = ["x86", "stm32", "esp32"]
+
+
+@pytest.mark.parametrize("target", TARGET)
+def test_gen_with_check_and_test(target):
+    runner = CliRunner()
+    lib_name = "test_library"
+    src_dir_path = Path("src")
+    main_dir_path = Path("main")
+    new_command_result = runner.invoke(
+        cli,
+        [
+            "new",
+            pytest.new_test_project_name,
+            f"--lib={lib_name}",
+            f"--target={target}",
+        ],
+    )
+    assert new_command_result.exit_code == 0
+
+    if target == "esp32":
+        lib_dir_path = main_dir_path
+    else:
+        lib_dir_path = src_dir_path
+
+    gen_command_result = runner.invoke(cli, ["gen", "-u", lib_dir_path])
+    assert gen_command_result.exit_code == 0
+
+    check_command_result = runner.invoke(cli, ["check"])
+    assert check_command_result.exit_code == 0
+
+    test_command_result = runner.invoke(cli, ["test"])
+    assert test_command_result.exit_code == 0
