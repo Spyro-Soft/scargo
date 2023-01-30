@@ -3,7 +3,6 @@ from typer.testing import CliRunner
 
 from scargo import cli
 
-
 PRECONDITIONS = [
     "precondition_regression_tests",
     "precondition_regular_tests",
