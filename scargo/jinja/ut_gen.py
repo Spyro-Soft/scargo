@@ -88,9 +88,18 @@ class _UnitTestsGen(BaseGen):
         ut_files = [
             p.name for p in self._get_paths_with_ext(ut_dir_path, SRC_EXTENSIONS)
         ]
+
+        # Exclude main from srcs to test
+        main_cpp = (
+            f"{self._config.project.bin_name}.cpp"
+            if self._config.project.bin_name
+            else None
+        )
+
         src_files = [
             p.absolute().relative_to(self._project_path.absolute())
             for p in self._get_paths_with_ext(src_dir_path, SRC_EXTENSIONS)
+            if p.name != main_cpp
         ]
 
         self.create_file_from_template(
