@@ -3,17 +3,18 @@ from pathlib import Path
 import pytest
 from typer.testing import CliRunner
 
+import run
 from scargo import cli
 
 PRECONDITIONS = ["precondition_regression_tests", "precondition_regular_tests"]
 PROFILES = ["Release", "RelWithDebugInfo", "MinSizeRel"]
 
 
+@pytest.mark.nightly
 @pytest.mark.parametrize("precondition", PRECONDITIONS)
 def test_build(precondition, request):
     request.getfixturevalue(precondition)
     build_path = Path("build/Debug")
-
     runner = CliRunner()
     result = runner.invoke(cli, ["build"])
 
@@ -31,6 +32,7 @@ def test_build_caps_fail():
     assert "Error: No such command" in result.output
 
 
+@pytest.mark.nightly
 @pytest.mark.parametrize("precondition", PRECONDITIONS)
 @pytest.mark.parametrize("profile", PROFILES)
 def test_profile_generic(precondition, request, profile):
