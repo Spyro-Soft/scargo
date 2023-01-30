@@ -8,8 +8,6 @@ import os
 import subprocess
 import sys
 
-import pytest
-
 import scargo
 from common_dev.scripts.documentation import create_doc
 
