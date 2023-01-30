@@ -33,7 +33,7 @@ def scargo_gen(
     config = prepare_config()
 
     if gen_ut:
-        generate_ut(gen_ut)
+        generate_ut(gen_ut, config)
 
     if gen_mock:
         generate_mocks(gen_mock)
