@@ -1,0 +1,6 @@
+{
+  "name": "esp32project_dev",
+  "dockerComposeFile": "docker-compose.yaml",
+  "service": "esp32project_dev",
+  "workspaceFolder": "/workspace"
+}

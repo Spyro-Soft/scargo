@@ -1,0 +1,95 @@
+[project]
+name = "common_scargo_project_stm32"
+version = "0.1.0"
+description = "Project description."
+homepage-url = "www.hello-world.com"
+
+bin_name = "test_bin"
+lib_name = "test_lib"
+target = "stm32"
+build-env = "docker"
+docker-file = ".devcontainer/Dockerfile-custom"
+docker-image-tag = "common_scargo_project_stm32-dev:1.0"
+
+cc  = "arm-none-eabi-gcc"
+cxx = "arm-none-eabi-g++"
+cxxstandard = "17"
+
+cflags   = "-Wall -Wextra"
+cxxflags = "-Wall -Wextra"
+
+in-repo-conan-cache = false
+
+[profile.Debug]
+cflags   = "-g"
+cxxflags = "-g"
+
+[profile.Release]
+cflags   = "-O3 -DNDEBUG"
+cxxflags = "-O3 -DNDEBUG"
+
+[profile.RelWithDebInfo]
+cflags   = "-O2 -g -DNDEBUG"
+cxxflags = "-O2 -g -DNDEBUG"
+
+[profile.MinSizeRel]
+cflags   = "-Os -DNDEBUG"
+cxxflags = "-Os -DNDEBUG"
+
+[check]
+exclude = []
+
+[check.pragma]
+exclude = []
+
+[check.copyright]
+description = "Copyright"
+exclude = []
+
+[check.todo]
+exclude = []
+
+[check.clang-format]
+exclude = []
+
+[check.clang-tidy]
+exclude = []
+
+[check.cyclomatic]
+exclude = []
+
+[tests]
+cc  = "gcc"
+cxx = "g++"
+
+cflags   = "-Wall -Wextra -Og --coverage -fkeep-inline-functions -fkeep-static-consts"
+cxxflags = "-Wall -Wextra -Og --coverage -fkeep-inline-functions -fkeep-static-consts"
+
+gcov-executable = "" # Empty string -> use default gcov executable
+
+# conan dependencies "lib_name/version"
+[dependencies]
+general = [
+]
+build = [
+]
+tool = [
+]
+test = [
+    "gtest/1.12.1"
+]
+
+[conan.repo]
+gitlab = "https://git.spyrosoft.it/api/v4/projects/159/packages/conan"
+
+[stm32]
+chip = "STM32L496AG"
+flash-start = 0x08000000
+
+[scargo]
+console-log-level = "INFO"
+file-log-level = "WARNING"
+update-exclude = [
+
+]
+version = "1.3.6"
