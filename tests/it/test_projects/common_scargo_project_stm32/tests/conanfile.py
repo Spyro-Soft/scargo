@@ -19,5 +19,4 @@ class Common_scargo_project_stm32TestConan(ConanFile):
         self.cmake.build(target=target_test)
 
     def requirements(self):
-        self.requires("gtest/cci.20210126")
-
+        self.requires("gtest/1.12.1")

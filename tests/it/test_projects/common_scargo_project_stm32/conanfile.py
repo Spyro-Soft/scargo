@@ -10,8 +10,8 @@ class Common_scargo_project_stm32Conan(ConanFile):
     generators = "cmake_find_package", "cmake"
 
     def package(self):
-        self.copy("*", src='build/Debug/bin/', dst='bin', keep_path=False)
-        self.copy("*", src='build/Debug/lib/', dst='lib', keep_path=False)
+        self.copy("*", src="build/Debug/bin/", dst="bin", keep_path=False)
+        self.copy("*", src="build/Debug/lib/", dst="lib", keep_path=False)
 
     def package_info(self):
         self.cpp_info.libs = tools.collect_libs(self)
@@ -22,5 +22,5 @@ class Common_scargo_project_stm32Conan(ConanFile):
         cmake.build()
 
     def source(self):
-        pass
-
+        git = tools.Git(folder="third-party/stm32-cmake")
+        git.clone("https://github.com/ObKo/stm32-cmake.git", "master")
