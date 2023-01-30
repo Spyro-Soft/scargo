@@ -7,6 +7,7 @@ import shutil
 import subprocess
 from pathlib import Path
 
+from scargo import __version__ as ver
 from scargo.jinja.cicd_gen import generate_cicd
 from scargo.jinja.cmake_gen import generate_cmake
 from scargo.jinja.conan_gen import generate_conanfile
@@ -19,7 +20,6 @@ from scargo.scargo_src.global_values import (
     SCARGO_LOCK_FILE,
     SCARGO_PGK_PATH,
 )
-from scargo.scargo_src.global_values import __version__ as ver
 from scargo.scargo_src.sc_docker import scargo_docker
 from scargo.scargo_src.sc_logger import get_logger
 from scargo.scargo_src.sc_src import check_scargo_version, get_scargo_config_or_exit

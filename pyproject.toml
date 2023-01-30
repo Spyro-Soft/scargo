@@ -1,0 +1,78 @@
+[build-system]
+requires = ["flit_core >=3.2,<4"]
+build-backend = "flit_core.buildapi"
+
+[project]
+name = "scargo"
+description = "C/C++ package manager and software development life cycle which base on RUST cargo idea."
+authors = [
+    {name = "Spyrosoft Solutions S.A.", email = "aak@spyro-soft.com"}
+]
+readme = "README.md"
+requires-python = ">=3.8"
+license = {file = "LICENSE"}
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "Intended Audience :: Developers",
+    "Natural Language :: English",
+    "Operating System :: POSIX",
+    "Operating System :: Microsoft :: Windows",
+    "Operating System :: MacOS :: MacOS X",
+    "Topic :: Software Development :: Embedded Systems",
+    "Environment :: Console",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+]
+dynamic = ["version"]
+keywords = ["scargo", "Package manager", "C++"]
+dependencies = [
+    "docker==6.0.1",
+    "typer==0.7.0",
+    "toml==0.10.2",
+    "jinja2==3.1.2",
+    "conan==1.56.0",
+    "docker-compose==1.29.2",
+    "coloredlogs==15.0.1",
+    "libclang==15.0.6.1",
+    "clang==14.0",
+    "lizard==1.17.10",
+    "cmake==3.25.0",
+    "shellingham==1.5.0.post1",
+    "esptool==4.4",
+    "tomlkit==0.11.6",
+    "pydantic==1.10.4",
+]
+
+[project.optional-dependencies]
+dev = [
+    "flake8>=3.2.0",
+    "flake8-gl-codeclimate",
+    "pyelftools",
+    "unittest-xml-reporting",
+    "coverage~=6.0",
+    "black",
+    "isort==5.11.4",
+    "pre-commit",
+    "requests>=2.28.1",
+    "pylint",
+    "gcovr>=5.2",
+    "PyInstaller",
+    "pytest",
+    "pytest-bdd",
+    "pytest-subprocess",
+    "pytest-cov",
+    "allure-pytest",
+    "pyclean==2.2.0",
+    "allure-docx @ git+https://github.com/typhoon-hil/allure-docx@54ad0c3e",
+]
+doc = [
+    "recommonmark",
+    "Sphinx",
+    "sphinx-rtd-theme==1.1.1",
+    "sphinxcontrib-plantuml==0.24.1",
+]
+
+[project.scripts]
+scargo = "scargo.__init__:cli"
