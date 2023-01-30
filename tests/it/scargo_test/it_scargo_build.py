@@ -3,7 +3,6 @@ from pathlib import Path
 import pytest
 from typer.testing import CliRunner
 
-import run
 from scargo import cli
 
 PRECONDITIONS = ["precondition_regression_tests", "precondition_regular_tests"]
