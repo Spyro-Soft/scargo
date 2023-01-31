@@ -99,7 +99,7 @@ def get_cmdline_arguments():
     return args
 
 
-def perform_tests(test_path, test_postfix):
+def perform_tests(test_path, test_postfix, *test_flags):
     out_test_doc_dir = OUT + "/test_doc"
     allure_result = out_test_doc_dir + "/allure_result"
     allure_report = out_test_doc_dir + "/allure_report"
@@ -108,71 +108,25 @@ def perform_tests(test_path, test_postfix):
         # needed because of relative imports
         os.environ["PYTHONPATH"] = SCARGO_DIR
 
-        subprocess.check_call(
-            [
-                "pytest",
-                test_path,
-                "--alluredir=" + allure_result + "_" + test_postfix,
-                "--cov-branch",
-                "--cov-report",
-                "html:" + out_test_doc_dir + "/coverage" + "_" + test_postfix,
-                "--cov=scargo",
-                "--gherkin-terminal-reporter",
-                "-v",
-                "-s",
-                test_path,
-            ]
-        )
-    except subprocess.CalledProcessError as e:
-        return test_postfix + " tests fail: " + str(e) + "\n"
-
-    subprocess.check_call(
-        [
-            "allure",
-            "generate",
-            allure_result + "_" + test_postfix,
-            "--clean",
-            "-o",
-            allure_report + "_" + test_postfix,
+        command = [
+            "pytest",
+            test_path,
+            "--alluredir=" + allure_result + "_" + test_postfix,
+            "--cov-branch",
+            "--cov-report",
+            "html:" + out_test_doc_dir + "/coverage" + "_" + test_postfix,
+            "--cov=scargo",
+            "--gherkin-terminal-reporter",
+            "-v",
+            "-s",
+            test_path,
         ]
-    )
-    subprocess.check_call(
-        [
-            "allure-docx",
-            allure_result + "_" + test_postfix,
-            allure_report + "_" + test_postfix + "/report.docx",
-            "--detail-level=compact",
-        ]
-    )
 
-    return ""
+        if test_flags:
+            command.append(*test_flags)
 
+        subprocess.check_call(command)
 
-def perform_nightly_tests(test_path, test_postfix):
-    out_test_doc_dir = OUT + "/test_doc"
-    allure_result = out_test_doc_dir + "/allure_result"
-    allure_report = out_test_doc_dir + "/allure_report"
-
-    try:
-        # needed because of relative imports
-        os.environ["PYTHONPATH"] = SCARGO_DIR
-
-        subprocess.check_call(
-            [
-                "pytest",
-                test_path,
-                "--alluredir=" + allure_result + "_" + test_postfix,
-                "--cov-branch",
-                "--cov-report",
-                "html:" + out_test_doc_dir + "/coverage" + "_" + test_postfix,
-                "--cov=scargo",
-                "--gherkin-terminal-reporter",
-                "-v",
-                "-s",
-                test_path,
-                "--nightly",
-            ]
-        )
     except subprocess.CalledProcessError as e:
         return test_postfix + " tests fail: " + str(e) + "\n"
 
@@ -352,7 +306,7 @@ def main():
         args.run_all = True
 
     if args.nightly_test:
-        result = perform_nightly_tests(IT_DIR, "it")
+        result = perform_tests(IT_DIR, "it", "--nightly")
         if result:
             sys.exit(1)
 
