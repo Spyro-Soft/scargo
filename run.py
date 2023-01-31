@@ -123,7 +123,7 @@ def perform_tests(test_path, test_postfix, *test_flags):
         ]
 
         if test_flags:
-            command.append(*test_flags)
+            command.extend(test_flags)
 
         subprocess.check_call(command)
 
