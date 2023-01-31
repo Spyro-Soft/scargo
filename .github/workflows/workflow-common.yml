@@ -10,7 +10,7 @@ jobs:
   check:
     runs-on: ubuntu-latest
     container:
-      image: spyrosoftsa/scargo-dev:1.0
+      image: spyrosoftsa/scargo-dev:1.1
       options: --user root
     steps:
       - name: Checkout
@@ -22,9 +22,9 @@ jobs:
         continue-on-error: true
         run: ./common_dev/scripts/todo_check.py -C scargo -C tests
       - name: Check with Black
-        run: black --check --diff scargo tests common_dev run.py build.py clean.py
+        run: black --check --diff scargo tests common_dev run.py clean.py
       - name: Check isort
-        run: isort --profile=black --check --diff scargo tests common_dev run.py build.py clean.py
+        run: isort --profile=black --check --diff scargo tests common_dev run.py clean.py
       - name: Check Cyclomatic
         continue-on-error: true
         run: ./common_dev/scripts/cyclomatic.py
@@ -33,7 +33,7 @@ jobs:
   tests:
     runs-on: ubuntu-latest
     container:
-      image: spyrosoftsa/scargo-dev:1.0
+      image: spyrosoftsa/scargo-dev:1.1
       options: --user root
     steps:
       - name: Checkout
@@ -45,7 +45,7 @@ jobs:
   documentation:
     runs-on: ubuntu-latest
     container:
-      image: spyrosoftsa/scargo-dev:1.0
+      image: spyrosoftsa/scargo-dev:1.1
       options: --user root
     steps:
       - name: Checkout

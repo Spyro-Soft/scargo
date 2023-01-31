@@ -6,8 +6,6 @@
 import pkgutil
 from pathlib import Path
 
-__version__ = "1.0.2"
-
 DESCRIPTION = "C/C++ package and software development life cycle manager based on RUST cargo idea."
 
 SCARGO_PGK_PATH = (
