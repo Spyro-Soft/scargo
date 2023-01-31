@@ -7,9 +7,9 @@ SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"/.
 
 cd ${SCRIPT_DIR}
 
-USER_NAME=$(id -u -n)
-USER_GID=$(id -g ${USER_NAME})
-USER_UID=$(id -u ${USER_NAME})
+USER_NAME=dev
+USER_GID=$(id -g $(id -u -n))
+USER_UID=$(id -u $(id -u -n))
 printf "USER_NAME=${USER_NAME}\n\
 USER_PASSWORD=user\n\
 GID_NUMBER=${USER_GID}\n\

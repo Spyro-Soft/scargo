@@ -1,4 +1,4 @@
-image: spyrosoftsa/scargo-dev:1.0
+image: spyrosoftsa/scargo-dev:1.1
 
 stages:
   - build
@@ -35,7 +35,7 @@ debug:
   stage: build
   extends: .merge_request
   script:
-    - ./build.py --build_all
+    - flit build
 
 #template
 .release:
@@ -44,11 +44,11 @@ debug:
     refs:
       - master
   script:
-    - ./build.py --build_all 
+    - flit build 
   artifacts:
     expire_in: 1 hour
     paths:
-      - out/program
+      - dist/
 
 #_______________________________________________________________________________________________UNIT TESTS
 unit test:
@@ -88,14 +88,14 @@ black:
   extends: .merge_request
   allow_failure: false
   script:
-    - black --check --diff scargo tests common_dev run.py build.py clean.py
+    - black --check --diff scargo tests common_dev run.py clean.py
 
 isort:
   stage: check
   extends: .merge_request
   allow_failure: false
   script:
-    - isort --profile=black --check --diff scargo tests common_dev run.py build.py clean.py
+    - isort --profile=black --check --diff scargo tests common_dev run.py clean.py
 #______________________________________________________________________________________________CYCLOMATIC
 cyclomatic:
   stage: check
