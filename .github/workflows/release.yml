@@ -89,7 +89,7 @@ jobs:
       run: |
         git config --global --add safe.directory /__w/scargo/scargo
         flit build
-        flit publish --repository  https://upload.pypi.org/legacy/
+        flit publish 
       env:
         FLIT_USERNAME: __token__
         FLIT_PASSWORD: ${{ secrets.PYPI_API_TOKEN }}
