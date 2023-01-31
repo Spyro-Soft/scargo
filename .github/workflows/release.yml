@@ -11,6 +11,10 @@ permissions:
   pages: write
   id-token: write
 
+env:
+  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  PYPI_API_TOKEN: ${{ secrets.PYPI_API_TOKEN }}
+
 jobs:
   documentation-release:
     if: ${{ github.event.pull_request.merged }} 
@@ -36,3 +40,54 @@ jobs:
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v1
+
+  create-release:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+      with:
+          fetch-depth: 0
+    - name: Get tag from source code
+      id: source-code-tag
+      run: echo "TAG_NAME=release_$(grep -w __version__ scargo/scargo_src/__init__.py | grep -Eo "[[:digit:]]+\.[[:digit:]]+\.[[:digit:]]+")" >> $GITHUB_ENV
+
+    - name: Create Release
+      uses: softprops/action-gh-release@v1
+      env:
+        GITHUB_TOKEN: ${{ env.GITHUB_TOKEN }}
+      with:
+        tag_name: ${{ env.TAG_NAME }}
+        draft: false
+        prerelease: false
+        generate_release_notes: true
+
+  
+  release-to-pypi:
+    runs-on: ubuntu-latest
+    container:
+        image: spyrosoftsa/scargo-dev:1.1
+        options: --user root
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+
+#    - name: Set up Python environment
+#      uses: actions/setup-python@v2
+#      with:
+#        python-version: 3.8
+
+    - name: Install dependencies
+      run: |
+        pip install --upgrade pip
+        pip install flit
+
+    - name: Build and upload to PyPI
+      run: |
+        flit build
+        flit publish --repository-url https://upload.pypi.org/legacy/ -u __token__:$PYPI_API_TOKEN
+
+  
