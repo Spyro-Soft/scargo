@@ -76,3 +76,15 @@ doc = [
 
 [project.scripts]
 scargo = "scargo.__init__:cli"
+
+[tool.flit.sdist]
+exclude = [
+    "*.py",
+    ".*",
+    "docker-compose.yaml",
+    "tests/",
+    "common_dev/",
+    "example_project/",
+    "ci/",
+    "docs/",
+]
