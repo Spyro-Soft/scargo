@@ -1,22 +1,13 @@
-import pytest
 from typer.testing import CliRunner
 
 from scargo import cli
-
-PRECONDITIONS = [
-    "precondition_regression_tests",
-    "precondition_regular_tests",
-    "precondition_regression_tests_esp32",
-    "precondition_regression_tests_stm32",
-]
+from scargo.scargo_src.global_values import __version__ as version
 
 
-@pytest.mark.parametrize("precondition", PRECONDITIONS)
-def test_version(precondition, request):
-    request.getfixturevalue(precondition)
+def test_version():
     runner = CliRunner()
 
     result = runner.invoke(cli, ["version"])
 
     assert result.exit_code == 0
-    assert "scargo version: " in result.output
+    assert f"scargo version: {version}" in result.output
