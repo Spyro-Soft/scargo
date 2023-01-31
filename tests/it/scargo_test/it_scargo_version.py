@@ -1,7 +1,7 @@
 from typer.testing import CliRunner
 
 from scargo import cli
-from scargo.scargo_src.global_values import __version__ as version
+from scargo import __version__ as version
 
 
 def test_version():
