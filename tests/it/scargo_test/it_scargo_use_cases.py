@@ -6,6 +6,7 @@ from typer.testing import CliRunner
 from utils import add_libs_to_toml_file
 
 from scargo import cli
+from scargo.scargo_src.sc_config import TARGETS
 
 TARGET = ["x86", "stm32", "esp32"]
 
@@ -168,8 +169,7 @@ def test_build_fail_with_incorrect_dependencies():
 def test_gen_with_check_and_test(target):
     runner = CliRunner()
     lib_name = "test_library"
-    src_dir_path = Path("src")
-    main_dir_path = Path("main")
+    target_path = TARGETS.get(target, "source_dir").source_dir
     new_command_result = runner.invoke(
         cli,
         [
@@ -181,12 +181,7 @@ def test_gen_with_check_and_test(target):
     )
     assert new_command_result.exit_code == 0
 
-    if target == "esp32":
-        lib_dir_path = main_dir_path
-    else:
-        lib_dir_path = src_dir_path
-
-    gen_command_result = runner.invoke(cli, ["gen", "-u", lib_dir_path])
+    gen_command_result = runner.invoke(cli, ["gen", "-u", target_path])
     assert gen_command_result.exit_code == 0
 
     check_command_result = runner.invoke(cli, ["check"])
