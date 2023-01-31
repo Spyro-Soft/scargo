@@ -183,5 +183,6 @@ _deps
 .ninja_log
 
 # End of https://www.gitignore.io/api/c,c++,cmake,ninja,assembler
+dist/
 .vscode/*
 ozone.jdebug.user
