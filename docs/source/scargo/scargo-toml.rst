@@ -2,7 +2,10 @@
 
 scargo.toml file basis
 ======================
-
+.. image:: ../_static/scargo_toml_update.gif
+   :alt: scargo update after scargo.toml modification
+   :align: center
+   
 This section describes possible options which can be set in the scargo.toml file.
 
 [project]

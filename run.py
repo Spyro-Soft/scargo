@@ -247,7 +247,6 @@ def run_flake8():
         "tests",
         "common_dev",
         "run.py",
-        "build.py",
         "clean.py",
     ]
     subprocess.check_call(command)
@@ -261,7 +260,6 @@ def run_isort(check=False):
         "tests",
         "common_dev",
         "run.py",
-        "build.py",
         "clean.py",
     ]
     if check:
@@ -276,7 +274,6 @@ def run_black(check=False):
         "tests",
         "common_dev",
         "run.py",
-        "build.py",
         "clean.py",
     ]
     if check:

@@ -1,0 +1,90 @@
+[build-system]
+requires = ["flit_core >=3.2,<4"]
+build-backend = "flit_core.buildapi"
+
+[project]
+name = "scargo"
+description = "C/C++ package manager and software development life cycle which base on RUST cargo idea."
+authors = [
+    {name = "Spyrosoft Solutions S.A.", email = "aak@spyro-soft.com"}
+]
+readme = "README.md"
+requires-python = ">=3.8"
+license = {file = "LICENSE"}
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "Intended Audience :: Developers",
+    "Natural Language :: English",
+    "Operating System :: POSIX",
+    "Operating System :: Microsoft :: Windows",
+    "Operating System :: MacOS :: MacOS X",
+    "Topic :: Software Development :: Embedded Systems",
+    "Environment :: Console",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+]
+dynamic = ["version"]
+keywords = ["scargo", "Package manager", "C++"]
+dependencies = [
+    "clang==14.0",
+    "cmake==3.25.0",
+    "coloredlogs==15.0.1",
+    "conan==1.56.0",
+    "docker-compose==1.29.2",
+    "docker==6.0.1",
+    "esptool==4.4",
+    "jinja2==3.1.2",
+    "libclang==15.0.6.1",
+    "lizard==1.17.10",
+    "pydantic==1.10.4",
+    "shellingham==1.5.0.post1",
+    "toml==0.10.2",
+    "tomlkit==0.11.6",
+    "typer==0.7.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "allure-docx @ git+https://github.com/typhoon-hil/allure-docx@54ad0c3e",
+    "allure-pytest",
+    "black",
+    "coverage~=6.0",
+    "flake8>=3.2.0",
+    "flit==3.8.0",
+    "gcovr>=5.2",
+    "isort==5.11.4",
+    "pre-commit",
+    "pyclean==2.2.0",
+    "pyelftools",
+    "PyInstaller",
+    "pylint",
+    "pytest-bdd",
+    "pytest-cov",
+    "pytest-subprocess",
+    "pytest",
+    "requests>=2.28.1",
+    "unittest-xml-reporting",
+]
+doc = [
+    "recommonmark",
+    "sphinx-rtd-theme==1.1.1",
+    "Sphinx",
+    "sphinxcontrib-plantuml==0.24.1",
+]
+
+[project.scripts]
+scargo = "scargo.__init__:cli"
+
+[tool.flit.sdist]
+exclude = [
+    "*.py",
+    ".*",
+    "docker-compose.yaml",
+    "tests/",
+    "common_dev/",
+    "example_project/",
+    "ci/",
+    "docs/",
+]

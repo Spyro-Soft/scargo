@@ -3,7 +3,7 @@
 Creating and working with x86 cpp project
 =========================================
 .. image:: ../_static/scargo_flow_docker.gif
-   :alt: StreamPlayer
+   :alt: scargo x86 flow
    :align: center
 
 Creating x86 cpp project

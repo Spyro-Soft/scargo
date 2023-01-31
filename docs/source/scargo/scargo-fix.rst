@@ -3,7 +3,7 @@
 Fix C/C++ project with static tool analyzers issues
 ---------------------------------------------------
 .. image:: ../_static/scargo_check_fix_docker.gif
-   :alt: StreamPlayer
+   :alt: scargo check and fix example
    :align: center
    
 Usage
