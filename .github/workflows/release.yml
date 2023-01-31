@@ -53,7 +53,7 @@ jobs:
           fetch-depth: 0
     - name: Get tag from source code
       id: source-code-tag
-      run: echo "TAG_NAME=release_$(grep -w __version__ scargo/scargo_src/__init__.py | grep -Eo "[[:digit:]]+\.[[:digit:]]+\.[[:digit:]]+")" >> $GITHUB_ENV
+      run: echo "TAG_NAME=release_$(grep -w __version__ scargo/__init__.py | grep -Eo "[[:digit:]]+\.[[:digit:]]+\.[[:digit:]]+")" >> $GITHUB_ENV
 
     - name: Create Release
       uses: softprops/action-gh-release@v1
@@ -74,11 +74,14 @@ jobs:
     steps:
     - name: Checkout code
       uses: actions/checkout@v2
-
+      with:
+          fetch-depth: 0
 #    - name: Set up Python environment
 #      uses: actions/setup-python@v2
 #      with:
 #        python-version: 3.8
+    - name: Add safe.directory
+      run: git config --global --add safe.directory ${{ github.workspace }}
 
     - name: Install dependencies
       run: |
