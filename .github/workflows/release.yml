@@ -17,6 +17,7 @@ env:
 
 jobs:
   documentation-release:
+    needs: create-release
     if: ${{ github.event.pull_request.merged }} 
     environment:
       name: github-pages
@@ -67,6 +68,7 @@ jobs:
 
   
   release-to-pypi:
+    needs: create-release
     runs-on: ubuntu-latest
     container:
         image: spyrosoftsa/scargo-dev:1.1
