@@ -10,7 +10,7 @@ jobs:
   check:
     runs-on: ubuntu-latest
     container:
-      image: spyrosoftsa/scargo-dev:1.1
+      image: spyrosoftsa/scargo-dev:1.2
       options: --user root
     steps:
       - name: Checkout
@@ -33,7 +33,7 @@ jobs:
   tests:
     runs-on: ubuntu-latest
     container:
-      image: spyrosoftsa/scargo-dev:1.1
+      image: spyrosoftsa/scargo-dev:1.2
       options: --user root
     steps:
       - name: Checkout
@@ -45,7 +45,7 @@ jobs:
   documentation:
     runs-on: ubuntu-latest
     container:
-      image: spyrosoftsa/scargo-dev:1.1
+      image: spyrosoftsa/scargo-dev:1.2
       options: --user root
     steps:
       - name: Checkout
