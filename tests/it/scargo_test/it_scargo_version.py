@@ -1,6 +1,6 @@
 from typer.testing import CliRunner
 
-from scargo import __version__ as version
+from scargo import __version__
 from scargo import cli
 
 
@@ -10,4 +10,4 @@ def test_version():
     result = runner.invoke(cli, ["version"])
 
     assert result.exit_code == 0
-    assert f"scargo version: {version}" in result.output
+    assert f"scargo version: {__version__}" in result.output
