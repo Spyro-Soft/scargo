@@ -3,7 +3,7 @@
 # THIS FILE WAS GENERATED AUTOMATICALLY. DO NOT CHANGE IT.
 ###
 lizard~=1.7.9
-gitpython==3.1.18
+gitpython==3.1.30
 Jinja2==3.0.2
 conan==1.53.0
 cmake==3.24.1.1
