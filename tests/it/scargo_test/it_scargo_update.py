@@ -1,8 +1,8 @@
 import pytest
 from typer.testing import CliRunner
+from utils import add_cmake_variables_to_toml, add_profile_to_toml
 
 from scargo import cli
-from utils import add_cmake_variables_to_toml, add_profile_to_toml
 
 PRECONDITIONS = [
     "precondition_regression_tests",
@@ -64,7 +64,13 @@ def test_update_add_profile(precondition, request):
     request.getfixturevalue(precondition)
     runner = CliRunner()
 
-    add_profile_to_toml("new", "cflags", 'cxxflags',"cflags for new profile", 'cxxflags for new profile')
+    add_profile_to_toml(
+        "new",
+        "cflags",
+        "cxxflags",
+        "cflags for new profile",
+        "cxxflags for new profile",
+    )
     result = runner.invoke(cli, ["update"])
     assert result.exit_code == 0
     cmakelists_lines = [line.strip() for line in open("CMakeLists.txt").readlines()]
