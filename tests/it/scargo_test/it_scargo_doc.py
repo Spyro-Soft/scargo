@@ -22,4 +22,3 @@ def test_doc(precondition, request):
     result = runner.invoke(cli, ["doc"])
     assert result.exit_code == 0
     assert doc_html_file.is_file()
-    
