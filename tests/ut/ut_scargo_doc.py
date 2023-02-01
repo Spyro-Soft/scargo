@@ -5,11 +5,12 @@ import pytest
 from scargo.scargo_src.sc_doc import OPEN_COMMAND, scargo_doc
 
 
-def verify_open_called(full_open_command, shell):
+def verify_open_called(full_open_command, shell, check):
     open_command, index_path = full_open_command.split(" ")
     assert open_command in OPEN_COMMAND.values()
     assert "build/doc/html/index.html" in index_path
     assert shell
+    assert check
 
 
 def test_doc_open_with_doxyfile(create_new_project, monkeypatch):
