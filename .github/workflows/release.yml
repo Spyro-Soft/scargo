@@ -24,7 +24,7 @@ jobs:
       url: ${{ steps.deployment.outputs.page_url }}
     runs-on: ubuntu-latest
     container:
-        image: spyrosoftsa/scargo-dev:1.2
+        image: spyrosoftsa/scargo-dev:1.1
         options: --user root
     steps:
       - name: Checkout
@@ -71,7 +71,7 @@ jobs:
     needs: create-release
     runs-on: ubuntu-latest
     container:
-        image: spyrosoftsa/scargo-dev:1.2
+        image: spyrosoftsa/scargo-dev:1.1
         options: --user root
     steps:
     - name: Checkout code
