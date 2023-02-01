@@ -24,7 +24,6 @@ class _DockerComposeTemplate(BaseGen):
         self._gen_file_list = [
             ("docker-compose.yaml.j2", docker_path / "docker-compose.yaml"),
             ("Dockerfile.j2", docker_path / "Dockerfile"),
-            ("requirements.txt.j2", docker_path / "requirements.txt"),
             ("devcontainer.json.j2", docker_path / "devcontainer.json"),
         ]
         if project_config.target.family == "stm32":

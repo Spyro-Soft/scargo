@@ -18,9 +18,9 @@ scargo can:
 - Work with the predefined docker environment depending on the chosen architecture
 
 # Installation
-To install scargo with pip in your top directory run `pip install -e .[dev]`
+Scargo is available on [pypi](https://pypi.org/project/scargo/) so you can install it with pip: 
 
-To prepare dockerized development environment run `./ci/setup.sh`
+```pip install scargo```
 
 # Working with scargo
 You can find all information on how to work with scargo on official documentation webpage: https://spyro-soft.github.io/scargo/index.html
