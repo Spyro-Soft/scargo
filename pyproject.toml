@@ -73,6 +73,11 @@ doc = [
     "sphinxcontrib-plantuml==0.24.1",
 ]
 
+[project.urls]
+Documentation = "https://spyro-soft.github.io/scargo/index.html"
+Source = "https://github.com/spyro-soft/scargo"
+Tracker = "https://github.com/Spyro-Soft/scargo/issues"
+
 [project.scripts]
 scargo = "scargo.__init__:cli"
 
