@@ -47,7 +47,6 @@ dependencies = [
 
 [project.optional-dependencies]
 dev = [
-    "allure-docx @ git+https://github.com/typhoon-hil/allure-docx@54ad0c3e",
     "allure-pytest",
     "black",
     "coverage~=6.0",

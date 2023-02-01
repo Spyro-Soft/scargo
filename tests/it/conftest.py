@@ -8,7 +8,7 @@ from typer.testing import CliRunner
 from scargo import cli
 
 
-def pytest_configure():
+def pytest_configure(config):
     pytest.predefined_test_project_name = "common_scargo_project"
     pytest.predefined_test_project_esp32_name = "common_scargo_project_esp32"
     pytest.predefined_test_project_stm32_name = "common_scargo_project_stm32"
@@ -30,6 +30,8 @@ def pytest_configure():
     pytest.predefined_test_project_stm32_path = Path(
         pytest.it_path, "test_projects", pytest.predefined_test_project_stm32_name
     )
+
+    config.addinivalue_line("markers", "slow: mark test as slow to run")
 
 
 @pytest.fixture(autouse=True)
@@ -70,3 +72,19 @@ def precondition_regular_tests():
 
     runner = CliRunner()
     runner.invoke(cli, ["new", pytest.new_test_project_name])
+
+
+def pytest_addoption(parser):
+    parser.addoption(
+        "--nightly", action="store_true", default=False, help="Run nightly tests"
+    )
+
+
+def pytest_collection_modifyitems(config, items):
+    if config.getoption("--nightly"):
+        # --nightly given in cli: do not skip slow tests
+        return
+    skip_nightly = pytest.mark.skip(reason="Need --nightly option to run")
+    for item in items:
+        if "nightly" in item.keywords:
+            item.add_marker(skip_nightly)
