@@ -140,14 +140,6 @@ def perform_tests(test_path, test_postfix, *test_flags):
             allure_report + "_" + test_postfix,
         ]
     )
-    subprocess.check_call(
-        [
-            "allure-docx",
-            allure_result + "_" + test_postfix,
-            allure_report + "_" + test_postfix + "/report.docx",
-            "--detail-level=compact",
-        ]
-    )
 
     return ""
 
