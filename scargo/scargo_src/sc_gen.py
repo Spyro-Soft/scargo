@@ -22,12 +22,12 @@ from scargo.scargo_src.utils import get_project_root
 OUT_FS_DIR = os.path.join("build", "fs")
 
 
-def scargo_gen(
+def scargo_gen(  # pylint: disable=too-many-arguments
     project_profile_path: Optional[Path],
     gen_ut: Optional[Path],
     gen_mock: Optional[Path],
     certs: Optional[str],
-    fs: bool,
+    file_system: bool,
     single_bin: bool,
 ):
     config = prepare_config()
@@ -41,7 +41,7 @@ def scargo_gen(
     if certs:
         generate_certs(certs)
 
-    if fs:
+    if file_system:
         generate_fs(config)
 
     if single_bin:

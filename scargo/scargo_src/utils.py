@@ -25,6 +25,7 @@ def get_config_file_path(config_file_name: str) -> Optional[Path]:
     for directory in directories_to_check:
         if (directory / config_file_name).exists():
             return directory / config_file_name
+    return None
 
 
 def get_project_root() -> Path:

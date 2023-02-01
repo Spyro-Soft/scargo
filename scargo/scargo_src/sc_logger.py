@@ -17,11 +17,10 @@ def __get_logging_config():
     try:
         lock_file = get_config_file_path(SCARGO_LOCK_FILE)
         config = parse_config(lock_file)
-        scargo_config = config.scargo
-        console_log_level = logging.getLevelName(scargo_config.console_log_level)
-        file_log_level = logging.getLevelName(scargo_config.file_log_level)
+        console_log_level = logging.getLevelName(config.scargo.console_log_level)
+        file_log_level = logging.getLevelName(config.scargo.file_log_level)
     finally:
-        return console_log_level, file_log_level
+        return console_log_level, file_log_level  # pylint: disable=lost-exception
 
 
 def get_logger(name="scargo"):
@@ -43,7 +42,7 @@ def get_logger(name="scargo"):
 
     project_root = get_project_root()
     if project_root:
-        log_path = project_root / "{}.log".format(name)
+        log_path = project_root / f"{name}.log"
         file_handler = logging.FileHandler(log_path)
         file_handler.setLevel(file_log_level)
         formatter = logging.Formatter(

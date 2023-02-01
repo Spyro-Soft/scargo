@@ -67,7 +67,7 @@ def _open_doc(doc_dir_path: Path):
     if html_file_path.exists():
         try:
             open_command = OPEN_COMMAND[platform.system()]
-            subprocess.run(f"{open_command} {html_file_path}", shell=True)
+            subprocess.run(f"{open_command} {html_file_path}", shell=True, check=True)
         except subprocess.CalledProcessError:
             logger.error("Fail to open documentation")
     else:

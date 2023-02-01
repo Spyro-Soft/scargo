@@ -142,10 +142,10 @@ class _UnitTestsGen(BaseGen):
         elif line.startswith("using namespace"):
             namespace = line.split(" ")[2]
         else:
-            raise "No 'namespace' found in line: '{0}'".format(line)
+            raise f"No 'namespace' found in line: '{line}'"
 
         last_char = namespace[-1]
-        if last_char == "{" or last_char == ";":
+        if last_char in ("{", ";"):
             return namespace[0:-1]
 
         return namespace

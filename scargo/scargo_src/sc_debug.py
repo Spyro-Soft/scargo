@@ -50,7 +50,7 @@ class _ScargoDebug:
             self._debug_stm32()
 
     def _debug_x86(self):
-        subprocess.run(f"gdb {self._bin_path}", shell=True)
+        subprocess.run(f"gdb {self._bin_path}", shell=True, check=True)
 
     def _debug_stm32(self):
         openocd_path = find_program_path("openocd")
@@ -79,6 +79,7 @@ class _ScargoDebug:
                     self._bin_path,
                     '--eval-command="target extended-remote localhost:3333"',
                 ],
+                check=True,
             )
         finally:
             openocd.terminate()

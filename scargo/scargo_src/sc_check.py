@@ -17,7 +17,7 @@ from scargo.scargo_src.sc_src import (
 from scargo.scargo_src.utils import get_project_root
 
 
-def scargo_check(
+def scargo_check(  # pylint: disable=too-many-arguments
     clang_format: bool,
     clang_tidy: bool,
     copy_right: bool,

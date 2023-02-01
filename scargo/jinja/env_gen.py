@@ -12,7 +12,7 @@ from scargo.scargo_src.global_values import ENV_DEFAULT_NAME, SCARGO_PGK_PATH
 
 
 @dataclass
-class _EnvironmentDescriptor:
+class _EnvironmentDescriptor:  # pylint: disable=too-many-instance-attributes
     user_name: str = getpass.getuser()
     user_passwd: str = "user"
     user_gid: int = 1000 if os.name == "nt" else os.getgid()

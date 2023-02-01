@@ -66,7 +66,7 @@ def run_ut(config: Config, verbose: bool, cwd: Path) -> None:
     try:
         # Using `subprocess.run` because tests can fail,
         # and we do not want Python to throw exception.
-        subprocess.run(cmd, shell=True, cwd=cwd)
+        subprocess.run(cmd, shell=True, cwd=cwd, check=True)
 
         # Run code coverage.
         cmd = "gcovr -r ut . --html ut-coverage.html"
@@ -76,7 +76,7 @@ def run_ut(config: Config, verbose: bool, cwd: Path) -> None:
         if gcov_executable != "":
             cmd = cmd + ' --gcov-executable "' + gcov_executable + '"'
 
-        subprocess.check_call(cmd, shell=True, cwd=cwd)
+        subprocess.check_call(cmd, shell=True, cwd=cwd, check=True)
     except subprocess.CalledProcessError:
         logger = get_logger()
         logger.error("Fail to run project tests")
@@ -90,7 +90,7 @@ def run_it(config: Config, verbose: bool):
     if verbose:
         cmd += " --verbose"
 
-    subprocess.run(cmd, shell=True)  # Using `subprocess.run` because tests
+    subprocess.run(cmd, shell=True, check=True)  # Using `subprocess.run` because tests
     # can fail and we do not want Python to
     # throw exception.
 

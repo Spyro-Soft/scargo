@@ -318,6 +318,6 @@ def version():
 if __name__ == "__main__":
     try:
         cli()
-    except Exception as e:
+    except Exception as e: # pylint: disable=broad-except
         print(f"\nA fatal error occurred: {e}")
         sys.exit(2)

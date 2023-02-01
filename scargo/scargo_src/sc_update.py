@@ -97,7 +97,7 @@ def scargo_update(config_file_path: Path) -> None:
 
     # do not rebuild dockers in the docker
     if target.family == "stm32" and not Path("third-party/stm32-cmake").is_dir():
-        subprocess.run("conan source .", shell=True, cwd=project_path)
+        subprocess.run("conan source .", shell=True, cwd=project_path, check=True)
 
     if project_config.build_env == SCARGO_DOCKER_ENV:
         scargo_docker(build_docker=True)

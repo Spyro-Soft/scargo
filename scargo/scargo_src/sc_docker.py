@@ -63,7 +63,9 @@ def _scargo_build_docker(docker_path: Path, no_cache: bool = False) -> None:
 
     cache = "--no-cache" if no_cache else ""
     try:
-        subprocess.run(f"docker-compose build {cache}", shell=True, cwd=docker_path)
+        subprocess.run(
+            f"docker-compose build {cache}", shell=True, cwd=docker_path, check=True
+        )
         logger.info("Initialize docker environment.")
     except subprocess.CalledProcessError:
         logger.error("Build docker fail.")
@@ -85,6 +87,7 @@ def _scargo_run_docker(docker_path: Path, project_config: ProjectConfig) -> None
             f"docker-compose run {project_config.name}_dev bash",
             shell=True,
             cwd=docker_path,
+            check=True,
         )
         logger.info("Stop docker environment.")
     except subprocess.CalledProcessError:
@@ -119,7 +122,7 @@ def _scargo_exec_docker(project_config: ProjectConfig):
     bash_command = ["bash"]
     cmd = ["docker", "exec", "-it", newest_container[0].id] + bash_command
     try:
-        subprocess.run(cmd)
+        subprocess.run(cmd, check=True)
         logger.info("Stop exec docker environment.")
     except subprocess.CalledProcessError:
         logger.error("Exec docker fail.")

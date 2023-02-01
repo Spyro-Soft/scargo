@@ -17,12 +17,12 @@ from scargo.scargo_src.sc_config import Target
 from scargo.scargo_src.sc_logger import get_logger
 from scargo.scargo_src.sc_src import (
     get_build_env,
-    get_cc_config,
+    get_default_cc_config,
     get_scargo_config_or_exit,
 )
 
 
-def scargo_new(
+def scargo_new(  # pylint: disable=too-many-arguments
     name: str,
     bin_name: Optional[str],
     lib_name: Optional[str],
@@ -60,14 +60,12 @@ def scargo_new(
 
     build_env = get_build_env(create_docker)
 
-    cc, cflags, cxx, cxxflags = get_cc_config(target)
+    cflags, cxxflags = get_default_cc_config()
     generate_toml(
         SCARGO_DEFAULT_CONFIG_FILE,
         project_name=name,
         target=target,
         build_env=build_env,
-        cc=cc,
-        cxx=cxx,
         cflags=cflags,
         cxxflags=cxxflags,
         version=__version__,

@@ -8,7 +8,7 @@ import os
 from argparse import ArgumentParser
 from pathlib import Path
 
-import clang.cindex as cindex
+from clang import cindex
 from jinja2 import Environment, FileSystemLoader
 
 from scargo.jinja.mock_utils.cmake_utlis import add_subdirs_to_cmake, create_cmake_lists

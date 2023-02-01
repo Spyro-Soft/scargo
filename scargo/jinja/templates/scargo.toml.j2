@@ -15,8 +15,8 @@ build-env = "{{ data.build_env }}"
 docker-file = ".devcontainer/Dockerfile-custom"
 docker-image-tag = "{{ data.docker_image_tag }}"
 
-cc  = "{{ data.cc }}"
-cxx = "{{ data.cxx }}"
+cc  = "{{ data.target.cc }}"
+cxx = "{{ data.target.cxx }}"
 cxxstandard = "17"
 
 cflags   = "{{ data.cflags }}"

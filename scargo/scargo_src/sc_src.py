@@ -117,12 +117,12 @@ def add_version_to_scargo_lock() -> None:
         logger.info("Did you run `scargo update`?")
         sys.exit(1)
 
-    scargo_lock_file = open(scargo_lock)
-    config = tomlkit.load(scargo_lock_file)
+    with scargo_lock.open("r", encoding="utf-8") as scargo_lock_file:
+        config = tomlkit.load(scargo_lock_file)
 
     config.setdefault("scargo", tomlkit.table())["version"] = ver
-    scargo_lock_file = open(scargo_lock, "w")
-    tomlkit.dump(config, scargo_lock_file)
+    with scargo_lock.open("w", encoding="utf-8") as scargo_lock_file:
+        tomlkit.dump(config, scargo_lock_file)
 
 
 ###############################################################################
@@ -365,7 +365,10 @@ def check_todo(config: Config) -> None:
                             if keyword in line:
                                 error_counter += 1
                                 logger.warning(
-                                    f"Found {keyword} in {fname} at line {line_number}"
+                                    "Found %s in %s at line %d",
+                                    keyword,
+                                    fname,
+                                    line_number,
                                 )
 
     logger.info("Finished todo check. Found %s problems.", error_counter)
@@ -580,9 +583,9 @@ def prepare_config() -> Config:
     return config
 
 
-def get_cc_config(target: Target) -> Tuple[str, str, str, str]:
+def get_default_cc_config() -> Tuple[str, str]:
     """
-    Get c configuration base on architecture
+    Get default c anx cxx flags
 
     :param target: project architecture
     :return: tuple of string
@@ -590,9 +593,7 @@ def get_cc_config(target: Target) -> Tuple[str, str, str, str]:
     """
     cflags = "-Wall -Wextra"
     cxxflags = "-Wall -Wextra"
-    cc = target.cc
-    cxx = target.cxx
-    return cc, cflags, cxx, cxxflags
+    return cflags, cxxflags
 
 
 def get_build_env(create_docker: bool) -> str:

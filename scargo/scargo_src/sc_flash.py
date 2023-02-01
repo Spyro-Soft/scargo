@@ -11,12 +11,14 @@ from scargo.scargo_src.sc_src import prepare_config
 from scargo.scargo_src.utils import get_project_root
 
 
-def scargo_flash(app: bool, fs: bool, flash_profile: str) -> None:
+def scargo_flash(app: bool, file_system: bool, flash_profile: str) -> None:
     config = prepare_config()
     target = config.project.target
 
     if target.family == "esp32":
-        flash_esp32(config, app=app, fs=fs, flash_profile=flash_profile)
+        flash_esp32(
+            config, app=app, file_system=file_system, flash_profile=flash_profile
+        )
     elif target.family == "stm32":
         flash_stm32(config, flash_profile)
     else:
@@ -25,7 +27,7 @@ def scargo_flash(app: bool, fs: bool, flash_profile: str) -> None:
 
 
 def flash_esp32(
-    config: Config, app: bool, fs: bool, flash_profile: str = "Debug"
+    config: Config, app: bool, file_system: bool, flash_profile: str = "Debug"
 ) -> None:
     project_path = get_project_root()
     out_dir = project_path / "build" / flash_profile
@@ -39,7 +41,7 @@ def flash_esp32(
                 f"parttool.py write_partition --partition-name=ota_0 --input {app_path}"
             )
             subprocess.check_call(command, shell=True, cwd=project_path)
-        elif fs:
+        elif file_system:
             fs_path = Path("build") / "spiffs.bin"
             command = (
                 f"parttool.py write_partition --partition-name=spiffs --input {fs_path}"
