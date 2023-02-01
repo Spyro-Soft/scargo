@@ -48,7 +48,7 @@ def build(profile: str = Option("Debug", "--profile")):
 
 
 @cli.command()
-def check(
+def check(  # pylint: disable=too-many-arguments
     clang_format: bool = Option(False, "--clang-format", help="Run clang-format."),
     clang_tidy: bool = Option(False, "--clang-tidy", help="Run clang-tidy."),
     copy_right: bool = Option(False, "--copyright", help="Run copyright check."),
@@ -154,20 +154,20 @@ def fix(
 @cli.command()
 def flash(
     app: bool = Option(False, "--app", help="Flash app only"),
-    fs: bool = Option(False, "--fs", help="Flash filesystem only"),
+    file_system: bool = Option(False, "--fs", help="Flash filesystem only"),
     flash_profile: str = Option(
         "Debug", "--profile", help="Flash base on previously built profile"
     ),
 ):
     """Flash the target (only available for esp32 for now)."""
-    scargo_flash(app, fs, flash_profile)
+    scargo_flash(app, file_system, flash_profile)
 
 
 ###############################################################################
 
 
 @cli.command()
-def gen(
+def gen(  # pylint: disable=too-many-arguments
     profile: str = Option("Debug", "--profile", "-p"),
     gen_ut: Optional[Path] = Option(
         None,
@@ -191,7 +191,7 @@ def gen(
         metavar="<DEVICE ID>",
         help="Generate cert files for azure based on device ID.",
     ),
-    fs: bool = Option(
+    file_system: bool = Option(
         False, "--fs", "-f", help="Build the filesystem, base on spiffs dir content."
     ),
     single_bin: bool = Option(
@@ -200,7 +200,7 @@ def gen(
 ):
     """Manage the auto file generator"""
     project_profile_path = get_project_root() / "build" / profile
-    if (gen_ut is gen_mock is certs is None) and not (fs or single_bin):
+    if (gen_ut is gen_mock is certs is None) and not (file_system or single_bin):
         logger = get_logger()
         logger.warning(
             "Please add one of the following options to the command:"
@@ -208,14 +208,14 @@ def gen(
         )
         sys.exit(1)
 
-    scargo_gen(project_profile_path, gen_ut, gen_mock, certs, fs, single_bin)
+    scargo_gen(project_profile_path, gen_ut, gen_mock, certs, file_system, single_bin)
 
 
 ###############################################################################
 
 
 @cli.command()
-def new(
+def new(  # pylint: disable=too-many-arguments
     name: str,
     bin_name: Optional[str] = Option(
         None,
@@ -319,5 +319,5 @@ if __name__ == "__main__":
     try:
         cli()
     except Exception as e:
-        print("\nA fatal error occurred: %s" % e)
+        print(f"\nA fatal error occurred: {e}")
         sys.exit(2)
