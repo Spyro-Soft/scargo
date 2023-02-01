@@ -53,6 +53,15 @@ def get_cmdline_arguments():
     )
 
     parser.add_argument(
+        "-n",
+        "--nightly",
+        action="store_true",
+        default=False,
+        dest="nightly_test",
+        help="Run nightly tests",
+    )
+
+    parser.add_argument(
         "-f",
         "--format",
         action="store_true",
@@ -90,7 +99,7 @@ def get_cmdline_arguments():
     return args
 
 
-def perform_tests(test_path, test_postfix):
+def perform_tests(test_path, test_postfix, *test_flags):
     out_test_doc_dir = OUT + "/test_doc"
     allure_result = out_test_doc_dir + "/allure_result"
     allure_report = out_test_doc_dir + "/allure_report"
@@ -99,20 +108,25 @@ def perform_tests(test_path, test_postfix):
         # needed because of relative imports
         os.environ["PYTHONPATH"] = SCARGO_DIR
 
-        subprocess.check_call(
-            [
-                "pytest",
-                test_path,
-                "--alluredir=" + allure_result + "_" + test_postfix,
-                "--cov-branch",
-                "--cov-report",
-                "html:" + out_test_doc_dir + "/coverage" + "_" + test_postfix,
-                "--cov=scargo",
-                "--gherkin-terminal-reporter",
-                "-v",
-                test_path,
-            ]
-        )
+        command = [
+            "pytest",
+            test_path,
+            "--alluredir=" + allure_result + "_" + test_postfix,
+            "--cov-branch",
+            "--cov-report",
+            "html:" + out_test_doc_dir + "/coverage" + "_" + test_postfix,
+            "--cov=scargo",
+            "--gherkin-terminal-reporter",
+            "-v",
+            "-s",
+            test_path,
+        ]
+
+        if test_flags:
+            command.extend(test_flags)
+
+        subprocess.check_call(command)
+
     except subprocess.CalledProcessError as e:
         return test_postfix + " tests fail: " + str(e) + "\n"
 
@@ -287,6 +301,11 @@ def main():
 
     if not len(sys.argv) > 1:
         args.run_all = True
+
+    if args.nightly_test:
+        result = perform_tests(IT_DIR, "it", "--nightly")
+        if result:
+            sys.exit(1)
 
     if args.run_all:
         run_all_code_checkers()
