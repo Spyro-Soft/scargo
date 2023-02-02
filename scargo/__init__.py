@@ -7,7 +7,7 @@ from typing import List, Optional
 
 from typer import Argument, Option, Typer
 
-__version__ = "1.0.3"
+__version__ = "1.0.4"
 
 from scargo.scargo_src.global_values import DESCRIPTION, SCARGO_DEFAULT_CONFIG_FILE
 from scargo.scargo_src.sc_build import scargo_build
