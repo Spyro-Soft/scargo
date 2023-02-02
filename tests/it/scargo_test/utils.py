@@ -31,3 +31,10 @@ def remove_dockerfile_path_from_toml_file(toml_path: Path = Path("scargo.toml"))
 
     with toml_path.open("w") as f:
         toml.dump(data, f)
+
+
+def get_bin_name(file_path: Path = Path("scargo.toml")) -> str:
+    data = toml.load(file_path)
+    bin_name = data["project"]["bin_name"]
+
+    return bin_name

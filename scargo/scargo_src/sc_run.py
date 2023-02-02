@@ -41,6 +41,7 @@ def scargo_run(
             subprocess.check_call([f"./{bin_file_name}"] + params, cwd=bin_file_path)
         except subprocess.CalledProcessError:
             logger.error("bin file not found")
+            exit(1)
     else:
         bin_dir = project_profile_path / "bin"
         if bin_dir.is_dir():
@@ -50,5 +51,7 @@ def scargo_run(
                 subprocess.check_call([f"./{bin_list[0]}"] + params, cwd=bin_dir)
             except subprocess.CalledProcessError:
                 logger.error("Unable to run bin file")
+                exit(1)
         else:
             logger.error("Bin file not found")
+            exit(1)
