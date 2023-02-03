@@ -1,3 +1,5 @@
+from pathlib import Path
+
 import pytest
 from typer.testing import CliRunner
 
@@ -13,15 +15,28 @@ PRECONDITIONS = [
 
 @pytest.mark.parametrize("precondition", PRECONDITIONS)
 def test_clean(precondition, request):
+    # ARRANGE
     request.getfixturevalue(precondition)
-
     runner = CliRunner()
+
+    # ACT
+    runner.invoke(cli, ["build"])
     result = runner.invoke(cli, ["clean"])
+
+    # ASSERT
+    build_path = Path("build")
+
     assert result.exit_code == 0
+    assert not build_path.is_dir()
 
 
 def test_clean_caps_fail():
+    # ARRANGE
     runner = CliRunner()
+
+    # ACT
     result = runner.invoke(cli, ["CLEAN"])
+
+    # ASSERT
     assert result.exit_code == 2
     assert "Error: No such command" in result.output

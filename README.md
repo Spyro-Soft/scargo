@@ -1,7 +1,7 @@
 # Scargo 
 Scargo project was written by Spyrosoft team. Find more information at [spyro-soft.com](https://spyro-soft.com/career).
 <p align="center">
-    <img src="docs/source/_static/spyrosoft_solutions_logo_color.png" alt="drawing" width="200"/>
+    <img src="https://raw.githubusercontent.com/Spyro-Soft/scargo/develop/docs/source/_static/spyrosoft_solutions_logo_color.png" alt="drawing" width="200"/>
 </p>
 
 # Overview
@@ -18,13 +18,13 @@ scargo can:
 - Work with the predefined docker environment depending on the chosen architecture
 
 # Installation
-To install scargo with pip in your top directory run `pip install -e .[dev]`
+Scargo is available on [pypi](https://pypi.org/project/scargo/) so you can install it with pip: 
 
-To prepare dockerized development environment run `./ci/setup.sh`
+```pip install scargo```
 
 # Working with scargo
 You can find all information on how to work with scargo on official documentation webpage: https://spyro-soft.github.io/scargo/index.html
-![](docs/source/_static/scargo_flow_docker.gif)
+![Scargo flow gif](https://raw.githubusercontent.com/Spyro-Soft/scargo/develop/docs/source/_static/scargo_flow_docker.gif)
 
 # Project dependencies
 ## Working with docker (recommended)

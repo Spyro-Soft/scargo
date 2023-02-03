@@ -193,7 +193,6 @@ def generate_mocks(path_to_src: Path, exclude=(), force=False, check_only=False)
     )
 
     for root, mock_root, file in header_files:
-
         src_header = os.path.join(root, file)
         dst_header = os.path.join(mock_root, file)
         dst_mock = os.path.join(mock_root, f"mock_{file}")

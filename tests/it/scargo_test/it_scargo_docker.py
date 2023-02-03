@@ -1,5 +1,3 @@
-from pathlib import Path
-
 import pytest
 from typer.testing import CliRunner
 from utils import remove_dockerfile_path_from_toml_file
