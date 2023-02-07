@@ -67,3 +67,14 @@ def test_check_fix_flow_x86():
     # Check
     result = runner.invoke(cli, ["check"])
     assert result.exit_code == 0
+
+
+def test_debug():
+    # ARRANGE
+    runner = CliRunner()
+    runner.invoke(cli, ["new", pytest.new_test_project_name])
+    runner.invoke(cli, ["build", "--profile", "Debug"])
+
+    # Debug
+    result = runner.invoke(cli, ["debug"])
+    assert result.exit_code == 0
