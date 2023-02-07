@@ -34,7 +34,7 @@ def test_update_project_content_with_docker(tmp_path, fp):
     os.chdir(tmp_path)
     project_name = "test_project_with_docker"
     scargo_new(project_name, None, None, TARGET_X86, True, False)
-    fp.register("docker-compose build ")
+    fp.register("docker-compose build")
     scargo_update(Path("scargo.toml"))
     for path in Path().iterdir():
         assert path.name in EXPECTED_FILES_AND_DIRS

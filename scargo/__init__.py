@@ -5,7 +5,7 @@ import sys
 from pathlib import Path
 from typing import List, Optional
 
-from typer import Argument, Option, Typer
+from typer import Argument, Context, Option, Typer
 
 __version__ = "1.0.4"
 
@@ -108,26 +108,28 @@ def doc(open_doc: bool = Option(False, "--open", help="Open html documentation")
 docker = Typer(help="Manage the docker environment for the project")
 
 
-@docker.command("build")
-def docker_build(
-    no_cache: bool = Option(
-        False, "--no-cache", help="Do not use cache when building the docker image"
-    ),
-):
+@docker.command(
+    "build", context_settings={"allow_extra_args": True, "ignore_unknown_options": True}
+)
+def docker_build(ctx: Context):
     """Build docker layers for this project depending on the target"""
-    scargo_docker(build_docker=True, no_cache=no_cache)
+    scargo_docker(build_docker=True, docker_opts=ctx.args)
 
 
-@docker.command("run")
-def docker_run():
+@docker.command(
+    "run", context_settings={"allow_extra_args": True, "ignore_unknown_options": True}
+)
+def docker_run(ctx: Context):
     """Run project in docker environment"""
-    scargo_docker(run_docker=True)
+    scargo_docker(run_docker=True, docker_opts=ctx.args)
 
 
-@docker.command("exec")
-def docker_exec():
+@docker.command(
+    "exec", context_settings={"allow_extra_args": True, "ignore_unknown_options": True}
+)
+def docker_exec(ctx: Context):
     """Attach to existing docker environment"""
-    scargo_docker(exec_docker=True)
+    scargo_docker(exec_docker=True, docker_opts=ctx.args)
 
 
 cli.add_typer(docker, name="docker")
