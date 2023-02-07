@@ -31,3 +31,18 @@ def remove_dockerfile_path_from_toml_file(toml_path: Path = Path("scargo.toml"))
 
     with toml_path.open("w") as f:
         toml.dump(data, f)
+
+
+def get_copyright_text(file_path: Path = Path("scargo.toml")) -> str:
+    data = toml.load(file_path)
+    copyright_text = data["check"]["copyright"]["description"]
+
+    return copyright_text
+
+
+def assert_str_in_file(file_path: Path, str_to_check: str) -> bool:
+    with open(file_path) as file:
+        if str_to_check in file.read():
+            return True
+
+    return False
