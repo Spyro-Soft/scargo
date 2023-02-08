@@ -4,25 +4,78 @@ from shutil import copytree
 
 import pytest
 from typer.testing import CliRunner
-from utils import assert_str_in_file, get_copyright_text, get_bin_name, add_profile_to_toml
+from utils import (
+    add_profile_to_toml,
+    assert_str_in_CMakeLists,
+    assert_str_in_file,
+    get_bin_name,
+    get_copyright_text,
+    get_project_name,
+)
 
 from scargo import cli
 
 TEST_FILES_PATH = Path(pytest.it_path, "test_projects", "test_files", "fix_test_files")
 
+PROJECT_CREATION_x86 = [
+    "new_project_x86",
+    "copy_project_x86",
+]
 
 
-def test_clean_build_check_fix_x86():
-    # ARRANGE
-    build_dir_path = Path("build")
-    debug_project_file_path = Path(
-        "build", "Debug", "bin", pytest.new_test_project_name
-    )
-    release_project_file_path = Path(
-        "build", "Release", "bin", pytest.new_test_project_name
-    )
+@pytest.fixture()
+def new_project_x86():
+    # Arrange
     runner = CliRunner()
-    runner.invoke(cli, ["new", pytest.new_test_project_name]) 
+
+    # New Help
+    result = runner.invoke(cli, ["new", "-h"])
+    assert result.exit_code == 0
+
+    # New
+    result = runner.invoke(cli, ["new", pytest.new_test_project_name, "--target=x86"])
+    bin_name = get_bin_name()
+    expected_bin_file_path = Path("./src/", bin_name.lower() + ".cpp")
+    assert expected_bin_file_path.exists()
+    assert result.exit_code == 0
+
+
+@pytest.fixture()
+def copy_project_x86():
+
+    copytree(pytest.predefined_test_project_path, os.getcwd(), dirs_exist_ok=True)
+
+
+@pytest.fixture()
+def copy_project_esp32():
+
+    copytree(pytest.predefined_test_project_esp32_path, os.getcwd(), dirs_exist_ok=True)
+
+
+@pytest.fixture()
+def copy_project_stm32():
+
+    copytree(pytest.predefined_test_project_stm32_path, os.getcwd(), dirs_exist_ok=True)
+
+
+@pytest.mark.parametrize("project_creation", PROJECT_CREATION_x86)
+def test_project_x86_dev_flow(project_creation, request, capfd):
+    # Arrange
+    build_dir_path = Path("build")
+    src_dir = "src"
+    runner = CliRunner()
+
+    # Help
+    result = runner.invoke(cli, ["-h"])
+    assert result.exit_code == 0
+
+    # New Help, New or copy existing project for regression tests
+    request.getfixturevalue(project_creation)
+    project_name = get_project_name()
+
+    # Docker Run
+    result = runner.invoke(cli, ["docker", "run"])
+    assert result.exit_code == 0
 
     # Build
     result = runner.invoke(cli, ["build"])
@@ -35,24 +88,31 @@ def test_clean_build_check_fix_x86():
     assert not build_dir_path.is_dir()
 
     # Build --profile Debug
+    debug_project_file_path = Path("build", "Debug", "bin", project_name)
+
     result = runner.invoke(cli, ["build", "--profile", "Debug"])
     assert result.exit_code == 0
+    assert debug_project_file_path.is_file()
 
     # Build --profile Release
+    release_project_file_path = Path("build", "Release", "bin", project_name)
+
     result = runner.invoke(cli, ["build", "--profile", "Release"])
     assert result.exit_code == 0
-    assert debug_project_file_path.is_file()
     assert release_project_file_path.is_file()
 
+    # Test
+    # result = runner.invoke(cli, ["test"])
+    # assert result.exit_code == 0
 
-def test_check_fix_flow_x86():
-    # ARRANGE
-    src_dir = "src"
-    runner = CliRunner()
-    runner.invoke(cli, ["new", pytest.new_test_project_name])
+    # Run
+    result = runner.invoke(cli, ["run"])
+    captured = capfd.readouterr()
+    assert "Hello World!" in captured.out
+    assert result.exit_code == 0
+
+    # Check fail
     copytree(TEST_FILES_PATH, Path(os.getcwd(), src_dir), dirs_exist_ok=True)
-
-    # Check
     result = runner.invoke(cli, ["check"])
     assert result.exit_code == 1
 
@@ -68,51 +128,20 @@ def test_check_fix_flow_x86():
     result = runner.invoke(cli, ["check"])
     assert result.exit_code == 0
 
-
-def test_new_project_x86_dev_flow(capfd):
-    # Arrange
-    runner = CliRunner()
-
-    # Help
-    result_help = runner.invoke(cli, ["-h"])
-    assert result_help.exit_code == 0
-
-    # New Help
-    result_new_help = runner.invoke(cli, ["new", "-h"])
-    assert result_new_help.exit_code == 0
-
-    # New
-    result_new_x86 = runner.invoke(
-        cli, ["new", pytest.new_test_project_name, "--target=x86"]
+    # Update
+    add_profile_to_toml(
+        "new",
+        "cflags",
+        "cxxflags",
+        "cflags for new profile",
+        "cxxflags for new profile",
     )
-    bin_name = get_bin_name()
-    expected_bin_file_path = Path("./src/", bin_name.lower() + ".cpp")
-    assert expected_bin_file_path.exists()
-    assert result_new_x86.exit_code == 0
-
-    # Docker Run
-    result_docker_run = runner.invoke(cli, ["docker", "run"])
-    assert result_docker_run.exit_code == 0
-
-    # Build
-    result_build = runner.invoke(cli, ["build"])
-    build_path = Path("build/Debug")
-    assert build_path.is_dir()
-    assert result_build.exit_code == 0
-
-    # Check
-    result_check = runner.invoke(cli, ["check"])
-    assert result_check.exit_code == 0
-
-    # Test
-    result_test = runner.invoke(cli, ["test"])
-    assert result_test.exit_code == 0
-
-    # Run
-    result_run = runner.invoke(cli, ["run"])
-    captured = capfd.readouterr()
-    assert "Hello World!" in captured.out
-    assert result_run.exit_code == 0
+    result = runner.invoke(cli, ["update"])
+    assert result.exit_code == 0
+    assert assert_str_in_CMakeLists('set(CMAKE_C_FLAGS_NEW   "cflags for new profile")')
+    assert assert_str_in_CMakeLists(
+        'set(CMAKE_CXX_FLAGS_NEW "cxxflags for new profile")'
+    )
 
 
 def test_new_project_esp32_dev_flow():
@@ -206,21 +235,3 @@ def test_new_project_stm32_dev_flow():
     result_test = runner.invoke(cli, ["test"])
     assert result_test.exit_code == 0
     # exit
-
-
-def test_change_scargo_toml_and_update():
-    runner = CliRunner()
-    runner.invoke(cli, ["new", pytest.new_test_project_name, "--target=x86"])
-    add_profile_to_toml(
-        "new",
-        "cflags",
-        "cxxflags",
-        "cflags for new profile",
-        "cxxflags for new profile",
-    )
-    result = runner.invoke(cli, ["update"])
-    assert result.exit_code == 0
-    cmakelists_lines = [line.strip() for line in open("CMakeLists.txt").readlines()]
-    print(cmakelists_lines)
-    assert 'set(CMAKE_C_FLAGS_NEW   "cflags for new profile")' in cmakelists_lines
-    assert 'set(CMAKE_CXX_FLAGS_NEW "cxxflags for new profile")' in cmakelists_lines

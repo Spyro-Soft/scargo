@@ -69,3 +69,14 @@ def add_profile_to_toml(
     data["profile"].update(temp_dict)
     with toml_path.open("w") as f:
         toml.dump(data, f)
+
+
+def assert_str_in_CMakeLists(
+    str_to_check: str, file_path: Path = Path("CMakeLists.txt")
+) -> bool:
+    with open(file_path) as file:
+        cmakelists_lines = [line.strip() for line in file.readlines()]
+        if str_to_check in cmakelists_lines:
+            return True
+
+    return False
