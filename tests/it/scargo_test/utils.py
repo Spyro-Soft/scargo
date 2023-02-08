@@ -46,3 +46,26 @@ def assert_str_in_file(file_path: Path, str_to_check: str) -> bool:
             return True
 
     return False
+
+
+def get_bin_name(file_path: Path = Path("scargo.toml")) -> str:
+    data = toml.load(file_path)
+    bin_name = data["project"]["bin_name"]
+
+    return bin_name
+
+
+def add_profile_to_toml(
+    profile: str,
+    var: str,
+    var2: str,
+    value: str,
+    value2: str,
+    toml_path: Path = Path("scargo.toml"),
+):
+    data = toml.load(toml_path)
+    temp_dict = dict()
+    temp_dict[profile] = {var: value, var2: value2}
+    data["profile"].update(temp_dict)
+    with toml_path.open("w") as f:
+        toml.dump(data, f)
