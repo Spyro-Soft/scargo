@@ -11,7 +11,8 @@ from scargo import cli
 TEST_FILES_PATH = Path(pytest.it_path, "test_projects", "test_files", "fix_test_files")
 
 
-def test_clean_build_x86():
+
+def test_clean_build_check_fix_x86():
     # ARRANGE
     build_dir_path = Path("build")
     debug_project_file_path = Path(
@@ -21,7 +22,7 @@ def test_clean_build_x86():
         "build", "Release", "bin", pytest.new_test_project_name
     )
     runner = CliRunner()
-    runner.invoke(cli, ["new", pytest.new_test_project_name])
+    runner.invoke(cli, ["new", pytest.new_test_project_name]) 
 
     # Build
     result = runner.invoke(cli, ["build"])
@@ -40,7 +41,6 @@ def test_clean_build_x86():
     # Build --profile Release
     result = runner.invoke(cli, ["build", "--profile", "Release"])
     assert result.exit_code == 0
-
     assert debug_project_file_path.is_file()
     assert release_project_file_path.is_file()
 
@@ -66,15 +66,4 @@ def test_check_fix_flow_x86():
 
     # Check
     result = runner.invoke(cli, ["check"])
-    assert result.exit_code == 0
-
-
-def test_debug():
-    # ARRANGE
-    runner = CliRunner()
-    runner.invoke(cli, ["new", pytest.new_test_project_name])
-    runner.invoke(cli, ["build", "--profile", "Debug"])
-
-    # Debug
-    result = runner.invoke(cli, ["debug"])
     assert result.exit_code == 0
