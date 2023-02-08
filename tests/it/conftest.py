@@ -4,7 +4,7 @@ from pathlib import Path
 import pytest
 
 
-def pytest_configure(config):
+def pytest_configure():
     pytest.predefined_test_project_name = "common_scargo_project"
     pytest.predefined_test_project_esp32_name = "common_scargo_project_esp32"
     pytest.predefined_test_project_stm32_name = "common_scargo_project_stm32"

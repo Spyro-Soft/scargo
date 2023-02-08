@@ -15,11 +15,23 @@ from utils import (
 
 from scargo import cli
 
-TEST_FILES_PATH = Path(pytest.it_path, "test_projects", "test_files", "fix_test_files")
+FIX_TEST_FILES_PATH = Path(
+    pytest.it_path, "test_projects", "test_files", "fix_test_files"
+)
 
 PROJECT_CREATION_x86 = [
     "new_project_x86",
     "copy_project_x86",
+]
+
+PROJECT_CREATION_esp32 = [
+    "new_project_esp32",
+    "copy_project_eps32",
+]
+
+PROJECT_CREATION_stm32 = [
+    "new_project_stm32",
+    "copy_project_stm32",
 ]
 
 
@@ -38,6 +50,36 @@ def new_project_x86():
     expected_bin_file_path = Path("./src/", bin_name.lower() + ".cpp")
     assert expected_bin_file_path.exists()
     assert result.exit_code == 0
+
+
+@pytest.fixture()
+def new_project_esp32():
+    # Arrange
+    runner = CliRunner()
+
+    # New
+    result_new_esp32 = runner.invoke(
+        cli, ["new", pytest.new_test_project_name, "--target=esp32"]
+    )
+    bin_name = get_bin_name()
+    expected_bin_file_path = Path("./main/", bin_name.lower() + ".cpp")
+    assert expected_bin_file_path.exists()
+    assert result_new_esp32.exit_code == 0
+
+
+@pytest.fixture()
+def new_project_stm32():
+    # Arrange
+    runner = CliRunner()
+
+    # New
+    result_new_stm32 = runner.invoke(
+        cli, ["new", pytest.new_test_project_name, "--target=stm32"]
+    )
+    bin_name = get_bin_name()
+    expected_bin_file_path = Path("./src/", bin_name.lower() + ".cpp")
+    assert expected_bin_file_path.exists()
+    assert result_new_stm32.exit_code == 0
 
 
 @pytest.fixture()
@@ -71,7 +113,6 @@ def test_project_x86_dev_flow(project_creation, request, capfd):
 
     # New Help, New or copy existing project for regression tests
     request.getfixturevalue(project_creation)
-    project_name = get_project_name()
 
     # Docker Run
     result = runner.invoke(cli, ["docker", "run"])
@@ -88,6 +129,7 @@ def test_project_x86_dev_flow(project_creation, request, capfd):
     assert not build_dir_path.is_dir()
 
     # Build --profile Debug
+    project_name = get_project_name()
     debug_project_file_path = Path("build", "Debug", "bin", project_name)
 
     result = runner.invoke(cli, ["build", "--profile", "Debug"])
@@ -112,7 +154,7 @@ def test_project_x86_dev_flow(project_creation, request, capfd):
     assert result.exit_code == 0
 
     # Check fail
-    copytree(TEST_FILES_PATH, Path(os.getcwd(), src_dir), dirs_exist_ok=True)
+    copytree(FIX_TEST_FILES_PATH, Path(os.getcwd(), src_dir), dirs_exist_ok=True)
     result = runner.invoke(cli, ["check"])
     assert result.exit_code == 1
 
@@ -144,26 +186,13 @@ def test_project_x86_dev_flow(project_creation, request, capfd):
     )
 
 
-def test_new_project_esp32_dev_flow():
+@pytest.mark.parametrize("project_creation", PROJECT_CREATION_esp32)
+def test_project_esp32_dev_flow(project_creation, request):
     # ARRANGE
     runner = CliRunner()
 
-    # Help
-    result_help = runner.invoke(cli, ["-h"])
-    assert result_help.exit_code == 0
-
-    # New Help
-    result_new_help = runner.invoke(cli, ["new", "-h"])
-    assert result_new_help.exit_code == 0
-
-    # New
-    result_new_esp32 = runner.invoke(
-        cli, ["new", pytest.new_test_project_name, "--target=esp32"]
-    )
-    bin_name = get_bin_name()
-    expected_bin_file_path = Path("./main/", bin_name.lower() + ".cpp")
-    assert expected_bin_file_path.exists()
-    assert result_new_esp32.exit_code == 0
+    # New or copy existing project for regression tests
+    request.getfixturevalue(project_creation)
 
     # Docker Run
     result_docker_run = runner.invoke(cli, ["docker", "run"])
@@ -171,67 +200,52 @@ def test_new_project_esp32_dev_flow():
 
     # IDF.py
     # Build
-    result_build = runner.invoke(cli, ["build"])
     build_path = Path("build/Debug")
+    result = runner.invoke(cli, ["build"])
     assert build_path.is_dir()
-    assert result_build.exit_code == 0
+    assert result.exit_code == 0
 
     # Gen --fs
-    result_gen_fs = runner.invoke(cli, ["gen", "--fs"])
+    result = runner.invoke(cli, ["gen", "--fs"])
     spiffs_file_path = Path("build", "spiffs.bin")
-    assert result_gen_fs.exit_code == 0
+    assert result.exit_code == 0
     assert spiffs_file_path.is_file()
 
     # Check
-    result_check = runner.invoke(cli, ["check"])
-    assert result_check.exit_code == 0
+    result = runner.invoke(cli, ["check"])
+    assert result.exit_code == 0
 
     # Test
-    result_test = runner.invoke(cli, ["test"])
-    assert result_test.exit_code == 0
+    result = runner.invoke(cli, ["test"])
+    assert result.exit_code == 0
 
     # idf.py -B build/Debug monitor
     # CTRL+]
-    # exit
 
 
-def test_new_project_stm32_dev_flow():
+@pytest.mark.parametrize("project_creation", PROJECT_CREATION_stm32)
+def test_project_stm32_dev_flow(project_creation, request):
     # Arrange
     runner = CliRunner()
 
-    # Help
-    result_help = runner.invoke(cli, ["-h"])
-    assert result_help.exit_code == 0
-
-    # New Help
-    result_new_help = runner.invoke(cli, ["new", "-h"])
-    assert result_new_help.exit_code == 0
-
-    # New
-    result_new_stm32 = runner.invoke(
-        cli, ["new", pytest.new_test_project_name, "--target=stm32"]
-    )
-    bin_name = get_bin_name()
-    expected_bin_file_path = Path("./src/", bin_name.lower() + ".cpp")
-    assert expected_bin_file_path.exists()
-    assert result_new_stm32.exit_code == 0
+    # New or copy existing project for regression tests
+    request.getfixturevalue(project_creation)
 
     # Docker Run
-    result_docker_run = runner.invoke(cli, ["docker", "run"])
-    assert result_docker_run.exit_code == 0
+    result = runner.invoke(cli, ["docker", "run"])
+    assert result.exit_code == 0
 
     # IDF.py
     # Build
-    result_build = runner.invoke(cli, ["build"])
     build_path = Path("build/Debug")
+    result = runner.invoke(cli, ["build"])
     assert build_path.is_dir()
-    assert result_build.exit_code == 0
+    assert result.exit_code == 0
 
     # Check
-    result_check = runner.invoke(cli, ["check"])
-    assert result_check.exit_code == 0
+    result = runner.invoke(cli, ["check"])
+    assert result.exit_code == 0
 
     # Test
-    result_test = runner.invoke(cli, ["test"])
-    assert result_test.exit_code == 0
-    # exit
+    result = runner.invoke(cli, ["test"])
+    assert result.exit_code == 0
