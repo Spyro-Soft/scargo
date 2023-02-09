@@ -68,9 +68,7 @@ def _scargo_build_docker(docker_path: Path, docker_opts: str = "") -> None:
         cmd = " ".join([cmd, docker_opts])
 
     try:
-        subprocess.run(
-            cmd, shell=True, cwd=docker_path
-        )
+        subprocess.run(cmd, shell=True, cwd=docker_path)
         logger.info("Initialize docker environment.")
     except subprocess.CalledProcessError:
         logger.error("Build docker fail.")
@@ -96,7 +94,9 @@ def _scargo_run_docker(
 
     try:
         subprocess.run(
-            cmd, shell=True, cwd=docker_path,
+            cmd,
+            shell=True,
+            cwd=docker_path,
         )
         logger.info("Stop docker environment.")
     except subprocess.CalledProcessError:
@@ -130,9 +130,7 @@ def _scargo_exec_docker(project_config: ProjectConfig, docker_opts: str = ""):
         sys.exit(1)
 
     bash_command = ["bash"]
-    cmd = (
-        ["docker", "exec", "-it", newest_container[0].id] + bash_command
-    )
+    cmd = ["docker", "exec", "-it", newest_container[0].id] + bash_command
     if docker_opts:
         cmd = cmd + [docker_opts]
     try:
