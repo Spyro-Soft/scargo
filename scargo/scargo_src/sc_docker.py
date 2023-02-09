@@ -19,7 +19,7 @@ def scargo_docker(
     build_docker: bool = False,
     run_docker: bool = False,
     exec_docker: bool = False,
-    docker_opts: list() = None,
+    docker_opts: list() = [],
 ):
     """
     :param bool run_docker: run command in docker
@@ -40,8 +40,6 @@ def scargo_docker(
 
     docker_path = Path(project_path, ".devcontainer")
 
-    docker_opts = " ".join(docker_opts) if docker_opts else ""
-
     if build_docker:
         _scargo_build_docker(docker_path, docker_opts=docker_opts)
 
@@ -52,7 +50,7 @@ def scargo_docker(
         _scargo_exec_docker(project_config, docker_opts=docker_opts)
 
 
-def _scargo_build_docker(docker_path: Path, docker_opts: str = "") -> None:
+def _scargo_build_docker(docker_path: Path, docker_opts: list() = []) -> None:
     """
     Build docker
 
@@ -63,9 +61,7 @@ def _scargo_build_docker(docker_path: Path, docker_opts: str = "") -> None:
     logger = get_logger()
     logger.debug("Build docker environment.")
 
-    cmd = f"docker-compose build"
-    if docker_opts:
-        cmd = " ".join([cmd, docker_opts])
+    cmd = " ".join([f"docker-compose build", *docker_opts])
 
     try:
         subprocess.run(cmd, shell=True, cwd=docker_path)
@@ -75,7 +71,7 @@ def _scargo_build_docker(docker_path: Path, docker_opts: str = "") -> None:
 
 
 def _scargo_run_docker(
-    docker_path: Path, project_config: ProjectConfig, docker_opts: str = ""
+    docker_path: Path, project_config: ProjectConfig, docker_opts: list() = []
 ) -> None:
     """
     Run docker
@@ -88,9 +84,7 @@ def _scargo_run_docker(
     logger = get_logger()
     logger.debug("Run docker environment.")
 
-    cmd = f"docker-compose run {project_config.name}_dev bash"
-    if docker_opts:
-        cmd = " ".join([cmd, docker_opts])
+    cmd = " ".join([f"docker-compose run {project_config.name}_dev bash", *docker_opts])
 
     try:
         subprocess.run(
@@ -103,7 +97,7 @@ def _scargo_run_docker(
         logger.error("Run docker fail.")
 
 
-def _scargo_exec_docker(project_config: ProjectConfig, docker_opts: str = ""):
+def _scargo_exec_docker(project_config: ProjectConfig, docker_opts: list() = []):
     """
     Exec docker
 
@@ -130,9 +124,8 @@ def _scargo_exec_docker(project_config: ProjectConfig, docker_opts: str = ""):
         sys.exit(1)
 
     bash_command = ["bash"]
-    cmd = ["docker", "exec", "-it", newest_container[0].id] + bash_command
-    if docker_opts:
-        cmd = cmd + [docker_opts]
+    cmd = ["docker", "exec", "-it", newest_container[0].id] + bash_command + docker_opts
+
     try:
         subprocess.run(cmd)
         logger.info("Stop exec docker environment.")
