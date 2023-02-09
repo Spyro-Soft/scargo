@@ -7,11 +7,10 @@ import shutil
 import subprocess
 from pathlib import Path
 
-from scargo import __version__ as ver
 from scargo.jinja.cicd_gen import generate_cicd
 from scargo.jinja.cmake_gen import generate_cmake
 from scargo.jinja.conan_gen import generate_conanfile
-from scargo.jinja.docker_gen import generate_docker_compose
+from scargo.jinja.docker_gen import generate_docker_env
 from scargo.jinja.env_gen import generate_env
 from scargo.jinja.readme_gen import generate_readme
 from scargo.jinja.tests_gen import generate_tests
@@ -72,7 +71,7 @@ def scargo_update(config_file_path: Path) -> None:
     target = project_config.target
 
     # Copy docker env files to repo directory
-    generate_docker_compose(docker_path, project_config, ver)
+    generate_docker_env(docker_path, project_config)
     generate_env(docker_path)
 
     generate_cmake(config)

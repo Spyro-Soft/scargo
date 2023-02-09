@@ -33,7 +33,7 @@ class ProjectConfig(BaseModel):
     lib_name: Optional[str]
     target_id: str = Field(..., alias="target")
     build_env: str = Field(SCARGO_DEFAULT_BUILD_ENV, alias="build-env")
-    docker_file: Path = Field(..., alias="docker-file")
+    docker_file: Optional[Path] = Field(None, alias="docker-file")
     docker_image_tag: str = Field(..., alias="docker-image-tag")
     in_repo_conan_cache: bool = Field(..., alias="in-repo-conan-cache")
 

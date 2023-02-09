@@ -1,0 +1,19 @@
+---
+version: '3.9'
+
+services:
+  scargo-x86:
+    image: spyrosoftsa/scargo-x86:1.0
+    build:
+      context: .
+      dockerfile: x86.Dockerfile
+  scargo-stm32:
+    image: spyrosoftsa/scargo-stm32:1.0
+    build:
+      context: .
+      dockerfile: stm32.Dockerfile
+  scargo-esp32:
+    image: spyrosoftsa/scargo-esp32:1.0
+    build:
+      context: .
+      dockerfile: esp32.Dockerfile

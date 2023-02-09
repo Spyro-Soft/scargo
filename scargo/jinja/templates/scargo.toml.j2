@@ -12,8 +12,10 @@ lib_name = "{{ data.lib_name }}"
 {% endif %}
 target = "{{ data.target.id }}"
 build-env = "{{ data.build_env }}"
-docker-file = ".devcontainer/Dockerfile-custom"
-docker-image-tag = "{{ data.docker_image_tag }}"
+
+custom-docker = false
+# docker-file = ".devcontainer/Dockerfile"
+docker-image-tag = "spyrosoftsa/scargo-{{ data.target.family }}:1.0"
 
 cc  = "{{ data.cc }}"
 cxx = "{{ data.cxx }}"

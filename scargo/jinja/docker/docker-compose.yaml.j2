@@ -16,17 +16,21 @@ x-project_config: &project_config
 services:
   {{ project.name }}_dev:
     image: {{ project.docker_image_tag }}
-    platform: linux/amd64
+    {% if project.docker_image_file %}
     build:
       context: .
       args:
         <<: *project_config
+    {% endif %}
+    platform: linux/amd64
     privileged: true
     volumes:
       - ..:/workspace
       - /dev:/dev
     command: sleep infinity 
-  {% if project.in_repo_conan_cache %}
     environment:
+      - CONAN_LOGIN_USERNAME=project_config.CONAN_LOGIN_USERNAME
+      - CONAN_PASSWORD=project_config.CONAN_PASSWORD
+      {% if project.in_repo_conan_cache %}
       - CONAN_USER_HOME=/workspace
-  {% endif %}
+      {% endif %}
