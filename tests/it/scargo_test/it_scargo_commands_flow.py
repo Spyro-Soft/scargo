@@ -1,6 +1,6 @@
 import os
 from pathlib import Path
-from shutil import copytree
+from shutil import copytree, copy
 
 import pytest
 from typer.testing import CliRunner
@@ -20,7 +20,7 @@ FIX_TEST_FILES_PATH = Path(
 )
 
 IDF_SDKCONFIG_FILE_PATH = Path(
-    pytest.it_path, pytest.it_path, "test_projects", "test_files", "esp_32_idf_config"
+    pytest.it_path, pytest.it_path, "test_projects", "test_files", "esp_32_idf_config", "sdkconfig"
 )
 
 PROJECT_CREATION_x86 = [
@@ -30,7 +30,7 @@ PROJECT_CREATION_x86 = [
 
 PROJECT_CREATION_esp32 = [
     "new_project_esp32",
-    "copy_project_eps32",
+    "copy_project_esp32",
 ]
 
 PROJECT_CREATION_stm32 = [
@@ -147,9 +147,13 @@ def test_project_x86_dev_flow(project_creation, request, capfd):
     assert result.exit_code == 0
     assert release_project_file_path.is_file()
 
+    # Gen -u
+    result = runner.invoke(cli, ["gen", "-u", src_dir])
+    assert result.exit_code == 0
+
     # Test
-    # result = runner.invoke(cli, ["test"])
-    # assert result.exit_code == 0
+    result = runner.invoke(cli, ["test"])
+    assert result.exit_code == 0
 
     # Run
     result = runner.invoke(cli, ["run"])
@@ -203,7 +207,7 @@ def test_project_esp32_dev_flow(project_creation, request):
     assert result_docker_run.exit_code == 0
 
     # IDF.py
-    copytree(IDF_SDKCONFIG_FILE_PATH, Path(os.getcwd()))
+    copy(IDF_SDKCONFIG_FILE_PATH, Path(os.getcwd()))
 
     # Build
     build_path = Path("build/Debug")
