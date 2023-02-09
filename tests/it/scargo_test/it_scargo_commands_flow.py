@@ -19,6 +19,10 @@ FIX_TEST_FILES_PATH = Path(
     pytest.it_path, "test_projects", "test_files", "fix_test_files"
 )
 
+IDF_SDKCONFIG_FILE_PATH = Path(
+    pytest.it_path, pytest.it_path, "test_projects", "test_files", "esp_32_idf_config"
+)
+
 PROJECT_CREATION_x86 = [
     "new_project_x86",
     "copy_project_x86",
@@ -199,6 +203,8 @@ def test_project_esp32_dev_flow(project_creation, request):
     assert result_docker_run.exit_code == 0
 
     # IDF.py
+    copytree(IDF_SDKCONFIG_FILE_PATH, Path(os.getcwd()))
+
     # Build
     build_path = Path("build/Debug")
     result = runner.invoke(cli, ["build"])
