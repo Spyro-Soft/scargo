@@ -19,7 +19,7 @@ def scargo_docker(
     build_docker: bool = False,
     run_docker: bool = False,
     exec_docker: bool = False,
-    docker_opts: list() = [],
+    docker_opts: tuple() = tuple()
 ):
     """
     :param bool run_docker: run command in docker
@@ -50,7 +50,7 @@ def scargo_docker(
         _scargo_exec_docker(project_config, docker_opts=docker_opts)
 
 
-def _scargo_build_docker(docker_path: Path, docker_opts: list() = []) -> None:
+def _scargo_build_docker(docker_path: Path, docker_opts: tuple() = tuple()) -> None:
     """
     Build docker
 
@@ -61,17 +61,17 @@ def _scargo_build_docker(docker_path: Path, docker_opts: list() = []) -> None:
     logger = get_logger()
     logger.debug("Build docker environment.")
 
-    cmd = " ".join([f"docker-compose build", *docker_opts])
+    cmd = " ".join(["docker-compose build", *docker_opts])
 
     try:
-        subprocess.run(cmd, shell=True, cwd=docker_path)
+        subprocess.run(cmd, shell=True, cwd=docker_path, check=False)
         logger.info("Initialize docker environment.")
     except subprocess.CalledProcessError:
         logger.error("Build docker fail.")
 
 
 def _scargo_run_docker(
-    docker_path: Path, project_config: ProjectConfig, docker_opts: list() = []
+    docker_path: Path, project_config: ProjectConfig, docker_opts: tuple() = tuple()
 ) -> None:
     """
     Run docker
@@ -91,13 +91,14 @@ def _scargo_run_docker(
             cmd,
             shell=True,
             cwd=docker_path,
+            check=False
         )
         logger.info("Stop docker environment.")
     except subprocess.CalledProcessError:
         logger.error("Run docker fail.")
 
 
-def _scargo_exec_docker(project_config: ProjectConfig, docker_opts: list() = []):
+def _scargo_exec_docker(project_config: ProjectConfig, docker_opts: tuple() = tuple()):
     """
     Exec docker
 
@@ -124,10 +125,10 @@ def _scargo_exec_docker(project_config: ProjectConfig, docker_opts: list() = [])
         sys.exit(1)
 
     bash_command = ["bash"]
-    cmd = ["docker", "exec", "-it", newest_container[0].id] + bash_command + docker_opts
+    cmd = ["docker", "exec", "-it", newest_container[0].id] + bash_command + list(docker_opts)
 
     try:
-        subprocess.run(cmd)
+        subprocess.run(cmd, check=False)
         logger.info("Stop exec docker environment.")
     except subprocess.CalledProcessError:
         logger.error("Exec docker fail.")

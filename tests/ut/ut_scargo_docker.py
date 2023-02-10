@@ -13,7 +13,7 @@ def test_docker_fails_when_inside_docker(create_new_project_docker, caplog):
 
 
 def test_docker_build(create_new_project_docker, fp):
-    fp.register(f"docker-compose build")
+    fp.register("docker-compose build")
     scargo_docker(build_docker=True)
 
 
