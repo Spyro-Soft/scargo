@@ -6,6 +6,7 @@
 import subprocess
 import sys
 from pathlib import Path
+from typing import Sequence
 
 import docker
 
@@ -19,7 +20,7 @@ def scargo_docker(
     build_docker: bool = False,
     run_docker: bool = False,
     exec_docker: bool = False,
-    docker_opts: tuple() = tuple()
+    docker_opts: Sequence = tuple(),
 ):
     """
     :param bool run_docker: run command in docker
@@ -50,7 +51,7 @@ def scargo_docker(
         _scargo_exec_docker(project_config, docker_opts=docker_opts)
 
 
-def _scargo_build_docker(docker_path: Path, docker_opts: tuple() = tuple()) -> None:
+def _scargo_build_docker(docker_path: Path, docker_opts: Sequence = tuple()) -> None:
     """
     Build docker
 
@@ -68,10 +69,11 @@ def _scargo_build_docker(docker_path: Path, docker_opts: tuple() = tuple()) -> N
         logger.info("Initialize docker environment.")
     except subprocess.CalledProcessError:
         logger.error("Build docker fail.")
+        sys.exit(1)
 
 
 def _scargo_run_docker(
-    docker_path: Path, project_config: ProjectConfig, docker_opts: tuple() = tuple()
+    docker_path: Path, project_config: ProjectConfig, docker_opts: Sequence = tuple()
 ) -> None:
     """
     Run docker
@@ -84,21 +86,19 @@ def _scargo_run_docker(
     logger = get_logger()
     logger.debug("Run docker environment.")
 
-    cmd = " ".join([f"docker-compose run {project_config.name}_dev bash", *docker_opts])
+    cmd = " ".join(
+        ["docker-compose run", *docker_opts, f"{project_config.name}_dev bash"]
+    )
 
     try:
-        subprocess.run(
-            cmd,
-            shell=True,
-            cwd=docker_path,
-            check=False
-        )
+        subprocess.run(cmd, shell=True, cwd=docker_path, check=False)
         logger.info("Stop docker environment.")
     except subprocess.CalledProcessError:
         logger.error("Run docker fail.")
+        sys.exit(1)
 
 
-def _scargo_exec_docker(project_config: ProjectConfig, docker_opts: tuple() = tuple()):
+def _scargo_exec_docker(project_config: ProjectConfig, docker_opts: Sequence = tuple()):
     """
     Exec docker
 
@@ -125,10 +125,15 @@ def _scargo_exec_docker(project_config: ProjectConfig, docker_opts: tuple() = tu
         sys.exit(1)
 
     bash_command = ["bash"]
-    cmd = ["docker", "exec", "-it", newest_container[0].id] + bash_command + list(docker_opts)
-
+    cmd = (
+        ["docker", "exec", "-it"]
+        + list(docker_opts)
+        + [newest_container[0].id]
+        + bash_command
+    )
     try:
         subprocess.run(cmd, check=False)
         logger.info("Stop exec docker environment.")
     except subprocess.CalledProcessError:
         logger.error("Exec docker fail.")
+        sys.exit(1)

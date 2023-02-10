@@ -38,7 +38,7 @@ def test_docker_run(create_new_project_docker, fp):
 def test_docker_run_with_rm(create_new_project_docker, fp):
     rm = "--rm"
     service_name = "test_project_dev"
-    fp.register(f"docker-compose run {service_name} bash {rm}")
+    fp.register(f"docker-compose run {rm} {service_name} bash")
     scargo_docker(run_docker=True, docker_opts=[rm])
 
 
