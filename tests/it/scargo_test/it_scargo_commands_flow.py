@@ -3,7 +3,6 @@ from pathlib import Path
 from shutil import copytree, copy
 
 import pytest
-from typer.testing import CliRunner
 from utils import (
     add_profile_to_toml,
     assert_str_in_CMakeLists,
@@ -11,6 +10,7 @@ from utils import (
     get_bin_name,
     get_copyright_text,
     get_project_name,
+    ScargoRunner
 )
 
 from scargo import cli
@@ -20,7 +20,7 @@ FIX_TEST_FILES_PATH = Path(
 )
 
 IDF_SDKCONFIG_FILE_PATH = Path(
-    pytest.it_path, pytest.it_path, "test_projects", "test_files", "esp_32_idf_config", "sdkconfig"
+    pytest.it_path, "test_projects", "test_files", "esp_32_idf_config", "sdkconfig"
 )
 
 PROJECT_CREATION_x86 = [
@@ -42,7 +42,7 @@ PROJECT_CREATION_stm32 = [
 @pytest.fixture()
 def new_project_x86():
     # Arrange
-    runner = CliRunner()
+    runner = ScargoRunner()
 
     # New Help
     result = runner.invoke(cli, ["new", "-h"])
@@ -59,7 +59,7 @@ def new_project_x86():
 @pytest.fixture()
 def new_project_esp32():
     # Arrange
-    runner = CliRunner()
+    runner = ScargoRunner()
 
     # New
     result_new_esp32 = runner.invoke(
@@ -74,7 +74,7 @@ def new_project_esp32():
 @pytest.fixture()
 def new_project_stm32():
     # Arrange
-    runner = CliRunner()
+    runner = ScargoRunner()
 
     # New
     result_new_stm32 = runner.invoke(
@@ -109,7 +109,7 @@ def test_project_x86_dev_flow(project_creation, request, capfd):
     # Arrange
     build_dir_path = Path("build")
     src_dir = "src"
-    runner = CliRunner()
+    runner = ScargoRunner()
 
     # Help
     result = runner.invoke(cli, ["-h"])
@@ -197,7 +197,7 @@ def test_project_x86_dev_flow(project_creation, request, capfd):
 @pytest.mark.parametrize("project_creation", PROJECT_CREATION_esp32)
 def test_project_esp32_dev_flow(project_creation, request):
     # ARRANGE
-    runner = CliRunner()
+    runner = ScargoRunner()
 
     # New or copy existing project for regression tests
     request.getfixturevalue(project_creation)
@@ -236,7 +236,7 @@ def test_project_esp32_dev_flow(project_creation, request):
 @pytest.mark.parametrize("project_creation", PROJECT_CREATION_stm32)
 def test_project_stm32_dev_flow(project_creation, request):
     # Arrange
-    runner = CliRunner()
+    runner = ScargoRunner()
 
     # New or copy existing project for regression tests
     request.getfixturevalue(project_creation)

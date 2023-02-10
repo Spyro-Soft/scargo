@@ -1,6 +1,37 @@
 from pathlib import Path
+from typing import IO, Any, Mapping, Optional, Sequence, Union
+import sys
+from scargo.scargo_src.sc_src import get_cmd_args
 
 import toml
+from click import Command
+from typer.testing import CliRunner, Result
+
+
+class ScargoRunner(CliRunner):
+    def invoke(  # type: ignore
+        self,
+        use_cli: Command,
+        args: Optional[Union[str, Sequence[str]]] = None,
+        input: Optional[Union[bytes, str, IO[Any]]] = None,
+        env: Optional[Mapping[str, str]] = None,
+        catch_exceptions: bool = True,
+        color: bool = False,
+        **extra: Any,
+    ) -> Result:
+        temp = sys.argv
+        sys.argv = ["scargo", *args]
+        result = super().invoke(
+            use_cli,
+            args=args,
+            input=input,
+            env=env,
+            catch_exceptions=catch_exceptions,
+            color=color,
+            **extra,
+        )
+        sys.argv = temp
+        return result
 
 
 def add_libs_to_toml_file(*libs: str, toml_path: Path = Path("scargo.toml")):
