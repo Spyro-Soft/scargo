@@ -157,8 +157,7 @@ def test_project_x86_dev_flow(project_creation, request, capfd):
 
     # Run
     result = runner.invoke(cli, ["run"])
-    captured = capfd.readouterr()
-    assert "Hello World!" in captured.out
+    assert "Hello World!" in result.output
     assert result.exit_code == 0
 
     # Check fail
