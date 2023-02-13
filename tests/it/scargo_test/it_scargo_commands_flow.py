@@ -1,16 +1,16 @@
 import os
 from pathlib import Path
-from shutil import copytree, copy
+from shutil import copy, copytree
 
 import pytest
 from utils import (
+    ScargoRunner,
     add_profile_to_toml,
     assert_str_in_CMakeLists,
     assert_str_in_file,
     get_bin_name,
     get_copyright_text,
     get_project_name,
-    ScargoRunner
 )
 
 from scargo import cli

@@ -41,6 +41,7 @@ def run_scargo_again_in_docker(project_config: ProjectConfig) -> None:
 
     docker_tag = project_config.docker_image_tag
     logger = get_logger()
+    logger.warning(cmd)
 
     if project_path:
         logger.info("Running scargo %s command in docker.", cmd_args)

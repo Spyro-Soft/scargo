@@ -60,7 +60,7 @@ set -e\n\
 \n\
 . $IDF_PATH/export.sh\n\
 \n\
-exec "$@"' >  /opt/esp/entrypoint.sh
+exec "$@"' >  /opt/esp/entrypoint.sh && chmod 775 /opt/esp/entrypoint.sh
     
 # Install QEMU
 ARG QEMU_VER=esp-develop-20220919
@@ -109,16 +109,7 @@ RUN printf "\n\nADDING USER $USER_NAME TO SUDOERS - DEV ENV ONLY!\n\n" >&2 && \
     echo "$USER_NAME:$USER_PASSWORD" | chpasswd && \
     echo "$USER_NAME ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers
 
-# install scargo from spyro rep (temporarily before pip repo will be available)
-COPY requirements.txt requirements.txt
-RUN pip3 install -r requirements.txt && \
-    rm requirements.txt
-
-ENV SCARGO_VERSION="release_1.3.7"
-ENV SCARGO_PATH="/opt/scargo"
-ENV SCARGO_REPO_URL="https://git.spyrosoft.it/it-11475/scargo.git"
-RUN git clone --single-branch --branch ${SCARGO_VERSION} ${SCARGO_REPO_URL} ${SCARGO_PATH} && \
-    cd scargo && pip install . 
+RUN pip3 install scargo
 
 RUN usermod -a -G dialout ${USER_NAME}
 USER ${USER_NAME}

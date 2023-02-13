@@ -1,7 +1,6 @@
+import sys
 from pathlib import Path
 from typing import IO, Any, Mapping, Optional, Sequence, Union
-import sys
-
 
 import toml
 from click import Command
