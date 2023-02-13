@@ -59,7 +59,7 @@ coverage[toml]==6.5.0
     # via
     #   pytest-cov
     #   scargo (pyproject.toml)
-cryptography==39.0.0
+cryptography==39.0.1
     # via
     #   esptool
     #   paramiko
