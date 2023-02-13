@@ -65,7 +65,7 @@ def _scargo_build_docker(docker_path: Path, docker_opts: Sequence = tuple()) -> 
     cmd = " ".join(["docker-compose build", *docker_opts])
 
     try:
-        subprocess.run(cmd, shell=True, cwd=docker_path, check=False)
+        subprocess.run(cmd, shell=True, cwd=docker_path, check=True)
         logger.info("Initialize docker environment.")
     except subprocess.CalledProcessError:
         logger.error("Build docker fail.")
@@ -91,7 +91,7 @@ def _scargo_run_docker(
     )
 
     try:
-        subprocess.run(cmd, shell=True, cwd=docker_path, check=False)
+        subprocess.run(cmd, shell=True, cwd=docker_path, check=True)
         logger.info("Stop docker environment.")
     except subprocess.CalledProcessError:
         logger.error("Run docker fail.")
@@ -132,7 +132,7 @@ def _scargo_exec_docker(project_config: ProjectConfig, docker_opts: Sequence = t
         + bash_command
     )
     try:
-        subprocess.run(cmd, check=False)
+        subprocess.run(cmd, check=True)
         logger.info("Stop exec docker environment.")
     except subprocess.CalledProcessError:
         logger.error("Exec docker fail.")
