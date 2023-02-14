@@ -14,6 +14,8 @@ from utils import (
 )
 
 from scargo import cli
+from scargo.jinja.env_gen import generate_env
+from scargo.scargo_src.utils import get_project_root
 
 FIX_TEST_FILES_PATH = Path(
     pytest.it_path, "test_projects", "test_files", "fix_test_files"
@@ -90,18 +92,27 @@ def new_project_stm32():
 def copy_project_x86():
 
     copytree(pytest.predefined_test_project_path, os.getcwd(), dirs_exist_ok=True)
+    project_path = get_project_root()
+    docker_path = Path(project_path, ".devcontainer")
+    generate_env(docker_path)
 
 
 @pytest.fixture()
 def copy_project_esp32():
 
     copytree(pytest.predefined_test_project_esp32_path, os.getcwd(), dirs_exist_ok=True)
+    project_path = get_project_root()
+    docker_path = Path(project_path, ".devcontainer")
+    generate_env(docker_path)
 
 
 @pytest.fixture()
 def copy_project_stm32():
 
     copytree(pytest.predefined_test_project_stm32_path, os.getcwd(), dirs_exist_ok=True)
+    project_path = get_project_root()
+    docker_path = Path(project_path, ".devcontainer")
+    generate_env(docker_path)
 
 
 @pytest.mark.parametrize("project_creation", PROJECT_CREATION_x86)
@@ -208,6 +219,10 @@ def test_project_esp32_dev_flow(project_creation, request):
     # IDF.py
     copy(IDF_SDKCONFIG_FILE_PATH, Path(os.getcwd()))
 
+    # Update
+    result = runner.invoke(cli, ["update"])
+    assert result.exit_code == 0
+
     # Build
     build_path = Path("build/Debug")
     result = runner.invoke(cli, ["build"])
@@ -239,6 +254,10 @@ def test_project_stm32_dev_flow(project_creation, request):
 
     # Docker Run
     result = runner.invoke(cli, ["docker", "run"])
+    assert result.exit_code == 0
+
+    # Update
+    result = runner.invoke(cli, ["update"])
     assert result.exit_code == 0
 
     # Build
