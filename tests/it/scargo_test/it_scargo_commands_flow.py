@@ -4,7 +4,7 @@ from shutil import copy, copytree
 
 import pytest
 from utils import (
-    ScargoRunner,
+    ScargoTestRunner,
     add_profile_to_toml,
     assert_str_in_CMakeLists,
     assert_str_in_file,
@@ -42,7 +42,7 @@ PROJECT_CREATION_stm32 = [
 @pytest.fixture()
 def new_project_x86():
     # Arrange
-    runner = ScargoRunner()
+    runner = ScargoTestRunner()
 
     # New Help
     result = runner.invoke(cli, ["new", "-h"])
@@ -51,39 +51,39 @@ def new_project_x86():
     # New
     result = runner.invoke(cli, ["new", pytest.new_test_project_name, "--target=x86"])
     bin_name = get_bin_name()
-    expected_bin_file_path = Path("./src/", bin_name.lower() + ".cpp")
-    assert expected_bin_file_path.exists()
+    expected_bin_file_path = Path("src", f"{bin_name.lower()}.cpp")
     assert result.exit_code == 0
+    assert expected_bin_file_path.is_file()
 
 
 @pytest.fixture()
 def new_project_esp32():
     # Arrange
-    runner = ScargoRunner()
+    runner = ScargoTestRunner()
 
     # New
     result_new_esp32 = runner.invoke(
         cli, ["new", pytest.new_test_project_name, "--target=esp32"]
     )
     bin_name = get_bin_name()
-    expected_bin_file_path = Path("./main/", bin_name.lower() + ".cpp")
-    assert expected_bin_file_path.exists()
+    expected_bin_file_path = Path("main", f"{bin_name.lower()}.cpp")
     assert result_new_esp32.exit_code == 0
+    assert expected_bin_file_path.is_file()
 
 
 @pytest.fixture()
 def new_project_stm32():
     # Arrange
-    runner = ScargoRunner()
+    runner = ScargoTestRunner()
 
     # New
     result_new_stm32 = runner.invoke(
         cli, ["new", pytest.new_test_project_name, "--target=stm32"]
     )
     bin_name = get_bin_name()
-    expected_bin_file_path = Path("./src/", bin_name.lower() + ".cpp")
-    assert expected_bin_file_path.exists()
+    expected_bin_file_path = Path("src", f"{bin_name.lower()}.cpp")
     assert result_new_stm32.exit_code == 0
+    assert expected_bin_file_path.is_file()
 
 
 @pytest.fixture()
@@ -109,7 +109,7 @@ def test_project_x86_dev_flow(project_creation, request):
     # Arrange
     build_dir_path = Path("build")
     src_dir = "src"
-    runner = ScargoRunner()
+    runner = ScargoTestRunner()
 
     # Help
     result = runner.invoke(cli, ["-h"])
@@ -196,7 +196,7 @@ def test_project_x86_dev_flow(project_creation, request):
 @pytest.mark.parametrize("project_creation", PROJECT_CREATION_esp32)
 def test_project_esp32_dev_flow(project_creation, request):
     # ARRANGE
-    runner = ScargoRunner()
+    runner = ScargoTestRunner()
 
     # New or copy existing project for regression tests
     request.getfixturevalue(project_creation)
@@ -232,7 +232,7 @@ def test_project_esp32_dev_flow(project_creation, request):
 @pytest.mark.parametrize("project_creation", PROJECT_CREATION_stm32)
 def test_project_stm32_dev_flow(project_creation, request):
     # Arrange
-    runner = ScargoRunner()
+    runner = ScargoTestRunner()
 
     # New or copy existing project for regression tests
     request.getfixturevalue(project_creation)

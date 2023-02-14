@@ -7,7 +7,7 @@ from click import Command
 from typer.testing import CliRunner, Result
 
 
-class ScargoRunner(CliRunner):
+class ScargoTestRunner(CliRunner):
     def invoke(  # type: ignore
         self,
         use_cli: Command,
