@@ -105,7 +105,7 @@ def copy_project_stm32():
 
 
 @pytest.mark.parametrize("project_creation", PROJECT_CREATION_x86)
-def test_project_x86_dev_flow(project_creation, request, capfd):
+def test_project_x86_dev_flow(project_creation, request):
     # Arrange
     build_dir_path = Path("build")
     src_dir = "src"
@@ -147,6 +147,21 @@ def test_project_x86_dev_flow(project_creation, request, capfd):
     assert result.exit_code == 0
     assert release_project_file_path.is_file()
 
+    # Update
+    add_profile_to_toml(
+        "new",
+        "cflags",
+        "cxxflags",
+        "cflags for new profile",
+        "cxxflags for new profile",
+    )
+    result = runner.invoke(cli, ["update"])
+    assert result.exit_code == 0
+    assert assert_str_in_CMakeLists('set(CMAKE_C_FLAGS_NEW   "cflags for new profile")')
+    assert assert_str_in_CMakeLists(
+        'set(CMAKE_CXX_FLAGS_NEW "cxxflags for new profile")'
+    )
+
     # Gen -u
     result = runner.invoke(cli, ["gen", "-u", src_dir])
     assert result.exit_code == 0
@@ -176,21 +191,6 @@ def test_project_x86_dev_flow(project_creation, request, capfd):
     # Check
     result = runner.invoke(cli, ["check"])
     assert result.exit_code == 0
-
-    # Update
-    add_profile_to_toml(
-        "new",
-        "cflags",
-        "cxxflags",
-        "cflags for new profile",
-        "cxxflags for new profile",
-    )
-    result = runner.invoke(cli, ["update"])
-    assert result.exit_code == 0
-    assert assert_str_in_CMakeLists('set(CMAKE_C_FLAGS_NEW   "cflags for new profile")')
-    assert assert_str_in_CMakeLists(
-        'set(CMAKE_CXX_FLAGS_NEW "cxxflags for new profile")'
-    )
 
 
 @pytest.mark.parametrize("project_creation", PROJECT_CREATION_esp32)
@@ -228,9 +228,6 @@ def test_project_esp32_dev_flow(project_creation, request):
     result = runner.invoke(cli, ["test"])
     assert result.exit_code == 0
 
-    # idf.py -B build/Debug monitor
-    # CTRL+]
-
 
 @pytest.mark.parametrize("project_creation", PROJECT_CREATION_stm32)
 def test_project_stm32_dev_flow(project_creation, request):
@@ -244,7 +241,6 @@ def test_project_stm32_dev_flow(project_creation, request):
     result = runner.invoke(cli, ["docker", "run"])
     assert result.exit_code == 0
 
-    # IDF.py
     # Build
     build_path = Path("build/Debug")
     result = runner.invoke(cli, ["build"])
