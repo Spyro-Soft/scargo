@@ -13,21 +13,33 @@ def test_docker_fails_when_inside_docker(create_new_project_docker, caplog):
 
 
 def test_docker_build(create_new_project_docker, fp):
-    cache = ""
-    fp.register(f"docker-compose build {cache}")
+    fp.register("docker-compose build")
     scargo_docker(build_docker=True)
 
 
 def test_docker_build_no_cache(create_new_project_docker, fp):
     cache = "--no-cache"
     fp.register(f"docker-compose build {cache}")
-    scargo_docker(build_docker=True, no_cache=True)
+    scargo_docker(build_docker=True, docker_opts=[cache])
+
+
+def test_docker_build_with_rm(create_new_project_docker, fp):
+    rm = "--rm"
+    fp.register(f"docker-compose build {rm}")
+    scargo_docker(build_docker=True, docker_opts=[rm])
 
 
 def test_docker_run(create_new_project_docker, fp):
     service_name = "test_project_dev"
     fp.register(f"docker-compose run {service_name} bash")
     scargo_docker(run_docker=True)
+
+
+def test_docker_run_with_rm(create_new_project_docker, fp):
+    rm = "--rm"
+    service_name = "test_project_dev"
+    fp.register(f"docker-compose run {rm} {service_name} bash")
+    scargo_docker(run_docker=True, docker_opts=[rm])
 
 
 class FakeDockerClient:
