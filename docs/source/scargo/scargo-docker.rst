@@ -27,6 +27,15 @@ Build the docker environment for the chosen architecture
 
 Run the docker environment bash console for this project architecture
 
+Options
+^^^^^^^
+
+-c, --command "TEXT"
+
+[default: bash]
+
+Quoted text, used to select command which will be executed with `docker run`
+
 ::
 
     exec
