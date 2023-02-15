@@ -49,6 +49,9 @@ We could have a dedicated section in scargo.toml to define compiler and flags fo
     cflags = "-Wall -Wextra -Werror"    # Flags for C compiler
     cxxflags = "-Wall -Wextra -Werror"  # Flags for C++ compiler
 
+    additional-cmake-flag1 = "first"
+    additional-cmake-flag2 = "second"
+
 Command scargo update would generate two CMakeLists.txt files:
 
 Top-level CMakeLists.txt in the project's root directory (as before).
