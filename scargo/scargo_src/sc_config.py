@@ -121,7 +121,7 @@ class CheckConfig(BaseModel):
     exclude: List[str] = Field(default_factory=list)
 
 
-class TestConfig(BaseModel):
+class TestConfig(BaseModel, extra=Extra.allow):
     cc: str
     cxx: str
 
@@ -129,6 +129,14 @@ class TestConfig(BaseModel):
     cxxflags: str
 
     gcov_executable: str = Field(..., alias="gcov-executable")
+
+    @property
+    def extras(self):
+        return {
+            key: value
+            for key, value in dict(self).items()
+            if key not in self.__fields__
+        }
 
 
 class Dependencies(BaseModel):
