@@ -111,7 +111,7 @@ And "CMakeLists.txt" is this:
 
 Additional cmake variables
 ==========================
-For each profile it's possible to define additional variables which will end up as cmake variables in main cmake. 
+For each profile and tests it's possible to define additional variables which will end up as cmake variables in main cmake. 
 For example, if "scargo.toml" has: 
 
 ::
@@ -127,6 +127,14 @@ For example, if "scargo.toml" has:
     cxxflags = "-O3 -DNDEBUG" 
     first_extra_var = "release_extra"
     second_extra_var = "second_var"
+
+    [tests]
+    cc  = "gcc"
+    cxx = "g++"
+    cflags   = "-Wall -Wextra -Og --coverage -fkeep-inline-functions -fkeep-static-consts"
+    cxxflags = "-Wall -Wextra -Og --coverage -fkeep-inline-functions -fkeep-static-consts"
+    gcov-executable = "" # Empty string -> use default gcov executable
+    additional-test-var = "something"
     ...
 
 then main "CMakeLists.txt" would contain:
@@ -148,6 +156,14 @@ then main "CMakeLists.txt" would contain:
         SET(second_extra_var second_var)
         SET(first_extra_var release_extra)
     ENDIF()
+    ...
+
+and tests "CMakeLists.txt" would contain:
+
+::
+
+    ...
+    SET(additional-test-var something)
     ...
 
 Additional profiles

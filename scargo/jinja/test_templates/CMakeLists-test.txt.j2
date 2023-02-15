@@ -7,18 +7,26 @@ cmake_minimum_required(VERSION 3.22)
 {% if tests %}
 {% if tests.cc %}
 set(CMAKE_C_COMPILER   "{{ tests.cc }}")
-{% endif %}
+{% endif %} {# tests.cc #}
+
 {% if tests.cxx %}
 set(CMAKE_CXX_COMPILER "{{ tests.cxx }}")
-{% endif %}
+{% endif %} {# tests.cxx #}
 
 {% if tests.cflags %}
 set(CMAKE_C_FLAGS   "{{ tests.cflags }}")
-{% endif %}
+{% endif %} {# tests.cflags #}
+
 {% if tests.cxxflags %}
 set(CMAKE_CXX_FLAGS "{{ tests.cxxflags }}")
-{% endif %}
-{% endif %}
+{% endif %} {# tests.cxxflags #}
+
+{% if tests.extras %}
+{% for key, value in tests.extras.items() %}
+SET({{ key }} {{ value }})
+{% endfor %}
+{% endif %} {# tests.extras #}
+{% endif %} {# tests #}
 
 project(tests LANGUAGES C CXX ASM)
 
