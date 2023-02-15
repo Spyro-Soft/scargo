@@ -11,7 +11,7 @@ ENV DEBIAN_FRONTEND noninteractive
 RUN apt update --fix-missing && \
     apt -y install python3.8 python3.8-venv python3-pip \
     binutils git wget \
-    scons build-essential pkg-config \ 
+    scons build-essential pkg-config \
     unzip graphviz nano vim && \
     apt -y install sudo && \
     update-alternatives --install /usr/bin/python python /usr/bin/python3 1 && \
@@ -36,7 +36,7 @@ RUN wget https://armkeil.blob.core.windows.net/developer/Files/downloads/gnu-rm/
 RUN apt-get update -q -y && \
     apt-get install -y git make cmake libusb-1.0-0-dev bzr libncurses5:amd64 \
                        openocd gdb-multiarch usbutils xterm minicom stlink-tools
-                           
+
 # Set up the compiler path
 ENV PATH $PATH:/opt/gcc-arm-none-eabi/bin
 
@@ -48,15 +48,15 @@ RUN curl -sL https://aka.ms/InstallAzureCLIDeb | sudo bash && \
     tee /etc/apt/trusted.gpg.d/microsoft.gpg > /dev/null && \
     AZ_REPO=$(lsb_release -cs) && \
     echo "deb [arch=amd64] https://packages.microsoft.com/repos/azure-cli/ $AZ_REPO main" | \
-    tee /etc/apt/sources.list.d/azure-cli.list && \ 
+    tee /etc/apt/sources.list.d/azure-cli.list && \
     apt-get update && \
-    apt-get install azure-cli 
+    apt-get install azure-cli
 
 ENV LC_ALL=C
 WORKDIR /opt
 
 FROM stm32 AS custom_common_scargo_project_stm32
-# user can add his docker code below which will be integrated with 
+# user can add his docker code below which will be integrated with
 # main docker file and not overwritten by scargo update
 ENV DEBIAN_FRONTEND noninteractive
 
@@ -89,16 +89,7 @@ RUN printf "\n\nADDING USER $USER_NAME TO SUDOERS - DEV ENV ONLY!\n\n" >&2 && \
     echo "$USER_NAME:$USER_PASSWORD" | chpasswd && \
     echo "$USER_NAME ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers
 
-# install scargo from spyro rep (temporarily before pip repo will be available)
-COPY requirements.txt requirements.txt
-RUN pip3 install -r requirements.txt && \
-    rm requirements.txt
-
-ENV SCARGO_VERSION="release_1.3.6"
-ENV SCARGO_PATH="/opt/scargo"
-ENV SCARGO_REPO_URL="https://git.spyrosoft.it/it-11475/scargo.git"
-RUN git clone --single-branch --branch ${SCARGO_VERSION} ${SCARGO_REPO_URL} ${SCARGO_PATH} && \
-    cd scargo && pip install . 
+RUN pip3 install scargo
 
 RUN usermod -a -G dialout ${USER_NAME}
 USER ${USER_NAME}
