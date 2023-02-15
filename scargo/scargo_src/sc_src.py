@@ -53,14 +53,13 @@ def run_scargo_again_in_docker(project_config: ProjectConfig) -> None:
             entrypoint=entrypoint,
             privileged=True,
             detach=True,
-            remove=True,
         )
-        # make life output
         output = container.attach(stdout=True, stream=True, logs=True)
         for line in output:
             print(line.decode(), end="")
-        # exit as command already processed in docker
-        sys.exit(0)
+        result = container.wait()
+        container.remove()
+        sys.exit(result["StatusCode"])
 
 
 ###############################################################################
