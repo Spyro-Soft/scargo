@@ -21,9 +21,8 @@ class _TestsTemplate(BaseGen):
         project_path = get_project_root()
         self.output_dir = project_path / "tests"
 
-        # List of files to generate (template_path, output_path)
-        self._gen_file_list = [
-            ("CMakeLists-test.txt.j2", self.output_dir / "CMakeLists.txt"),
+        # List of files to generate once (template_path, output_path)
+        self._gen_once_file_list = [
             ("CMakeLists-ut.txt.j2", self.output_dir / "ut" / "CMakeLists.txt"),
             ("CMakeLists-it.txt.j2", self.output_dir / "it" / "CMakeLists.txt"),
             ("CMakeLists-mocks.txt.j2", self.output_dir / "mocks" / "CMakeLists.txt"),
@@ -35,9 +34,22 @@ class _TestsTemplate(BaseGen):
         if not static_mock_dir.exists():
             copytree(self.tests_template_dir / "static_mock", static_mock_dir)
 
-        for template, output_path in self._gen_file_list:
+        # Update main test cmake on scargo update
+        self.create_file_from_template(
+            "CMakeLists-test.txt.j2",
+            self.output_dir / "CMakeLists.txt",
+            overwrite=True,
+            target=target,
+            tests=tests_config,
+        )
+
+        for template, output_path in self._gen_once_file_list:
             self.create_file_from_template(
-                template, output_path, target=target, tests=tests_config
+                template,
+                output_path,
+                overwrite=False,
+                target=target,
+                tests=tests_config,
             )
 
 
