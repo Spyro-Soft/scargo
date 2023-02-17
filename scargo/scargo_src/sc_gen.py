@@ -128,8 +128,9 @@ def gen_fs_esp32(config: Config) -> None:
 
         shutil.copytree(fs_in_dir, fs_out_dir, dirs_exist_ok=True)
 
+        idf_path = os.environ.get("IDF_PATH")
         command = [
-            "$IDF_PATH/components/spiffs/spiffsgen.py",
+            f"{idf_path}/components/spiffs/spiffsgen.py",
             fs_size,
             fs_out_dir,
             fs_out_bin,
