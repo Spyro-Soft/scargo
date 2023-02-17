@@ -49,7 +49,14 @@ def scargo_publish(repo: str) -> None:
     conan_repo = ["-r", repo] if repo else []
     try:
         subprocess.check_call(
-            ["conan", "upload", f"{project_name}/{version}", *conan_repo, "--all", "--confirm"],
+            [
+                "conan",
+                "upload",
+                f"{project_name}/{version}",
+                *conan_repo,
+                "--all",
+                "--confirm",
+            ],
             cwd=project_path,
         )
     except subprocess.CalledProcessError:

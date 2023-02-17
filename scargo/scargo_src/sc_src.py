@@ -430,7 +430,9 @@ def check_clang_format(config: Config, fix_errors: bool, verbose: bool) -> None:
                     if fix_errors:
                         logger.info("Fixing...")
 
-                        subprocess.check_call(["clang-format", "-style=file", "-i", fname])
+                        subprocess.check_call(
+                            ["clang-format", "-style=file", "-i", fname]
+                        )
 
     if fix_errors:
         logger.info(

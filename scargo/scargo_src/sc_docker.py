@@ -28,7 +28,9 @@ def scargo_docker_build(docker_opts: Sequence) -> None:
     docker_path = _get_docker_path()
 
     try:
-        subprocess.run(["docker-compose", "build", *docker_opts], cwd=docker_path, check=True)
+        subprocess.run(
+            ["docker-compose", "build", *docker_opts], cwd=docker_path, check=True
+        )
         logger.info("Initialize docker environment.")
     except subprocess.CalledProcessError:
         logger.error("Build docker fail.")
@@ -52,7 +54,12 @@ def scargo_docker_run(
     docker_path = _get_docker_path()
     project_config_name = _get_project_config().name
 
-    cmd = ["docker-compose", "run", *docker_opts, f"{project_config_name}_dev"] + command.split()
+    cmd = [
+        "docker-compose",
+        "run",
+        *docker_opts,
+        f"{project_config_name}_dev",
+    ] + command.split()
 
     try:
         subprocess.run(cmd, cwd=docker_path, check=True)

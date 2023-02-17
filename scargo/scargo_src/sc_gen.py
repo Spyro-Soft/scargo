@@ -128,7 +128,12 @@ def gen_fs_esp32(config: Config) -> None:
 
         shutil.copytree(fs_in_dir, fs_out_dir, dirs_exist_ok=True)
 
-        command = ["$IDF_PATH/components/spiffs/spiffsgen.py", fs_size, fs_out_dir, fs_out_bin]
+        command = [
+            "$IDF_PATH/components/spiffs/spiffsgen.py",
+            fs_size,
+            fs_out_dir,
+            fs_out_bin,
+        ]
 
         subprocess.check_call(command, cwd=project_path)
         logger.info("Generated %s of size:%s", fs_out_bin, fs_size)

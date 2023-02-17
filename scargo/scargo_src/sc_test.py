@@ -72,7 +72,7 @@ def run_ut(config: Config, verbose: bool, cwd: Path) -> None:
         gcov_executable = config.tests.gcov_executable
 
         if gcov_executable != "":
-            cmd.extend(['--gcov-executable', gcov_executable])
+            cmd.extend(["--gcov-executable", gcov_executable])
 
         subprocess.check_call(cmd, cwd=cwd)
     except subprocess.CalledProcessError:
@@ -94,12 +94,21 @@ def run_it(config: Config, verbose: bool):
     # throw exception.
 
     # Run code coverage.
-    cmd = ["gcovr", "-r", "it", ".", "--txt", "it-coverage.txt", "--html", "it-coverage.html"]
+    cmd = [
+        "gcovr",
+        "-r",
+        "it",
+        ".",
+        "--txt",
+        "it-coverage.txt",
+        "--html",
+        "it-coverage.html",
+    ]
 
     gcov_executable = config.tests.gcov_executable
 
     if gcov_executable != "":
-        cmd.extend(['--gcov-executable', gcov_executable])
+        cmd.extend(["--gcov-executable", gcov_executable])
 
     subprocess.check_call(cmd)
     subprocess.check_call("cat it-coverage.txt", shell=True)
