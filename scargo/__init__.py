@@ -173,9 +173,13 @@ def flash(
     flash_profile: str = Option(
         "Debug", "--profile", help="Flash base on previously built profile"
     ),
+    port: Optional[str] = Option(
+        None,
+        help="port where the target device of the command is connected to, e.g. /dev/ttyUSB0",
+    ),
 ):
     """Flash the target (only available for esp32 for now)."""
-    scargo_flash(app, file_system, flash_profile)
+    scargo_flash(app, file_system, flash_profile, port)
 
 
 ###############################################################################
