@@ -18,7 +18,7 @@ scargo can:
 - Work with the predefined docker environment depending on the chosen architecture
 
 # Installation
-Scargo is available on [pypi](https://pypi.org/project/scargo/) so you can install it with pip: 
+Scargo is available on [pypi](https://pypi.org/project/scargo/), so you can install it with pip: 
 
 ```pip install scargo```
 
