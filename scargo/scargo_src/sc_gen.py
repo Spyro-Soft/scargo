@@ -128,9 +128,9 @@ def gen_fs_esp32(config: Config) -> None:
 
         shutil.copytree(fs_in_dir, fs_out_dir, dirs_exist_ok=True)
 
-        command = f"$IDF_PATH/components/spiffs/spiffsgen.py {fs_size} {fs_out_dir} {fs_out_bin}"
+        command = ["$IDF_PATH/components/spiffs/spiffsgen.py", fs_size, fs_out_dir, fs_out_bin]
 
-        subprocess.check_call(command, shell=True, cwd=project_path)
+        subprocess.check_call(command, cwd=project_path)
         logger.info("Generated %s of size:%s", fs_out_bin, fs_size)
 
     except subprocess.CalledProcessError:
@@ -179,11 +179,10 @@ def gen_single_binary_esp32(project_profile_path: Path, config: Config):
 
     if spiffs_addr:
         command.extend([spiffs_addr, "build/spiffs.bin"])
-    cmd = " ".join(command)
 
     try:
-        logger.info("Running: %s", cmd)
-        subprocess.check_call(cmd, shell=True, cwd=get_project_root())
+        logger.info("Running: %s", " ".join(command))
+        subprocess.check_call(command, cwd=get_project_root())
     except subprocess.CalledProcessError:
         logger.error("Generation of single binary failed")
         sys.exit(1)
