@@ -15,6 +15,7 @@ class Config(BaseModel):
     project: "ProjectConfig"
     profiles: Dict[str, "ProfileConfig"] = Field(..., alias="profile")
     check: "ChecksConfig"
+    doc: "DocConfig" = Field(default_factory=lambda: DocConfig())
     tests: "TestConfig"
     dependencies: "Dependencies"
     conan: "ConanConfig"
@@ -118,6 +119,10 @@ class ChecksConfig(BaseModel):
 
 class CheckConfig(BaseModel):
     description: Optional[str]
+    exclude: List[str] = Field(default_factory=list)
+
+
+class DocConfig(BaseModel):
     exclude: List[str] = Field(default_factory=list)
 
 
