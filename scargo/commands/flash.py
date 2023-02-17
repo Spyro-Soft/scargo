@@ -5,6 +5,7 @@
 import subprocess
 import sys
 from pathlib import Path
+from typing import Optional
 
 from scargo.config import Config
 from scargo.config_utils import prepare_config
@@ -12,21 +13,30 @@ from scargo.logger import get_logger
 from scargo.path_utils import get_project_root
 
 
-def scargo_flash(app: bool, fs: bool, flash_profile: str) -> None:
+def scargo_flash(
+    app: bool, fs: bool, flash_profile: str, port: Optional[str] = None
+) -> None:
     config = prepare_config()
     target = config.project.target
+    logger = get_logger()
 
+
+    if port and target.family != "esp32":
+        logger.warning("--port option is only supported for esp32 projects.")
     if target.family == "esp32":
-        flash_esp32(config, app=app, fs=fs, flash_profile=flash_profile)
+        flash_esp32(config, app=app, fs=fs, flash_profile=flash_profile, port=port)
     elif target.family == "stm32":
         flash_stm32(config, flash_profile)
     else:
-        logger = get_logger()
         logger.error("Flash command not supported for this target yet.")
 
 
 def flash_esp32(
-    config: Config, app: bool, fs: bool, flash_profile: str = "Debug"
+    config: Config,
+    app: bool,
+    fs: bool,
+    flash_profile: str = "Debug",
+    port: Optional[str]=None,
 ) -> None:
     project_path = get_project_root()
     out_dir = project_path / "build" / flash_profile
@@ -42,6 +52,8 @@ def flash_esp32(
                 "--partition-name=ota_0",
                 f"--input={app_path}",
             ]
+            if port:
+                command.append(f"--port={port}")
             subprocess.check_call(command, cwd=project_path)
         elif fs:
             fs_path = Path("build") / "spiffs.bin"
@@ -51,6 +63,8 @@ def flash_esp32(
                 "--partition-name=spiffs",
                 f"--input={fs_path}",
             ]
+            if port:
+                command.append(f"--port={port}")
             subprocess.check_call(command, cwd=project_path)
         else:
             command = ["esptool.py", "--chip", target.id, "write_flash", "@flash_args"]
