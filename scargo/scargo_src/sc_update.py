@@ -20,7 +20,7 @@ from scargo.scargo_src.global_values import (
     SCARGO_LOCK_FILE,
     SCARGO_PGK_PATH,
 )
-from scargo.scargo_src.sc_docker import scargo_docker
+from scargo.scargo_src.sc_docker import scargo_docker_build
 from scargo.scargo_src.sc_logger import get_logger
 from scargo.scargo_src.sc_src import check_scargo_version, get_scargo_config_or_exit
 from scargo.scargo_src.utils import get_project_root
@@ -101,6 +101,6 @@ def scargo_update(config_file_path: Path) -> None:
 
     if project_config.build_env == SCARGO_DOCKER_ENV:
         if not Path(project_path, ".dockerenv").exists():
-            scargo_docker(build_docker=True)
+            scargo_docker_build([])
         else:
             logger.warning("Cannot run docker inside docker")

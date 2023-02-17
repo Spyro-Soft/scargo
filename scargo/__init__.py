@@ -16,7 +16,11 @@ from scargo.scargo_src.sc_clean import scargo_clean
 from scargo.scargo_src.sc_config import ScargoTargets, Target
 from scargo.scargo_src.sc_debug import scargo_debug
 from scargo.scargo_src.sc_doc import scargo_doc
-from scargo.scargo_src.sc_docker import scargo_docker
+from scargo.scargo_src.sc_docker import (
+    scargo_docker_build,
+    scargo_docker_exec,
+    scargo_docker_run,
+)
 from scargo.scargo_src.sc_fix import scargo_fix
 from scargo.scargo_src.sc_flash import scargo_flash
 from scargo.scargo_src.sc_gen import scargo_gen
@@ -113,15 +117,24 @@ docker = Typer(help="Manage the docker environment for the project")
 )
 def docker_build(ctx: Context):
     """Build docker layers for this project depending on the target"""
-    scargo_docker(build_docker=True, docker_opts=ctx.args)
+    scargo_docker_build(ctx.args)
 
 
 @docker.command(
     "run", context_settings={"allow_extra_args": True, "ignore_unknown_options": True}
 )
-def docker_run(ctx: Context):
+def docker_run(
+    ctx: Context,
+    command: str = Option(
+        "bash",
+        "-c",
+        "--command",
+        metavar="COMMAND",
+        help="Select command to be used with docker run.",
+    ),
+):
     """Run project in docker environment"""
-    scargo_docker(run_docker=True, docker_opts=ctx.args)
+    scargo_docker_run(docker_opts=ctx.args, command=command)
 
 
 @docker.command(
@@ -129,7 +142,7 @@ def docker_run(ctx: Context):
 )
 def docker_exec(ctx: Context):
     """Attach to existing docker environment"""
-    scargo_docker(exec_docker=True, docker_opts=ctx.args)
+    scargo_docker_exec(ctx.args)
 
 
 cli.add_typer(docker, name="docker")
