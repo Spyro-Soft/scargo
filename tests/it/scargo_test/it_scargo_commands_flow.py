@@ -90,7 +90,6 @@ def new_project_stm32():
 
 @pytest.fixture()
 def copy_project_x86():
-
     copytree(pytest.predefined_test_project_path, os.getcwd(), dirs_exist_ok=True)
     project_path = get_project_root()
     docker_path = Path(project_path, ".devcontainer")
@@ -99,7 +98,6 @@ def copy_project_x86():
 
 @pytest.fixture()
 def copy_project_esp32():
-
     copytree(pytest.predefined_test_project_esp32_path, os.getcwd(), dirs_exist_ok=True)
     project_path = get_project_root()
     docker_path = Path(project_path, ".devcontainer")
@@ -108,7 +106,6 @@ def copy_project_esp32():
 
 @pytest.fixture()
 def copy_project_stm32():
-
     copytree(pytest.predefined_test_project_stm32_path, os.getcwd(), dirs_exist_ok=True)
     project_path = get_project_root()
     docker_path = Path(project_path, ".devcontainer")
