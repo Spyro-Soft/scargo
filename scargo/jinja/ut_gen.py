@@ -23,7 +23,7 @@ class HeaderDescriptor:
     to generate unit tests.
     """
 
-    def __init__(self, name, includes, classes, namespaces):
+    def __init__(self, name: str, includes: List[str], classes: List[str], namespaces: List[str]) -> None:
         self.name = name
         self.includes = includes
         self.classes = classes
@@ -39,7 +39,7 @@ class _UnitTestsGen(BaseGen):
         self._project_path = get_project_root()
         self._ut_dir = self._project_path / "tests/ut"
 
-    def generate_tests(self, input_path: Path, overwrite: bool):
+    def generate_tests(self, input_path: Path, overwrite: bool) -> None:
         """Generates unit test files and corresponding cmake file
 
         :param Path input_path: Path to src file or src directory
@@ -61,7 +61,7 @@ class _UnitTestsGen(BaseGen):
 
     def _generate_unit_test(
         self, input_file_path: Path, output_file_path: Path, overwrite: bool
-    ):
+    ) -> None:
         """Generates unit test source file
 
         :param Path input_file_path: Path to src file
@@ -72,11 +72,11 @@ class _UnitTestsGen(BaseGen):
         self.create_file_from_template(
             "ut.cpp.j2",
             output_file_path,
-            overwrite,
-            header=header_descriptor,
+            overwrite=overwrite,
+            template_params={"header": header_descriptor},
         )
 
-    def _generate_cmake(self, src_dir_path: Path, ut_dir_path: Path):
+    def _generate_cmake(self, src_dir_path: Path, ut_dir_path: Path) -> None:
         """Generate CMakeLists for unit tests
 
         :param Path src_dir_path: Source directory for which tests are being generated
@@ -106,9 +106,11 @@ class _UnitTestsGen(BaseGen):
             "CMakeLists.txt.j2",
             ut_dir_path / "CMakeLists.txt",
             overwrite=True,
-            src_files=src_files,
-            utest_name=ut_name,
-            ut_files=ut_files,
+            template_params={
+                "src_files": src_files,
+                "utest_name": ut_name,
+                "ut_files": ut_files,
+            },
         )
 
     def _get_unit_test_path(self, input_src_path: Path) -> Path:
@@ -136,13 +138,13 @@ class _UnitTestsGen(BaseGen):
         return "_".join(relative_path.parts)
 
     @staticmethod
-    def _get_namespace(line):
+    def _get_namespace(line: str) -> str:
         if line.startswith("namespace"):
             namespace = line.split(" ")[1]
         elif line.startswith("using namespace"):
             namespace = line.split(" ")[2]
         else:
-            raise "No 'namespace' found in line: '{0}'".format(line)
+            raise ValueError(f"No 'namespace' found in line: '{line}'")
 
         last_char = namespace[-1]
         if last_char == "{" or last_char == ";":
@@ -173,13 +175,13 @@ class _UnitTestsGen(BaseGen):
                     class_name = "".join([w.capitalize() for w in header_path.stem])
                     classes.append(class_name)
 
-        return HeaderDescriptor(header_path, namespaces, classes, includes)
+        return HeaderDescriptor(str(header_path), namespaces, classes, includes)
 
     @staticmethod
     def _get_paths_with_ext(workdir: Path, extensions: Sequence[str]) -> List[Path]:
         return [child for child in workdir.iterdir() if child.suffix in extensions]
 
 
-def generate_ut(input_path: Path, config: Config, force=False):
+def generate_ut(input_path: Path, config: Config, force: bool = False) -> None:
     ut_gen = _UnitTestsGen(config)
     ut_gen.generate_tests(input_path, force)

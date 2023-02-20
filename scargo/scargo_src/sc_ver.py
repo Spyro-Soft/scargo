@@ -6,5 +6,5 @@
 from scargo import __version__ as ver
 
 
-def scargo_version():
+def scargo_version() -> None:
     print(f"scargo version: {ver}")

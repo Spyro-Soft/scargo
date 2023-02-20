@@ -7,7 +7,7 @@ import os
 import subprocess
 import sys
 from pathlib import Path
-from typing import Optional, Tuple
+from typing import Optional, Tuple, List
 
 import docker as dock
 import tomlkit
@@ -127,7 +127,7 @@ def add_version_to_scargo_lock() -> None:
 ###############################################################################
 
 
-def get_docker_files_from_scargo_pkg(directory: Path, target: Target) -> list:
+def get_docker_files_from_scargo_pkg(directory: Path, target: Target) -> List[str]:
     """
     Copy docker file from scargo pkg
 

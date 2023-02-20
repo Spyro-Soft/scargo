@@ -3,7 +3,7 @@
 # #
 from enum import Enum
 from pathlib import Path
-from typing import Dict, List, Optional
+from typing import Dict, List, Optional, Any
 
 import toml
 from pydantic import BaseModel, Extra, Field
@@ -58,7 +58,7 @@ class Target(BaseModel):
     cxx: str
 
     @classmethod
-    def get_target_by_id(cls, target_id):
+    def get_target_by_id(cls, target_id: str) -> "Target":
         return TARGETS[target_id]
 
 
@@ -99,7 +99,7 @@ class ProfileConfig(BaseModel, extra=Extra.allow):
     cxxflags: Optional[str]
 
     @property
-    def extras(self):
+    def extras(self) -> Dict[str, Any]:
         return {
             key: value
             for key, value in dict(self).items()
@@ -136,7 +136,7 @@ class TestConfig(BaseModel, extra=Extra.allow):
     gcov_executable: str = Field(..., alias="gcov-executable")
 
     @property
-    def extras(self):
+    def extras(self) -> Dict[str, Any]:
         return {
             key: value
             for key, value in dict(self).items()

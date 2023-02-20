@@ -2,13 +2,17 @@
 # @copyright Copyright (C) 2023 SpyroSoft Solutions S.A. All rights reserved.
 # #
 import os
+from pathlib import Path
+from typing import List, Union
+
+from jinja2 import Environment
 
 COPYRIGHT = """# #
 # Copyright (C) 2022 Spyrosoft Solutions. All rights reserved.
 # #\n\n"""
 
 
-def pop_and_add_subdirs(mock_folder):
+def pop_and_add_subdirs(mock_folder: List[str]) -> None:
     """pop_and_add_subdirs
 
     Args:
@@ -36,7 +40,7 @@ def pop_and_add_subdirs(mock_folder):
         pass
 
 
-def add_subdirs_to_cmake(mock_root):
+def add_subdirs_to_cmake(mock_root: Union[Path, str]) -> None:
     """This function takes as input a path to mocks and a path to root.
     Then it creates a list of root directories where the index of "src"
     directory is found. The "start_path" is created which is a path of
@@ -81,7 +85,7 @@ def add_subdirs_to_cmake(mock_root):
         pass
 
 
-def create_cmake_lists(mock_root, jinja_env):
+def create_cmake_lists(mock_root: str, jinja_env: Environment) -> None:
     """This function copies a CMakeLists file from template folder to mock"""
 
     name = "mock_" + str(os.path.normpath(mock_root).split(os.path.sep)[-1])

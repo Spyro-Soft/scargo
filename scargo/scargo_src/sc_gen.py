@@ -29,7 +29,7 @@ def scargo_gen(
     certs: Optional[str],
     fs: bool,
     single_bin: bool,
-):
+) -> None:
     config = prepare_config()
 
     if gen_ut:
@@ -48,7 +48,7 @@ def scargo_gen(
         gen_single_binary(project_profile_path, config)
 
 
-def generate_certs(device_name):
+def generate_certs(device_name: str) -> None:
     project_path = get_project_root()
 
     in_certs_dir = Path(SCARGO_PGK_PATH, "certs")
@@ -99,7 +99,7 @@ def generate_fs(config: Config) -> None:
         logger.warning("Gen --fs command not supported for this target yet.")
 
 
-def gen_single_binary(project_profile_path: Path, config: Config):
+def gen_single_binary(project_profile_path: Path, config: Config) -> None:
     target = config.project.target
     if target.family == "esp32":
         gen_single_binary_esp32(project_profile_path, config)
@@ -142,7 +142,7 @@ def gen_fs_esp32(config: Config) -> None:
         sys.exit(1)
 
 
-def gen_single_binary_esp32(project_profile_path: Path, config: Config):
+def gen_single_binary_esp32(project_profile_path: Path, config: Config) -> None:
     logger = get_logger()
     esp32_config = config.esp32
     if not esp32_config:

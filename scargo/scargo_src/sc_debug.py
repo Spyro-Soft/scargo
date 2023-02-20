@@ -49,16 +49,16 @@ class _ScargoDebug:
                 )
                 sys.exit(1)
 
-    def run_debugger(self):
+    def run_debugger(self) -> None:
         if self._target.family == "x86":
             self._debug_x86()
         elif self._target.family == "stm32":
             self._debug_stm32()
 
-    def _debug_x86(self):
+    def _debug_x86(self) -> None:
         subprocess.run(f"gdb {self._bin_path}", shell=True)
 
-    def _debug_stm32(self):
+    def _debug_stm32(self) -> None:
         openocd_path = find_program_path("openocd")
         if not openocd_path:
             self._logger.error("Could not find openocd.")
@@ -98,7 +98,7 @@ class _ScargoDebug:
         return bin_path
 
 
-def scargo_debug(bin_path: Optional[Path]):
+def scargo_debug(bin_path: Optional[Path]) -> None:
     config = prepare_config()
     sc_debug = _ScargoDebug(config, bin_path)
     sc_debug.run_debugger()
