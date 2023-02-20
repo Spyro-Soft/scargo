@@ -5,6 +5,7 @@
 """Update project"""
 import shutil
 import subprocess
+import sys
 from pathlib import Path
 
 from scargo import __version__ as ver
@@ -79,6 +80,10 @@ def scargo_update(config_file_path: Path) -> None:
     generate_conanfile(config)
 
     if target.family == "esp32":
+        esp32_config = config.esp32
+        if not esp32_config:
+            logger.error("No [esp32] in scargo config!")
+            sys.exit(1)
         Path(target.source_dir, "fs").mkdir(parents=True, exist_ok=True)
         with open(Path(project_path, "version.txt"), "w", encoding="utf-8") as out:
             out.write(project_config.version)
@@ -86,7 +91,7 @@ def scargo_update(config_file_path: Path) -> None:
             out.write(
                 "# ESP-IDF Partition Table\n# Name,   Type, SubType, Offset,  Size, Flags\n"
             )
-            partitions = config.esp32.partitions
+            partitions = esp32_config.partitions
             for line in partitions:
                 out.write(line + "\n")
             out.write("\n")

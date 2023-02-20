@@ -28,14 +28,20 @@ class _ScargoDebug:
             )
             sys.exit(1)
 
-        self._bin_path = bin_path or self._get_bin_path(config.project.bin_name)
+        bin_name = config.project.bin_name
+        if not bin_name:
+            self._logger.error("No bin_name in config")
+            sys.exit(1)
+        self._bin_path = bin_path or self._get_bin_path(bin_name)
         if not self._bin_path.exists():
             self._logger.error("Binary %s does not exist", self._bin_path)
             self._logger.info("Did you run scargo build --profile Debug?")
             sys.exit(1)
 
         if self._target.family == "stm32":
-            self._chip = config.stm32.chip
+            stm32_config = config.stm32
+            if stm32_config:
+                self._chip = stm32_config.chip
             if not self._chip:
                 self._logger.error("Chip label not defined in toml.")
                 self._logger.info(

@@ -23,7 +23,7 @@ OUT_FS_DIR = os.path.join("build", "fs")
 
 
 def scargo_gen(
-    project_profile_path: Optional[Path],
+    project_profile_path: Path,
     gen_ut: Optional[Path],
     gen_mock: Optional[Path],
     certs: Optional[str],
@@ -111,7 +111,11 @@ def gen_single_binary(project_profile_path: Path, config: Config):
 def gen_fs_esp32(config: Config) -> None:
     command = ""
     logger = get_logger()
-    partition_list = config.esp32.partitions
+    esp32_config = config.esp32
+    if not esp32_config:
+        logger.error("No [esp32] in scargo config!")
+        sys.exit(1)
+    partition_list = esp32_config.partitions
     fs_size = 0
     for i in partition_list:
         split_list = i.split(",")
@@ -139,12 +143,16 @@ def gen_fs_esp32(config: Config) -> None:
 
 
 def gen_single_binary_esp32(project_profile_path: Path, config: Config):
-    partition_list = config.esp32.partitions
+    logger = get_logger()
+    esp32_config = config.esp32
+    if not esp32_config:
+        logger.error("No [esp32] section in config!")
+        return
+    partition_list = esp32_config.partitions
     target = config.project.target
 
     flasher_args_path = project_profile_path / "flash_args"
     if not flasher_args_path.is_file():
-        logger = get_logger()
         logger.warning("%s does not exists", flasher_args_path)
         sys.exit(1)
 
@@ -175,7 +183,6 @@ def gen_single_binary_esp32(project_profile_path: Path, config: Config):
         f"{flash_size}",
     ]
     command.extend(line_list)
-    logger = get_logger()
 
     if spiffs_addr:
         command.extend([spiffs_addr, "build/spiffs.bin"])

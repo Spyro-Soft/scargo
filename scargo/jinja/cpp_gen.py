@@ -22,7 +22,7 @@ class _CppTemplateGen(BaseGen):
     def _set_src_dir(self, target: Target):
         self._src_dir = get_project_root() / target.source_dir
 
-    def _generate_bin(self, target: str, bin_name: str):
+    def _generate_bin(self, target: Target, bin_name: str):
         """Function which creates main.cpp file using jinja"""
         self.create_file_from_template(
             "main.cpp.j2",

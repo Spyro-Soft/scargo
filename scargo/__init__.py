@@ -306,8 +306,8 @@ def test(verbose: bool = Option(False, "--verbose", "-v", help="Verbose mode."))
 
 @cli.command()
 def update(
-    config_file_path: Path = Option(
-        SCARGO_DEFAULT_CONFIG_FILE,
+    config_file_path: Optional[Path] = Option(
+        None,
         "--config-file",
         "-c",
         exists=True,
@@ -315,8 +315,14 @@ def update(
         help="Path to .toml configuration file.",
     ),
 ):
+    logger = get_logger()
+    if config_file_path is None:
+        config_file_path = get_config_file_path(SCARGO_DEFAULT_CONFIG_FILE)
+        if not config_file_path:
+            logger.error("Config file not found.")
+        sys.exit(1)
     """Read .toml config file and generate `CMakeLists.txt`."""
-    scargo_update(get_config_file_path(config_file_path))
+    scargo_update(config_file_path)
 
 
 ###############################################################################

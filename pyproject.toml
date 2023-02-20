@@ -91,3 +91,11 @@ exclude = [
     "ci/",
     "docs/",
 ]
+
+[[tool.mypy.overrides]]
+module = "coloredlogs"
+ignore_missing_imports = true
+
+[[tool.mypy.overrides]]
+module = "docker"
+ignore_missing_imports = true

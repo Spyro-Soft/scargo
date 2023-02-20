@@ -56,7 +56,7 @@ class _UnitTestsGen(BaseGen):
             for hdr in headers:
                 ut_path = self._get_unit_test_path(hdr)
                 self._generate_unit_test(hdr, ut_path, overwrite)
-            if headers:
+            if ut_path:
                 self._generate_cmake(input_path, ut_path.parent)
 
     def _generate_unit_test(
@@ -128,7 +128,7 @@ class _UnitTestsGen(BaseGen):
     def _get_cmake_tests_name(self, test_dir_path: Path) -> str:
         """Get tests name for cmake
 
-        :param Path test_file_path: Path to test dir
+        :param Path test_dir_path: Path to test dir
         :return str: tests name for cmake
         """
         test_dir_path = test_dir_path.absolute()
@@ -167,7 +167,8 @@ class _UnitTestsGen(BaseGen):
                 elif line.startswith("class"):
                     class_regex = re.compile(r"^([a-z]+)(\s[a-zA-Z\d]+)")
                     temp = class_regex.search(line)
-                    classes.append(temp.group(2).lstrip())
+                    if temp:
+                        classes.append(temp.group(2).lstrip())
                 elif line.startswith('extern "C"'):
                     class_name = "".join([w.capitalize() for w in header_path.stem])
                     classes.append(class_name)

@@ -6,7 +6,7 @@
 import subprocess
 import sys
 from pathlib import Path
-from typing import Sequence
+from typing import Sequence, Optional, List
 
 import docker
 
@@ -38,7 +38,7 @@ def scargo_docker_build(docker_opts: Sequence) -> None:
 
 def scargo_docker_run(
     docker_opts: Sequence,
-    command: str = None,
+    command: Optional[str] = None,
 ) -> None:
     """
     Run docker
@@ -67,7 +67,7 @@ def scargo_docker_run(
         sys.exit(1)
 
 
-def scargo_docker_exec(docker_opts: Sequence):
+def scargo_docker_exec(docker_opts: List[str]):
     """
     Exec docker
 

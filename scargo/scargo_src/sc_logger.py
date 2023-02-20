@@ -8,7 +8,7 @@ import coloredlogs
 
 from scargo.scargo_src.global_values import SCARGO_LOCK_FILE
 from scargo.scargo_src.sc_config import parse_config
-from scargo.scargo_src.utils import get_config_file_path, get_project_root
+from scargo.scargo_src.utils import get_config_file_path, get_project_root_or_none
 
 
 def __get_logging_config():
@@ -41,7 +41,7 @@ def get_logger(name="scargo"):
     stream_handler.setFormatter(stream_formatter)
     logger.addHandler(stream_handler)
 
-    project_root = get_project_root()
+    project_root = get_project_root_or_none()
     if project_root:
         log_path = project_root / "{}.log".format(name)
         file_handler = logging.FileHandler(log_path)

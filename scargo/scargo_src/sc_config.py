@@ -89,7 +89,7 @@ TARGETS = {
 
 
 # for typer
-ScargoTargets = Enum(
+ScargoTargets = Enum(  # type: ignore[misc]
     "ScargoTargets", {target.id: target.id for target in TARGETS.values()}
 )
 
