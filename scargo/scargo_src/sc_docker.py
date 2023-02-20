@@ -59,7 +59,9 @@ def scargo_docker_run(
         "run",
         *docker_opts,
         f"{project_config_name}_dev",
-    ] + command.split()
+    ]
+    if command:
+        cmd.extend(command.split())
 
     try:
         subprocess.run(cmd, cwd=docker_path, check=True)
