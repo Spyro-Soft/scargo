@@ -33,7 +33,10 @@ class _ScargoGenDoc:
         """Update Doxyfile configuration according specified values"""
         project_name = self._config.project.name
         project_path = Path(Path().absolute())
-        exclude = " ".join([f"{project_path}/{dir}" for dir in self.EXCLUDE_LIST])
+        exclude = " ".join(
+            f"{project_path}/{dir}"
+            for dir in self.EXCLUDE_LIST + self._config.doc.exclude
+        )
 
         doxy_values = {
             "PROJECT_NAME": f'"{project_name}"',
