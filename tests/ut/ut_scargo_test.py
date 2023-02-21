@@ -2,24 +2,28 @@ import shutil
 from pathlib import Path
 
 import pytest
+from pytest_subprocess import FakeProcess
 
+from scargo.scargo_src.sc_config import Config
 from scargo.scargo_src.sc_test import scargo_test
 from scargo.scargo_src.utils import get_project_root
 
 
-def test_scargo_test_no_test_dir(create_new_project):
+def test_scargo_test_no_test_dir(create_new_project: None) -> None:
     shutil.rmtree("tests")
     with pytest.raises(SystemExit):
         scargo_test(False)
 
 
-def test_scargo_test_no_cmake_file(create_new_project, caplog, get_lock_file):
+def test_scargo_test_no_cmake_file(
+    create_new_project: None, caplog: pytest.LogCaptureFixture, get_lock_file: Config
+) -> None:
     Path("tests/CMakeLists.txt").unlink()
     with pytest.raises(SystemExit):
         scargo_test(False)
 
 
-def test_scargo_test(create_new_project, fp):
+def test_scargo_test(create_new_project: None, fp: FakeProcess) -> None:
     project_root = get_project_root()
     tests_src_dir = project_root / "tests"
     test_build_dir = project_root / "build/tests"

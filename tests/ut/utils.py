@@ -1,5 +1,6 @@
 from pathlib import Path
-from unittest.mock import patch
+from typing import Generator
+from unittest.mock import patch, MagicMock
 
 import pytest
 
@@ -7,7 +8,7 @@ from scargo.scargo_src.sc_config import Config, parse_config
 
 
 @pytest.fixture
-def mock_subprocess_run():
+def mock_subprocess_run() -> Generator[MagicMock, None, None]:
     with patch("subprocess.run") as mock_subprocess_run:
         yield mock_subprocess_run
 
