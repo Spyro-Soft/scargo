@@ -2,8 +2,11 @@
 # @copyright Copyright (C) 2023 SpyroSoft Solutions S.A. All rights reserved.
 # #
 
+import os
+import shutil
 from pathlib import Path
 
+from scargo import __version__
 from scargo.jinja.base_gen import BaseGen
 from scargo.scargo_src.global_values import SCARGO_PGK_PATH
 from scargo.scargo_src.sc_config import ProjectConfig
@@ -30,7 +33,7 @@ class _DockerComposeTemplate(BaseGen):
             self._gen_file_list.extend([("stm32.cfg.j2", docker_path / "stm32.cfg")])
         self.project_config = project_config
 
-    def generate_docker_env(self, scargo_version: str):
+    def generate_docker_env(self):
         """Generate dirs and files"""
         custom_docker = ""
         self.create_file_from_template(
@@ -49,18 +52,26 @@ class _DockerComposeTemplate(BaseGen):
             "Custom docker file path: %s", custom_docker_path.relative_to(project_root)
         )
 
+        scargo_package_version = self._set_up_package_version()
+
         for template, output_path in self._gen_file_list:
             self.create_file_from_template(
                 template,
                 output_path,
                 project=self.project_config,
-                scargo_version=scargo_version,
+                scargo_package_version=scargo_package_version,
                 custom_docker=custom_docker,
             )
 
+    def _set_up_package_version(self) -> str:
+        if whl_path := os.getenv("SCARGO_DOCKER_INSTALL_LOCAL"):
+            repo_root = Path(__file__).parent.parent.parent
+            whl_path = repo_root / whl_path
+            shutil.copy(repo_root / whl_path, self.docker_path)
+            return whl_path.name
+        return "scargo=={__version__}"
 
-def generate_docker_compose(
-    docker_path: Path, project_config: ProjectConfig, scargo_version: str
-):
+
+def generate_docker_compose(docker_path: Path, project_config: ProjectConfig):
     docker_compose_template = _DockerComposeTemplate(project_config, docker_path)
-    docker_compose_template.generate_docker_env(scargo_version)
+    docker_compose_template.generate_docker_env()

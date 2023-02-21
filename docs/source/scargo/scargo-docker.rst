@@ -11,7 +11,7 @@ Usage
 
 Description
 ^^^^^^^^^^^
-Manage docker environment.
+Manage docker environment. For a list of supported OPTIONS please refer to official docker documentation of corresponding SUBCOMMAND.
 
 Subcommands
 ^^^^^^^^^^^
@@ -21,14 +21,20 @@ Subcommands
 
 Build the docker environment for the chosen architecture
 
-Use the option ``--no-cache`` if you want to fully clean the cache and build images from scratch.
-WARNING: This option can be time-consuming.
-
 ::
 
     run
 
 Run the docker environment bash console for this project architecture
+
+Options
+^^^^^^^
+
+-c, --command "TEXT"
+
+[default: bash]
+
+Quoted text, used to select command which will be executed with `docker run`
 
 ::
 
@@ -46,7 +52,7 @@ Command:
 **Effects:**
 
 ::
-    
+
     $ docker images
 
 
@@ -54,7 +60,7 @@ User dockerfile extension
 ^^^^^^^^^^^^^^^^^^^^^^^^^
 The user can add a layer to the existing project docker setup. User can point to the folder where the dockerfile exist and it will be built as a custom layer in the project docker environment.
 
-To do that user should set a relative path to the project folder of *docker_context* parameter in scargo.toml file where the custom Dockerfile is located. E.g. setup can be found below: 
+To do that user should set a relative path to the project folder of *docker_context* parameter in scargo.toml file where the custom Dockerfile is located. E.g. setup can be found below:
 ::
 
     docker-file = ".devcontainer/Dockerfile-custom"
@@ -62,17 +68,17 @@ To do that user should set a relative path to the project folder of *docker_cont
 
 IMPORTANT: The custom layer should be a single file and *must not* start with the following lines to properly link with previously build base layers:
 ::
-  
+
     FROM <docker origin image>
 
 To apply the changes please use
 ::
 
     scargo update
-    
+
 Adding display handling to the docker
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-To add display handling to the docker firstly in scargo.toml add .devcontainer/docker-compose.yaml path to 
+To add display handling to the docker firstly in scargo.toml add .devcontainer/docker-compose.yaml path to
 as follow:
 ::
 
@@ -80,7 +86,7 @@ as follow:
     ".devcontainer/docker-compose.yaml"
     ]
 
-Then modify ".devcontainer/docker-compose.yaml as presented below: 
+Then modify ".devcontainer/docker-compose.yaml as presented below:
 ::
 
     volumes:

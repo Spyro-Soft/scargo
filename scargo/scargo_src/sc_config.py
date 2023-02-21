@@ -15,6 +15,7 @@ class Config(BaseModel):
     project: "ProjectConfig"
     profiles: Dict[str, "ProfileConfig"] = Field(..., alias="profile")
     check: "ChecksConfig"
+    doc: "DocConfig" = Field(default_factory=lambda: DocConfig())
     tests: "TestConfig"
     dependencies: "Dependencies"
     conan: "ConanConfig"
@@ -121,7 +122,11 @@ class CheckConfig(BaseModel):
     exclude: List[str] = Field(default_factory=list)
 
 
-class TestConfig(BaseModel):
+class DocConfig(BaseModel):
+    exclude: List[str] = Field(default_factory=list)
+
+
+class TestConfig(BaseModel, extra=Extra.allow):
     cc: str
     cxx: str
 
@@ -129,6 +134,14 @@ class TestConfig(BaseModel):
     cxxflags: str
 
     gcov_executable: str = Field(..., alias="gcov-executable")
+
+    @property
+    def extras(self):
+        return {
+            key: value
+            for key, value in dict(self).items()
+            if key not in self.__fields__
+        }
 
 
 class Dependencies(BaseModel):

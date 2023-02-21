@@ -5,9 +5,9 @@ import sys
 from pathlib import Path
 from typing import List, Optional
 
-from typer import Argument, Option, Typer
+from typer import Argument, Context, Option, Typer
 
-__version__ = "1.0.4"
+__version__ = "1.0.5"
 
 from scargo.scargo_src.global_values import DESCRIPTION, SCARGO_DEFAULT_CONFIG_FILE
 from scargo.scargo_src.sc_build import scargo_build
@@ -16,7 +16,11 @@ from scargo.scargo_src.sc_clean import scargo_clean
 from scargo.scargo_src.sc_config import ScargoTargets, Target
 from scargo.scargo_src.sc_debug import scargo_debug
 from scargo.scargo_src.sc_doc import scargo_doc
-from scargo.scargo_src.sc_docker import scargo_docker
+from scargo.scargo_src.sc_docker import (
+    scargo_docker_build,
+    scargo_docker_exec,
+    scargo_docker_run,
+)
 from scargo.scargo_src.sc_fix import scargo_fix
 from scargo.scargo_src.sc_flash import scargo_flash
 from scargo.scargo_src.sc_gen import scargo_gen
@@ -108,26 +112,37 @@ def doc(open_doc: bool = Option(False, "--open", help="Open html documentation")
 docker = Typer(help="Manage the docker environment for the project")
 
 
-@docker.command("build")
-def docker_build(
-    no_cache: bool = Option(
-        False, "--no-cache", help="Do not use cache when building the docker image"
+@docker.command(
+    "build", context_settings={"allow_extra_args": True, "ignore_unknown_options": True}
+)
+def docker_build(ctx: Context):
+    """Build docker layers for this project depending on the target"""
+    scargo_docker_build(ctx.args)
+
+
+@docker.command(
+    "run", context_settings={"allow_extra_args": True, "ignore_unknown_options": True}
+)
+def docker_run(
+    ctx: Context,
+    command: str = Option(
+        "bash",
+        "-c",
+        "--command",
+        metavar="COMMAND",
+        help="Select command to be used with docker run.",
     ),
 ):
-    """Build docker layers for this project depending on the target"""
-    scargo_docker(build_docker=True, no_cache=no_cache)
-
-
-@docker.command("run")
-def docker_run():
     """Run project in docker environment"""
-    scargo_docker(run_docker=True)
+    scargo_docker_run(docker_opts=ctx.args, command=command)
 
 
-@docker.command("exec")
-def docker_exec():
+@docker.command(
+    "exec", context_settings={"allow_extra_args": True, "ignore_unknown_options": True}
+)
+def docker_exec(ctx: Context):
     """Attach to existing docker environment"""
-    scargo_docker(exec_docker=True)
+    scargo_docker_exec(ctx.args)
 
 
 cli.add_typer(docker, name="docker")

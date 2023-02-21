@@ -53,15 +53,6 @@ def get_cmdline_arguments():
     )
 
     parser.add_argument(
-        "-n",
-        "--nightly",
-        action="store_true",
-        default=False,
-        dest="nightly_test",
-        help="Run nightly tests",
-    )
-
-    parser.add_argument(
         "-f",
         "--format",
         action="store_true",
@@ -293,11 +284,6 @@ def main():
 
     if not len(sys.argv) > 1:
         args.run_all = True
-
-    if args.nightly_test:
-        result = perform_tests(IT_DIR, "it", "--nightly")
-        if result:
-            sys.exit(1)
 
     if args.run_all:
         run_all_code_checkers()

@@ -20,7 +20,7 @@ from scargo.scargo_src.global_values import (
     SCARGO_LOCK_FILE,
     SCARGO_PGK_PATH,
 )
-from scargo.scargo_src.sc_docker import scargo_docker
+from scargo.scargo_src.sc_docker import scargo_docker_build
 from scargo.scargo_src.sc_logger import get_logger
 from scargo.scargo_src.sc_src import check_scargo_version, get_scargo_config_or_exit
 from scargo.scargo_src.utils import get_project_root
@@ -72,7 +72,7 @@ def scargo_update(config_file_path: Path) -> None:
     target = project_config.target
 
     # Copy docker env files to repo directory
-    generate_docker_compose(docker_path, project_config, ver)
+    generate_docker_compose(docker_path, project_config)
     generate_env(docker_path)
 
     generate_cmake(config)
@@ -97,7 +97,10 @@ def scargo_update(config_file_path: Path) -> None:
 
     # do not rebuild dockers in the docker
     if target.family == "stm32" and not Path("third-party/stm32-cmake").is_dir():
-        subprocess.run("conan source .", shell=True, cwd=project_path)
+        subprocess.run("conan source .", shell=True, cwd=project_path, check=True)
 
     if project_config.build_env == SCARGO_DOCKER_ENV:
-        scargo_docker(build_docker=True)
+        if not Path(project_path, ".dockerenv").exists():
+            scargo_docker_build([])
+        else:
+            logger.warning("Cannot run docker inside docker")

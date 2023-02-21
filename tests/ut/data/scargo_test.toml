@@ -1,18 +1,17 @@
 [project]
-name = "common_scargo_project_stm32"
+name = "testproject"
 version = "0.1.0"
 description = "Project description."
 homepage-url = "www.hello-world.com"
 
-bin_name = "test_bin"
-lib_name = "test_lib"
-target = "stm32"
+bin_name = "testproject"
+target = "x86"
 build-env = "docker"
 docker-file = ".devcontainer/Dockerfile-custom"
-docker-image-tag = "common_scargo_project_stm32-dev:1.0"
+docker-image-tag = "testproject-dev:1.0"
 
-cc  = "arm-none-eabi-gcc"
-cxx = "arm-none-eabi-g++"
+cc  = "gcc"
+cxx = "g++"
 cxxstandard = "17"
 
 cflags   = "-Wall -Wextra"
@@ -76,15 +75,12 @@ build = [
 tool = [
 ]
 test = [
-    "gtest/1.12.1"
+    "gtest/cci.20210126"
 ]
 
 [conan.repo]
-gitlab = "https://git.spyrosoft.it/api/v4/projects/159/packages/conan"
+# gitlab = "https://git.spyrosoft.it/api/v4/projects/159/packages/conan"
 
-[stm32]
-chip = "STM32L496AG"
-flash-start = 0x08000000
 
 [scargo]
 console-log-level = "INFO"
@@ -92,4 +88,3 @@ file-log-level = "WARNING"
 update-exclude = [
 
 ]
-version = "1.0.4"
