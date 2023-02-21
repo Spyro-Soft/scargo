@@ -6,7 +6,7 @@
 import os
 import sys
 from argparse import ArgumentParser, Namespace
-from typing import Sequence, List, Tuple
+from typing import List, Sequence, Tuple
 
 text_to_search = ["tbd", "todo", "TODO", "fixme"]
 file_extensions = (".py", ".md", ".txt", ".sh", "Dockerfile")
@@ -36,7 +36,9 @@ def option_parser_init() -> Tuple[Namespace, List[str]]:
     return parser.parse_known_args()
 
 
-def search_multiple_strings_in_file(file_name: str, search_strings: List[str]) -> List[Tuple[str, int, str]]:
+def search_multiple_strings_in_file(
+    file_name: str, search_strings: List[str]
+) -> List[Tuple[str, int, str]]:
     """Get line from the file along with line numbers, which contains any string from the list"""
     line_number = 0
     results = []

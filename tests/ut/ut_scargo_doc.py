@@ -10,7 +10,9 @@ def verify_open_called(index_path: str) -> None:
     assert index_path.endswith("/build/doc/html/index.html")
 
 
-def test_doc_open_with_doxyfile(create_new_project: None, monkeypatch: pytest.MonkeyPatch) -> None:
+def test_doc_open_with_doxyfile(
+    create_new_project: None, monkeypatch: pytest.MonkeyPatch
+) -> None:
     scargo_doc(False)
     assert Path("build/doc/html/index.html").exists()
 
@@ -21,7 +23,9 @@ def test_doc_open_with_doxyfile(create_new_project: None, monkeypatch: pytest.Mo
         assert e.value.code == 0
 
 
-def test_doc_open_without_doc_file(create_new_project: None, caplog: LogCaptureFixture) -> None:
+def test_doc_open_without_doc_file(
+    create_new_project: None, caplog: LogCaptureFixture
+) -> None:
     with pytest.raises(SystemExit) as e:
         scargo_doc(True)
     assert "Documentation not found" in caplog.text
@@ -29,7 +33,9 @@ def test_doc_open_without_doc_file(create_new_project: None, caplog: LogCaptureF
     assert e.value.code == 1
 
 
-def test_doc_without_doxygen(monkeypatch: pytest.MonkeyPatch, caplog: LogCaptureFixture) -> None:
+def test_doc_without_doxygen(
+    monkeypatch: pytest.MonkeyPatch, caplog: LogCaptureFixture
+) -> None:
     monkeypatch.setenv("PATH", "")
     with pytest.raises(SystemExit) as e:
         scargo_doc(False)

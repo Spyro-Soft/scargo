@@ -31,7 +31,9 @@ def scargo_docker_test_setup(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) ->
 
 
 def test_docker_fails_when_inside_docker(
-    caplog: pytest.LogCaptureFixture, mock_subprocess_run: MagicMock, scargo_docker_test_setup: Config
+    caplog: pytest.LogCaptureFixture,
+    mock_subprocess_run: MagicMock,
+    scargo_docker_test_setup: Config,
 ) -> None:
     Path(".dockerenv").mkdir()
     with pytest.raises(SystemExit):
@@ -44,7 +46,9 @@ def test_docker_fails_when_inside_docker(
     ([], ["--no-cache"], ["--rm"], ["--no-cache", "--parallel", "--rm"]),
 )
 def test_docker_build(
-    command_args: List[str], mock_subprocess_run: MagicMock, scargo_docker_test_setup: Config
+    command_args: List[str],
+    mock_subprocess_run: MagicMock,
+    scargo_docker_test_setup: Config,
 ) -> None:
     scargo_docker_build(command_args)
 
@@ -56,7 +60,11 @@ def test_docker_build(
     "command_args",
     ([], ["--no-deps"], ["--rm"], ["--no-deps", "--rm"]),
 )
-def test_docker_run(command_args: List[str], mock_subprocess_run: MagicMock, scargo_docker_test_setup: Config) -> None:
+def test_docker_run(
+    command_args: List[str],
+    mock_subprocess_run: MagicMock,
+    scargo_docker_test_setup: Config,
+) -> None:
     scargo_docker_run(command_args)
 
     service_name = f"{scargo_docker_test_setup.project.name}_dev"
@@ -66,7 +74,9 @@ def test_docker_run(command_args: List[str], mock_subprocess_run: MagicMock, sca
     assert mock_subprocess_run.call_args.args[0] == called_subprocess_cmd
 
 
-def test_docker_run_with_command(mock_subprocess_run: MagicMock, scargo_docker_test_setup: Config) -> None:
+def test_docker_run_with_command(
+    mock_subprocess_run: MagicMock, scargo_docker_test_setup: Config
+) -> None:
     rm = "--rm"
     command = 'bash -c "pwd"'
 
@@ -95,7 +105,9 @@ class FakeDockerClient:
 
 
 def test_docker_exec(
-    mock_subprocess_run: MagicMock, monkeypatch: pytest.MonkeyPatch, scargo_docker_test_setup: Config
+    mock_subprocess_run: MagicMock,
+    monkeypatch: pytest.MonkeyPatch,
+    scargo_docker_test_setup: Config,
 ) -> None:
     id = "some_hash"
     docker_opts = "-it"
@@ -107,7 +119,9 @@ def test_docker_exec(
 
 
 def test_docker_exec_no_container(
-    mock_subprocess_run: MagicMock, monkeypatch: pytest.MonkeyPatch, scargo_docker_test_setup: Config
+    mock_subprocess_run: MagicMock,
+    monkeypatch: pytest.MonkeyPatch,
+    scargo_docker_test_setup: Config,
 ) -> None:
     monkeypatch.setattr("docker.from_env", lambda: FakeDockerClient())
     with pytest.raises(SystemExit):

@@ -28,7 +28,9 @@ class _TestsTemplate(BaseGen):
             ("CMakeLists-mocks.txt.j2", self.output_dir / "mocks" / "CMakeLists.txt"),
         ]
 
-    def generate_test_dirs_and_files(self, target: Target, tests_config: TestConfig) -> None:
+    def generate_test_dirs_and_files(
+        self, target: Target, tests_config: TestConfig
+    ) -> None:
         """Generate dirs and files"""
         static_mock_dir = self.output_dir / "mocks" / "static_mock"
         if not static_mock_dir.exists():

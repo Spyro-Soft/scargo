@@ -10,7 +10,9 @@ from scargo.scargo_src.sc_clean import scargo_clean
     "build_path_str",
     ["build", "BUILD", "BuIlD", "test/build", "TEST/BUILD", "tEsT/BuILD"],
 )
-def test_clean_build(build_path_str: str, tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+def test_clean_build(
+    build_path_str: str, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
     monkeypatch.setattr("scargo.scargo_src.sc_clean.get_project_root", lambda: tmp_path)
     os.chdir(tmp_path)
     build_path = Path(build_path_str)

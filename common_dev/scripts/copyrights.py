@@ -9,7 +9,7 @@ import os
 import re
 import sys
 from argparse import ArgumentParser, Namespace
-from typing import Tuple, List, Iterable, Callable, Optional, Sequence
+from typing import Callable, Iterable, List, Optional, Sequence, Tuple
 
 file_extensions = (".py", ".txt", ".sh", "Dockerfile")
 
@@ -263,7 +263,9 @@ def check_copyright_before_fix(file: str, fix_stats: FixStats) -> int:
     return 0
 
 
-def fix_copyright_common(file: str, fix_stats: FixStats, copyright_string: str, check_shebang: bool = True) -> None:
+def fix_copyright_common(
+    file: str, fix_stats: FixStats, copyright_string: str, check_shebang: bool = True
+) -> None:
     with fileinput.input(files=file, inplace=True) as f:
         for line in f:
             if f.isfirstline():

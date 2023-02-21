@@ -6,7 +6,7 @@
 import subprocess
 import sys
 from pathlib import Path
-from typing import Sequence, Optional, List
+from typing import List, Optional, Sequence
 
 import docker
 

@@ -5,7 +5,7 @@
 
 import os
 from pathlib import Path
-from typing import Optional, List, Iterable, Sequence, Tuple
+from typing import Iterable, List, Optional, Sequence, Tuple
 
 import clang.cindex as cindex
 from jinja2 import Environment, FileSystemLoader
@@ -36,7 +36,11 @@ missing_mocks_json = os.path.join(absolute_path, "mock_utils", "missing_mocks.js
 
 
 def header_files_in_path(
-    path_to_src: Path, exclude: Sequence[str], force: bool, check_only: bool, src_dir: str = SRC_DIR
+    path_to_src: Path,
+    exclude: Sequence[str],
+    force: bool,
+    check_only: bool,
+    src_dir: str = SRC_DIR,
 ) -> List[Tuple[str, str, str]]:
     """
     Returns list of the .h files in the path.
@@ -85,7 +89,10 @@ def header_files_in_path(
 
 
 def generate_mocks(
-    path_to_src: Path, exclude: Sequence[str] = (), force: bool = False, check_only: bool = False
+    path_to_src: Path,
+    exclude: Sequence[str] = (),
+    force: bool = False,
+    check_only: bool = False,
 ) -> None:
     """
     Generates mock header and implementations for specified source headers.
@@ -194,7 +201,9 @@ class ParamsExtractor(object):
         assert False
 
     @staticmethod
-    def _extract_method_params(cursor: cindex.Cursor) -> Optional[MockFunctionDescriptor]:
+    def _extract_method_params(
+        cursor: cindex.Cursor,
+    ) -> Optional[MockFunctionDescriptor]:
         fun_ret_val = cursor.result_type.spelling
         fun_name = cursor.spelling
         fun_args = []

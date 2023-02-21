@@ -17,7 +17,6 @@ from scargo import cli
 from scargo.jinja.env_gen import generate_env
 from scargo.scargo_src.utils import get_project_root
 
-
 TEST_PROJECT_NAME = "common_scargo_project"
 TEST_PROJECT_ESP32_NAME = "common_scargo_project_esp32"
 TEST_PROJECT_STM32_NAME = "common_scargo_project_stm32"
@@ -30,9 +29,7 @@ TEST_PROJECT_ESP32_PATH = Path(IT_PATH, "test_projects", TEST_PROJECT_ESP32_NAME
 TEST_PROJECT_STM32_PATH = Path(IT_PATH, "test_projects", TEST_PROJECT_STM32_NAME)
 
 
-FIX_TEST_FILES_PATH = Path(
-    IT_PATH, "test_projects", "test_files", "fix_test_files"
-)
+FIX_TEST_FILES_PATH = Path(IT_PATH, "test_projects", "test_files", "fix_test_files")
 
 IDF_SDKCONFIG_FILE_PATH = Path(
     IT_PATH, "test_projects", "test_files", "esp_32_idf_config", "sdkconfig"
@@ -126,7 +123,9 @@ def copy_project_stm32() -> None:
 
 
 @pytest.mark.parametrize("project_creation", PROJECT_CREATION_x86)
-def test_project_x86_dev_flow(project_creation: str, request: pytest.FixtureRequest) -> None:
+def test_project_x86_dev_flow(
+    project_creation: str, request: pytest.FixtureRequest
+) -> None:
     # Arrange
     build_dir_path = Path("build")
     src_dir = "src"
@@ -215,7 +214,9 @@ def test_project_x86_dev_flow(project_creation: str, request: pytest.FixtureRequ
 
 
 @pytest.mark.parametrize("project_creation", PROJECT_CREATION_esp32)
-def test_project_esp32_dev_flow(project_creation: str, request: pytest.FixtureRequest) -> None:
+def test_project_esp32_dev_flow(
+    project_creation: str, request: pytest.FixtureRequest
+) -> None:
     # ARRANGE
     runner = ScargoTestRunner()
 
@@ -255,7 +256,9 @@ def test_project_esp32_dev_flow(project_creation: str, request: pytest.FixtureRe
 
 
 @pytest.mark.parametrize("project_creation", PROJECT_CREATION_stm32)
-def test_project_stm32_dev_flow(project_creation: str, request: pytest.FixtureRequest) -> None:
+def test_project_stm32_dev_flow(
+    project_creation: str, request: pytest.FixtureRequest
+) -> None:
     # Arrange
     runner = ScargoTestRunner()
 

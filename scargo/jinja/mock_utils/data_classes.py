@@ -1,7 +1,7 @@
 # #
 # @copyright Copyright (C) 2023 SpyroSoft Solutions S.A. All rights reserved.
 # #
-from typing import Any, Sequence, List, Union, Optional
+from typing import Any, List, Optional, Sequence, Union
 
 
 class ArgumentDescriptor:
@@ -16,7 +16,11 @@ class MockFunctionDescriptor:
     """Contains function name and types"""
 
     def __init__(
-        self, name: str, return_type: str, specifiers: Sequence[str], arguments: Sequence[ArgumentDescriptor] = ()
+        self,
+        name: str,
+        return_type: str,
+        specifiers: Sequence[str],
+        arguments: Sequence[ArgumentDescriptor] = (),
     ):
         self.name = name
         self.return_type = return_type
@@ -75,4 +79,6 @@ class HeaderDescriptor:
         self.c_style_header = kwargs.get("c_style_header", False)
 
 
-MockDescriptor = Union[MockFunctionDescriptor, MockClassDescriptor, MockNamespaceDescriptor]
+MockDescriptor = Union[
+    MockFunctionDescriptor, MockClassDescriptor, MockNamespaceDescriptor
+]

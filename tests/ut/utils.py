@@ -1,6 +1,6 @@
 from pathlib import Path
 from typing import Generator
-from unittest.mock import patch, MagicMock
+from unittest.mock import MagicMock, patch
 
 import pytest
 

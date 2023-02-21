@@ -61,7 +61,9 @@ def get_project_version(file_path: Path = Path("scargo.toml")) -> str:
     return project_version  # type: ignore[no-any-return]
 
 
-def remove_dockerfile_path_from_toml_file(toml_path: Path = Path("scargo.toml")) -> None:
+def remove_dockerfile_path_from_toml_file(
+    toml_path: Path = Path("scargo.toml"),
+) -> None:
     data = toml.load(toml_path)
     data["project"]["docker-file"] = ""
 

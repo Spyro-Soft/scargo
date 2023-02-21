@@ -3,7 +3,7 @@
 # #
 
 from pathlib import Path
-from typing import Dict, Any
+from typing import Any, Dict
 
 from jinja2 import Environment, FileSystemLoader
 

@@ -101,7 +101,9 @@ def debug(
 
 
 @cli.command()
-def doc(open_doc: bool = Option(False, "--open", help="Open html documentation")) -> None:
+def doc(
+    open_doc: bool = Option(False, "--open", help="Open html documentation")
+) -> None:
     """Create project documentation"""
     scargo_doc(open_doc)
 
@@ -296,7 +298,9 @@ def run(
 
 
 @cli.command()
-def test(verbose: bool = Option(False, "--verbose", "-v", help="Verbose mode.")) -> None:
+def test(
+    verbose: bool = Option(False, "--verbose", "-v", help="Verbose mode.")
+) -> None:
     """Compile and run all tests in directory `test`."""
     scargo_test(verbose)
 

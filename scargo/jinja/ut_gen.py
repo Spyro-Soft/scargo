@@ -23,7 +23,9 @@ class HeaderDescriptor:
     to generate unit tests.
     """
 
-    def __init__(self, name: str, includes: List[str], classes: List[str], namespaces: List[str]) -> None:
+    def __init__(
+        self, name: str, includes: List[str], classes: List[str], namespaces: List[str]
+    ) -> None:
         self.name = name
         self.includes = includes
         self.classes = classes

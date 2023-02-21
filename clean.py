@@ -6,7 +6,7 @@
 import argparse
 import os
 import subprocess
-from typing import Sequence, Optional, List
+from typing import List, Optional, Sequence
 
 OUTPUT_FILES = [
     "build",

@@ -9,7 +9,9 @@ from typing import Sequence
 from pylint.lint import Run  # type: ignore[import]
 
 
-def run_pylint_on_specific_directory(directory: str, score: float, exclude: Sequence[str]) -> int:
+def run_pylint_on_specific_directory(
+    directory: str, score: float, exclude: Sequence[str]
+) -> int:
     ignore_pattern = []
 
     for ex in exclude:

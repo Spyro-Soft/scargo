@@ -63,7 +63,7 @@ class _DockerComposeTemplate(BaseGen):
                     "project": self.project_config,
                     "scargo_package_version": scargo_package_version,
                     "custom_docker": custom_docker,
-                }
+                },
             )
 
     def _set_up_package_version(self) -> str:

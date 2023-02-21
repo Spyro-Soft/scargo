@@ -5,7 +5,7 @@
 
 """Generate toml for scargo project"""
 import os
-from typing import Dict, Any
+from typing import Any, Dict
 
 from jinja2 import Environment, FileSystemLoader
 

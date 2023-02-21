@@ -38,7 +38,9 @@ class _CppTemplateGen(BaseGen):
             template_params={"lib_name": lib_name},
         )
         self.create_file_from_template(
-            "lib.h.j2", Path(self._src_dir, f"{lib_name.lower()}.h"), {"lib_name": lib_name}
+            "lib.h.j2",
+            Path(self._src_dir, f"{lib_name.lower()}.h"),
+            {"lib_name": lib_name},
         )
 
     def _generate_cmake(self, config: Config) -> None:
