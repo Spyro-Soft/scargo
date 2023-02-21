@@ -70,6 +70,13 @@ def get_cmdline_arguments() -> argparse.Namespace:
     )
 
     parser.add_argument(
+        "--types",
+        action="store_true",
+        default=False,
+        help="Run type checking",
+    )
+
+    parser.add_argument(
         "-p",
         "--program",
         nargs="*",
@@ -210,6 +217,13 @@ def run_all_code_checkers() -> bool:
             "Pylint check failed run: " + " ".join(command) + "\n"
         )
 
+    try:
+        run_mypy()
+    except subprocess.CalledProcessError:
+        checker_exception_message += (
+            "Mypy check failed run: " + " ".join(command) + "\n"
+        )
+
     # try:
     #     run_flake8()
     # except subprocess.CalledProcessError:
@@ -279,6 +293,19 @@ def run_black(check: bool = False) -> None:
     subprocess.check_call(black_command)
 
 
+def run_mypy() -> None:
+    mypy_command = [
+        "mypy",
+        "--explicit-package-bases",
+        "scargo",
+        "tests",
+        "common_dev",
+        "run.py",
+        "clean.py",
+    ]
+    subprocess.check_call(mypy_command)
+
+
 def main() -> None:
     args = get_cmdline_arguments()
 
@@ -304,6 +331,9 @@ def main() -> None:
     if args.lint:
         run_pylint()
         run_flake8()
+
+    if args.types:
+        run_mypy()
 
     if args.program:
         ar = [i.split() for i in args.program]
