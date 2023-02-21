@@ -69,7 +69,7 @@ class _DockerComposeTemplate(BaseGen):
             whl_path = repo_root / whl_path
             shutil.copy(repo_root / whl_path, self.docker_path)
             return whl_path.name
-        return "scargo=={__version__}"
+        return f"scargo=={__version__}"
 
 
 def generate_docker_compose(docker_path: Path, project_config: ProjectConfig):
