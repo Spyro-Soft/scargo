@@ -3,10 +3,10 @@
 # @copyright Copyright (C) 2022 SpyroSoft Solutions S.A. All rights reserved.
 # #
 
-import lizard
+import lizard  # type: ignore[import]
 
 # to exclude directory use -x <dir_path> param
-params = [lizard, "/scargo/", "-C", "25", "-w"]
+params = ["lizard", "/scargo/", "-C", "25", "-w"]
 
 if __name__ == "__main__":
     lizard.main(params)
