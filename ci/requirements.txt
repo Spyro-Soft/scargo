@@ -12,7 +12,7 @@ allure-python-commons==2.12.0
     # via allure-pytest
 altgraph==0.17.3
     # via pyinstaller
-astroid==2.13.3
+astroid==2.14.2
     # via pylint
 attrs==22.2.0
     # via
@@ -25,7 +25,7 @@ bcrypt==4.0.1
     # via paramiko
 bitstring==3.1.9
     # via esptool
-black==22.12.0
+black==23.1.0
     # via scargo (pyproject.toml)
 bottle==0.12.23
     # via conan
@@ -37,7 +37,7 @@ cffi==1.15.1
     #   pynacl
 cfgv==3.3.1
     # via pre-commit
-charset-normalizer==2.1.1
+charset-normalizer==3.0.1
     # via requests
 clang==14.0
     # via scargo (pyproject.toml)
@@ -53,13 +53,13 @@ coloredlogs==15.0.1
     # via scargo (pyproject.toml)
 commonmark==0.9.1
     # via recommonmark
-conan==1.56.0
+conan==1.59.0
     # via scargo (pyproject.toml)
 coverage[toml]==6.5.0
     # via
     #   pytest-cov
     #   scargo (pyproject.toml)
-cryptography==39.0.0
+cryptography==39.0.1
     # via
     #   esptool
     #   paramiko
@@ -67,7 +67,7 @@ dill==0.3.6
     # via pylint
 distlib==0.3.6
     # via virtualenv
-distro==1.7.0
+distro==1.8.0
     # via
     #   conan
     #   docker-compose
@@ -107,7 +107,7 @@ gcovr==5.2
     # via scargo (pyproject.toml)
 humanfriendly==10.0
     # via coloredlogs
-identify==2.5.17
+identify==2.5.18
     # via pre-commit
 idna==3.4
     # via requests
@@ -139,7 +139,7 @@ lxml==4.9.2
     #   unittest-xml-reporting
 mako==1.2.4
     # via pytest-bdd
-markupsafe==2.1.1
+markupsafe==2.1.2
     # via
     #   jinja2
     #   mako
@@ -147,7 +147,7 @@ mccabe==0.7.0
     # via
     #   flake8
     #   pylint
-mypy-extensions==0.4.3
+mypy-extensions==1.0.0
     # via black
 node-semver==0.6.1
     # via conan
@@ -155,10 +155,11 @@ nodeenv==1.7.0
     # via pre-commit
 packaging==23.0
     # via
+    #   black
     #   docker
     #   pytest
     #   sphinx
-paramiko==2.12.0
+paramiko==3.0.0
     # via docker
 parse==1.19.0
     # via
@@ -170,7 +171,7 @@ patch-ng==1.17.4
     # via conan
 pathspec==0.11.0
     # via black
-platformdirs==2.6.2
+platformdirs==3.0.0
     # via
     #   black
     #   pylint
@@ -181,7 +182,7 @@ pluggy==1.0.0
     #   pytest
 pluginbase==1.0.1
     # via conan
-pre-commit==3.0.2
+pre-commit==3.0.4
     # via scargo (pyproject.toml)
 pyclean==2.2.0
     # via scargo (pyproject.toml)
@@ -200,13 +201,13 @@ pygments==2.14.0
     #   conan
     #   gcovr
     #   sphinx
-pyinstaller==5.7.0
+pyinstaller==5.8.0
     # via scargo (pyproject.toml)
-pyinstaller-hooks-contrib==2022.15
+pyinstaller-hooks-contrib==2023.0
     # via pyinstaller
 pyjwt==2.6.0
     # via conan
-pylint==2.15.10
+pylint==2.16.2
     # via scargo (pyproject.toml)
 pynacl==1.5.0
     # via paramiko
@@ -229,7 +230,7 @@ pytest-subprocess==1.5.0
     # via scargo (pyproject.toml)
 python-dateutil==2.8.2
     # via conan
-python-dotenv==0.21.0
+python-dotenv==0.21.1
     # via docker-compose
 pytz==2022.7.1
     # via babel
@@ -242,13 +243,12 @@ recommonmark==0.7.1
     # via scargo (pyproject.toml)
 reedsolo==1.5.4
     # via esptool
-requests==2.28.1
+requests==2.28.2
     # via
     #   conan
     #   docker
     #   docker-compose
     #   flit
-    #   scargo (pyproject.toml)
     #   sphinx
 shellingham==1.5.0.post1
     # via scargo (pyproject.toml)
@@ -260,7 +260,6 @@ six==1.16.0
     #   dockerpty
     #   ecdsa
     #   jsonschema
-    #   paramiko
     #   parse-type
     #   python-dateutil
     #   websocket-client
@@ -278,7 +277,7 @@ sphinxcontrib-applehelp==1.0.4
     # via sphinx
 sphinxcontrib-devhelp==1.0.2
     # via sphinx
-sphinxcontrib-htmlhelp==2.0.0
+sphinxcontrib-htmlhelp==2.0.1
     # via sphinx
 sphinxcontrib-jsmath==1.0.1
     # via sphinx
@@ -308,19 +307,19 @@ tqdm==4.64.1
     # via conan
 typer==0.7.0
     # via scargo (pyproject.toml)
-typing-extensions==4.4.0
+typing-extensions==4.5.0
     # via
     #   astroid
     #   pydantic
     #   pytest-bdd
 unittest-xml-reporting==3.2.0
     # via scargo (pyproject.toml)
-urllib3==1.26.13
+urllib3==1.26.14
     # via
     #   conan
     #   docker
     #   requests
-virtualenv==20.17.1
+virtualenv==20.19.0
     # via pre-commit
 websocket-client==0.59.0
     # via

@@ -5,7 +5,7 @@ Scargo project was written by Spyrosoft team. Find more information at [spyro-so
 </p>
 
 # Overview
-This is the documentation for scargo - a Python-based package manager based on RUST cargo idea.
+This is the documentation for scargo - a Python-based C/C++ package and software development life cycle manager inspired by RUST cargo idea.
 
 scargo can:
 
