@@ -23,7 +23,7 @@ IT_DIR = REPO_DIR + "/tests/it"
 CHECKERS_EXCLUSIONS = ["-e", "common_dev"]
 
 
-def get_cmdline_arguments():
+def get_cmdline_arguments() -> argparse.Namespace:
     parser = argparse.ArgumentParser(epilog="Run options include tests")
 
     parser.add_argument(
@@ -90,7 +90,7 @@ def get_cmdline_arguments():
     return args
 
 
-def perform_tests(test_path, test_postfix, *test_flags):
+def perform_tests(test_path: str, test_postfix: str, *test_flags: str) -> str:
     out_test_doc_dir = OUT + "/test_doc"
     allure_result = out_test_doc_dir + "/allure_result"
     allure_report = out_test_doc_dir + "/allure_report"
@@ -135,7 +135,7 @@ def perform_tests(test_path, test_postfix, *test_flags):
     return ""
 
 
-def run_all_code_checkers():
+def run_all_code_checkers() -> bool:
     checker_exception_message = ""
 
     checker_exception_message += perform_tests(UT_DIR, "ut")
@@ -224,7 +224,7 @@ def run_all_code_checkers():
     return True
 
 
-def run_pylint():
+def run_pylint() -> None:
     # can add "tests",  optionally
     command = [
         "./common_dev/scripts/pylintchecker.py",
@@ -237,7 +237,7 @@ def run_pylint():
     subprocess.check_call(command)
 
 
-def run_flake8():
+def run_flake8() -> None:
     command = [
         "flake8",
         "scargo",
@@ -249,7 +249,7 @@ def run_flake8():
     subprocess.check_call(command)
 
 
-def run_isort(check=False):
+def run_isort(check: bool = False) -> None:
     isort_command = [
         "isort",
         "--profile=black",
@@ -264,7 +264,7 @@ def run_isort(check=False):
     subprocess.check_call(isort_command)
 
 
-def run_black(check=False):
+def run_black(check: bool = False) -> None:
     black_command = [
         "black",
         "scargo",
@@ -279,7 +279,7 @@ def run_black(check=False):
     subprocess.check_call(black_command)
 
 
-def main():
+def main() -> None:
     args = get_cmdline_arguments()
 
     if not len(sys.argv) > 1:
@@ -314,7 +314,7 @@ def main():
 
 
 # avoiding making `e` a global variable
-def try_main():
+def try_main() -> None:
     try:
         main()
     except subprocess.CalledProcessError as e:
