@@ -53,13 +53,13 @@ def scargo_update(config_file_path: Path) -> None:
     config = get_scargo_config_or_exit(config_file_path)
     if not config.project:
         logger.error("File `%s`: Section `project` not found.", config_file_path)
-        return
+        sys.exit(1)
 
     if not config.project.name:
         logger.error(
             "File `{config_file_path}`: `name` not found under `project` section."
         )
-        return
+        sys.exit(1)
 
     # Copy templates project files to repo directory
     copy_file_if_not_exists()

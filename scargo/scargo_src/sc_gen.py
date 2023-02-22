@@ -147,7 +147,7 @@ def gen_single_binary_esp32(project_profile_path: Path, config: Config) -> None:
     esp32_config = config.esp32
     if not esp32_config:
         logger.error("No [esp32] section in config!")
-        return
+        sys.exit(1)
     partition_list = esp32_config.partitions
     target = config.project.target
 
