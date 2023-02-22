@@ -10,8 +10,8 @@ class Example_projectConan(ConanFile):
     generators = "cmake_find_package", "cmake"
 
     def package(self):
-        self.copy("*", src='build/Debug/bin/', dst='bin', keep_path=False)
-        self.copy("*", src='build/Debug/lib/', dst='lib', keep_path=False)
+        self.copy("*", src="build/Debug/bin/", dst="bin", keep_path=False)
+        self.copy("*", src="build/Debug/lib/", dst="lib", keep_path=False)
 
     def package_info(self):
         self.cpp_info.libs = tools.collect_libs(self)
@@ -23,4 +23,3 @@ class Example_projectConan(ConanFile):
 
     def source(self):
         pass
-

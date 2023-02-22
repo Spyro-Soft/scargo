@@ -20,4 +20,3 @@ class Example_projectTestConan(ConanFile):
 
     def requirements(self):
         self.requires("gtest/cci.20210126")
-
