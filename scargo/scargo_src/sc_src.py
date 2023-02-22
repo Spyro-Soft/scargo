@@ -14,7 +14,13 @@ import tomlkit
 
 from scargo import __version__ as ver
 from scargo.scargo_src.global_values import SCARGO_DOCKER_ENV, SCARGO_LOCK_FILE
-from scargo.scargo_src.sc_config import Config, ProjectConfig, Target, parse_config, ConfigError
+from scargo.scargo_src.sc_config import (
+    Config,
+    ConfigError,
+    ProjectConfig,
+    Target,
+    parse_config,
+)
 from scargo.scargo_src.sc_logger import get_logger
 from scargo.scargo_src.utils import get_config_file_path, get_project_root
 
