@@ -11,7 +11,6 @@
 # doc root, use os.path.abspath to make it absolute, like shown here.
 #
 import sys
-
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parents[2]))
