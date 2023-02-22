@@ -3,17 +3,16 @@
 # #
 
 """Create project documentation"""
-import platform
 import subprocess
 import sys
 from pathlib import Path
+
+import typer
 
 from scargo.scargo_src.sc_config import Config
 from scargo.scargo_src.sc_logger import get_logger
 from scargo.scargo_src.sc_src import prepare_config
 from scargo.scargo_src.utils import find_program_path, get_project_root
-
-OPEN_COMMAND = {"Windows": "&", "Linux": "xdg-open", "Darwin": "open"}
 
 
 class _ScargoGenDoc:
@@ -33,7 +32,10 @@ class _ScargoGenDoc:
         """Update Doxyfile configuration according specified values"""
         project_name = self._config.project.name
         project_path = Path(Path().absolute())
-        exclude = " ".join([f"{project_path}/{dir}" for dir in self.EXCLUDE_LIST])
+        exclude = " ".join(
+            f"{project_path}/{dir}"
+            for dir in self.EXCLUDE_LIST + self._config.doc.exclude
+        )
 
         doxy_values = {
             "PROJECT_NAME": f'"{project_name}"',
@@ -66,8 +68,7 @@ def _open_doc(doc_dir_path: Path):
     html_file_path = doc_dir_path / "html/index.html"
     if html_file_path.exists():
         try:
-            open_command = OPEN_COMMAND[platform.system()]
-            subprocess.run([open_command, html_file_path])
+            typer.launch(str(html_file_path))
         except subprocess.CalledProcessError:
             logger.error("Fail to open documentation")
     else:

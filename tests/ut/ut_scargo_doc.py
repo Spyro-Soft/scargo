@@ -2,20 +2,18 @@ from pathlib import Path
 
 import pytest
 
-from scargo.scargo_src.sc_doc import OPEN_COMMAND, scargo_doc
+from scargo.scargo_src.sc_doc import scargo_doc
 
 
-def verify_open_called(full_open_command):
-    open_command, index_path = full_open_command
-    assert open_command in OPEN_COMMAND.values()
-    assert str(index_path).endswith("build/doc/html/index.html")
+def verify_open_called(index_path):
+    assert index_path.endswith("/build/doc/html/index.html")
 
 
 def test_doc_open_with_doxyfile(create_new_project, monkeypatch):
     scargo_doc(False)
     assert Path("build/doc/html/index.html").exists()
 
-    monkeypatch.setattr("subprocess.run", verify_open_called)
+    monkeypatch.setattr("typer.launch", verify_open_called)
     with pytest.raises(SystemExit) as e:
         scargo_doc(True)
         assert e.type == SystemExit

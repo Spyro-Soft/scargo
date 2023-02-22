@@ -90,6 +90,10 @@ This section describes possible options which can be set in the scargo.toml file
 ------------------
 **exclude** = (string list)(path to excluded dirs e.g. [])
 
+[doc]
+-----
+**exclude** = (string list)(path to excluded dirs e.g. [])
+
 [tests]
 -------  
 **cc**  = (string) (c compiler flags e.g. "gcc")

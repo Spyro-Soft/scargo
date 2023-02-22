@@ -72,7 +72,7 @@ def scargo_update(config_file_path: Path) -> None:
     target = project_config.target
 
     # Copy docker env files to repo directory
-    generate_docker_compose(docker_path, project_config, ver)
+    generate_docker_compose(docker_path, project_config)
     generate_env(docker_path)
 
     generate_cmake(config)
