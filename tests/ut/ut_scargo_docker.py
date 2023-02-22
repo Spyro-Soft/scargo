@@ -66,7 +66,13 @@ def test_docker_run_with_command(mock_subprocess_run, scargo_docker_test_setup):
     scargo_docker_run(docker_opts=[rm], command=command)
 
     service_name = f"{scargo_docker_test_setup.project.name}_dev"
-    called_subprocess_cmd = ["docker-compose", "run", rm, service_name, *command.split()]
+    called_subprocess_cmd = [
+        "docker-compose",
+        "run",
+        rm,
+        service_name,
+        *command.split(),
+    ]
     assert mock_subprocess_run.call_args.args[0] == called_subprocess_cmd
 
 
