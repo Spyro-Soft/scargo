@@ -8,7 +8,7 @@ from scargo.scargo_src.sc_docker import (
     scargo_docker_exec,
     scargo_docker_run,
 )
-from tests.ut.utils import get_test_project_config, mock_subprocess_run
+from tests.ut.utils import get_test_project_config
 
 
 @pytest.fixture

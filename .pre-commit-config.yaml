@@ -38,14 +38,12 @@ repos:
       - id: check-json
       - id: check-toml
       - id: check-yaml
-#  - repo: https://github.com/pycqa/flake8
-#    rev: 6.0.0
-#    hooks:
-#      - id: flake8
-#        additional_dependencies:
-#          - flake8-absolute-import
-#          - flake8-black
-#          - flake8-docstrings
+  - repo: https://github.com/pycqa/flake8
+    rev: 6.0.0
+    hooks:
+      - id: flake8
+        additional_dependencies:
+          - flake8-absolute-import
 
 # sets up .pre-commit-ci.yaml to ensure pre-commit dependencies stay up to date
 ci:

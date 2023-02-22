@@ -26,7 +26,7 @@ class BaseGen:
         overwrite: bool = True,
         **template_kwargs,
     ) -> None:
-        """Function creates file using jinja template on output path, creates dirs if necessary"""
+        """Creates file using jinja template on output path, creates dirs if necessary"""
         if (
             self._is_file_excluded(output_path)
             or output_path.exists()

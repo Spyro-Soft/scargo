@@ -1,4 +1,4 @@
-from conans import CMake, ConanFile, tools
+from conans import CMake, ConanFile
 
 
 class Esp32projectTestConan(ConanFile):
