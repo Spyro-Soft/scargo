@@ -1,5 +1,6 @@
 import os
 from pathlib import Path
+from unittest.mock import patch
 
 import pytest
 
@@ -30,3 +31,9 @@ def create_new_project_docker(tmp_path):
 @pytest.fixture()
 def get_lock_file():
     return prepare_config()
+
+
+@pytest.fixture
+def mock_subprocess_run():
+    with patch("subprocess.run") as mock_subprocess_run:
+        yield mock_subprocess_run
