@@ -111,11 +111,7 @@ def gen_single_binary(project_profile_path: Path, config: Config) -> None:
 def gen_fs_esp32(config: Config) -> None:
     command = ""
     logger = get_logger()
-    esp32_config = config.esp32
-    if not esp32_config:
-        logger.error("No [esp32] in scargo config!")
-        sys.exit(1)
-    partition_list = esp32_config.partitions
+    partition_list = config.get_esp32_config().partitions
     fs_size = 0
     for i in partition_list:
         split_list = i.split(",")
@@ -144,11 +140,7 @@ def gen_fs_esp32(config: Config) -> None:
 
 def gen_single_binary_esp32(project_profile_path: Path, config: Config) -> None:
     logger = get_logger()
-    esp32_config = config.esp32
-    if not esp32_config:
-        logger.error("No [esp32] section in config!")
-        sys.exit(1)
-    partition_list = esp32_config.partitions
+    partition_list = config.get_esp32_config().partitions
     target = config.project.target
 
     flasher_args_path = project_profile_path / "flash_args"

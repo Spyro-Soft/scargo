@@ -14,7 +14,7 @@ import tomlkit
 
 from scargo import __version__ as ver
 from scargo.scargo_src.global_values import SCARGO_DOCKER_ENV, SCARGO_LOCK_FILE
-from scargo.scargo_src.sc_config import Config, ProjectConfig, Target, parse_config
+from scargo.scargo_src.sc_config import Config, ProjectConfig, Target, parse_config, ConfigError
 from scargo.scargo_src.sc_logger import get_logger
 from scargo.scargo_src.utils import get_config_file_path, get_project_root
 
@@ -91,15 +91,19 @@ def get_scargo_config_or_exit(
     :param config_file_path
     :return: project configuration as dict
     """
+    logger = get_logger()
     if config_file_path is None:
         config_file_path = get_config_file_path(SCARGO_LOCK_FILE)
     if config_file_path is None or not config_file_path.exists():
-        logger = get_logger()
         logger.error("File `%s` does not exist.", SCARGO_LOCK_FILE)
         logger.info("Did you run `scargo update`?")
         sys.exit(1)
 
-    return parse_config(config_file_path)
+    try:
+        return parse_config(config_file_path)
+    except ConfigError as e:
+        logger.error(e.args[0])
+        sys.exit(1)
 
 
 ###############################################################################

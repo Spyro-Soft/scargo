@@ -65,12 +65,7 @@ def flash_stm32(config: Config, flash_profile: str = "Debug") -> None:
     bin_name = bin_name.lower()
     bin_path = project_path / "build" / flash_profile / "bin" / f"{bin_name}.bin"
 
-    stm32_config = config.stm32
-    if not stm32_config:
-        logger.error("No [stm32] section in config!")
-        sys.exit(1)
-
-    flash_start = hex(stm32_config.flash_start)
+    flash_start = hex(config.get_stm32_config().flash_start)
 
     if not bin_path.exists():
         logger.error("%s does not exist", bin_path)

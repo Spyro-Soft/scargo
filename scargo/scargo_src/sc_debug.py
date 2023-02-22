@@ -40,9 +40,8 @@ class _ScargoDebug:
             sys.exit(1)
 
         if self._target.family == "stm32":
-            stm32_config = config.stm32
-            if stm32_config:
-                self._chip = stm32_config.chip
+            stm32_config = config.get_stm32_config()
+            self._chip = stm32_config.chip
             if not self._chip:
                 self._logger.error("Chip label not defined in toml.")
                 self._logger.info(
