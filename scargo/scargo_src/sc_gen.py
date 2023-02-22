@@ -131,7 +131,7 @@ def gen_fs_esp32(config: Config) -> None:
         idf_path = os.environ.get("IDF_PATH")
         command = [
             f"{idf_path}/components/spiffs/spiffsgen.py",
-            fs_size,
+            str(fs_size),
             fs_out_dir,
             fs_out_bin,
         ]
