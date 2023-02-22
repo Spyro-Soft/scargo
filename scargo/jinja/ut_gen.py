@@ -142,7 +142,7 @@ class _UnitTestsGen(BaseGen):
         elif line.startswith("using namespace"):
             namespace = line.split(" ")[2]
         else:
-            raise "No 'namespace' found in line: '{0}'".format(line)
+            raise f"No 'namespace' found in line: '{line}'"
 
         last_char = namespace[-1]
         if last_char == "{" or last_char == ";":
@@ -157,7 +157,7 @@ class _UnitTestsGen(BaseGen):
         includes = []
 
         # open header file to parse the header name and class name
-        with open(header_path, "r", encoding="utf-8") as header:
+        with open(header_path, encoding="utf-8") as header:
             for line in header:
                 line = line.strip()
                 if line.startswith("#include"):

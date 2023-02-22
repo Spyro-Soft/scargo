@@ -150,7 +150,7 @@ def check_mocks(path_to_src, exclude, force, check_only):
             # Read classes and functions from the source header
             header_data = parse_file(src_header)
             # Check classes and methods in mock file
-            mock_file = open(dst_header, "r", encoding="utf-8").read()
+            mock_file = open(dst_header, encoding="utf-8").read()
             for mock_class in header_data.classes:
                 if mock_class.name and mock_class.name not in mock_file:
                     missing_classes.setdefault(src_header, []).append(mock_class.name)
@@ -171,7 +171,7 @@ def check_mocks(path_to_src, exclude, force, check_only):
         "missing_methods": missing_methods,
     }
 
-    with open(missing_mocks_json, "r", encoding="utf-8") as json_file:
+    with open(missing_mocks_json, encoding="utf-8") as json_file:
         old_data = json.load(json_file)
 
     if missing_data_diff(old_data, data):
@@ -242,7 +242,7 @@ def find_namespaces_in_file(cursor, filename):
         yield i.spelling
 
 
-class ParamsExtractor(object):
+class ParamsExtractor:
     @staticmethod
     def extract_params_of_children_in_file(cursor, type_list, filename=None):
         return [
