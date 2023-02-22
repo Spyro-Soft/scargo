@@ -121,7 +121,7 @@ copy rights:
 
 #______________________________________________________________________________________________DOCU
 docu:
-  stage: docu 
+  stage: docu
   extends: .merge_request
   allow_failure: true
   script:

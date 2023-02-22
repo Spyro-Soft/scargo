@@ -1,0 +1,55 @@
+repos:
+#  - repo: https://github.com/PyCQA/doc8
+#    rev: v1.1.1
+#    hooks:
+#      - id: doc8
+#        name: doc8
+#        description: This hook runs doc8 for linting docs.
+#        entry: python -m doc8
+#        language: python
+#        files: \.rst$
+#        require_serial: true
+#  - repo: https://github.com/asottile/pyupgrade
+#    rev: v3.3.1
+#    hooks:
+#      - id: pyupgrade
+#        args: [--py38-plus]
+#  - repo: https://github.com/psf/black.git
+#    rev: 23.1.0
+#    hooks:
+#      - id: black
+#        language_version: python3
+#        exclude: ^(tests\/hooks-abort-render\/hooks|docs\/HelloCookieCutter1)
+#  - repo: https://github.com/PyCQA/isort
+#    rev: 5.12.0
+#    hooks:
+#      - id: isort
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.4.0
+    hooks:
+      - id: trailing-whitespace
+        args: [--markdown-linebreak-ext=md]
+      - id: mixed-line-ending
+      - id: fix-byte-order-marker
+      - id: check-executables-have-shebangs
+      - id: check-shebang-scripts-are-executable
+      - id: check-merge-conflict
+      - id: check-case-conflict
+      - id: check-docstring-first
+      - id: check-json
+      - id: check-toml
+      - id: check-yaml
+#  - repo: https://github.com/pycqa/flake8
+#    rev: 6.0.0
+#    hooks:
+#      - id: flake8
+#        additional_dependencies:
+#          - flake8-absolute-import
+#          - flake8-black
+#          - flake8-docstrings
+
+# sets up .pre-commit-ci.yaml to ensure pre-commit dependencies stay up to date
+ci:
+  autoupdate_schedule: weekly
+  skip: []
+  submodules: false

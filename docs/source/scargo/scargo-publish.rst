@@ -32,7 +32,7 @@ Options
 
     -r --repo TEXT
 
-Publish conan artifact to particular repo defined by its name. Should be in line with the names provided in scargo.toml file. 
+Publish conan artifact to particular repo defined by its name. Should be in line with the names provided in scargo.toml file.
 
 Example
 ^^^^^^^

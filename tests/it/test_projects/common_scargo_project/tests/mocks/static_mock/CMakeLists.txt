@@ -7,12 +7,12 @@ set(INTERNAL_NAME StaticMock)
 
 file( GLOB WILDCARD_SRC *.cpp *.h )
 
-add_library(${INTERNAL_NAME} 
-    OBJECT 
+add_library(${INTERNAL_NAME}
+    OBJECT
         ${WILDCARD_SRC}
 )
 
-target_include_directories(${INTERNAL_NAME} 
-    PUBLIC 
+target_include_directories(${INTERNAL_NAME}
+    PUBLIC
         .
 )

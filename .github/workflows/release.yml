@@ -18,7 +18,7 @@ env:
 jobs:
   documentation-release:
     needs: create-release
-    if: ${{ github.event.pull_request.merged }} 
+    if: ${{ github.event.pull_request.merged }}
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
@@ -46,7 +46,7 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: write
-    
+
     steps:
     - name: Checkout code
       uses: actions/checkout@v2
@@ -66,7 +66,7 @@ jobs:
         prerelease: false
         generate_release_notes: true
 
-  
+
   release-to-pypi:
     needs: create-release
     runs-on: ubuntu-latest
@@ -83,7 +83,7 @@ jobs:
 #      with:
 #        python-version: 3.8
     - name: Install dependencies
-      run: |        
+      run: |
         pip install --upgrade pip
         pip install flit
 
@@ -91,9 +91,8 @@ jobs:
       run: |
         git config --global --add safe.directory /__w/scargo/scargo
         flit build
-        flit publish 
+        flit publish
       env:
         FLIT_USERNAME: __token__
         FLIT_PASSWORD: ${{ secrets.PYPI_API_TOKEN }}
 
-  

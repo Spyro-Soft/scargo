@@ -11,7 +11,7 @@ ENV DEBIAN_FRONTEND noninteractive
 RUN apt update --fix-missing && \
     apt -y install python3.8 python3.8-venv python3-pip \
     binutils git wget \
-    scons build-essential pkg-config \ 
+    scons build-essential pkg-config \
     unzip graphviz nano vim && \
     apt -y install sudo && \
     update-alternatives --install /usr/bin/python python /usr/bin/python3 1 && \
@@ -48,9 +48,9 @@ RUN curl -sL https://aka.ms/InstallAzureCLIDeb | sudo bash && \
     tee /etc/apt/trusted.gpg.d/microsoft.gpg > /dev/null && \
     AZ_REPO=$(lsb_release -cs) && \
     echo "deb [arch=amd64] https://packages.microsoft.com/repos/azure-cli/ $AZ_REPO main" | \
-    tee /etc/apt/sources.list.d/azure-cli.list && \ 
+    tee /etc/apt/sources.list.d/azure-cli.list && \
     apt-get update && \
-    apt-get install azure-cli 
+    apt-get install azure-cli
 
 ENV LC_ALL=C
 
@@ -61,7 +61,7 @@ set -e\n\
 . $IDF_PATH/export.sh\n\
 \n\
 exec "$@"' >  /opt/esp/entrypoint.sh && chmod 775 /opt/esp/entrypoint.sh
-    
+
 # Install QEMU
 ARG QEMU_VER=esp-develop-20220919
 ARG QEMU_DIST=qemu-${QEMU_VER}.tar.bz2
@@ -76,7 +76,7 @@ ENV PATH=/opt/qemu/bin:${PATH}
 WORKDIR /opt
 
 FROM esp32 AS custom_esp32project
-# user can add his docker code below which will be integrated with 
+# user can add his docker code below which will be integrated with
 # main docker file and not overwritten by scargo update
 ENV DEBIAN_FRONTEND noninteractive
 

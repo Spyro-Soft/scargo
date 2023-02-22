@@ -61,9 +61,9 @@ In the console please run `idf.py menuconfig` and configure at least the followi
 - Partition Table -> Partition Table ... -> Custom Partition Table CSV
 
 ## Simulation with qemu
-To use qemu, a single image with all partitions is needed. You can generate it with the following command: 
+To use qemu, a single image with all partitions is needed. You can generate it with the following command:
 
-`scargo gen -b` 
+`scargo gen -b`
 
 or it can be generated based on data from build/flasher_args.json but spiffs partition needs to be added manually to the file.
 
@@ -130,7 +130,7 @@ idf.py flash monitor openocd gdbgui
 
 {% elif project.target.family == "stm32" %}
 # STM32 configure
-The model of the microcontroller is taken from the model set in scargo.toml file e.g.:  
+The model of the microcontroller is taken from the model set in scargo.toml file e.g.:
 `[stm32] -> chip = "STM32L496AGI6"`
 Please change is according to your needs.
 

@@ -10,7 +10,7 @@ ENV DEBIAN_FRONTEND=noninteractive
 RUN apt update --fix-missing && \
     apt -y install python3.8 python3.8-venv python3-pip \
     binutils git wget \
-    scons build-essential pkg-config \ 
+    scons build-essential pkg-config \
     unzip texlive-latex-base graphviz nano vim \
     libgtk2.0-0 libgtk-3-0 libxss1 libasound2 plantuml && \
     apt -y install sudo && \

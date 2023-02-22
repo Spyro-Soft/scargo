@@ -13,7 +13,7 @@ Creating x86 cpp project
 To create *Hello world* x86 cpp project we will use :doc:`scargo new command </scargo/scargo-new>`:
 
 Open the command line and run: ::
-    
+
     scargo new --target x86 --bin hello_world hello_world_project
 
 This will create a new dockerized x86 cpp project inside hello_world_project directory.
@@ -67,7 +67,7 @@ Running the binary
 ------------------
 
 To run the binary we can simply use :doc:`scargo run command </scargo/scargo-run>`: ::
-    
+
     scargo run --profile Release --skip-build
 
 After running the command we will see *Hello world!* text in the terminal.

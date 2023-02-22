@@ -5,7 +5,7 @@ Fix C/C++ project with static tool analyzers issues
 .. image:: ../_static/scargo_check_fix_docker.gif
    :alt: scargo check and fix example
    :align: center
-   
+
 Usage
 ^^^^^
 
@@ -44,4 +44,4 @@ Fix if there is no copyright info at the top of each file.
 
 --clang-format
 
-Fix formatting reported by clang-format. 
+Fix formatting reported by clang-format.

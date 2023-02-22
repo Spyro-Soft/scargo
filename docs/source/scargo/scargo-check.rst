@@ -17,7 +17,7 @@ Description
 ^^^^^^^^^^^
 
 Check source code in directory src and all subdirectories and report warnings and errors.
-With no params scargo will perform all checks and exist on the first failing. 
+With no params scargo will perform all checks and exist on the first failing.
 
 Options
 ^^^^^^^
@@ -44,13 +44,13 @@ Check if there is TODO in any file.
 
 --clang-format
 
-Run clang-format. 
+Run clang-format.
 
 ::
 
 --clang-tidy
 
-Run clang-tidy. 
+Run clang-tidy.
 
 ::
 

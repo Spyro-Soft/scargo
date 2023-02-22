@@ -58,9 +58,9 @@ In console please run `idf.py menuconfig` and configure at least fallowing optio
 - Partition Table -> Partition Table ... -> Custom Partition Table CSV
 
 ## Simulation with qemu
-To use qemu single image with all partition is needed. You can generated with following command: 
+To use qemu single image with all partition is needed. You can generated with following command:
 
-`scargo gen -b` 
+`scargo gen -b`
 
 or it can be generated base on data from build/flasher_args.json but spiffs partition need to be added manually to the file
 
