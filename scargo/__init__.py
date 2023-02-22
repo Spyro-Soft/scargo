@@ -324,7 +324,7 @@ def update(
         config_file_path = get_config_file_path(SCARGO_DEFAULT_CONFIG_FILE)
         if not config_file_path:
             logger.error("Config file not found.")
-        sys.exit(1)
+            sys.exit(1)
     """Read .toml config file and generate `CMakeLists.txt`."""
     scargo_update(config_file_path)
 
