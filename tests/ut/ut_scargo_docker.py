@@ -43,7 +43,7 @@ def test_docker_fails_when_inside_docker(
 def test_docker_build(command_args, mock_subprocess_run, scargo_docker_test_setup):
     scargo_docker_build(command_args)
 
-    called_subprocess_cmd = " ".join(["docker-compose build", *command_args])
+    called_subprocess_cmd = ["docker-compose", "build", *command_args]
     assert mock_subprocess_run.call_args.args[0] == called_subprocess_cmd
 
 
@@ -55,9 +55,7 @@ def test_docker_run(command_args, mock_subprocess_run, scargo_docker_test_setup)
     scargo_docker_run(command_args)
 
     service_name = f"{scargo_docker_test_setup.project.name}_dev"
-    called_subprocess_cmd = " ".join(
-        ["docker-compose run", *command_args, service_name]
-    )
+    called_subprocess_cmd = ["docker-compose", "run", *command_args, service_name]
     assert mock_subprocess_run.call_args.args[0] == called_subprocess_cmd
 
 
@@ -68,7 +66,7 @@ def test_docker_run_with_command(mock_subprocess_run, scargo_docker_test_setup):
     scargo_docker_run(docker_opts=[rm], command=command)
 
     service_name = f"{scargo_docker_test_setup.project.name}_dev"
-    called_subprocess_cmd = f"docker-compose run {rm} {service_name} {command}"
+    called_subprocess_cmd = ["docker-compose", "run", rm, service_name, *command.split()]
     assert mock_subprocess_run.call_args.args[0] == called_subprocess_cmd
 
 
