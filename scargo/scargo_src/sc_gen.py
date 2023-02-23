@@ -31,12 +31,19 @@ def scargo_gen(
     single_bin: bool,
 ) -> None:
     config = prepare_config()
+    logger = get_logger()
 
     if gen_ut:
         generate_ut(gen_ut, config)
 
     if gen_mock:
-        generate_mocks(gen_mock)
+        if gen_mock.suffix not in (".h", ".hpp"):
+            logger.error("Not a header file. Please chose .h or .hpp file.")
+            sys.exit(1)
+        if generate_mocks(gen_mock):
+            logger.info(f"Generated: {gen_mock}")
+        else:
+            logger.info(f"Skipping: {gen_mock}")
 
     if certs:
         generate_certs(certs)
