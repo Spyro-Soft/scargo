@@ -36,7 +36,7 @@ while (( "$#" )); do
         shift 2
         ;;
 
-    --output) 
+    --output)
         OUTPUT_DIR=$2
         echo -e "${GREEN}Output dir: ${OUTPUT_DIR} ${NC}" >&1
         shift 2

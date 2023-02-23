@@ -1,6 +1,6 @@
 .. _scargo_flash:
 
-Flash using generated C/C++ project 
+Flash using generated C/C++ project
 -----------------------------------
 
 Usage
@@ -25,7 +25,7 @@ Flash app only
 
 ::
 
---fs         
+--fs
 
 Flash filesystem only
 

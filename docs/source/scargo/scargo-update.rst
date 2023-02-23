@@ -111,8 +111,8 @@ And "CMakeLists.txt" is this:
 
 Additional cmake variables
 ==========================
-For each profile and tests it's possible to define additional variables which will end up as cmake variables in main cmake. 
-For example, if "scargo.toml" has: 
+For each profile and tests it's possible to define additional variables which will end up as cmake variables in main cmake.
+For example, if "scargo.toml" has:
 
 ::
 
@@ -124,7 +124,7 @@ For example, if "scargo.toml" has:
 
     [profile.Release]
     cflags = "-O3 -DNDEBUG"
-    cxxflags = "-O3 -DNDEBUG" 
+    cxxflags = "-O3 -DNDEBUG"
     first_extra_var = "release_extra"
     second_extra_var = "second_var"
 

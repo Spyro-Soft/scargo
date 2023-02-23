@@ -3,7 +3,7 @@ from pathlib import Path
 from shutil import copy, copytree
 
 import pytest
-from utils import (
+from utils import (  # type: ignore[import]
     ScargoTestRunner,
     add_profile_to_toml,
     assert_str_in_CMakeLists,
@@ -17,12 +17,22 @@ from scargo import cli
 from scargo.jinja.env_gen import generate_env
 from scargo.scargo_src.utils import get_project_root
 
-FIX_TEST_FILES_PATH = Path(
-    pytest.it_path, "test_projects", "test_files", "fix_test_files"
-)
+TEST_PROJECT_NAME = "common_scargo_project"
+TEST_PROJECT_ESP32_NAME = "common_scargo_project_esp32"
+TEST_PROJECT_STM32_NAME = "common_scargo_project_stm32"
+NEW_TEST_PROJECT_NAME = "test_new_project"
+IT_PATH = Path("tests", "it").absolute()
+TEST_PROJECT_PATH = Path(IT_PATH, "test_projects", TEST_PROJECT_NAME)
+TEST_LIBS_PATH = Path(IT_PATH, "test_projects", "test_files", "test_libs")
+ESP_32_BUILD_PATH = Path(IT_PATH, "test_projects", "test_files", "esp_32_build")
+TEST_PROJECT_ESP32_PATH = Path(IT_PATH, "test_projects", TEST_PROJECT_ESP32_NAME)
+TEST_PROJECT_STM32_PATH = Path(IT_PATH, "test_projects", TEST_PROJECT_STM32_NAME)
+
+
+FIX_TEST_FILES_PATH = Path(IT_PATH, "test_projects", "test_files", "fix_test_files")
 
 IDF_SDKCONFIG_FILE_PATH = Path(
-    pytest.it_path, "test_projects", "test_files", "esp_32_idf_config", "sdkconfig"
+    IT_PATH, "test_projects", "test_files", "esp_32_idf_config", "sdkconfig"
 )
 
 PROJECT_CREATION_x86 = [
@@ -42,7 +52,7 @@ PROJECT_CREATION_stm32 = [
 
 
 @pytest.fixture()
-def new_project_x86():
+def new_project_x86() -> None:
     # Arrange
     runner = ScargoTestRunner()
 
@@ -51,7 +61,7 @@ def new_project_x86():
     assert result.exit_code == 0
 
     # New
-    result = runner.invoke(cli, ["new", pytest.new_test_project_name, "--target=x86"])
+    result = runner.invoke(cli, ["new", NEW_TEST_PROJECT_NAME, "--target=x86"])
     bin_name = get_bin_name()
     expected_bin_file_path = Path("src", f"{bin_name.lower()}.cpp")
     assert result.exit_code == 0
@@ -59,13 +69,13 @@ def new_project_x86():
 
 
 @pytest.fixture()
-def new_project_esp32():
+def new_project_esp32() -> None:
     # Arrange
     runner = ScargoTestRunner()
 
     # New
     result_new_esp32 = runner.invoke(
-        cli, ["new", pytest.new_test_project_name, "--target=esp32"]
+        cli, ["new", NEW_TEST_PROJECT_NAME, "--target=esp32"]
     )
     bin_name = get_bin_name()
     expected_bin_file_path = Path("main", f"{bin_name.lower()}.cpp")
@@ -74,13 +84,13 @@ def new_project_esp32():
 
 
 @pytest.fixture()
-def new_project_stm32():
+def new_project_stm32() -> None:
     # Arrange
     runner = ScargoTestRunner()
 
     # New
     result_new_stm32 = runner.invoke(
-        cli, ["new", pytest.new_test_project_name, "--target=stm32"]
+        cli, ["new", NEW_TEST_PROJECT_NAME, "--target=stm32"]
     )
     bin_name = get_bin_name()
     expected_bin_file_path = Path("src", f"{bin_name.lower()}.cpp")
@@ -89,31 +99,33 @@ def new_project_stm32():
 
 
 @pytest.fixture()
-def copy_project_x86():
-    copytree(pytest.predefined_test_project_path, os.getcwd(), dirs_exist_ok=True)
+def copy_project_x86() -> None:
+    copytree(TEST_PROJECT_PATH, os.getcwd(), dirs_exist_ok=True)
     project_path = get_project_root()
     docker_path = Path(project_path, ".devcontainer")
     generate_env(docker_path)
 
 
 @pytest.fixture()
-def copy_project_esp32():
-    copytree(pytest.predefined_test_project_esp32_path, os.getcwd(), dirs_exist_ok=True)
+def copy_project_esp32() -> None:
+    copytree(TEST_PROJECT_ESP32_PATH, os.getcwd(), dirs_exist_ok=True)
     project_path = get_project_root()
     docker_path = Path(project_path, ".devcontainer")
     generate_env(docker_path)
 
 
 @pytest.fixture()
-def copy_project_stm32():
-    copytree(pytest.predefined_test_project_stm32_path, os.getcwd(), dirs_exist_ok=True)
+def copy_project_stm32() -> None:
+    copytree(TEST_PROJECT_STM32_PATH, os.getcwd(), dirs_exist_ok=True)
     project_path = get_project_root()
     docker_path = Path(project_path, ".devcontainer")
     generate_env(docker_path)
 
 
 @pytest.mark.parametrize("project_creation", PROJECT_CREATION_x86)
-def test_project_x86_dev_flow(project_creation, request):
+def test_project_x86_dev_flow(
+    project_creation: str, request: pytest.FixtureRequest
+) -> None:
     # Arrange
     build_dir_path = Path("build")
     src_dir = "src"
@@ -202,7 +214,9 @@ def test_project_x86_dev_flow(project_creation, request):
 
 
 @pytest.mark.parametrize("project_creation", PROJECT_CREATION_esp32)
-def test_project_esp32_dev_flow(project_creation, request):
+def test_project_esp32_dev_flow(
+    project_creation: str, request: pytest.FixtureRequest
+) -> None:
     # ARRANGE
     runner = ScargoTestRunner()
 
@@ -242,7 +256,9 @@ def test_project_esp32_dev_flow(project_creation, request):
 
 
 @pytest.mark.parametrize("project_creation", PROJECT_CREATION_stm32)
-def test_project_stm32_dev_flow(project_creation, request):
+def test_project_stm32_dev_flow(
+    project_creation: str, request: pytest.FixtureRequest
+) -> None:
     # Arrange
     runner = ScargoTestRunner()
 

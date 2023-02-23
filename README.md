@@ -1,4 +1,4 @@
-# Scargo 
+# Scargo
 Scargo project was written by Spyrosoft team. Find more information at [spyro-soft.com](https://spyro-soft.com/career).
 <p align="center">
     <img src="https://raw.githubusercontent.com/Spyro-Soft/scargo/develop/docs/source/_static/spyrosoft_solutions_logo_color.png" alt="drawing" width="200"/>
@@ -18,7 +18,7 @@ scargo can:
 - Work with the predefined docker environment depending on the chosen architecture
 
 # Installation
-Scargo is available on [pypi](https://pypi.org/project/scargo/), so you can install it with pip: 
+Scargo is available on [pypi](https://pypi.org/project/scargo/), so you can install it with pip:
 
 ```pip install scargo```
 
@@ -45,7 +45,7 @@ Depending on the architecture:
 
 - compiler (e.g. gcc-arm-none-eabi-9-2020-q2-update gcc-arm-none-eabi)
 - flashing tools
-- uC HAL and dependent files 
+- uC HAL and dependent files
 - much more....
 
 # Work environment
@@ -56,7 +56,7 @@ Just edit the scargo.toml file ([project] -> build-env = "docker" or build-env =
 1) If you create a new project, run `docker-compose run scargo-dev` to run project development image depending on chosen architecture. All dependencies should be already there.
 Run scargo commands as you would do natively.
 
-2) If you create a project with --docker flag (`scargo new <my_proj> --docker ...`) or with any docker flag, by default each scargo command will be triggered in docker. 
+2) If you create a project with --docker flag (`scargo new <my_proj> --docker ...`) or with any docker flag, by default each scargo command will be triggered in docker.
 
 ## Working natively
-1) Create a project with --no-docker flag (`scargo new <my_proj> --no-docker ...`). 
+1) Create a project with --no-docker flag (`scargo new <my_proj> --no-docker ...`).

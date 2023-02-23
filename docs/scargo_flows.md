@@ -63,12 +63,12 @@ exit
 
 ```console
 scargo docker run
-ls ./build 
+ls ./build
 scargo clean
-ls ./build 
+ls ./build
 scargo build --profile Debug
 scargo build --profile Release
-ls ./build 
+ls ./build
 ./build/Release/bin/my_project
 ./build/Debug/bin/my_project
 exit
@@ -82,7 +82,7 @@ vi src/my_project.cpp
 * make some format issues
 wq!
 scargo check
-scargo fix 
+scargo fix
 scargo check
 exit
 ```

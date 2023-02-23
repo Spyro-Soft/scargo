@@ -3,6 +3,7 @@
 # #
 
 import subprocess
+import sys
 from pathlib import Path
 
 from scargo.scargo_src.sc_config import Config
@@ -30,26 +31,26 @@ def flash_esp32(
     project_path = get_project_root()
     out_dir = project_path / "build" / flash_profile
     target = config.project.target
-    command = ""
+    command = []
     try:
         if app:
             app_name = config.project.name
             app_path = out_dir / f"{app_name}.bin"
-            command = (
+            command = [
                 "parttool.py",
                 "write_partition",
                 "--partition-name=ota_0",
                 f"--input={app_path}",
-            )
+            ]
             subprocess.check_call(command, cwd=project_path)
         elif fs:
             fs_path = Path("build") / "spiffs.bin"
-            command = (
+            command = [
                 "parttool.py",
                 "write_partition",
                 "--partition-name=spiffs",
                 f"--input={fs_path}",
-            )
+            ]
             subprocess.check_call(command, cwd=project_path)
         else:
             command = ["esptool.py", "--chip", target.id, "write_flash", "@flash_args"]
@@ -63,10 +64,14 @@ def flash_stm32(config: Config, flash_profile: str = "Debug") -> None:
     logger = get_logger()
 
     project_path = get_project_root()
-    bin_name = config.project.bin_name.lower()
+    bin_name = config.project.bin_name
+    if not bin_name:
+        logger.error("No bin_name in config!")
+        sys.exit(1)
+    bin_name = bin_name.lower()
     bin_path = project_path / "build" / flash_profile / "bin" / f"{bin_name}.bin"
 
-    flash_start = hex(config.stm32.flash_start)
+    flash_start = hex(config.get_stm32_config().flash_start)
 
     if not bin_path.exists():
         logger.error("%s does not exist", bin_path)

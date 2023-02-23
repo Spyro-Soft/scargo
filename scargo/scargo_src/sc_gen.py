@@ -23,13 +23,13 @@ OUT_FS_DIR = os.path.join("build", "fs")
 
 
 def scargo_gen(
-    project_profile_path: Optional[Path],
+    project_profile_path: Path,
     gen_ut: Optional[Path],
     gen_mock: Optional[Path],
     certs: Optional[str],
     fs: bool,
     single_bin: bool,
-):
+) -> None:
     config = prepare_config()
 
     if gen_ut:
@@ -48,7 +48,7 @@ def scargo_gen(
         gen_single_binary(project_profile_path, config)
 
 
-def generate_certs(device_name):
+def generate_certs(device_name: str) -> None:
     project_path = get_project_root()
 
     in_certs_dir = Path(SCARGO_PGK_PATH, "certs")
@@ -99,7 +99,7 @@ def generate_fs(config: Config) -> None:
         logger.warning("Gen --fs command not supported for this target yet.")
 
 
-def gen_single_binary(project_profile_path: Path, config: Config):
+def gen_single_binary(project_profile_path: Path, config: Config) -> None:
     target = config.project.target
     if target.family == "esp32":
         gen_single_binary_esp32(project_profile_path, config)
@@ -109,9 +109,9 @@ def gen_single_binary(project_profile_path: Path, config: Config):
 
 
 def gen_fs_esp32(config: Config) -> None:
-    command = ""
+    command = []
     logger = get_logger()
-    partition_list = config.esp32.partitions
+    partition_list = config.get_esp32_config().partitions
     fs_size = 0
     for i in partition_list:
         split_list = i.split(",")
@@ -132,8 +132,8 @@ def gen_fs_esp32(config: Config) -> None:
         command = [
             f"{idf_path}/components/spiffs/spiffsgen.py",
             str(fs_size),
-            fs_out_dir,
-            fs_out_bin,
+            str(fs_out_dir),
+            str(fs_out_bin),
         ]
 
         subprocess.check_call(command, cwd=project_path)
@@ -144,13 +144,13 @@ def gen_fs_esp32(config: Config) -> None:
         sys.exit(1)
 
 
-def gen_single_binary_esp32(project_profile_path: Path, config: Config):
-    partition_list = config.esp32.partitions
+def gen_single_binary_esp32(project_profile_path: Path, config: Config) -> None:
+    logger = get_logger()
+    partition_list = config.get_esp32_config().partitions
     target = config.project.target
 
     flasher_args_path = project_profile_path / "flash_args"
     if not flasher_args_path.is_file():
-        logger = get_logger()
         logger.warning("%s does not exists", flasher_args_path)
         sys.exit(1)
 
@@ -181,7 +181,6 @@ def gen_single_binary_esp32(project_profile_path: Path, config: Config):
         f"{flash_size}",
     ]
     command.extend(line_list)
-    logger = get_logger()
 
     if spiffs_addr:
         command.extend([spiffs_addr, "build/spiffs.bin"])

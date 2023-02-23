@@ -1,4 +1,3 @@
-#!/bin/bash -e
 # #
 # @copyright Copyright (C) 2022 SpyroSoft Solutions S.A. All rights reserved.
 # #

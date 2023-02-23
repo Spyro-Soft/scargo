@@ -1,18 +1,21 @@
 import os
 from pathlib import Path
+from typing import Any, List, Sequence
+from unittest.mock import MagicMock
 
 import pytest
 
+from scargo.scargo_src.sc_config import Config
 from scargo.scargo_src.sc_docker import (
     scargo_docker_build,
     scargo_docker_exec,
     scargo_docker_run,
 )
-from tests.ut.utils import get_test_project_config, mock_subprocess_run
+from tests.ut.utils import get_test_project_config
 
 
 @pytest.fixture
-def scargo_docker_test_setup(monkeypatch, tmp_path):
+def scargo_docker_test_setup(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> Config:
     os.chdir(tmp_path)
     monkeypatch.setattr(
         "scargo.scargo_src.sc_docker.get_project_root", lambda: tmp_path
@@ -24,12 +27,14 @@ def scargo_docker_test_setup(monkeypatch, tmp_path):
         lambda: test_project_config.project,
     )
 
-    yield test_project_config
+    return test_project_config
 
 
 def test_docker_fails_when_inside_docker(
-    caplog, mock_subprocess_run, scargo_docker_test_setup
-):
+    caplog: pytest.LogCaptureFixture,
+    mock_subprocess_run: MagicMock,
+    scargo_docker_test_setup: Config,
+) -> None:
     Path(".dockerenv").mkdir()
     with pytest.raises(SystemExit):
         scargo_docker_build([])
@@ -40,7 +45,11 @@ def test_docker_fails_when_inside_docker(
     "command_args",
     ([], ["--no-cache"], ["--rm"], ["--no-cache", "--parallel", "--rm"]),
 )
-def test_docker_build(command_args, mock_subprocess_run, scargo_docker_test_setup):
+def test_docker_build(
+    command_args: List[str],
+    mock_subprocess_run: MagicMock,
+    scargo_docker_test_setup: Config,
+) -> None:
     scargo_docker_build(command_args)
 
     called_subprocess_cmd = ["docker-compose", "build", *command_args]
@@ -51,7 +60,11 @@ def test_docker_build(command_args, mock_subprocess_run, scargo_docker_test_setu
     "command_args",
     ([], ["--no-deps"], ["--rm"], ["--no-deps", "--rm"]),
 )
-def test_docker_run(command_args, mock_subprocess_run, scargo_docker_test_setup):
+def test_docker_run(
+    command_args: List[str],
+    mock_subprocess_run: MagicMock,
+    scargo_docker_test_setup: Config,
+) -> None:
     scargo_docker_run(command_args)
 
     service_name = f"{scargo_docker_test_setup.project.name}_dev"
@@ -59,7 +72,9 @@ def test_docker_run(command_args, mock_subprocess_run, scargo_docker_test_setup)
     assert mock_subprocess_run.call_args.args[0] == called_subprocess_cmd
 
 
-def test_docker_run_with_command(mock_subprocess_run, scargo_docker_test_setup):
+def test_docker_run_with_command(
+    mock_subprocess_run: MagicMock, scargo_docker_test_setup: Config
+) -> None:
     rm = "--rm"
     command = 'bash -c "pwd"'
 
@@ -77,7 +92,7 @@ def test_docker_run_with_command(mock_subprocess_run, scargo_docker_test_setup):
 
 
 class FakeDockerClient:
-    def __init__(self, *container_ids):
+    def __init__(self, *container_ids: str):
         self.containers = self.FakeContainerCollection(container_ids)
 
     class FakeContainerCollection:
@@ -86,14 +101,18 @@ class FakeDockerClient:
                 self.id = id
                 self.status = "running"
 
-        def __init__(self, container_ids):
+        def __init__(self, container_ids: Sequence[str]) -> None:
             self.container_list = [self.FakeContainer(id) for id in container_ids]
 
-        def list(self, *args, **kwargs):
+        def list(self, *args: Any, **kwargs: Any) -> List[FakeContainer]:
             return self.container_list
 
 
-def test_docker_exec(mock_subprocess_run, monkeypatch, scargo_docker_test_setup):
+def test_docker_exec(
+    mock_subprocess_run: MagicMock,
+    monkeypatch: pytest.MonkeyPatch,
+    scargo_docker_test_setup: Config,
+) -> None:
     id = "some_hash"
     docker_opts = "-it"
     monkeypatch.setattr("docker.from_env", lambda: FakeDockerClient(id))
@@ -104,8 +123,10 @@ def test_docker_exec(mock_subprocess_run, monkeypatch, scargo_docker_test_setup)
 
 
 def test_docker_exec_no_container(
-    mock_subprocess_run, monkeypatch, scargo_docker_test_setup
-):
+    mock_subprocess_run: MagicMock,
+    monkeypatch: pytest.MonkeyPatch,
+    scargo_docker_test_setup: Config,
+) -> None:
     monkeypatch.setattr("docker.from_env", lambda: FakeDockerClient())
     with pytest.raises(SystemExit):
         scargo_docker_exec([])

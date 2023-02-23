@@ -88,7 +88,7 @@ Creates file src/bar.cpp
     void bar()
     {
     }
-    
+
 Creates file src/CMakeLists.txt
 
 ::

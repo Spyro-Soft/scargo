@@ -33,7 +33,7 @@ target_link_libraries(${PROJECT_NAME}
     STM32::Nano
 )
 
-{# 
+{#
 conan_basic_setup() adjusts output directories which should not be switched off
 because we rely on it for packaging. This creates a problem for functions in
 stm32-cmake/cmake/common.cmake because it searches in different directory for

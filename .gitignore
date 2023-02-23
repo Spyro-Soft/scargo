@@ -10,7 +10,7 @@ temp/
 docs/source/modules
 __pycache__/
 .idea/
-*.log 
+*.log
 package-lock.json
 .env
 .coverage*

@@ -2,7 +2,7 @@ import subprocess
 from pathlib import Path
 
 
-def create_doc():
+def create_doc() -> None:
     project_path = Path().absolute()
     docs_path = Path(project_path, "docs")
     subprocess.check_call(

@@ -51,9 +51,9 @@ to update the environment with your credential.
 - docker-compose version 1.29.2
 
 # STM32 configure
-External dependencies are delivered with conan package "stm32_cmake/0.1.0" . It consist of cmsis and HAL from stm. 
+External dependencies are delivered with conan package "stm32_cmake/0.1.0" . It consist of cmsis and HAL from stm.
 Presently only L4, F4 and F7 series are supported. Those dependencies can be refer using:
-`${CONAN_STM32_CMAKE_ROOT}` 
+`${CONAN_STM32_CMAKE_ROOT}`
 To get the conan build time dependencies into your project it is recommended to use CMake FetchContent functionality.
 Model of the microcontroller is taken from the model set in scargo.toml file e.g.:  
 `[stm32] -> chip = "STM32L496AGI6"`

@@ -25,7 +25,7 @@ services:
     volumes:
       - ..:/workspace
       - /dev:/dev
-    command: sleep infinity 
+    command: sleep infinity
   {% if project.in_repo_conan_cache %}
     environment:
       - CONAN_USER_HOME=/workspace

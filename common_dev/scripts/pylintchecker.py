@@ -4,11 +4,14 @@
 # #
 import argparse
 import sys
+from typing import Sequence
 
-from pylint.lint import Run
+from pylint.lint import Run  # type: ignore[import]
 
 
-def run_pylint_on_specific_directory(directory, score, exclude):
+def run_pylint_on_specific_directory(
+    directory: str, score: float, exclude: Sequence[str]
+) -> int:
     ignore_pattern = []
 
     for ex in exclude:
@@ -35,7 +38,7 @@ def run_pylint_on_specific_directory(directory, score, exclude):
         return 1
 
 
-def get_cmdline_arguments():
+def get_cmdline_arguments() -> argparse.Namespace:
     parser = argparse.ArgumentParser(epilog="Run options include tests")
 
     parser.add_argument(
@@ -69,7 +72,7 @@ def get_cmdline_arguments():
     return args
 
 
-def main():
+def main() -> None:
     args = get_cmdline_arguments()
 
     result = run_pylint_on_specific_directory(args.directory, args.score, args.exclude)

@@ -139,7 +139,7 @@ copy rights:
 
 #______________________________________________________________________________________________DOCU
 docu:
-  stage: docu 
+  stage: docu
   extends: .merge_request
   allow_failure: true
   script:
@@ -157,7 +157,7 @@ check_tag:
     - git config --global --add safe.directory "${CI_PROJECT_DIR}"
     - git fetch --tags
     - tag=release_$(grep -w "project" scargo.lock -A 3 | grep version | grep -Eo "[[:digit:]]+\.[[:digit:]]+\.[[:digit:]]+")
-    - if [[ $(git tag -l "$tag") ]]; then echo "tag $tag exist"; exit 1; else echo "tag $tag does not exist "; fi  
+    - if [[ $(git tag -l "$tag") ]]; then echo "tag $tag exist"; exit 1; else echo "tag $tag does not exist "; fi
 
 #______________________________________________________________________________________________RELEASING
 releasing:

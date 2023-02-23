@@ -43,7 +43,7 @@ cli = Typer(context_settings=dict(help_option_names=["-h", "--help"]), help=DESC
 
 
 @cli.command()
-def build(profile: str = Option("Debug", "--profile")):
+def build(profile: str = Option("Debug", "--profile")) -> None:
     """Compile sources."""
     scargo_build(profile)
 
@@ -61,7 +61,7 @@ def check(  # pylint: disable=too-many-arguments
     pragma: bool = Option(False, "--pragma", help="Run pragma check."),
     todo: bool = Option(False, "--todo", help="Run TODO check."),
     silent: bool = Option(False, "--silent", "-s", help="Show less output."),
-):
+) -> None:
     """Check source code in directory `src`."""
     scargo_check(
         clang_format,
@@ -79,7 +79,7 @@ def check(  # pylint: disable=too-many-arguments
 
 
 @cli.command()
-def clean():
+def clean() -> None:
     """Remove directory `build`."""
     scargo_clean()
 
@@ -92,7 +92,7 @@ def debug(
     bin_path: Optional[Path] = Option(
         None, "--bin", "-b", exists=True, dir_okay=False, help="Path to bin file"
     )
-):
+) -> None:
     """Use gdb cli to debug"""
     scargo_debug(bin_path)
 
@@ -101,7 +101,9 @@ def debug(
 
 
 @cli.command()
-def doc(open_doc: bool = Option(False, "--open", help="Open html documentation")):
+def doc(
+    open_doc: bool = Option(False, "--open", help="Open html documentation")
+) -> None:
     """Create project documentation"""
     scargo_doc(open_doc)
 
@@ -115,7 +117,7 @@ docker = Typer(help="Manage the docker environment for the project")
 @docker.command(
     "build", context_settings={"allow_extra_args": True, "ignore_unknown_options": True}
 )
-def docker_build(ctx: Context):
+def docker_build(ctx: Context) -> None:
     """Build docker layers for this project depending on the target"""
     scargo_docker_build(ctx.args)
 
@@ -132,7 +134,7 @@ def docker_run(
         metavar="COMMAND",
         help="Select command to be used with docker run.",
     ),
-):
+) -> None:
     """Run project in docker environment"""
     scargo_docker_run(docker_opts=ctx.args, command=command)
 
@@ -140,7 +142,7 @@ def docker_run(
 @docker.command(
     "exec", context_settings={"allow_extra_args": True, "ignore_unknown_options": True}
 )
-def docker_exec(ctx: Context):
+def docker_exec(ctx: Context) -> None:
     """Attach to existing docker environment"""
     scargo_docker_exec(ctx.args)
 
@@ -158,7 +160,7 @@ def fix(
     ),
     copy_right: bool = Option(False, "--copyright", help="Fix copyrights violations"),
     pragma: bool = Option(False, "--pragma", help="Fix pragma violations"),
-):
+) -> None:
     """Fix violations reported by command `check`."""
     scargo_fix(pragma, copy_right, clang_format)
 
@@ -173,7 +175,7 @@ def flash(
     flash_profile: str = Option(
         "Debug", "--profile", help="Flash base on previously built profile"
     ),
-):
+) -> None:
     """Flash the target (only available for esp32 for now)."""
     scargo_flash(app, file_system, flash_profile)
 
@@ -212,7 +214,7 @@ def gen(  # pylint: disable=too-many-arguments
     single_bin: bool = Option(
         False, "--bin", "-b", help="Generate single binary image."
     ),
-):
+) -> None:
     """Manage the auto file generator"""
     project_profile_path = get_project_root() / "build" / profile
     if (gen_ut is gen_mock is certs is None) and not (file_system or single_bin):
@@ -251,7 +253,7 @@ def new(  # pylint: disable=too-many-arguments
         True, "--docker/--no-docker", help="Initialize docker environment."
     ),
     git: bool = Option(True, "--git/--no-git", help="Initialize git repository."),
-):
+) -> None:
     """Create new project template."""
     scargo_new(
         name,
@@ -268,7 +270,7 @@ def new(  # pylint: disable=too-many-arguments
 
 
 @cli.command()
-def publish(repo: str = Option("", "--repo", "-r", help="Repo name")):
+def publish(repo: str = Option("", "--repo", "-r", help="Repo name")) -> None:
     """Upload conan pkg to repo"""
     scargo_publish(repo)
 
@@ -284,7 +286,7 @@ def run(
     profile: str = Option("Debug", "--profile", "-p"),
     skip_build: bool = Option(False, "--skip-build", help="Skip calling scargo build"),
     bin_params: List[str] = Argument(None),
-):
+) -> None:
     """Build and run project"""
     if not skip_build:
         scargo_build(profile)
@@ -296,7 +298,9 @@ def run(
 
 
 @cli.command()
-def test(verbose: bool = Option(False, "--verbose", "-v", help="Verbose mode.")):
+def test(
+    verbose: bool = Option(False, "--verbose", "-v", help="Verbose mode.")
+) -> None:
     """Compile and run all tests in directory `test`."""
     scargo_test(verbose)
 
@@ -306,24 +310,30 @@ def test(verbose: bool = Option(False, "--verbose", "-v", help="Verbose mode."))
 
 @cli.command()
 def update(
-    config_file_path: Path = Option(
-        SCARGO_DEFAULT_CONFIG_FILE,
+    config_file_path: Optional[Path] = Option(
+        None,
         "--config-file",
         "-c",
         exists=True,
         dir_okay=False,
         help="Path to .toml configuration file.",
     ),
-):
+) -> None:
+    logger = get_logger()
+    if config_file_path is None:
+        config_file_path = get_config_file_path(SCARGO_DEFAULT_CONFIG_FILE)
+        if not config_file_path:
+            logger.error("Config file not found.")
+            sys.exit(1)
     """Read .toml config file and generate `CMakeLists.txt`."""
-    scargo_update(get_config_file_path(config_file_path))
+    scargo_update(config_file_path)
 
 
 ###############################################################################
 
 
 @cli.command()
-def version():
+def version() -> None:
     """Get scargo version"""
     scargo_version()
 

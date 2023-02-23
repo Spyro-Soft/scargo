@@ -5,12 +5,12 @@ on:
       config-path:
         required: false
         type: string
-        
+
 jobs:
   check:
     runs-on: ubuntu-latest
     container:
-      image: spyrosoftsa/scargo-dev:1.1
+      image: spyrosoftsa/scargo-dev:1.2
       options: --user root
     steps:
       - name: Checkout
@@ -30,6 +30,8 @@ jobs:
         run: ./common_dev/scripts/cyclomatic.py
       - name: Run pylint
         run: ./common_dev/scripts/pylintchecker.py -c scargo/ -s 9.5 --exclude=tests/
+      - name: Check typing with mypy
+        run: mypy --explicit-package-bases scargo tests common_dev run.py clean.py
   tests:
     runs-on: ubuntu-latest
     steps:
@@ -40,19 +42,19 @@ jobs:
 
       - name: Apt install dependencies
         run: |
-          sudo apt-get update --fix-missing  
-          wget https://github.com/allure-framework/allure2/releases/download/2.13.7/allure_2.13.7-1_all.deb  
-          sudo apt-get install doxygen 
-          sudo apt-get install -y ./allure_2.13.7-1_all.deb  
-          sudo rm allure_2.13.7-1_all.deb 
-          sudo chmod 777 /usr/bin/allure  
-          sudo apt-get clean 
-          sudo apt-get autoremove --yes 
-          sudo rm -rf /var/lib/{cache,log} 
+          sudo apt-get update --fix-missing
+          wget https://github.com/allure-framework/allure2/releases/download/2.13.7/allure_2.13.7-1_all.deb
+          sudo apt-get install doxygen
+          sudo apt-get install -y ./allure_2.13.7-1_all.deb
+          sudo rm allure_2.13.7-1_all.deb
+          sudo chmod 777 /usr/bin/allure
+          sudo apt-get clean
+          sudo apt-get autoremove --yes
+          sudo rm -rf /var/lib/{cache,log}
           sudo rm -rf /var/lib/apt/lists/*
 
       - name: Pip install dependencies
-        run: |        
+        run: |
           pip install --upgrade pip
           pip install -r ci/requirements.txt
 
@@ -72,7 +74,7 @@ jobs:
   documentation:
     runs-on: ubuntu-latest
     container:
-      image: spyrosoftsa/scargo-dev:1.1
+      image: spyrosoftsa/scargo-dev:1.2
       options: --user root
     steps:
       - name: Checkout

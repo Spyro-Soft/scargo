@@ -5,9 +5,9 @@
 """Update project"""
 import shutil
 import subprocess
+import sys
 from pathlib import Path
 
-from scargo import __version__ as ver
 from scargo.jinja.cicd_gen import generate_cicd
 from scargo.jinja.cmake_gen import generate_cmake
 from scargo.jinja.conan_gen import generate_conanfile
@@ -52,13 +52,13 @@ def scargo_update(config_file_path: Path) -> None:
     config = get_scargo_config_or_exit(config_file_path)
     if not config.project:
         logger.error("File `%s`: Section `project` not found.", config_file_path)
-        return
+        sys.exit(1)
 
     if not config.project.name:
         logger.error(
             "File `{config_file_path}`: `name` not found under `project` section."
         )
-        return
+        sys.exit(1)
 
     # Copy templates project files to repo directory
     copy_file_if_not_exists()
@@ -86,7 +86,7 @@ def scargo_update(config_file_path: Path) -> None:
             out.write(
                 "# ESP-IDF Partition Table\n# Name,   Type, SubType, Offset,  Size, Flags\n"
             )
-            partitions = config.esp32.partitions
+            partitions = config.get_esp32_config().partitions
             for line in partitions:
                 out.write(line + "\n")
             out.write("\n")
