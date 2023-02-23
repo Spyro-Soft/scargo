@@ -241,11 +241,15 @@ def check_copyright(config: Config, fix_errors: bool) -> None:
                     file.write(old)
 
     if fix_errors:
-        logger.info("Finished pragma check. Fixed problems in %s files.", error_counter)
+        logger.info(
+            "Finished copyright check. Fixed problems in %s files.", error_counter
+        )
     else:
-        logger.info("Finished pragma check. Found problems in %s files.", error_counter)
+        logger.info(
+            "Finished copyright check. Found problems in %s files.", error_counter
+        )
         if error_counter > 0:
-            logger.error("pragma check fail!")
+            logger.error("copyright check fail!")
             sys.exit(1)
 
 
