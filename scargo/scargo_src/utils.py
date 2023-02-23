@@ -38,5 +38,5 @@ def get_project_root_or_none() -> Optional[Path]:
 def get_project_root() -> Path:
     project_root = get_project_root_or_none()
     if not project_root:
-        raise FileNotFoundError(f"Config file not found!")
+        raise FileNotFoundError("Config file not found!")
     return project_root

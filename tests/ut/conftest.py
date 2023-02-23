@@ -1,6 +1,7 @@
 import os
 from pathlib import Path
-from unittest.mock import patch
+from typing import Generator
+from unittest.mock import MagicMock, patch
 
 import pytest
 
@@ -34,6 +35,6 @@ def get_lock_file() -> Config:
 
 
 @pytest.fixture
-def mock_subprocess_run():
+def mock_subprocess_run() -> Generator[MagicMock, None, None]:
     with patch("subprocess.run") as mock_subprocess_run:
         yield mock_subprocess_run
