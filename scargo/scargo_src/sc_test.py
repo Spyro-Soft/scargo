@@ -83,7 +83,7 @@ def run_ut(config: Config, verbose: bool, cwd: Path) -> None:
         sys.exit(1)
 
 
-def run_it(config: Config, verbose: bool):
+def run_it(config: Config, verbose: bool) -> None:
     # Run tests.
     cmd = "ctest"
 

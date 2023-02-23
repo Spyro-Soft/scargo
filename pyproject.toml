@@ -54,6 +54,7 @@ dev = [
     "flit==3.8.0",
     "gcovr>=5.2",
     "isort==5.11.4",
+    "mypy==1.0.1",
     "pre-commit",
     "pyclean==2.2.0",
     "pyelftools",
@@ -63,6 +64,8 @@ dev = [
     "pytest-cov",
     "pytest-subprocess",
     "pytest",
+    "types-clang",
+    "types-toml",
     "unittest-xml-reporting",
 ]
 doc = [
@@ -91,3 +94,17 @@ exclude = [
     "ci/",
     "docs/",
 ]
+
+[tool.mypy]
+strict = true
+disallow_any_unimported = true
+no_implicit_optional = true
+show_error_codes = true
+
+[[tool.mypy.overrides]]
+module = "coloredlogs"
+ignore_missing_imports = true
+
+[[tool.mypy.overrides]]
+module = "docker"
+ignore_missing_imports = true

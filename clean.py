@@ -6,6 +6,7 @@
 import argparse
 import os
 import subprocess
+from typing import List, Optional, Sequence
 
 OUTPUT_FILES = [
     "build",
@@ -14,7 +15,7 @@ OUTPUT_FILES = [
 ]
 
 
-def get_cmdline_arguments():
+def get_cmdline_arguments() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Cleans build and optionally cache")
 
     parser.add_argument(
@@ -46,7 +47,7 @@ def get_cmdline_arguments():
     return parser.parse_args()
 
 
-def list_files(path):
+def list_files(path: str) -> Optional[List[str]]:
     if path:
         if os.path.isdir(path):
             return [path]
@@ -54,9 +55,10 @@ def list_files(path):
             raise argparse.ArgumentTypeError(
                 f"readable_dir:schemas/{path} is not a valid path"
             )
+    return None
 
 
-def clean(output_file_names):
+def clean(output_file_names: Sequence[str]) -> None:
     try:
         command = ["py3clean", "."]
         subprocess.check_call(command)
@@ -67,7 +69,7 @@ def clean(output_file_names):
         subprocess.run(["rm", "-rf", item])
 
 
-def main():
+def main() -> None:
     args = get_cmdline_arguments()
 
     if args.list_of_files:

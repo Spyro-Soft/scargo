@@ -12,7 +12,7 @@ x-project_config: &project_config
 
 services:
   scargo-dev:
-    image: spyrosoftsa/scargo-dev:1.1
+    image: spyrosoftsa/scargo-dev:1.2
     platform: linux/amd64
     build:
       context: ./ci/

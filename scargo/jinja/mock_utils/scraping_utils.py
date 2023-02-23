@@ -1,6 +1,8 @@
 # #
 # @copyright Copyright (C) 2023 SpyroSoft Solutions S.A. All rights reserved.
 # #
+# type: ignore
+# This module does not seem to be used anywhere
 
 
 def is_multiline(line):

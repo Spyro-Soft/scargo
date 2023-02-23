@@ -5,6 +5,7 @@
 
 """Generate toml for scargo project"""
 import os
+from typing import Any, Dict
 
 from jinja2 import Environment, FileSystemLoader
 
@@ -18,7 +19,7 @@ class TomlTemplate:
     Is providing basic environmental variable setup
     """
 
-    def __init__(self, output_path, values):
+    def __init__(self, output_path: str, values: Dict[str, Any]) -> None:
         self.scargo_path = SCARGO_PGK_PATH
         self.output_path = output_path
         self.values = values
@@ -28,7 +29,7 @@ class TomlTemplate:
             lstrip_blocks=True,
         )
 
-    def create_toml_file(self):
+    def create_toml_file(self) -> None:
         """Function which creates a toml file using jinja"""
         with open(self.output_path, "w", encoding="utf-8") as out:
             out.write(
@@ -37,13 +38,12 @@ class TomlTemplate:
         logger = get_logger()
         logger.info("Generated scargo.toml file")
 
-    def create_toml(self):
+    def create_toml(self) -> None:
         """Generate toml"""
         self.create_toml_file()
-        return 0
 
 
-def generate_toml(output_file_path, **values):
+def generate_toml(output_file_path: str, **values: Any) -> None:
     """_summary_
 
     Args:
@@ -55,6 +55,4 @@ def generate_toml(output_file_path, **values):
     """
 
     toml_template = TomlTemplate(output_file_path, values)
-    status = toml_template.create_toml()
-
-    return status
+    toml_template.create_toml()

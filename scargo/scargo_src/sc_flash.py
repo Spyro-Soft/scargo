@@ -3,6 +3,7 @@
 # #
 
 import subprocess
+import sys
 from pathlib import Path
 
 from scargo.scargo_src.sc_config import Config
@@ -57,10 +58,14 @@ def flash_stm32(config: Config, flash_profile: str = "Debug") -> None:
     logger = get_logger()
 
     project_path = get_project_root()
-    bin_name = config.project.bin_name.lower()
+    bin_name = config.project.bin_name
+    if not bin_name:
+        logger.error("No bin_name in config!")
+        sys.exit(1)
+    bin_name = bin_name.lower()
     bin_path = project_path / "build" / flash_profile / "bin" / f"{bin_name}.bin"
 
-    flash_start = hex(config.stm32.flash_start)
+    flash_start = hex(config.get_stm32_config().flash_start)
 
     if not bin_path.exists():
         logger.error("%s does not exist", bin_path)
