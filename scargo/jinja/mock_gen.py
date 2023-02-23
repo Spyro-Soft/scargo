@@ -3,10 +3,9 @@
 # @copyright Copyright (C) 2023 SpyroSoft Solutions S.A. All rights reserved.
 # #
 
-import json
 import os
-from argparse import ArgumentParser
 from pathlib import Path
+from typing import Iterable, List, Optional, Sequence, Tuple
 
 import clang.cindex as cindex
 from jinja2 import Environment, FileSystemLoader
@@ -16,11 +15,10 @@ from scargo.jinja.mock_utils.data_classes import (
     ArgumentDescriptor,
     HeaderDescriptor,
     MockClassDescriptor,
+    MockDescriptor,
     MockFunctionDescriptor,
     MockNamespaceDescriptor,
 )
-from scargo.jinja.mock_utils.error_classes import MockNotImplemented
-from scargo.jinja.mock_utils.scraping_utils import missing_data_diff
 
 # define paths
 absolute_path = Path(__file__).parent.absolute()
@@ -37,47 +35,13 @@ jinja_env = Environment(
 missing_mocks_json = os.path.join(absolute_path, "mock_utils", "missing_mocks.json")
 
 
-def option_parser_init():
-    """This function parses the arguments which are given and
-    returns known arguments for path and exclude and unknown arguments"""
-
-    parser = ArgumentParser(epilog="The script creates mock files for cpp code.")
-
-    parser.add_argument(
-        "-p",
-        "--path_to_src",
-        type=str,
-        default=SRC_DIR,
-        help="Path to source directory or single header file",
-    )
-
-    parser.add_argument(
-        "-e",
-        "--exclude",
-        default=[],
-        action="append",
-        help="Exclude directories",
-    )
-
-    parser.add_argument(
-        "-f",
-        "--force",
-        action="store_true",
-        help="Force mock folder override",
-    )
-
-    parser.add_argument(
-        "-c",
-        "--check",
-        action="store_true",
-        help="Check if the mocks exist",
-    )
-
-    args = parser.parse_args()
-    return args
-
-
-def header_files_in_path(path_to_src, exclude, force, check_only, src_dir=SRC_DIR):
+def header_files_in_path(
+    path_to_src: Path,
+    exclude: Sequence[str],
+    force: bool,
+    check_only: bool,
+    src_dir: str = SRC_DIR,
+) -> List[Tuple[str, str, str]]:
     """
     Returns list of the .h files in the path.
     If not check_only it also adds paths to the CMakelist.
@@ -124,61 +88,12 @@ def header_files_in_path(path_to_src, exclude, force, check_only, src_dir=SRC_DI
     return header_files
 
 
-def check_mocks(path_to_src, exclude, force, check_only):
-    """
-    Check if there is a mock implementations for cpp files in the path.
-    """
-    src_dir = "main" if "main" in path_to_src else SRC_DIR
-    header_files = header_files_in_path(
-        path_to_src, exclude, force, check_only, src_dir
-    )
-    missing_mocks = []
-    missing_classes = {}
-    missing_methods = {}
-
-    for root, mock_root, file in header_files:
-        src_header = os.path.join(root, file)
-        dst_header = os.path.join(mock_root, file)
-
-        # Skip files in the excluded list
-        if exclude and src_header in exclude:
-            print("Excluded:", src_header)
-            continue
-
-        # Scraping data from exist source and mock files to compare
-        if os.path.isfile(dst_header):
-            # Read classes and functions from the source header
-            header_data = parse_file(src_header)
-            # Check classes and methods in mock file
-            mock_file = open(dst_header, encoding="utf-8").read()
-            for mock_class in header_data.classes:
-                if mock_class.name and mock_class.name not in mock_file:
-                    missing_classes.setdefault(src_header, []).append(mock_class.name)
-                    continue
-                for method in mock_class.methods:
-                    if method.name not in mock_file:
-                        missing_methods.setdefault(src_header, []).append(method.name)
-            for mock_class in header_data.one_line_classes:
-                mock_class = mock_class.strip().replace(";", "")
-                if mock_class not in mock_file:
-                    missing_classes.setdefault(src_header, []).append(mock_class)
-        else:
-            missing_mocks.append(src_header)
-
-    data = {
-        "missing_mocks": missing_mocks,
-        "missing_classes": missing_classes,
-        "missing_methods": missing_methods,
-    }
-
-    with open(missing_mocks_json, encoding="utf-8") as json_file:
-        old_data = json.load(json_file)
-
-    if missing_data_diff(old_data, data):
-        raise MockNotImplemented()
-
-
-def generate_mocks(path_to_src: Path, exclude=(), force=False, check_only=False):
+def generate_mocks(
+    path_to_src: Path,
+    exclude: Sequence[str] = (),
+    force: bool = False,
+    check_only: bool = False,
+) -> None:
     """
     Generates mock header and implementations for specified source headers.
     Creates directories and CMake lists where required.
@@ -233,18 +148,22 @@ def generate_mocks(path_to_src: Path, exclude=(), force=False, check_only=False)
         print("Generated:", src_header)
 
 
-def find_namespaces_in_file(cursor, filename):
+def find_namespaces_in_file(cursor: cindex.Cursor, filename: str) -> Iterable[str]:
     for i in cursor.walk_preorder():
         if i.kind != cindex.CursorKind.NAMESPACE:
             continue
-        if i.location.file.name != filename:
+        if i.location.file != filename:
             continue
         yield i.spelling
 
 
 class ParamsExtractor:
     @staticmethod
-    def extract_params_of_children_in_file(cursor, type_list, filename=None):
+    def extract_params_of_children_in_file(
+        cursor: cindex.Cursor,
+        type_list: List[cindex.CursorKind],
+        filename: Optional[str] = None,
+    ) -> List[Optional[MockDescriptor]]:
         return [
             ParamsExtractor.extract_params(x)
             for x in ParamsExtractor.find_children_of_type_in_file(
@@ -253,38 +172,45 @@ class ParamsExtractor:
         ]
 
     @staticmethod
-    def find_children_of_type_in_file(cursor, type_list, filename=None):
+    def find_children_of_type_in_file(
+        cursor: cindex.Cursor,
+        type_list: List[cindex.CursorKind],
+        filename: Optional[str] = None,
+    ) -> Iterable[cindex.Cursor]:
         for i in cursor.walk_preorder():
             if i.kind not in type_list:
                 continue
-            if filename is not None and i.location.file.name != filename:
+            if filename is not None and i.location.file != filename:
                 continue
             yield i
 
     @staticmethod
-    def extract_params(cursor):
+    def extract_params(cursor: cindex.Cursor) -> Optional[MockDescriptor]:
         if cursor.kind == cindex.CursorKind.FUNCTION_DECL:
-            return __class__._extract_function_params(cursor)
+            return ParamsExtractor._extract_function_params(cursor)
         elif cursor.kind == cindex.CursorKind.CXX_METHOD:
-            return __class__._extract_method_params(cursor)
+            return ParamsExtractor._extract_method_params(cursor)
         elif cursor.kind == cindex.CursorKind.CONSTRUCTOR:
-            return __class__._extract_method_params(cursor)
+            return ParamsExtractor._extract_method_params(cursor)
         elif cursor.kind == cindex.CursorKind.DESTRUCTOR:
-            return __class__._extract_method_params(cursor)
+            return ParamsExtractor._extract_method_params(cursor)
         elif cursor.kind == cindex.CursorKind.CLASS_DECL:
-            return __class__._extract_class_params(cursor)
+            return ParamsExtractor._extract_class_params(cursor)
         elif cursor.kind == cindex.CursorKind.NAMESPACE:
-            return __class__._extract_namespace_params(cursor)
+            return ParamsExtractor._extract_namespace_params(cursor)
+        assert False
 
     @staticmethod
-    def _extract_method_params(cursor):
+    def _extract_method_params(
+        cursor: cindex.Cursor,
+    ) -> Optional[MockFunctionDescriptor]:
         fun_ret_val = cursor.result_type.spelling
         fun_name = cursor.spelling
         fun_args = []
         specifiers = []
 
         if cursor.access_specifier.name != "PUBLIC":
-            return
+            return None
         if cursor.is_virtual_method():
             specifiers.append("override")
         if cursor.is_const_method():
@@ -297,7 +223,7 @@ class ParamsExtractor:
         )
 
     @staticmethod
-    def _extract_function_params(cursor):
+    def _extract_function_params(cursor: cindex.Cursor) -> MockFunctionDescriptor:
         fun_ret_val = cursor.result_type.spelling
         fun_name = cursor.spelling
         fun_args = []
@@ -307,11 +233,11 @@ class ParamsExtractor:
         return MockFunctionDescriptor(fun_name, fun_ret_val, "", arguments=fun_args)
 
     @staticmethod
-    def _extract_namespace_params(cursor):
+    def _extract_namespace_params(cursor: cindex.Cursor) -> MockNamespaceDescriptor:
         return MockNamespaceDescriptor(cursor.spelling)
 
     @staticmethod
-    def _extract_class_params(cursor):
+    def _extract_class_params(cursor: cindex.Cursor) -> MockClassDescriptor:
         cls = MockClassDescriptor(cursor.spelling, f"Mock{cursor.spelling}")
 
         methods = ParamsExtractor.find_children_of_type_in_file(
@@ -325,7 +251,7 @@ class ParamsExtractor:
         return cls
 
 
-def parse_file(file_path):
+def parse_file(file_path: str) -> HeaderDescriptor:
     """TODO documentation
     look here for available types which can be extracted
     https://clang.llvm.org/doxygen/group__CINDEX.html
@@ -353,19 +279,3 @@ def parse_file(file_path):
         translation_unit.cursor, [cindex.CursorKind.CLASS_DECL], file_path
     )
     return hdr
-
-
-def main():
-    args = option_parser_init()
-
-    if args.check and args.force:
-        raise ValueError("You shouldn't use the check and force option together.")
-    if args.check:
-        check_mocks(args.path_to_src, args.exclude, args.force, args.check)
-        pass
-    else:
-        generate_mocks(args.path_to_src, args.exclude, args.force, args.check)
-
-
-if __name__ == "__main__":
-    main()

@@ -28,7 +28,8 @@ def scargo_clean() -> None:
     source_directories = [project_path, test_dir]
 
     for source_dir in source_directories:
-        build_dir = _case_insensitive_find_dir(source_dir, "build")
-        if build_dir and build_dir.exists():
-            shutil.rmtree(build_dir)
-            logger.info("Removed %s", build_dir)
+        if source_dir:
+            build_dir = _case_insensitive_find_dir(source_dir, "build")
+            if build_dir and build_dir.exists():
+                shutil.rmtree(build_dir)
+                logger.info("Removed %s", build_dir)

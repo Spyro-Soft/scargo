@@ -8,12 +8,13 @@ import fileinput
 import os
 import re
 import sys
-from argparse import ArgumentParser
+from argparse import ArgumentParser, Namespace
+from typing import Callable, Iterable, List, Optional, Sequence, Tuple
 
 file_extensions = (".py", ".txt", ".sh", "Dockerfile")
 
 
-def option_parser_init():
+def option_parser_init() -> Tuple[Namespace, List[str]]:
     parser = ArgumentParser(
         epilog="The scripts checks if copyright info in files is correct."
     )
@@ -32,6 +33,7 @@ def option_parser_init():
     parser.add_argument(
         "-e",
         "--exclude",
+        nargs="*",
         help="exclude repository directory",
     )
 
@@ -92,14 +94,14 @@ SHEBANG_REGEX = r"^#!"
 
 
 class FilesToCheck:
-    lang_c = []
-    lang_python = []
-    lang_cmake = []
-    lang_sh = []
-    lang_data = []
-    lang_other = []
+    lang_c: List[str] = []
+    lang_python: List[str] = []
+    lang_cmake: List[str] = []
+    lang_sh: List[str] = []
+    lang_data: List[str] = []
+    lang_other: List[str] = []
 
-    def add_file_to_check(self, file, repo_path):
+    def add_file_to_check(self, file: str, repo_path: str) -> int:
         if os.path.islink(file):
             # ignore symbolic links (they are likely to be found as file again)
             return 0
@@ -142,7 +144,7 @@ class FilesToCheck:
         return 1
 
 
-def get_all_files(repo_path, exclude_dir):
+def get_all_files(repo_path: str, exclude_dir: Sequence[str]) -> FilesToCheck:
     files_to_check = FilesToCheck()
     files = []
     for root, d_names, f_names in os.walk(repo_path):
@@ -159,10 +161,10 @@ def get_all_files(repo_path, exclude_dir):
 
 
 def check_correct_copyright_embedded(
-    file,
-    require_doxygen_tag=False,
-    enable_verbose_print=False,
-):
+    file: str,
+    require_doxygen_tag: bool = False,
+    enable_verbose_print: bool = False,
+) -> Optional[int]:
     if file.endswith(file_extensions):
         for line in open(file, encoding="utf-8"):
             copyright_regex = COPYRIGHT_CHECK_REGEX
@@ -176,9 +178,10 @@ def check_correct_copyright_embedded(
             print(PRINT_PREFIX + "No matching copyright found in file: " + file)
         # no matching copyright found
         return 1
+    return None
 
 
-def check_copyrights(files_to_check):
+def check_copyrights(files_to_check: FilesToCheck) -> int:
     fail_count = 0
     for file in list(
         files_to_check.lang_c + files_to_check.lang_python + files_to_check.lang_sh
@@ -217,7 +220,7 @@ def check_copyrights(files_to_check):
         return 0
 
 
-def is_any_copyright_embedded(file):
+def is_any_copyright_embedded(file: str) -> bool:
     for line in open(file):
         if re.search(COPYRIGHT_ANY_CHECK_REGEX, line) is not None:
             # some copyright found
@@ -226,7 +229,7 @@ def is_any_copyright_embedded(file):
     return False
 
 
-def is_correct_copyright_with_any_year_embedded(file):
+def is_correct_copyright_with_any_year_embedded(file: str) -> bool:
     for line in open(file):
         if re.search(COPYRIGHT_CHECK_REGEX, line) is not None:
             # some copyright found
@@ -242,7 +245,7 @@ class FixStats:
     unsupported_extensions_count = 0
 
 
-def check_copyright_before_fix(file, fix_stats):
+def check_copyright_before_fix(file: str, fix_stats: FixStats) -> int:
     if is_any_copyright_embedded(file):
         if is_correct_copyright_with_any_year_embedded(file):
             return 3
@@ -260,7 +263,9 @@ def check_copyright_before_fix(file, fix_stats):
     return 0
 
 
-def fix_copyright_common(file, fix_stats, copyright_string, check_shebang=True):
+def fix_copyright_common(
+    file: str, fix_stats: FixStats, copyright_string: str, check_shebang: bool = True
+) -> None:
     with fileinput.input(files=file, inplace=True) as f:
         for line in f:
             if f.isfirstline():
@@ -276,7 +281,7 @@ def fix_copyright_common(file, fix_stats, copyright_string, check_shebang=True):
     fix_stats.fixed_count += 1
 
 
-def fix_copyright_year(file, fix_stats):
+def fix_copyright_year(file: str, fix_stats: FixStats) -> None:
     copyright_fixed = False
     with fileinput.input(files=file, inplace=True) as f:
         for line in f:
@@ -291,27 +296,27 @@ def fix_copyright_year(file, fix_stats):
         fix_stats.fixed_count += 1
 
 
-def fix_copyright_lang_c(file, fix_stats):
+def fix_copyright_lang_c(file: str, fix_stats: FixStats) -> None:
     fix_copyright_common(file, fix_stats, COPYRIGHT_HEADER_LANG_C_STRING)
 
 
-def fix_copyright_lang_python(file, fix_stats):
+def fix_copyright_lang_python(file: str, fix_stats: FixStats) -> None:
     fix_copyright_common(file, fix_stats, COPYRIGHT_HEADER_LANG_PYTHON_STRING)
 
 
-def fix_copyright_lang_sh(file, fix_stats):
+def fix_copyright_lang_sh(file: str, fix_stats: FixStats) -> None:
     fix_copyright_common(file, fix_stats, COPYRIGHT_HEADER_LANG_SH_STRING)
 
 
-def fix_copyright_lang_data(file, fix_stats):
+def fix_copyright_lang_data(file: str, fix_stats: FixStats) -> None:
     fix_copyright_common(file, fix_stats, COPYRIGHT_HEADER_LANG_DATA_STRING)
 
 
-def fix_copyright_lang_cmake(file, fix_stats):
+def fix_copyright_lang_cmake(file: str, fix_stats: FixStats) -> None:
     fix_copyright_common(file, fix_stats, COPYRIGHT_HEADER_LANG_CMAKE_STRING)
 
 
-def fix_copyright_lang_other(file, fix_stats):
+def fix_copyright_lang_other(file: str, fix_stats: FixStats) -> None:
     print(
         PRINT_PREFIX + " fix copyright not supported for this file extension: " + file
     )
@@ -319,12 +324,12 @@ def fix_copyright_lang_other(file, fix_stats):
 
 
 def fix_copyright(
-    files,
-    lang_func,
-    fix_stats,
-    check_before_fix=True,
-    check_doxygen_copyright_tag=False,
-):
+    files: Iterable[str],
+    lang_func: Callable[[str, FixStats], None],
+    fix_stats: FixStats,
+    check_before_fix: bool = True,
+    check_doxygen_copyright_tag: bool = False,
+) -> None:
     update_copyright_year_only = False
     for file in files:
         if (
@@ -351,7 +356,7 @@ def fix_copyright(
             lang_func(file, fix_stats)
 
 
-def fix_copyrights(files_to_check):
+def fix_copyrights(files_to_check: FilesToCheck) -> int:
     fix_stats = FixStats()
     fix_copyright(
         files_to_check.lang_c,
@@ -401,7 +406,7 @@ def fix_copyrights(files_to_check):
     return 0
 
 
-def main():
+def main() -> None:
     (args, unknown_args) = option_parser_init()
 
     files_to_check = get_all_files(args.workdir, args.exclude)

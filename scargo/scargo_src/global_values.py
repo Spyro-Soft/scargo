@@ -9,8 +9,8 @@ from pathlib import Path
 DESCRIPTION = "C/C++ package and software development life cycle manager based on RUST cargo idea."
 
 SCARGO_PGK_PATH = (
-    Path(pkgutil.get_loader("scargo").path).parent
-    if pkgutil.get_loader("scargo").path
+    Path(pkgutil.get_loader("scargo").path).parent  # type: ignore[union-attr]
+    if pkgutil.get_loader("scargo").path  # type: ignore[union-attr]
     else Path(Path(__file__).absolute()).parent
 )
 SCARGO_DEFAULT_BUILD_ENV = "docker"

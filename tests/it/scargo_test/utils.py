@@ -3,14 +3,15 @@ from pathlib import Path
 from typing import IO, Any, Mapping, Optional, Sequence, Union
 
 import toml
-from click import Command
-from typer.testing import CliRunner, Result
+from click.testing import Result
+from typer import Typer
+from typer.testing import CliRunner
 
 
 class ScargoTestRunner(CliRunner):
-    def invoke(  # type: ignore
+    def invoke(  # type: ignore[override]
         self,
-        use_cli: Command,
+        use_cli: Typer,
         args: Optional[Union[str, Sequence[str]]] = None,
         input: Optional[Union[bytes, str, IO[Any]]] = None,
         env: Optional[Mapping[str, str]] = None,
@@ -19,7 +20,12 @@ class ScargoTestRunner(CliRunner):
         **extra: Any,
     ) -> Result:
         temp = sys.argv
-        sys.argv = ["scargo", *args]
+        if not args:
+            sys.argv = ["scargo"]
+        elif isinstance(args, str):
+            sys.argv = ["scargo", args]
+        else:
+            sys.argv = ["scargo", *args]
         result = super().invoke(
             use_cli,
             args=args,
@@ -33,7 +39,7 @@ class ScargoTestRunner(CliRunner):
         return result
 
 
-def add_libs_to_toml_file(*libs: str, toml_path: Path = Path("scargo.toml")):
+def add_libs_to_toml_file(*libs: str, toml_path: Path = Path("scargo.toml")) -> None:
     data = toml.load(toml_path)
     data["dependencies"]["general"].extend(libs)
 
@@ -45,17 +51,19 @@ def get_project_name(file_path: Path = Path("scargo.toml")) -> str:
     data = toml.load(file_path)
     project_name = data["project"]["name"]
 
-    return project_name
+    return project_name  # type: ignore[no-any-return]
 
 
 def get_project_version(file_path: Path = Path("scargo.toml")) -> str:
     data = toml.load(file_path)
     project_version = data["project"]["version"]
 
-    return project_version
+    return project_version  # type: ignore[no-any-return]
 
 
-def remove_dockerfile_path_from_toml_file(toml_path: Path = Path("scargo.toml")):
+def remove_dockerfile_path_from_toml_file(
+    toml_path: Path = Path("scargo.toml"),
+) -> None:
     data = toml.load(toml_path)
     data["project"]["docker-file"] = ""
 
@@ -67,7 +75,7 @@ def get_copyright_text(file_path: Path = Path("scargo.toml")) -> str:
     data = toml.load(file_path)
     copyright_text = data["check"]["copyright"]["description"]
 
-    return copyright_text
+    return copyright_text  # type: ignore[no-any-return]
 
 
 def assert_str_in_file(file_path: Path, str_to_check: str) -> bool:
@@ -82,7 +90,7 @@ def get_bin_name(file_path: Path = Path("scargo.toml")) -> str:
     data = toml.load(file_path)
     bin_name = data["project"]["bin_name"]
 
-    return bin_name
+    return bin_name  # type: ignore[no-any-return]
 
 
 def add_profile_to_toml(
@@ -92,7 +100,7 @@ def add_profile_to_toml(
     value: str,
     value2: str,
     toml_path: Path = Path("scargo.toml"),
-):
+) -> None:
     data = toml.load(toml_path)
     temp_dict = dict()
     temp_dict[profile] = {var: value, var2: value2}

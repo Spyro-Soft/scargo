@@ -34,15 +34,15 @@ class _EnvTemplate(BaseGen):
         BaseGen.__init__(self, self.template_dir)
         self.env_output_path = output_path / ENV_DEFAULT_NAME
 
-    def generate_env(self):
+    def generate_env(self) -> None:
         self.create_file_from_template(
             "env.txt.j2",
             self.env_output_path,
             overwrite=False,
-            env=_EnvironmentDescriptor(),
+            template_params={"env": _EnvironmentDescriptor()},
         )
 
 
-def generate_env(output_dir_path: Path):
+def generate_env(output_dir_path: Path) -> None:
     env_compose_template = _EnvTemplate(output_dir_path)
     env_compose_template.generate_env()

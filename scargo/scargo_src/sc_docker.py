@@ -6,16 +6,17 @@
 import subprocess
 import sys
 from pathlib import Path
-from typing import Sequence
+from typing import List, Optional, Sequence
 
 import docker
 
+from scargo.scargo_src.sc_config import ProjectConfig
 from scargo.scargo_src.sc_logger import get_logger
 from scargo.scargo_src.sc_src import get_scargo_config_or_exit
 from scargo.scargo_src.utils import get_project_root
 
 
-def scargo_docker_build(docker_opts: Sequence) -> None:
+def scargo_docker_build(docker_opts: Sequence[str]) -> None:
     """
     Build docker
 
@@ -37,8 +38,8 @@ def scargo_docker_build(docker_opts: Sequence) -> None:
 
 
 def scargo_docker_run(
-    docker_opts: Sequence,
-    command: str = None,
+    docker_opts: Sequence[str],
+    command: Optional[str] = None,
 ) -> None:
     """
     Run docker
@@ -67,7 +68,7 @@ def scargo_docker_run(
         sys.exit(1)
 
 
-def scargo_docker_exec(docker_opts: Sequence):
+def scargo_docker_exec(docker_opts: List[str]) -> None:
     """
     Exec docker
 
@@ -102,7 +103,7 @@ def scargo_docker_exec(docker_opts: Sequence):
         sys.exit(1)
 
 
-def _get_docker_path():
+def _get_docker_path() -> Path:
     project_path = get_project_root()
     # do not rebuild dockers in the docker
     if Path(project_path, ".dockerenv").exists():
@@ -112,5 +113,5 @@ def _get_docker_path():
     return Path(project_path, ".devcontainer")
 
 
-def _get_project_config():
+def _get_project_config() -> ProjectConfig:
     return get_scargo_config_or_exit().project

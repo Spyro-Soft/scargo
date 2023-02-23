@@ -24,11 +24,11 @@ class _ScargoGenDoc:
         self._doxygen_path = doxygen_path
         self._doc_dir_path = doc_dir_path
 
-    def create_default_doxyfile(self):
+    def create_default_doxyfile(self) -> None:
         """Create default doxyfile"""
         subprocess.check_call("doxygen -g", shell=True, cwd=self._doc_dir_path)
 
-    def update_doxyfile(self):
+    def update_doxyfile(self) -> None:
         """Update Doxyfile configuration according specified values"""
         project_name = self._config.project.name
         project_path = Path(Path().absolute())
@@ -57,12 +57,12 @@ class _ScargoGenDoc:
         with doxyfile_path.open("w", encoding="utf-8") as doxyfile:
             doxyfile.writelines(rewrite_file)
 
-    def generate_doxygen(self):
+    def generate_doxygen(self) -> None:
         """Generate doxygen according to doxyfile"""
         subprocess.check_call("doxygen", shell=True, cwd=self._doc_dir_path)
 
 
-def _open_doc(doc_dir_path: Path):
+def _open_doc(doc_dir_path: Path) -> None:
     logger = get_logger()
 
     html_file_path = doc_dir_path / "html/index.html"

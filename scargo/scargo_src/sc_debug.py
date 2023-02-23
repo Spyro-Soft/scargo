@@ -28,14 +28,20 @@ class _ScargoDebug:
             )
             sys.exit(1)
 
-        self._bin_path = bin_path or self._get_bin_path(config.project.bin_name)
+        bin_name = config.project.bin_name
+        bin_path = bin_path or (self._get_bin_path(bin_name) if bin_name else None)
+        if not bin_path:
+            self._logger.error("No bin_name in config")
+            sys.exit(1)
+        self._bin_path = bin_path
         if not self._bin_path.exists():
             self._logger.error("Binary %s does not exist", self._bin_path)
             self._logger.info("Did you run scargo build --profile Debug?")
             sys.exit(1)
 
         if self._target.family == "stm32":
-            self._chip = config.stm32.chip
+            stm32_config = config.get_stm32_config()
+            self._chip = stm32_config.chip
             if not self._chip:
                 self._logger.error("Chip label not defined in toml.")
                 self._logger.info(
@@ -43,16 +49,16 @@ class _ScargoDebug:
                 )
                 sys.exit(1)
 
-    def run_debugger(self):
+    def run_debugger(self) -> None:
         if self._target.family == "x86":
             self._debug_x86()
         elif self._target.family == "stm32":
             self._debug_stm32()
 
-    def _debug_x86(self):
+    def _debug_x86(self) -> None:
         subprocess.run(f"gdb {self._bin_path}", shell=True)
 
-    def _debug_stm32(self):
+    def _debug_stm32(self) -> None:
         openocd_path = find_program_path("openocd")
         if not openocd_path:
             self._logger.error("Could not find openocd.")
@@ -92,7 +98,7 @@ class _ScargoDebug:
         return bin_path
 
 
-def scargo_debug(bin_path: Optional[Path]):
+def scargo_debug(bin_path: Optional[Path]) -> None:
     config = prepare_config()
     sc_debug = _ScargoDebug(config, bin_path)
     sc_debug.run_debugger()

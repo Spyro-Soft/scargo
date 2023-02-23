@@ -15,26 +15,26 @@ class _ConanTemplate(BaseGen):
     This class is a container for cmake file which is used by cmake.
     """
 
-    def __init__(self):
+    def __init__(self) -> None:
         template_dir = Path(SCARGO_PGK_PATH, "jinja", "conan")
         BaseGen.__init__(self, template_dir)
 
-    def generate_conanfile(self, config: Config):
+    def generate_conanfile(self, config: Config) -> None:
         self.create_file_from_template(
             "conanfile.py.j2",
             get_project_root() / "conanfile.py",
-            config=config,
+            template_params={"config": config},
         )
 
-    def generate_conanfile_tests(self, config: Config):
+    def generate_conanfile_tests(self, config: Config) -> None:
         self.create_file_from_template(
             "conanfiletest.j2",
             get_project_root() / "tests/conanfile.py",
-            config=config,
+            template_params={"config": config},
         )
 
 
-def generate_conanfile(config: Config):
+def generate_conanfile(config: Config) -> None:
     conanfile_template = _ConanTemplate()
     conanfile_template.generate_conanfile(config)
     conanfile_template.generate_conanfile_tests(config)
