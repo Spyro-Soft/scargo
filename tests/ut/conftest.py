@@ -38,3 +38,9 @@ def get_lock_file() -> Config:
 def mock_subprocess_run() -> Generator[MagicMock, None, None]:
     with patch("subprocess.run") as mock_subprocess_run:
         yield mock_subprocess_run
+
+
+@pytest.fixture
+def mock_subprocess_check_call() -> Generator[MagicMock, None, None]:
+    with patch("subprocess.check_call") as mock_subprocess_check_call:
+        yield mock_subprocess_check_call
