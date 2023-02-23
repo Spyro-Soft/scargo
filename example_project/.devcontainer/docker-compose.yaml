@@ -25,4 +25,4 @@ services:
     volumes:
       - ..:/workspace
       - /dev:/dev
-    command: sleep infinity 
+    command: sleep infinity

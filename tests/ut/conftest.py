@@ -1,5 +1,7 @@
 import os
 from pathlib import Path
+from typing import Generator
+from unittest.mock import MagicMock, patch
 
 import pytest
 
@@ -30,3 +32,9 @@ def create_new_project_docker(tmp_path: Path) -> None:
 @pytest.fixture()
 def get_lock_file() -> Config:
     return prepare_config()
+
+
+@pytest.fixture
+def mock_subprocess_run() -> Generator[MagicMock, None, None]:
+    with patch("subprocess.run") as mock_subprocess_run:
+        yield mock_subprocess_run

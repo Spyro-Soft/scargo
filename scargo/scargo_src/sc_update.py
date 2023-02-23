@@ -8,7 +8,6 @@ import subprocess
 import sys
 from pathlib import Path
 
-from scargo import __version__ as ver
 from scargo.jinja.cicd_gen import generate_cicd
 from scargo.jinja.cmake_gen import generate_cmake
 from scargo.jinja.conan_gen import generate_conanfile

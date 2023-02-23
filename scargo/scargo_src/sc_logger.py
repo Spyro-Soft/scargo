@@ -46,7 +46,7 @@ def get_logger(name: str = "scargo") -> logging.Logger:
 
     project_root = get_project_root_or_none()
     if project_root:
-        log_path = project_root / "{}.log".format(name)
+        log_path = project_root / f"{name}.log"
         file_handler = logging.FileHandler(log_path)
         file_handler.setLevel(file_log_level)
         formatter = logging.Formatter(

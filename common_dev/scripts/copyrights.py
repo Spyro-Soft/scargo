@@ -166,7 +166,7 @@ def check_correct_copyright_embedded(
     enable_verbose_print: bool = False,
 ) -> Optional[int]:
     if file.endswith(file_extensions):
-        for line in open(file, "r", encoding="utf-8"):
+        for line in open(file, encoding="utf-8"):
             copyright_regex = COPYRIGHT_CHECK_REGEX
             copyright_check_with_doxygen = COPYRIGHT_CHECK_WITH_DOXYGEN_REGEX
             if require_doxygen_tag:

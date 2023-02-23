@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 # #
 # @copyright Copyright (C) 2023 SpyroSoft Solutions S.A. All rights reserved.
 # #
@@ -9,7 +8,6 @@ import os
 import subprocess
 import sys
 from pathlib import Path
-from typing import Union
 
 from scargo.scargo_src.sc_logger import get_logger
 from scargo.scargo_src.sc_src import prepare_config

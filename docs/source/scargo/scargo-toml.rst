@@ -5,11 +5,11 @@ scargo.toml file basis
 .. image:: ../_static/scargo_toml_update.gif
    :alt: scargo update after scargo.toml modification
    :align: center
-   
+
 This section describes possible options which can be set in the scargo.toml file.
 
 [project]
---------- 
+---------
 **name** = (string) <project name e.g."esp322">
 
 **version** = (string) <project version must be major.minor.patch e.g. "0.1.0")
@@ -22,7 +22,7 @@ This section describes possible options which can be set in the scargo.toml file
 
 **build-env** = (string) <"docker" or "native">
 
-**docker-file** = (string) (path to custom docker file. Shall not start with FROM keyword) 
+**docker-file** = (string) (path to custom docker file. Shall not start with FROM keyword)
 
 **docker-image-tag** = (string) (e.g. "esp322-dev:1.0")
 
@@ -39,7 +39,7 @@ This section describes possible options which can be set in the scargo.toml file
 **in-repo-conan-cache** = (bool) (If set to true conan cache is placed in the repo root - so it persists)
 
 [profile.Debug]
-------------------  
+------------------
 **cflags**   = (string) (c compiler flags e.g. "-g")
 
 **cxxflags** = (string) (cpp compiler flags e.g."-g")
@@ -51,7 +51,7 @@ This section describes possible options which can be set in the scargo.toml file
 **cxxflags** = (string) (cpp compiler flags e.g. "-O3 -DNDEBUG")
 
 [profile.RelWithDebInfo]
---------------------------- 
+---------------------------
 **cflags**   = (string) (c compiler flags e.g. "-O2 -g -DNDEBUG")
 
 **cxxflags** = (string) (cpp compiler flags e.g. "-O2 -g -DNDEBUG")
@@ -63,27 +63,27 @@ This section describes possible options which can be set in the scargo.toml file
 **cxxflags** = (string) (cpp compiler flags e.g."-Os -DNDEBUG")
 
 [check]
--------  
+-------
 **exclude** = (string list)(path to excluded dirs e.g. [])
 
 [check.pragma]
---------------  
+--------------
 **exclude** = (string list)(path to excluded dirs e.g. [])
 
 [check.copyright]
------------------ 
+-----------------
 **exclude** = (string list)(path to excluded dirs e.g. [])
 
 [check.todo]
-------------  
+------------
 **exclude** = (string list)(path to excluded dirs e.g. [])
 
 [check.clang-format]
---------------------  
+--------------------
 **exclude** = (string list)(path to excluded dirs e.g. [])
 
 [check.clang-tidy]
-------------------  
+------------------
 **exclude** = (string list)(path to excluded dirs e.g. [])
 
 [check.cyclomatic]
@@ -95,7 +95,7 @@ This section describes possible options which can be set in the scargo.toml file
 **exclude** = (string list)(path to excluded dirs e.g. [])
 
 [tests]
--------  
+-------
 **cc**  = (string) (c compiler flags e.g. "gcc")
 
 **cxx** = (string) (cpp compiler flags e.g."g++")
@@ -109,7 +109,7 @@ This section describes possible options which can be set in the scargo.toml file
 [dependencies]
 --------------
 Add external dependencies in conan style e.g.:
-:: 
+::
 
     general = [
         "demo_lib/0.1.0"
@@ -120,7 +120,7 @@ Add external dependencies in conan style e.g.:
     ]
 
 [conan.repo]
-------------  
+------------
 **gitlab** = (string) (url to conan repo e.g. "https://git.spyrosoft.it/api/v4/projects/159/packages/conan")
 
 Applicable for esp32 only

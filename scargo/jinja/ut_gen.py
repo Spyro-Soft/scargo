@@ -161,7 +161,7 @@ class _UnitTestsGen(BaseGen):
         includes = []
 
         # open header file to parse the header name and class name
-        with open(header_path, "r", encoding="utf-8") as header:
+        with open(header_path, encoding="utf-8") as header:
             for line in header:
                 line = line.strip()
                 if line.startswith("#include"):

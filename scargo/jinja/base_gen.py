@@ -27,7 +27,7 @@ class BaseGen:
         template_params: Dict[str, Any],
         overwrite: bool = True,
     ) -> None:
-        """Function creates file using jinja template on output path, creates dirs if necessary"""
+        """Creates file using jinja template on output path, creates dirs if necessary"""
         if (
             self._is_file_excluded(output_path)
             or output_path.exists()

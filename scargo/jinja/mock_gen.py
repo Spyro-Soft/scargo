@@ -157,7 +157,7 @@ def find_namespaces_in_file(cursor: cindex.Cursor, filename: str) -> Iterable[st
         yield i.spelling
 
 
-class ParamsExtractor(object):
+class ParamsExtractor:
     @staticmethod
     def extract_params_of_children_in_file(
         cursor: cindex.Cursor,

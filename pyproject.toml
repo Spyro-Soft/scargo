@@ -95,6 +95,9 @@ exclude = [
     "docs/",
 ]
 
+[tool.isort]
+profile = "black"
+
 [tool.mypy]
 strict = true
 disallow_any_unimported = true

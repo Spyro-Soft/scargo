@@ -11,7 +11,7 @@ ENV DEBIAN_FRONTEND noninteractive
 RUN apt update --fix-missing && \
     apt -y install python3.8 python3.8-venv python3-pip \
     binutils git wget \
-    scons build-essential pkg-config \ 
+    scons build-essential pkg-config \
     unzip graphviz nano vim && \
     apt -y install sudo && \
     update-alternatives --install /usr/bin/python python /usr/bin/python3 1 && \

@@ -43,7 +43,7 @@ def search_multiple_strings_in_file(
     line_number = 0
     results = []
     # Open the file in read only mode
-    with open(file_name, "r", encoding="utf-8") as read_obj:
+    with open(file_name, encoding="utf-8") as read_obj:
         # Read all lines in the file one by one
         for line in read_obj:
             line_number += 1

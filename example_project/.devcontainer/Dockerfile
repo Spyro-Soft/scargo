@@ -11,7 +11,7 @@ ENV DEBIAN_FRONTEND noninteractive
 RUN apt update --fix-missing && \
     apt -y install python3.8 python3.8-venv python3-pip \
     binutils git wget \
-    scons build-essential pkg-config \ 
+    scons build-essential pkg-config \
     unzip graphviz nano vim && \
     apt -y install sudo && \
     update-alternatives --install /usr/bin/python python /usr/bin/python3 1 && \
@@ -31,12 +31,12 @@ ENV DEBIAN_FRONTEND noninteractive
 
 # configure wxWidget
 RUN apt update --fix-missing && \
-    apt install -y adwaita-icon-theme-full libwxgtk3.0-gtk3-dev dbus-x11 \ 
+    apt install -y adwaita-icon-theme-full libwxgtk3.0-gtk3-dev dbus-x11 \
     bzr lib32z1 libncurses5:amd64 usbutils xterm minicom
 WORKDIR /opt
 
 FROM x86 AS custom_example_project
-# user can add his docker code below which will be integrated with 
+# user can add his docker code below which will be integrated with
 # main docker file and not overwritten by scargo update
 ENV DEBIAN_FRONTEND noninteractive
 
@@ -78,7 +78,7 @@ ENV SCARGO_VERSION="release_1.0.0"
 ENV SCARGO_PATH="/opt/scargo"
 ENV SCARGO_REPO_URL="https://github.com/Spyro-Soft/scargo.git"
 RUN git clone --single-branch --branch ${SCARGO_VERSION} ${SCARGO_REPO_URL} ${SCARGO_PATH} && \
-    cd scargo && pip install . 
+    cd scargo && pip install .
 
 RUN usermod -a -G dialout ${USER_NAME}
 USER ${USER_NAME}
