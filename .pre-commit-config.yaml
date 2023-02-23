@@ -43,6 +43,23 @@ repos:
       - id: flake8
         additional_dependencies:
           - flake8-absolute-import
+  - repo: https://github.com/pre-commit/mirrors-mypy
+    rev: v1.0.1
+    hooks:
+      - id: mypy
+        args: [--explicit-package-bases]
+        additional_dependencies: [
+          click,
+          jinja2,
+          pydantic,
+          pytest,
+          pytest_subprocess,
+          python-dotenv,
+          tomlkit,
+          typer,
+          types-clang,
+          types-toml,
+        ]
 
 # sets up .pre-commit-ci.yaml to ensure pre-commit dependencies stay up to date
 ci:
