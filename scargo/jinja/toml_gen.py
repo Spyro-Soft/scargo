@@ -3,7 +3,6 @@
 # #
 
 """Generate toml for scargo project"""
-import os
 from typing import Any, Dict
 
 from jinja2 import Environment, FileSystemLoader
@@ -23,7 +22,7 @@ class TomlTemplate:
         self.output_path = output_path
         self.values = values
         self.jinja_env = Environment(
-            loader=FileSystemLoader(os.path.join(self.scargo_path, "jinja/templates")),
+            loader=FileSystemLoader(self.scargo_path / "jinja/templates"),
             trim_blocks=True,
             lstrip_blocks=True,
         )

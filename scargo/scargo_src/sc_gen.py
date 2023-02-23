@@ -2,7 +2,6 @@
 # @copyright Copyright (C) 2023 SpyroSoft Solutions S.A. All rights reserved.
 # #
 
-import os
 import re
 import shutil
 import subprocess
@@ -19,7 +18,7 @@ from scargo.scargo_src.sc_logger import get_logger
 from scargo.scargo_src.sc_src import prepare_config
 from scargo.scargo_src.utils import get_project_root
 
-OUT_FS_DIR = os.path.join("build", "fs")
+OUT_FS_DIR = Path("build", "fs")
 
 
 def scargo_gen(
