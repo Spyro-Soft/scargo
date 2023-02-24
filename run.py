@@ -8,8 +8,8 @@ import os
 import subprocess
 import sys
 
-import scargo
 from common_dev.scripts.documentation import create_doc
+from scargo.cli import cli as scargo_cli
 
 SCRIPT_DIR = os.path.dirname(os.path.realpath(__file__))
 REPO_DIR = SCRIPT_DIR  # '/repo'
@@ -337,7 +337,7 @@ def main() -> None:
 
     if args.program:
         ar = [i.split() for i in args.program]
-        scargo.cli(ar[0])
+        scargo_cli(ar[0])
 
     if args.doc:
         create_doc()
