@@ -312,8 +312,9 @@ def check_clang_format(config: Config, fix_errors: bool, verbose: bool) -> None:
             if fix_errors:
                 logger.info("Fixing...")
 
-                cmd = "clang-format -style=file -i " + str(file_path)
-                subprocess.check_call(cmd, shell=True)
+                subprocess.check_call(
+                    ["clang-format", "-style=file", "-i", str(file_path)]
+                )
 
     if fix_errors:
         logger.info(
@@ -409,12 +410,12 @@ def check_cyclomatic(config: Config) -> None:
     # Collect local excludes.
     exclude_list.extend(config.check.cyclomatic.exclude)
 
-    cmd = "lizard " + source_dir + " -C 25 -w"
+    cmd = ["lizard", source_dir, "-C", "25", "-w"]
 
     for exclude_pattern in exclude_list:
-        cmd = cmd + " --exclude " + exclude_pattern
+        cmd.extend(["--exclude", exclude_pattern])
     try:
-        subprocess.check_call(cmd, shell=True)
+        subprocess.check_call(cmd)
     except subprocess.CalledProcessError:
         logger.error("ERROR: Check cyclomatic fail")
     logger.info("Finished cyclomatic check.")
