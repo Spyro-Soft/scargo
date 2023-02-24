@@ -81,7 +81,7 @@ Source = "https://github.com/spyro-soft/scargo"
 Tracker = "https://github.com/Spyro-Soft/scargo/issues"
 
 [project.scripts]
-scargo = "scargo.__init__:cli"
+scargo = "scargo.cli:cli"
 
 [tool.flit.sdist]
 exclude = [

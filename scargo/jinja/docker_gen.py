@@ -6,8 +6,9 @@ import os
 import shutil
 from pathlib import Path
 
+from scargo import __version__
 from scargo.jinja.base_gen import BaseGen
-from scargo.scargo_src.global_values import SCARGO_PGK_PATH, SCARGO_VERSION
+from scargo.scargo_src.global_values import SCARGO_PGK_PATH
 from scargo.scargo_src.sc_config import ProjectConfig
 from scargo.scargo_src.sc_logger import get_logger
 from scargo.scargo_src.utils import get_project_root
@@ -71,7 +72,7 @@ class _DockerComposeTemplate(BaseGen):
             whl_path = repo_root / whl_path_str
             shutil.copy(repo_root / whl_path, self.docker_path)
             return whl_path.name
-        return f"scargo=={SCARGO_VERSION}"
+        return f"scargo=={__version__}"
 
 
 def generate_docker_compose(docker_path: Path, project_config: ProjectConfig) -> None:

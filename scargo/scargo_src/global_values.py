@@ -8,8 +8,6 @@ from pathlib import Path
 
 DESCRIPTION = "C/C++ package and software development life cycle manager based on RUST cargo idea."
 
-SCARGO_VERSION = "1.0.6"
-
 SCARGO_PGK_PATH = (
     Path(pkgutil.get_loader("scargo").path).parent  # type: ignore[union-attr]
     if pkgutil.get_loader("scargo").path  # type: ignore[union-attr]
