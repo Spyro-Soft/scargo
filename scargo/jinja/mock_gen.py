@@ -6,7 +6,7 @@
 from pathlib import Path
 from typing import List, Optional
 
-import clang.cindex as cindex
+from clang.cindex import Cursor, CursorKind, Index
 from jinja2 import Environment, FileSystemLoader
 
 from scargo.jinja.mock_utils.data_classes import (
@@ -78,40 +78,38 @@ def gen_header(path: Path, template_name: str, header_data: HeaderDescriptor) ->
 
 class ParamsExtractor:
     @staticmethod
-    def extract_cxx_methods(cursor: cindex.Cursor) -> List[MockFunctionDescriptor]:
+    def extract_cxx_methods(cursor: Cursor) -> List[MockFunctionDescriptor]:
         descriptors = (
             ParamsExtractor._extract_method_params(descendant)
             for descendant in cursor.walk_preorder()
-            if descendant.kind == cindex.CursorKind.CXX_METHOD
+            if descendant.kind == CursorKind.CXX_METHOD
         )
 
         return [x for x in descriptors if x is not None]
 
     @staticmethod
     def extract_namespaces(
-        cursor: cindex.Cursor, filename: str
+        cursor: Cursor, filename: str
     ) -> List[MockNamespaceDescriptor]:
         return [
             ParamsExtractor._extract_namespace_params(descendant)
             for descendant in cursor.walk_preorder()
-            if descendant.kind == cindex.CursorKind.NAMESPACE
+            if descendant.kind == CursorKind.NAMESPACE
             and descendant.location.file == filename
         ]
 
     @staticmethod
-    def extract_classes(
-        cursor: cindex.Cursor, filename: str
-    ) -> List[MockClassDescriptor]:
+    def extract_classes(cursor: Cursor, filename: str) -> List[MockClassDescriptor]:
         return [
             ParamsExtractor._extract_class_params(descendant)
             for descendant in cursor.walk_preorder()
-            if descendant.kind == cindex.CursorKind.CLASS_DECL
+            if descendant.kind == CursorKind.CLASS_DECL
             and descendant.location.file == filename
         ]
 
     @staticmethod
     def _extract_method_params(
-        cursor: cindex.Cursor,
+        cursor: Cursor,
     ) -> Optional[MockFunctionDescriptor]:
         fun_ret_val = cursor.result_type.spelling
         fun_name = cursor.spelling
@@ -125,18 +123,18 @@ class ParamsExtractor:
         if cursor.is_const_method():
             specifiers.append("const")
         for i in cursor.walk_preorder():
-            if i.kind == cindex.CursorKind.PARM_DECL:
+            if i.kind == CursorKind.PARM_DECL:
                 fun_args.append(ArgumentDescriptor(i.spelling, i.type.spelling))
         return MockFunctionDescriptor(
             fun_name, fun_ret_val, specifiers, arguments=fun_args
         )
 
     @staticmethod
-    def _extract_namespace_params(cursor: cindex.Cursor) -> MockNamespaceDescriptor:
+    def _extract_namespace_params(cursor: Cursor) -> MockNamespaceDescriptor:
         return MockNamespaceDescriptor(cursor.spelling)
 
     @staticmethod
-    def _extract_class_params(cursor: cindex.Cursor) -> MockClassDescriptor:
+    def _extract_class_params(cursor: Cursor) -> MockClassDescriptor:
         cls = MockClassDescriptor(cursor.spelling, f"Mock{cursor.spelling}")
         cls.methods = ParamsExtractor.extract_cxx_methods(cursor)
         return cls
@@ -155,7 +153,7 @@ def parse_file(file_path: Path) -> HeaderDescriptor:
 
     hdr = HeaderDescriptor(file_name)
 
-    idx = cindex.Index.create()
+    idx = Index.create()
     translation_unit = idx.parse(str(file_path), ["-x", "c++"])
 
     hdr.namespaces = ParamsExtractor.extract_namespaces(

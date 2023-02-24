@@ -3,8 +3,8 @@
 # #
 
 """feature function for scargo"""
-from scargo import __version__ as ver
+from scargo.scargo_src.global_values import SCARGO_VERSION
 
 
 def scargo_version() -> None:
-    print(f"scargo version: {ver}")
+    print(f"scargo version: {SCARGO_VERSION}")

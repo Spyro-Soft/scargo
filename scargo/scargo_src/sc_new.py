@@ -9,10 +9,9 @@ import sys
 from pathlib import Path
 from typing import Optional
 
-from scargo import __version__
 from scargo.jinja.cpp_gen import generate_cpp
 from scargo.jinja.toml_gen import generate_toml
-from scargo.scargo_src.global_values import SCARGO_DEFAULT_CONFIG_FILE
+from scargo.scargo_src.global_values import SCARGO_DEFAULT_CONFIG_FILE, SCARGO_VERSION
 from scargo.scargo_src.sc_config import Target
 from scargo.scargo_src.sc_logger import get_logger
 from scargo.scargo_src.sc_src import (
@@ -70,7 +69,7 @@ def scargo_new(
         cxx=cxx,
         cflags=cflags,
         cxxflags=cxxflags,
-        version=__version__,
+        version=SCARGO_VERSION,
         docker_image_tag=f"{name}-dev:1.0",
         lib_name=lib_name,
         bin_name=bin_name,

@@ -245,7 +245,7 @@ def run_pylint() -> None:
         "-c",
         "scargo/",
         "-s",
-        "9.5",
+        "9.9",
         "--exclude=tests/*.py",
     ]
     subprocess.check_call(command)

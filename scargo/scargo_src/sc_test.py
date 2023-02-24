@@ -64,7 +64,7 @@ def run_ut(config: Config, verbose: bool, cwd: Path) -> None:
     try:
         # Using `subprocess.run` because tests can fail,
         # and we do not want Python to throw exception.
-        subprocess.run(cmd, cwd=cwd)
+        subprocess.run(cmd, cwd=cwd, check=False)
 
         # Run code coverage.
         cmd = ["gcovr", "-r", "ut", ".", "--html", "ut-coverage.html"]
@@ -88,7 +88,7 @@ def run_it(config: Config, verbose: bool) -> None:
     if verbose:
         cmd.append("--verbose")
 
-    subprocess.run(cmd)
+    subprocess.run(cmd, check=False)
     # Using `subprocess.run` because tests
     # can fail, and we do not want Python to
     # throw exception.

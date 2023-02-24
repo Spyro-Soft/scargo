@@ -7,9 +7,11 @@ from typing import List, Optional
 
 from typer import Argument, Context, Option, Typer
 
-__version__ = "1.0.6"
-
-from scargo.scargo_src.global_values import DESCRIPTION, SCARGO_DEFAULT_CONFIG_FILE
+from scargo.scargo_src.global_values import (
+    DESCRIPTION,
+    SCARGO_DEFAULT_CONFIG_FILE,
+    SCARGO_VERSION,
+)
 from scargo.scargo_src.sc_build import scargo_build
 from scargo.scargo_src.sc_check import scargo_check
 from scargo.scargo_src.sc_clean import scargo_clean
@@ -33,10 +35,12 @@ from scargo.scargo_src.sc_update import scargo_update
 from scargo.scargo_src.sc_ver import scargo_version
 from scargo.scargo_src.utils import get_config_file_path, get_project_root
 
+__version__ = SCARGO_VERSION
+
 ###############################################################################
 
 
-cli = Typer(context_settings=dict(help_option_names=["-h", "--help"]), help=DESCRIPTION)
+cli = Typer(context_settings={"help_option_names": ["-h", "--help"]}, help=DESCRIPTION)
 
 
 ###############################################################################
@@ -325,7 +329,7 @@ def update(
         if not config_file_path:
             logger.error("Config file not found.")
             sys.exit(1)
-    """Read .toml config file and generate `CMakeLists.txt`."""
+    # Read .toml config file and generate `CMakeLists.txt`.
     scargo_update(config_file_path)
 
 
