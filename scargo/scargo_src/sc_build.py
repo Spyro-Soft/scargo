@@ -47,13 +47,11 @@ def scargo_build(profile: str) -> None:
 
     try:
         subprocess.check_call(
-            f"conan install . -if {build_dir}",
-            shell=True,
+            ["conan", "install", ".", "-if", build_dir],
             cwd=project_dir,
         )
         subprocess.check_call(
-            f"cmake -DCMAKE_BUILD_TYPE={profile} {project_dir}",
-            shell=True,
+            ["cmake", f"-DCMAKE_BUILD_TYPE={profile}", project_dir],
             cwd=build_dir,
         )
         subprocess.check_call("cmake --build . --parallel", shell=True, cwd=build_dir)

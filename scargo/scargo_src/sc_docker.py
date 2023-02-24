@@ -27,10 +27,11 @@ def scargo_docker_build(docker_opts: Sequence[str]) -> None:
     logger.debug("Build docker environment.")
 
     docker_path = _get_docker_path()
-    cmd = " ".join(["docker-compose build", *docker_opts])
 
     try:
-        subprocess.run(cmd, shell=True, cwd=docker_path, check=True)
+        subprocess.run(
+            ["docker-compose", "build", *docker_opts], cwd=docker_path, check=True
+        )
         logger.info("Initialize docker environment.")
     except subprocess.CalledProcessError:
         logger.error("Build docker fail.")
@@ -45,6 +46,7 @@ def scargo_docker_run(
     Run docker
 
     :param docker_opts: additional docker options
+    :param command: command to run in the container
     :raises CalledProcessError: if docker did not start
     """
     logger = get_logger()
@@ -53,15 +55,17 @@ def scargo_docker_run(
     docker_path = _get_docker_path()
     project_config_name = _get_project_config().name
 
-    cmd = " ".join(
-        filter(
-            None,
-            ["docker-compose run", *docker_opts, f"{project_config_name}_dev", command],
-        )
-    )
+    cmd = [
+        "docker-compose",
+        "run",
+        *docker_opts,
+        f"{project_config_name}_dev",
+    ]
+    if command:
+        cmd.extend(command.split())
 
     try:
-        subprocess.run(cmd, shell=True, cwd=docker_path, check=True)
+        subprocess.run(cmd, cwd=docker_path, check=True)
         logger.info("Stop docker environment.")
     except subprocess.CalledProcessError:
         logger.error("Run docker fail.")

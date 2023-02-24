@@ -56,7 +56,7 @@ class _ScargoDebug:
             self._debug_stm32()
 
     def _debug_x86(self) -> None:
-        subprocess.run(f"gdb {self._bin_path}", shell=True)
+        subprocess.run(["gdb", self._bin_path])
 
     def _debug_stm32(self) -> None:
         openocd_path = find_program_path("openocd")

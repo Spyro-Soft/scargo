@@ -31,24 +31,30 @@ def flash_esp32(
     project_path = get_project_root()
     out_dir = project_path / "build" / flash_profile
     target = config.project.target
-    command = ""
+    command = []
     try:
         if app:
             app_name = config.project.name
             app_path = out_dir / f"{app_name}.bin"
-            command = (
-                f"parttool.py write_partition --partition-name=ota_0 --input {app_path}"
-            )
-            subprocess.check_call(command, shell=True, cwd=project_path)
+            command = [
+                "parttool.py",
+                "write_partition",
+                "--partition-name=ota_0",
+                f"--input={app_path}",
+            ]
+            subprocess.check_call(command, cwd=project_path)
         elif fs:
             fs_path = Path("build") / "spiffs.bin"
-            command = (
-                f"parttool.py write_partition --partition-name=spiffs --input {fs_path}"
-            )
-            subprocess.check_call(command, shell=True, cwd=project_path)
+            command = [
+                "parttool.py",
+                "write_partition",
+                "--partition-name=spiffs",
+                f"--input={fs_path}",
+            ]
+            subprocess.check_call(command, cwd=project_path)
         else:
-            command = f"esptool.py --chip {target.id} write_flash @flash_args"
-            subprocess.check_call(command, shell=True, cwd=out_dir)
+            command = ["esptool.py", "--chip", target.id, "write_flash", "@flash_args"]
+            subprocess.check_call(command, cwd=out_dir)
     except subprocess.CalledProcessError:
         logger = get_logger()
         logger.error("%s fail", command)
