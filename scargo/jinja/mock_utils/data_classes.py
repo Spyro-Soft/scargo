@@ -1,7 +1,7 @@
 # #
 # @copyright Copyright (C) 2023 SpyroSoft Solutions S.A. All rights reserved.
 # #
-from typing import Any, List, Optional, Sequence, Union
+from typing import Any, List, Sequence
 
 
 class ArgumentDescriptor:
@@ -56,7 +56,7 @@ class MockClassDescriptor:
     def __init__(self, name: str, mock_name: str):
         self.name = name
         self.mock_name = mock_name
-        self.methods: List[Optional[MockDescriptor]] = []
+        self.methods: List[MockFunctionDescriptor] = []
         self.constructors: List[str] = []  # this is never set to anything else
         self.destructor = ""  # this is never set to anything else
 
@@ -77,8 +77,3 @@ class HeaderDescriptor:
         self.one_line_classes = kwargs.get("one_line_classes", [])
         self.namespaces = kwargs.get("namespaces", [])
         self.c_style_header = kwargs.get("c_style_header", False)
-
-
-MockDescriptor = Union[
-    MockFunctionDescriptor, MockClassDescriptor, MockNamespaceDescriptor
-]
