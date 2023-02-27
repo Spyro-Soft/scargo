@@ -20,9 +20,9 @@ def scargo_flash(
     target = config.project.target
     logger = get_logger()
 
-
     if port and target.family != "esp32":
-        logger.warning("--port option is only supported for esp32 projects.")
+        logger.error("--port option is only supported for esp32 projects.")
+        sys.exit(1)
     if target.family == "esp32":
         flash_esp32(config, app=app, fs=fs, flash_profile=flash_profile, port=port)
     elif target.family == "stm32":
@@ -36,7 +36,7 @@ def flash_esp32(
     app: bool,
     fs: bool,
     flash_profile: str = "Debug",
-    port: Optional[str]=None,
+    port: Optional[str] = None,
 ) -> None:
     project_path = get_project_root()
     out_dir = project_path / "build" / flash_profile
@@ -68,6 +68,8 @@ def flash_esp32(
             subprocess.check_call(command, cwd=project_path)
         else:
             command = ["esptool.py", "--chip", target.id, "write_flash", "@flash_args"]
+            if port:
+                command.append(f"--port={port}")
             subprocess.check_call(command, cwd=out_dir)
     except subprocess.CalledProcessError:
         logger = get_logger()
