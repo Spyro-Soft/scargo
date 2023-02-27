@@ -10,8 +10,8 @@ from typing import List, Optional, Sequence
 
 import docker
 
-from scargo.commands.sc_src import get_scargo_config_or_exit
 from scargo.config import ProjectConfig
+from scargo.config_utils import get_scargo_config_or_exit
 from scargo.logger import get_logger
 from scargo.path_utils import get_project_root
 

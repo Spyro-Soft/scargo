@@ -7,7 +7,7 @@ from typing import Any, Dict
 
 from jinja2 import Environment, FileSystemLoader
 
-from scargo.commands.sc_src import get_scargo_config_or_exit
+from scargo.config_utils import get_scargo_config_or_exit
 from scargo.logger import get_logger
 from scargo.path_utils import get_config_file_path, get_project_root
 

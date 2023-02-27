@@ -2,8 +2,7 @@ import pytest
 from _pytest.logging import LogCaptureFixture
 from pytest_subprocess import FakeProcess
 
-from scargo.commands.check import scargo_check
-from scargo.commands.sc_src import (
+from scargo.commands.check import (
     check_clang_format,
     check_clang_tidy,
     check_copyright,
@@ -11,6 +10,7 @@ from scargo.commands.sc_src import (
     check_cyclomatic,
     check_pragma,
     check_todo,
+    scargo_check,
 )
 from scargo.config import Config
 

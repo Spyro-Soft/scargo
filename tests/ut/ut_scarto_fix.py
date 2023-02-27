@@ -1,6 +1,6 @@
 import pytest
 
-from scargo.commands.sc_src import check_copyright, check_pragma
+from scargo.commands.check import check_copyright, check_pragma
 from scargo.config import Config
 
 

@@ -6,9 +6,9 @@ from unittest.mock import MagicMock, patch
 import pytest
 
 from scargo.commands.new import scargo_new
-from scargo.commands.sc_src import prepare_config
 from scargo.commands.update import scargo_update
 from scargo.config import Config, Target
+from scargo.config_utils import prepare_config
 
 TARGET_X86 = Target.get_target_by_id("x86")
 

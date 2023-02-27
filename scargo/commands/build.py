@@ -12,7 +12,7 @@ from scargo.commands.publish import (
     conan_add_remote,
     conan_clean_remote,
 )
-from scargo.commands.sc_src import prepare_config
+from scargo.config_utils import prepare_config
 from scargo.logger import get_logger
 from scargo.path_utils import get_project_root
 

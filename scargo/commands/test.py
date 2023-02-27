@@ -7,8 +7,8 @@ import subprocess
 import sys
 from pathlib import Path
 
-from scargo.commands.sc_src import prepare_config
 from scargo.config import Config
+from scargo.config_utils import prepare_config
 from scargo.logger import get_logger
 from scargo.path_utils import get_project_root
 

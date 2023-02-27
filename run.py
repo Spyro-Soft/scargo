@@ -170,8 +170,6 @@ def run_all_code_checkers() -> bool:
             "scargo",
             "-C",
             "tests",
-            "-e",
-            "scargo/commands/sc_src.py",
         ]
         command.extend(CHECKERS_EXCLUSIONS)
         subprocess.check_call(command)

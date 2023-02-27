@@ -8,8 +8,8 @@ from pathlib import Path
 from time import sleep
 from typing import Optional
 
-from scargo.commands.sc_src import prepare_config
 from scargo.config import Config
+from scargo.config_utils import prepare_config
 from scargo.logger import get_logger
 from scargo.path_utils import find_program_path, get_project_root
 

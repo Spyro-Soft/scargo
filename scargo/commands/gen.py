@@ -11,8 +11,8 @@ from pathlib import Path
 from shutil import copyfile
 from typing import Optional
 
-from scargo.commands.sc_src import prepare_config
 from scargo.config import Config
+from scargo.config_utils import prepare_config
 from scargo.global_values import SCARGO_PGK_PATH
 from scargo.jinja.mock_gen import generate_mocks
 from scargo.jinja.ut_gen import generate_ut

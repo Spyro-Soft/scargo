@@ -9,7 +9,7 @@ import sys
 from pathlib import Path
 from typing import List, Optional
 
-from scargo.commands.sc_src import prepare_config
+from scargo.config_utils import prepare_config
 from scargo.logger import get_logger
 
 
