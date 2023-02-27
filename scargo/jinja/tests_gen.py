@@ -6,10 +6,10 @@
 from pathlib import Path
 from shutil import copytree
 
+from scargo.config import Target, TestConfig
+from scargo.global_values import SCARGO_PGK_PATH
 from scargo.jinja.base_gen import BaseGen
-from scargo.scargo_src.global_values import SCARGO_PGK_PATH
-from scargo.scargo_src.sc_config import Target, TestConfig
-from scargo.scargo_src.utils import get_project_root
+from scargo.path_utils import get_project_root
 
 
 class _TestsTemplate(BaseGen):

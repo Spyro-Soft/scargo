@@ -4,13 +4,9 @@
 """Format project code using formatter"""
 import os
 
-from scargo.scargo_src.sc_src import (
-    check_clang_format,
-    check_copyright,
-    check_pragma,
-    prepare_config,
-)
-from scargo.scargo_src.utils import get_project_root
+from scargo.commands.check import check_clang_format, check_copyright, check_pragma
+from scargo.config_utils import prepare_config
+from scargo.path_utils import get_project_root
 
 
 def scargo_fix(pragma: bool, copy_right: bool, clang_format: bool) -> None:

@@ -4,9 +4,9 @@ from pathlib import Path
 import pytest
 from pytest_subprocess import FakeProcess
 
-from scargo.scargo_src.sc_config import Config
-from scargo.scargo_src.sc_test import scargo_test
-from scargo.scargo_src.utils import get_project_root
+from scargo.commands.test import scargo_test
+from scargo.config import Config
+from scargo.path_utils import get_project_root
 
 
 def test_scargo_test_no_test_dir(create_new_project: None) -> None:

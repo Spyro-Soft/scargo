@@ -6,11 +6,11 @@ import re
 from pathlib import Path
 from typing import List, Sequence
 
+from scargo.config import Config
+from scargo.global_values import SCARGO_PGK_PATH
 from scargo.jinja.base_gen import BaseGen
 from scargo.jinja.mock_utils.cmake_utlis import add_subdirs_to_cmake
-from scargo.scargo_src.global_values import SCARGO_PGK_PATH
-from scargo.scargo_src.sc_config import Config
-from scargo.scargo_src.utils import get_project_root
+from scargo.path_utils import get_project_root
 
 HEADER_EXTENSIONS = (".h", ".hpp")
 SRC_EXTENSIONS = (".c", ".cpp")

@@ -7,9 +7,9 @@ from typing import Any, Dict
 
 from jinja2 import Environment, FileSystemLoader
 
-from scargo.scargo_src.sc_logger import get_logger
-from scargo.scargo_src.sc_src import get_scargo_config_or_exit
-from scargo.scargo_src.utils import get_config_file_path, get_project_root
+from scargo.config_utils import get_scargo_config_or_exit
+from scargo.logger import get_logger
+from scargo.path_utils import get_config_file_path, get_project_root
 
 
 class BaseGen:

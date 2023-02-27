@@ -3,9 +3,9 @@ from pathlib import Path
 
 from pytest_subprocess import FakeProcess
 
-from scargo.scargo_src.sc_config import Target
-from scargo.scargo_src.sc_new import scargo_new
-from scargo.scargo_src.sc_update import scargo_update
+from scargo.commands.new import scargo_new
+from scargo.commands.update import scargo_update
+from scargo.config import Target
 
 EXPECTED_FILES_AND_DIRS = [
     ".clang-format",

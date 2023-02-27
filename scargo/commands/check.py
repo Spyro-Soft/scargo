@@ -1,145 +1,83 @@
 # #
 # @copyright Copyright (C) 2023 SpyroSoft Solutions S.A. All rights reserved.
 # #
-"""feature function for scargo"""
+"""Check written code with formatters"""
 import glob
 import os
 import subprocess
 import sys
 from itertools import chain
 from pathlib import Path
-from typing import Iterable, List, Optional, Sequence, Tuple
+from typing import Iterable, Sequence
 
-import docker as dock
-import tomlkit
-
-from scargo import __version__
-from scargo.scargo_src.global_values import SCARGO_DOCKER_ENV, SCARGO_LOCK_FILE
-from scargo.scargo_src.sc_config import (
-    Config,
-    ConfigError,
-    ProjectConfig,
-    Target,
-    parse_config,
-)
-from scargo.scargo_src.sc_logger import get_logger
-from scargo.scargo_src.utils import get_config_file_path, get_project_root
+from scargo.config import Config
+from scargo.config_utils import prepare_config
+from scargo.logger import get_logger
+from scargo.path_utils import get_project_root
 
 
-def run_scargo_again_in_docker(project_config: ProjectConfig) -> None:
+def scargo_check(
+    clang_format: bool,
+    clang_tidy: bool,
+    copy_right: bool,
+    cppcheck: bool,
+    cyclomatic: bool,
+    pragma: bool,
+    todo: bool,
+    verbose: bool,
+) -> None:
     """
-    Run command in docker
+    Check written code using different formatters
 
-    :param dict project_config: project configuration
+    :param bool clang_format: check clang_format
+    :param bool clang_tidy: check clang_tidy
+    :param bool copy_right:  check copyrights
+    :param bool cppcheck: check cpp format
+    :param bool cyclomatic: check cyclomatic
+    :param bool pragma: check pragma
+    :param bool todo: check todo left in code
+    :param bool verbose: set verbose
     :return: None
     """
-    project_path = get_project_root()
-    relative_path = Path.cwd().absolute().relative_to(project_path)
+    config = prepare_config()
 
-    cmd_args = " ".join(sys.argv[1:])
+    # Run all checks by default. If any of checks is specified then do not
+    # run all checks; then run only specified checks.
+    run_all = not any(
+        [
+            clang_format,
+            clang_tidy,
+            copy_right,
+            cppcheck,
+            cyclomatic,
+            pragma,
+            todo,
+        ]
+    )
 
-    entrypoint = ""
-    if project_config.target.family == "esp32":
-        entrypoint = "/opt/esp/entrypoint.sh"
+    # Todo, remove chdir and change cwd for checks
+    os.chdir(get_project_root())
 
-    cmd = f'/bin/bash -c "scargo version || true; cd {relative_path} && scargo {cmd_args}"'
+    if clang_format or run_all:
+        check_clang_format(config, False, verbose)
 
-    docker_tag = project_config.docker_image_tag
-    logger = get_logger()
+    if clang_tidy or run_all:
+        check_clang_tidy(config, verbose)
 
-    if project_path:
-        logger.info("Running scargo %s command in docker.", cmd_args)
+    if copy_right or run_all:
+        check_copyright(config, False)
 
-        client = dock.from_env()
-        container = client.containers.run(
-            f"{docker_tag}",
-            cmd,
-            volumes=[str(project_path) + ":/workspace/", "/dev/:/dev/"],
-            entrypoint=entrypoint,
-            privileged=True,
-            detach=True,
-        )
-        output = container.attach(stdout=True, stream=True, logs=True)
-        for line in output:
-            print(line.decode(), end="")
-        result = container.wait()
-        container.remove()
-        sys.exit(result["StatusCode"])
+    if cppcheck or run_all:
+        check_cppcheck()
 
+    if cyclomatic or run_all:
+        check_cyclomatic(config)
 
-def check_scargo_version(config: Config) -> None:
-    """
-    Check scargo version
+    if pragma or run_all:
+        check_pragma(config, False)
 
-    :param Config config: project configuration
-    :return: None
-    """
-    version_lock = config.scargo.version
-    if not version_lock:
-        add_version_to_scargo_lock()
-    elif __version__ != version_lock:
-        logger = get_logger()
-        logger.warning("Warning: scargo package is different then in lock file")
-        logger.info("Run scargo update")
-
-
-def get_scargo_config_or_exit(
-    config_file_path: Optional[Path] = None,
-) -> Config:
-    """
-    :param config_file_path
-    :return: project configuration as dict
-    """
-    logger = get_logger()
-    if config_file_path is None:
-        config_file_path = get_config_file_path(SCARGO_LOCK_FILE)
-    if config_file_path is None or not config_file_path.exists():
-        logger.error("File `%s` does not exist.", SCARGO_LOCK_FILE)
-        logger.info("Did you run `scargo update`?")
-        sys.exit(1)
-
-    try:
-        return parse_config(config_file_path)
-    except ConfigError as e:
-        logger.error(e.args[0])
-        sys.exit(1)
-
-
-def add_version_to_scargo_lock() -> None:
-    """
-    :return: project configuration as dict
-    """
-    scargo_lock = get_config_file_path(SCARGO_LOCK_FILE)
-    if not scargo_lock:
-        logger = get_logger()
-        logger.error("ERROR: File `%s` does not exist.", SCARGO_LOCK_FILE)
-        logger.info("Did you run `scargo update`?")
-        sys.exit(1)
-
-    with open(scargo_lock, encoding="utf-8") as scargo_lock_file:
-        config = tomlkit.load(scargo_lock_file)
-
-    config.setdefault("scargo", tomlkit.table())["version"] = __version__
-    with open(scargo_lock, "w", encoding="utf-8") as scargo_lock_file:
-        tomlkit.dump(config, scargo_lock_file)
-
-
-def get_docker_files_from_scargo_pkg(directory: Path, target: Target) -> List[str]:
-    """
-    Copy docker file from scargo pkg
-
-    :param Path directory: output dir
-    :param target: type of architecture
-    :return: list of files to copy
-    """
-    available_dir_list = ["base", "user", "cpp", target.id]
-    result_list_of_files = []
-    files = Path(directory).glob("*")
-    for file in files:
-        if Path(file).is_dir():
-            if Path(file).name in available_dir_list:
-                result_list_of_files.append(str(file))
-    return result_list_of_files
+    if todo or run_all:
+        check_todo(config)
 
 
 def check_pragma(config: Config, fix_errors: bool) -> None:
@@ -436,48 +374,3 @@ def check_cppcheck() -> None:
     except subprocess.CalledProcessError:
         logger.error("cppcheck fail")
     logger.info("Finished cppcheck check.")
-
-
-def prepare_config() -> Config:
-    """
-    Prepare configuration file
-
-    :return: project configuration
-    """
-    config = get_scargo_config_or_exit()
-    check_scargo_version(config)
-    ###########################################################################
-    project_config = config.project
-    build_env = project_config.build_env
-    if build_env == SCARGO_DOCKER_ENV and not os.path.exists("/.dockerenv"):
-        run_scargo_again_in_docker(project_config)
-    ###########################################################################
-    return config
-
-
-def get_cc_config(target: Target) -> Tuple[str, str, str, str]:
-    """
-    Get c configuration base on architecture
-
-    :param target: project architecture
-    :return: tuple of string
-    :raises Exception: if architecture not allowed
-    """
-    cflags = "-Wall -Wextra"
-    cxxflags = "-Wall -Wextra"
-    cc = target.cc
-    cxx = target.cxx
-    return cc, cflags, cxx, cxxflags
-
-
-def get_build_env(create_docker: bool) -> str:
-    """
-    Get build env
-    :param bool create_docker: if create docker
-    :return: build env
-    """
-    if create_docker:
-        build_env = f"{SCARGO_DOCKER_ENV}"
-    else:
-        build_env = "native"
-    return build_env

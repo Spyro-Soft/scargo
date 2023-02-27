@@ -3,7 +3,7 @@ from pathlib import Path
 import pytest
 from _pytest.logging import LogCaptureFixture
 
-from scargo.scargo_src.sc_doc import scargo_doc
+from scargo.commands.doc import scargo_doc
 
 
 def verify_open_called(index_path: str) -> None:

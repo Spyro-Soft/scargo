@@ -15,7 +15,7 @@ from utils import (  # type: ignore[import]
 
 from scargo.cli import cli
 from scargo.jinja.env_gen import generate_env
-from scargo.scargo_src.utils import get_project_root
+from scargo.path_utils import get_project_root
 
 TEST_PROJECT_NAME = "common_scargo_project"
 TEST_PROJECT_ESP32_NAME = "common_scargo_project_esp32"

@@ -7,29 +7,29 @@ from typing import List, Optional
 
 from typer import Argument, Context, Option, Typer
 
-from scargo.scargo_src.global_values import DESCRIPTION, SCARGO_DEFAULT_CONFIG_FILE
-from scargo.scargo_src.sc_build import scargo_build
-from scargo.scargo_src.sc_check import scargo_check
-from scargo.scargo_src.sc_clean import scargo_clean
-from scargo.scargo_src.sc_config import ScargoTargets, Target
-from scargo.scargo_src.sc_debug import scargo_debug
-from scargo.scargo_src.sc_doc import scargo_doc
-from scargo.scargo_src.sc_docker import (
+from scargo.commands.build import scargo_build
+from scargo.commands.check import scargo_check
+from scargo.commands.clean import scargo_clean
+from scargo.commands.debug import scargo_debug
+from scargo.commands.doc import scargo_doc
+from scargo.commands.docker import (
     scargo_docker_build,
     scargo_docker_exec,
     scargo_docker_run,
 )
-from scargo.scargo_src.sc_fix import scargo_fix
-from scargo.scargo_src.sc_flash import scargo_flash
-from scargo.scargo_src.sc_gen import scargo_gen
-from scargo.scargo_src.sc_logger import get_logger
-from scargo.scargo_src.sc_new import scargo_new
-from scargo.scargo_src.sc_publish import scargo_publish
-from scargo.scargo_src.sc_run import scargo_run
-from scargo.scargo_src.sc_test import scargo_test
-from scargo.scargo_src.sc_update import scargo_update
-from scargo.scargo_src.sc_ver import scargo_version
-from scargo.scargo_src.utils import get_config_file_path, get_project_root
+from scargo.commands.fix import scargo_fix
+from scargo.commands.flash import scargo_flash
+from scargo.commands.gen import scargo_gen
+from scargo.commands.new import scargo_new
+from scargo.commands.publish import scargo_publish
+from scargo.commands.run import scargo_run
+from scargo.commands.test import scargo_test
+from scargo.commands.update import scargo_update
+from scargo.commands.version import scargo_version
+from scargo.config import ScargoTargets, Target
+from scargo.global_values import DESCRIPTION, SCARGO_DEFAULT_CONFIG_FILE
+from scargo.logger import get_logger
+from scargo.path_utils import get_config_file_path, get_project_root
 
 ###############################################################################
 

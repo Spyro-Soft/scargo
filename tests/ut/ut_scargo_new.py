@@ -3,8 +3,8 @@ from pathlib import Path
 
 import pytest
 
-from scargo.scargo_src.sc_config import Target
-from scargo.scargo_src.sc_new import scargo_new
+from scargo.commands.new import scargo_new
+from scargo.config import Target
 
 TARGET_X86 = Target.get_target_by_id("x86")
 

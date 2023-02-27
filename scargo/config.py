@@ -8,7 +8,7 @@ from typing import Any, Dict, List, Optional
 import toml
 from pydantic import BaseModel, Extra, Field, root_validator
 
-from scargo.scargo_src.global_values import SCARGO_DEFAULT_BUILD_ENV
+from scargo.global_values import SCARGO_DEFAULT_BUILD_ENV
 
 
 class ConfigError(Exception):

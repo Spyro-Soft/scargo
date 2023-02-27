@@ -2,7 +2,7 @@ from pathlib import Path
 
 from pytest_subprocess import FakeProcess
 
-from scargo.scargo_src.sc_build import scargo_build
+from scargo.commands.build import scargo_build
 
 
 def test_scargo_build_dir_exist(fp: FakeProcess, create_new_project: None) -> None:

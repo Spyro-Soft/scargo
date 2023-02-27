@@ -6,10 +6,10 @@ import subprocess
 import sys
 from pathlib import Path
 
-from scargo.scargo_src.sc_config import Config
-from scargo.scargo_src.sc_logger import get_logger
-from scargo.scargo_src.sc_src import prepare_config
-from scargo.scargo_src.utils import get_project_root
+from scargo.config import Config
+from scargo.config_utils import prepare_config
+from scargo.logger import get_logger
+from scargo.path_utils import get_project_root
 
 
 def scargo_flash(app: bool, fs: bool, flash_profile: str) -> None:
