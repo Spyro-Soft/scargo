@@ -118,7 +118,7 @@ pylint:
   extends: .merge_request
   allow_failure: false
   script:
-    - ./common_dev/scripts/pylintchecker.py -c scargo/ -s 9.5 --exclude=tests/
+    - ./common_dev/scripts/pylintchecker.py -c scargo/ -s 9.9 --exclude=tests/
 #______________________________________________________________________________________________CHECK_TAG
 check_tag:
   stage: publish

@@ -13,7 +13,7 @@ from utils import (  # type: ignore[import]
     get_project_name,
 )
 
-from scargo import cli
+from scargo.cli import cli
 from scargo.jinja.env_gen import generate_env
 from scargo.scargo_src.utils import get_project_root
 

@@ -4,6 +4,7 @@
 
 """Run feature depending on provided args"""
 import subprocess
+import sys
 from pathlib import Path
 from typing import List, Optional
 
@@ -31,7 +32,7 @@ def scargo_run(
             "Run project on x86 architecture is not implemented for %s yet.",
             target.family,
         )
-        exit(1)
+        sys.exit(1)
 
     if bin_path:
         bin_file_name = bin_path.name

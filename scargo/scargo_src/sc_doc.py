@@ -31,7 +31,7 @@ class _ScargoGenDoc:
     def update_doxyfile(self) -> None:
         """Update Doxyfile configuration according specified values"""
         project_name = self._config.project.name
-        project_path = Path(Path().absolute())
+        project_path = get_project_root()
         exclude = " ".join(
             f"{project_path}/{dir}"
             for dir in self.EXCLUDE_LIST + self._config.doc.exclude
@@ -42,7 +42,7 @@ class _ScargoGenDoc:
             "EXTRACT_ALL": "YES",
             "INPUT": project_path,
             "RECURSIVE": "YES",
-            "EXCLUDE": exclude,
+            "EXCLUDE_PATTERNS": exclude,
             "GENERATE_LATEX": "NO",
         }
 

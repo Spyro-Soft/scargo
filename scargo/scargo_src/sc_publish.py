@@ -119,7 +119,7 @@ def conan_add_user(remote: str) -> None:
     :return: None
     """
     conan_user = subprocess.run(
-        "conan user", capture_output=True, shell=True
+        "conan user", capture_output=True, shell=True, check=False
     ).stdout.decode("utf-8")
 
     env_conan_user = os.environ.get("CONAN_LOGIN_USERNAME", "")
