@@ -7,19 +7,15 @@ import os
 import subprocess
 import sys
 from pathlib import Path
-from typing import Optional
+from typing import Optional, Tuple
 
 from scargo import __version__
+from scargo.config import Target
+from scargo.config_utils import get_scargo_config_or_exit
+from scargo.global_values import SCARGO_DEFAULT_CONFIG_FILE, SCARGO_DOCKER_ENV
 from scargo.jinja.cpp_gen import generate_cpp
 from scargo.jinja.toml_gen import generate_toml
-from scargo.scargo_src.global_values import SCARGO_DEFAULT_CONFIG_FILE
-from scargo.scargo_src.sc_config import Target
-from scargo.scargo_src.sc_logger import get_logger
-from scargo.scargo_src.sc_src import (
-    get_build_env,
-    get_cc_config,
-    get_scargo_config_or_exit,
-)
+from scargo.logger import get_logger
 
 
 def scargo_new(
@@ -87,3 +83,31 @@ def scargo_new(
     if git:
         subprocess.check_call("git init -q", shell=True)
         logger.info("Initialized git repo")
+
+
+def get_cc_config(target: Target) -> Tuple[str, str, str, str]:
+    """
+    Get c configuration base on architecture
+
+    :param target: project architecture
+    :return: tuple of string
+    :raises Exception: if architecture not allowed
+    """
+    cflags = "-Wall -Wextra"
+    cxxflags = "-Wall -Wextra"
+    cc = target.cc
+    cxx = target.cxx
+    return cc, cflags, cxx, cxxflags
+
+
+def get_build_env(create_docker: bool) -> str:
+    """
+    Get build env
+    :param bool create_docker: if create docker
+    :return: build env
+    """
+    if create_docker:
+        build_env = f"{SCARGO_DOCKER_ENV}"
+    else:
+        build_env = "native"
+    return build_env

@@ -7,8 +7,8 @@ import shutil
 from pathlib import Path
 from typing import Optional
 
-from scargo.scargo_src.sc_logger import get_logger
-from scargo.scargo_src.utils import get_project_root
+from scargo.logger import get_logger
+from scargo.path_utils import get_project_root
 
 
 def _case_insensitive_find_dir(source_dir: Path, dirname: str) -> Optional[Path]:

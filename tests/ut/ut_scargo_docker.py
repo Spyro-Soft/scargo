@@ -5,25 +5,23 @@ from unittest.mock import MagicMock
 
 import pytest
 
-from scargo.scargo_src.sc_config import Config
-from scargo.scargo_src.sc_docker import (
+from scargo.commands.docker import (
     scargo_docker_build,
     scargo_docker_exec,
     scargo_docker_run,
 )
+from scargo.config import Config
 from tests.ut.utils import get_test_project_config
 
 
 @pytest.fixture
 def scargo_docker_test_setup(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> Config:
     os.chdir(tmp_path)
-    monkeypatch.setattr(
-        "scargo.scargo_src.sc_docker.get_project_root", lambda: tmp_path
-    )
+    monkeypatch.setattr("scargo.commands.docker.get_project_root", lambda: tmp_path)
 
     test_project_config = get_test_project_config()
     monkeypatch.setattr(
-        "scargo.scargo_src.sc_docker._get_project_config",
+        "scargo.commands.docker._get_project_config",
         lambda: test_project_config.project,
     )
 

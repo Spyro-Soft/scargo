@@ -7,8 +7,8 @@ import os
 from dataclasses import dataclass
 from pathlib import Path
 
+from scargo.global_values import ENV_DEFAULT_NAME, SCARGO_PGK_PATH
 from scargo.jinja.base_gen import BaseGen
-from scargo.scargo_src.global_values import ENV_DEFAULT_NAME, SCARGO_PGK_PATH
 
 
 @dataclass

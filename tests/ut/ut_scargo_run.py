@@ -3,7 +3,7 @@ from pathlib import Path
 
 from pytest_subprocess import FakeProcess
 
-from scargo.scargo_src.sc_run import scargo_run
+from scargo.commands.run import scargo_run
 
 
 def test_scargo_run_bin_path(create_new_project: None, fp: FakeProcess) -> None:

@@ -11,13 +11,13 @@ from pathlib import Path
 from shutil import copyfile
 from typing import Optional
 
+from scargo.config import Config
+from scargo.config_utils import prepare_config
+from scargo.global_values import SCARGO_PGK_PATH
 from scargo.jinja.mock_gen import generate_mocks
 from scargo.jinja.ut_gen import generate_ut
-from scargo.scargo_src.global_values import SCARGO_PGK_PATH
-from scargo.scargo_src.sc_config import Config
-from scargo.scargo_src.sc_logger import get_logger
-from scargo.scargo_src.sc_src import prepare_config
-from scargo.scargo_src.utils import get_project_root
+from scargo.logger import get_logger
+from scargo.path_utils import get_project_root
 
 OUT_FS_DIR = Path("build", "fs")
 

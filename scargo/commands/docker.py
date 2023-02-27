@@ -10,10 +10,10 @@ from typing import List, Optional, Sequence
 
 import docker
 
-from scargo.scargo_src.sc_config import ProjectConfig
-from scargo.scargo_src.sc_logger import get_logger
-from scargo.scargo_src.sc_src import get_scargo_config_or_exit
-from scargo.scargo_src.utils import get_project_root
+from scargo.config import ProjectConfig
+from scargo.config_utils import get_scargo_config_or_exit
+from scargo.logger import get_logger
+from scargo.path_utils import get_project_root
 
 
 def scargo_docker_build(docker_opts: Sequence[str]) -> None:

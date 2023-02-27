@@ -2,9 +2,7 @@ import pytest
 from _pytest.logging import LogCaptureFixture
 from pytest_subprocess import FakeProcess
 
-from scargo.scargo_src.sc_check import scargo_check
-from scargo.scargo_src.sc_config import Config
-from scargo.scargo_src.sc_src import (
+from scargo.commands.check import (
     check_clang_format,
     check_clang_tidy,
     check_copyright,
@@ -12,7 +10,9 @@ from scargo.scargo_src.sc_src import (
     check_cyclomatic,
     check_pragma,
     check_todo,
+    scargo_check,
 )
+from scargo.config import Config
 
 CPPCHECK_CALL = "cppcheck --enable=all --suppress=missingIncludeSystem src/ main/"
 CLANG_FORMAT_CALL = "clang-format -style=file --dry-run src/test_project.cpp"

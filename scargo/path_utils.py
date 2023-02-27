@@ -7,7 +7,7 @@ import subprocess
 from pathlib import Path
 from typing import Optional
 
-from scargo.scargo_src.global_values import SCARGO_DEFAULT_CONFIG_FILE, SCARGO_LOCK_FILE
+from scargo.global_values import SCARGO_DEFAULT_CONFIG_FILE, SCARGO_LOCK_FILE
 
 
 def find_program_path(program_name: str) -> Optional[Path]:

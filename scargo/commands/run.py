@@ -8,8 +8,8 @@ import sys
 from pathlib import Path
 from typing import List, Optional
 
-from scargo.scargo_src.sc_logger import get_logger
-from scargo.scargo_src.sc_src import prepare_config
+from scargo.config_utils import prepare_config
+from scargo.logger import get_logger
 
 
 def scargo_run(
