@@ -3,7 +3,6 @@
 # #
 
 """Run feature depending on provided args"""
-import os
 import subprocess
 import sys
 from pathlib import Path
@@ -45,10 +44,10 @@ def scargo_run(
     else:
         bin_dir = project_profile_path / "bin"
         if bin_dir.is_dir():
-            bin_list = os.listdir(bin_dir)
+            first_bin = next(bin_dir.iterdir())
             # Run project
             try:
-                subprocess.check_call([f"./{bin_list[0]}"] + params, cwd=bin_dir)
+                subprocess.check_call([f"./{first_bin.name}"] + params, cwd=bin_dir)
             except subprocess.CalledProcessError:
                 logger.error("Unable to run bin file")
         else:

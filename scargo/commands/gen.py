@@ -19,7 +19,7 @@ from scargo.jinja.ut_gen import generate_ut
 from scargo.logger import get_logger
 from scargo.path_utils import get_project_root
 
-OUT_FS_DIR = os.path.join("build", "fs")
+OUT_FS_DIR = Path("build", "fs")
 
 
 def scargo_gen(
