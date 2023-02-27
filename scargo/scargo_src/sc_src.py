@@ -13,7 +13,7 @@ from typing import Iterable, List, Optional, Sequence, Tuple
 import docker as dock
 import tomlkit
 
-from scargo import __version__ as ver
+from scargo import __version__
 from scargo.scargo_src.global_values import SCARGO_DOCKER_ENV, SCARGO_LOCK_FILE
 from scargo.scargo_src.sc_config import (
     Config,
@@ -77,7 +77,7 @@ def check_scargo_version(config: Config) -> None:
     version_lock = config.scargo.version
     if not version_lock:
         add_version_to_scargo_lock()
-    elif ver != version_lock:
+    elif __version__ != version_lock:
         logger = get_logger()
         logger.warning("Warning: scargo package is different then in lock file")
         logger.info("Run scargo update")
@@ -116,12 +116,12 @@ def add_version_to_scargo_lock() -> None:
         logger.info("Did you run `scargo update`?")
         sys.exit(1)
 
-    scargo_lock_file = open(scargo_lock)
-    config = tomlkit.load(scargo_lock_file)
+    with open(scargo_lock, encoding="utf-8") as scargo_lock_file:
+        config = tomlkit.load(scargo_lock_file)
 
-    config.setdefault("scargo", tomlkit.table())["version"] = ver
-    scargo_lock_file = open(scargo_lock, "w")
-    tomlkit.dump(config, scargo_lock_file)
+    config.setdefault("scargo", tomlkit.table())["version"] = __version__
+    with open(scargo_lock, "w", encoding="utf-8") as scargo_lock_file:
+        tomlkit.dump(config, scargo_lock_file)
 
 
 def get_docker_files_from_scargo_pkg(directory: Path, target: Target) -> List[str]:

@@ -22,8 +22,13 @@ def run_pylint_on_specific_directory(
         "y",
         "-f",
         "colorized",
+        "--disable=C0103",  # snake_case naming style, disallows names like "e" or "fs"
         "--disable=C0114,C0115,C0116",  # disable missing docstring rules
+        "--disable=R0902",  # too many instance attributes
         "--disable=R0903",  # too few public methods
+        "--disable=R0913",  # too many arguments
+        "--disable=W1203",  # lazy % formatting in logging functions
+        "--extension-pkg-whitelist=pydantic",  # ignore "No name 'BaseModel' in module 'pydantic'"
     ]
     args.extend(ignore_pattern)
     # `exit` is deprecated, use `do_exit` instead
