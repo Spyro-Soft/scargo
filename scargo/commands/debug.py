@@ -8,10 +8,10 @@ from pathlib import Path
 from time import sleep
 from typing import Optional
 
-from scargo.scargo_src.sc_config import Config
-from scargo.scargo_src.sc_logger import get_logger
-from scargo.scargo_src.sc_src import prepare_config
-from scargo.scargo_src.utils import find_program_path, get_project_root
+from scargo.commands.sc_src import prepare_config
+from scargo.config import Config
+from scargo.logger import get_logger
+from scargo.path_utils import find_program_path, get_project_root
 
 
 class _ScargoDebug:
@@ -100,5 +100,5 @@ class _ScargoDebug:
 
 def scargo_debug(bin_path: Optional[Path]) -> None:
     config = prepare_config()
-    sc_debug = _ScargoDebug(config, bin_path)
-    sc_debug.run_debugger()
+    debug = _ScargoDebug(config, bin_path)
+    debug.run_debugger()

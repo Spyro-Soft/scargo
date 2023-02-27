@@ -7,11 +7,11 @@ import shutil
 from pathlib import Path
 
 from scargo import __version__
+from scargo.config import ProjectConfig
+from scargo.global_values import SCARGO_PGK_PATH
 from scargo.jinja.base_gen import BaseGen
-from scargo.scargo_src.global_values import SCARGO_PGK_PATH
-from scargo.scargo_src.sc_config import ProjectConfig
-from scargo.scargo_src.sc_logger import get_logger
-from scargo.scargo_src.utils import get_project_root
+from scargo.logger import get_logger
+from scargo.path_utils import get_project_root
 
 
 class _DockerComposeTemplate(BaseGen):

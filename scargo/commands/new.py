@@ -10,16 +10,16 @@ from pathlib import Path
 from typing import Optional
 
 from scargo import __version__
-from scargo.jinja.cpp_gen import generate_cpp
-from scargo.jinja.toml_gen import generate_toml
-from scargo.scargo_src.global_values import SCARGO_DEFAULT_CONFIG_FILE
-from scargo.scargo_src.sc_config import Target
-from scargo.scargo_src.sc_logger import get_logger
-from scargo.scargo_src.sc_src import (
+from scargo.commands.sc_src import (
     get_build_env,
     get_cc_config,
     get_scargo_config_or_exit,
 )
+from scargo.config import Target
+from scargo.global_values import SCARGO_DEFAULT_CONFIG_FILE
+from scargo.jinja.cpp_gen import generate_cpp
+from scargo.jinja.toml_gen import generate_toml
+from scargo.logger import get_logger
 
 
 def scargo_new(

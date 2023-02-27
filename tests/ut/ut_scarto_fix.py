@@ -1,7 +1,7 @@
 import pytest
 
-from scargo.scargo_src.sc_config import Config
-from scargo.scargo_src.sc_src import check_copyright, check_pragma
+from scargo.commands.sc_src import check_copyright, check_pragma
+from scargo.config import Config
 
 
 def test_fix_pragma(

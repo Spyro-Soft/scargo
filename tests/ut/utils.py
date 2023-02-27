@@ -1,6 +1,6 @@
 from pathlib import Path
 
-from scargo.scargo_src.sc_config import Config, parse_config
+from scargo.config import Config, parse_config
 
 
 def get_test_project_config() -> Config:

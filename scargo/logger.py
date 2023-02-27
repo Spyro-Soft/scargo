@@ -7,9 +7,9 @@ from typing import Tuple
 
 import coloredlogs
 
-from scargo.scargo_src.global_values import SCARGO_LOCK_FILE
-from scargo.scargo_src.sc_config import parse_config
-from scargo.scargo_src.utils import get_config_file_path, get_project_root_or_none
+from scargo.config import parse_config
+from scargo.global_values import SCARGO_LOCK_FILE
+from scargo.path_utils import get_config_file_path, get_project_root_or_none
 
 
 def __get_logging_config() -> Tuple[int, int]:

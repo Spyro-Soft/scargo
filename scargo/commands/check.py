@@ -4,7 +4,7 @@
 """Check written code with formatters"""
 import os
 
-from scargo.scargo_src.sc_src import (
+from scargo.commands.sc_src import (
     check_clang_format,
     check_clang_tidy,
     check_copyright,
@@ -14,7 +14,7 @@ from scargo.scargo_src.sc_src import (
     check_todo,
     prepare_config,
 )
-from scargo.scargo_src.utils import get_project_root
+from scargo.path_utils import get_project_root
 
 
 def scargo_check(

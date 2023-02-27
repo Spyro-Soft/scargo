@@ -14,16 +14,10 @@ import docker as dock
 import tomlkit
 
 from scargo import __version__
-from scargo.scargo_src.global_values import SCARGO_DOCKER_ENV, SCARGO_LOCK_FILE
-from scargo.scargo_src.sc_config import (
-    Config,
-    ConfigError,
-    ProjectConfig,
-    Target,
-    parse_config,
-)
-from scargo.scargo_src.sc_logger import get_logger
-from scargo.scargo_src.utils import get_config_file_path, get_project_root
+from scargo.config import Config, ConfigError, ProjectConfig, Target, parse_config
+from scargo.global_values import SCARGO_DOCKER_ENV, SCARGO_LOCK_FILE
+from scargo.logger import get_logger
+from scargo.path_utils import get_config_file_path, get_project_root
 
 
 def run_scargo_again_in_docker(project_config: ProjectConfig) -> None:

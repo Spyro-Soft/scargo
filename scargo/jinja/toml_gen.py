@@ -8,8 +8,8 @@ from typing import Any, Dict
 
 from jinja2 import Environment, FileSystemLoader
 
-from scargo.scargo_src.global_values import SCARGO_PGK_PATH
-from scargo.scargo_src.sc_logger import get_logger
+from scargo.global_values import SCARGO_PGK_PATH
+from scargo.logger import get_logger
 
 
 class TomlTemplate:
