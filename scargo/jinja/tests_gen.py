@@ -6,16 +6,16 @@
 from pathlib import Path
 from shutil import copytree
 
+from scargo.config import Target, TestConfig
+from scargo.global_values import SCARGO_PGK_PATH
 from scargo.jinja.base_gen import BaseGen
-from scargo.scargo_src.global_values import SCARGO_PGK_PATH
-from scargo.scargo_src.sc_config import Target, TestConfig
-from scargo.scargo_src.utils import get_project_root
+from scargo.path_utils import get_project_root
 
 
 class _TestsTemplate(BaseGen):
     """Create cmake template in test dir"""
 
-    def __init__(self):
+    def __init__(self) -> None:
         self.tests_template_dir = Path(SCARGO_PGK_PATH, "jinja", "test_templates")
         BaseGen.__init__(self, self.tests_template_dir)
         project_path = get_project_root()
@@ -28,7 +28,9 @@ class _TestsTemplate(BaseGen):
             ("CMakeLists-mocks.txt.j2", self.output_dir / "mocks" / "CMakeLists.txt"),
         ]
 
-    def generate_test_dirs_and_files(self, target: Target, tests_config: TestConfig):
+    def generate_test_dirs_and_files(
+        self, target: Target, tests_config: TestConfig
+    ) -> None:
         """Generate dirs and files"""
         static_mock_dir = self.output_dir / "mocks" / "static_mock"
         if not static_mock_dir.exists():
@@ -39,8 +41,10 @@ class _TestsTemplate(BaseGen):
             "CMakeLists-test.txt.j2",
             self.output_dir / "CMakeLists.txt",
             overwrite=True,
-            target=target,
-            tests=tests_config,
+            template_params={
+                "target": target,
+                "tests": tests_config,
+            },
         )
 
         for template, output_path in self._gen_once_file_list:
@@ -48,11 +52,13 @@ class _TestsTemplate(BaseGen):
                 template,
                 output_path,
                 overwrite=False,
-                target=target,
-                tests=tests_config,
+                template_params={
+                    "target": target,
+                    "tests": tests_config,
+                },
             )
 
 
-def generate_tests(target: Target, tests_config: TestConfig):
+def generate_tests(target: Target, tests_config: TestConfig) -> None:
     tests = _TestsTemplate()
     tests.generate_test_dirs_and_files(target, tests_config)

@@ -27,12 +27,12 @@ Generate certs needed by azure base on dev id
 
 It will generate certs in build/certs/fs dir. This cert should be used in two-way authentication with azure IoTHub.
 
-Generate a single binary image 
+Generate a single binary image
 ------------------------------
-Generate the single binary image from all binary partitions. 
+Generate the single binary image from all binary partitions.
 ::
 
-    scargo gen --bin 
+    scargo gen --bin
 
 It will generate build/flash_image.bin file. This file can be used with a Quick Emulator (qemu).
 

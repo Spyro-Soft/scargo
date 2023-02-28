@@ -4,11 +4,14 @@
 # #
 import argparse
 import sys
+from typing import Sequence
 
-from pylint.lint import Run
+from pylint.lint import Run  # type: ignore[import]
 
 
-def run_pylint_on_specific_directory(directory, score, exclude):
+def run_pylint_on_specific_directory(
+    directory: str, score: float, exclude: Sequence[str]
+) -> int:
     ignore_pattern = []
 
     for ex in exclude:
@@ -19,8 +22,13 @@ def run_pylint_on_specific_directory(directory, score, exclude):
         "y",
         "-f",
         "colorized",
+        "--disable=C0103",  # snake_case naming style, disallows names like "e" or "fs"
         "--disable=C0114,C0115,C0116",  # disable missing docstring rules
+        "--disable=R0902",  # too many instance attributes
         "--disable=R0903",  # too few public methods
+        "--disable=R0913",  # too many arguments
+        "--disable=W1203",  # lazy % formatting in logging functions
+        "--extension-pkg-whitelist=pydantic",  # ignore "No name 'BaseModel' in module 'pydantic'"
     ]
     args.extend(ignore_pattern)
     # `exit` is deprecated, use `do_exit` instead
@@ -35,7 +43,7 @@ def run_pylint_on_specific_directory(directory, score, exclude):
         return 1
 
 
-def get_cmdline_arguments():
+def get_cmdline_arguments() -> argparse.Namespace:
     parser = argparse.ArgumentParser(epilog="Run options include tests")
 
     parser.add_argument(
@@ -69,7 +77,7 @@ def get_cmdline_arguments():
     return args
 
 
-def main():
+def main() -> None:
     args = get_cmdline_arguments()
 
     result = run_pylint_on_specific_directory(args.directory, args.score, args.exclude)

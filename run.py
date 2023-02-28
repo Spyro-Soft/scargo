@@ -8,8 +8,8 @@ import os
 import subprocess
 import sys
 
-import scargo
 from common_dev.scripts.documentation import create_doc
+from scargo.cli import cli as scargo_cli
 
 SCRIPT_DIR = os.path.dirname(os.path.realpath(__file__))
 REPO_DIR = SCRIPT_DIR  # '/repo'
@@ -23,7 +23,7 @@ IT_DIR = REPO_DIR + "/tests/it"
 CHECKERS_EXCLUSIONS = ["-e", "common_dev"]
 
 
-def get_cmdline_arguments():
+def get_cmdline_arguments() -> argparse.Namespace:
     parser = argparse.ArgumentParser(epilog="Run options include tests")
 
     parser.add_argument(
@@ -70,6 +70,13 @@ def get_cmdline_arguments():
     )
 
     parser.add_argument(
+        "--types",
+        action="store_true",
+        default=False,
+        help="Run type checking",
+    )
+
+    parser.add_argument(
         "-p",
         "--program",
         nargs="*",
@@ -90,7 +97,7 @@ def get_cmdline_arguments():
     return args
 
 
-def perform_tests(test_path, test_postfix, *test_flags):
+def perform_tests(test_path: str, test_postfix: str, *test_flags: str) -> str:
     out_test_doc_dir = OUT + "/test_doc"
     allure_result = out_test_doc_dir + "/allure_result"
     allure_report = out_test_doc_dir + "/allure_report"
@@ -135,7 +142,7 @@ def perform_tests(test_path, test_postfix, *test_flags):
     return ""
 
 
-def run_all_code_checkers():
+def run_all_code_checkers() -> bool:
     checker_exception_message = ""
 
     checker_exception_message += perform_tests(UT_DIR, "ut")
@@ -163,8 +170,6 @@ def run_all_code_checkers():
             "scargo",
             "-C",
             "tests",
-            "-e",
-            "scargo/scargo_src/sc_src.py",
         ]
         command.extend(CHECKERS_EXCLUSIONS)
         subprocess.check_call(command)
@@ -210,6 +215,13 @@ def run_all_code_checkers():
             "Pylint check failed run: " + " ".join(command) + "\n"
         )
 
+    try:
+        run_mypy()
+    except subprocess.CalledProcessError:
+        checker_exception_message += (
+            "Mypy check failed run: " + " ".join(command) + "\n"
+        )
+
     # try:
     #     run_flake8()
     # except subprocess.CalledProcessError:
@@ -224,20 +236,20 @@ def run_all_code_checkers():
     return True
 
 
-def run_pylint():
+def run_pylint() -> None:
     # can add "tests",  optionally
     command = [
         "./common_dev/scripts/pylintchecker.py",
         "-c",
         "scargo/",
         "-s",
-        "9.5",
+        "9.9",
         "--exclude=tests/*.py",
     ]
     subprocess.check_call(command)
 
 
-def run_flake8():
+def run_flake8() -> None:
     command = [
         "flake8",
         "scargo",
@@ -249,7 +261,7 @@ def run_flake8():
     subprocess.check_call(command)
 
 
-def run_isort(check=False):
+def run_isort(check: bool = False) -> None:
     isort_command = [
         "isort",
         "--profile=black",
@@ -264,7 +276,7 @@ def run_isort(check=False):
     subprocess.check_call(isort_command)
 
 
-def run_black(check=False):
+def run_black(check: bool = False) -> None:
     black_command = [
         "black",
         "scargo",
@@ -279,7 +291,20 @@ def run_black(check=False):
     subprocess.check_call(black_command)
 
 
-def main():
+def run_mypy() -> None:
+    mypy_command = [
+        "mypy",
+        "--explicit-package-bases",
+        "scargo",
+        "tests",
+        "common_dev",
+        "run.py",
+        "clean.py",
+    ]
+    subprocess.check_call(mypy_command)
+
+
+def main() -> None:
     args = get_cmdline_arguments()
 
     if not len(sys.argv) > 1:
@@ -305,16 +330,19 @@ def main():
         run_pylint()
         run_flake8()
 
+    if args.types:
+        run_mypy()
+
     if args.program:
         ar = [i.split() for i in args.program]
-        scargo.cli(ar[0])
+        scargo_cli(ar[0])
 
     if args.doc:
         create_doc()
 
 
 # avoiding making `e` a global variable
-def try_main():
+def try_main() -> None:
     try:
         main()
     except subprocess.CalledProcessError as e:

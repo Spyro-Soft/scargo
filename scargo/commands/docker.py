@@ -6,16 +6,17 @@
 import subprocess
 import sys
 from pathlib import Path
-from typing import Sequence
+from typing import List, Optional, Sequence
 
 import docker
 
-from scargo.scargo_src.sc_logger import get_logger
-from scargo.scargo_src.sc_src import get_scargo_config_or_exit
-from scargo.scargo_src.utils import get_project_root
+from scargo.config import ProjectConfig
+from scargo.config_utils import get_scargo_config_or_exit
+from scargo.logger import get_logger
+from scargo.path_utils import get_project_root
 
 
-def scargo_docker_build(docker_opts: Sequence) -> None:
+def scargo_docker_build(docker_opts: Sequence[str]) -> None:
     """
     Build docker
 
@@ -26,10 +27,11 @@ def scargo_docker_build(docker_opts: Sequence) -> None:
     logger.debug("Build docker environment.")
 
     docker_path = _get_docker_path()
-    cmd = " ".join(["docker-compose build", *docker_opts])
 
     try:
-        subprocess.run(cmd, shell=True, cwd=docker_path, check=True)
+        subprocess.run(
+            ["docker-compose", "build", *docker_opts], cwd=docker_path, check=True
+        )
         logger.info("Initialize docker environment.")
     except subprocess.CalledProcessError:
         logger.error("Build docker fail.")
@@ -37,13 +39,14 @@ def scargo_docker_build(docker_opts: Sequence) -> None:
 
 
 def scargo_docker_run(
-    docker_opts: Sequence,
-    command: str = None,
+    docker_opts: Sequence[str],
+    command: Optional[str] = None,
 ) -> None:
     """
     Run docker
 
     :param docker_opts: additional docker options
+    :param command: command to run in the container
     :raises CalledProcessError: if docker did not start
     """
     logger = get_logger()
@@ -52,22 +55,24 @@ def scargo_docker_run(
     docker_path = _get_docker_path()
     project_config_name = _get_project_config().name
 
-    cmd = " ".join(
-        filter(
-            None,
-            ["docker-compose run", *docker_opts, f"{project_config_name}_dev", command],
-        )
-    )
+    cmd = [
+        "docker-compose",
+        "run",
+        *docker_opts,
+        f"{project_config_name}_dev",
+    ]
+    if command:
+        cmd.extend(command.split())
 
     try:
-        subprocess.run(cmd, shell=True, cwd=docker_path, check=True)
+        subprocess.run(cmd, cwd=docker_path, check=True)
         logger.info("Stop docker environment.")
     except subprocess.CalledProcessError:
         logger.error("Run docker fail.")
         sys.exit(1)
 
 
-def scargo_docker_exec(docker_opts: Sequence):
+def scargo_docker_exec(docker_opts: List[str]) -> None:
     """
     Exec docker
 
@@ -102,7 +107,7 @@ def scargo_docker_exec(docker_opts: Sequence):
         sys.exit(1)
 
 
-def _get_docker_path():
+def _get_docker_path() -> Path:
     project_path = get_project_root()
     # do not rebuild dockers in the docker
     if Path(project_path, ".dockerenv").exists():
@@ -112,5 +117,5 @@ def _get_docker_path():
     return Path(project_path, ".devcontainer")
 
 
-def _get_project_config():
+def _get_project_config() -> ProjectConfig:
     return get_scargo_config_or_exit().project

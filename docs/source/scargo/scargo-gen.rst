@@ -43,15 +43,15 @@ Generate certs for azure IoTHub. TEXT shall be the device id.
 
 ::
 
-    -f, --fs              
-    
+    -f, --fs
+
 (Only for uC) Build the filesystem, based on spiffs dir content.
 For esp32 file, the system will be generated based on the interior of main/fs dir.
 
 
 ::
 
-    -b, --bin              
-    
-(Only for uC) Generate the single binary image from all binary partitions. 
+    -b, --bin
+
+(Only for uC) Generate the single binary image from all binary partitions.
 For esp32 file, the system will generate build/flash_image.bin file

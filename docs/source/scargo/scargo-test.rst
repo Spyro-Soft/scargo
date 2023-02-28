@@ -79,7 +79,7 @@ File ./test/CMakeLists.txt is not included into ./CMakeLists.txt
 Command scargo test would do the following:
 
 ::
-    
+
     $ cd test
     $ mkdir build
     $ cd build

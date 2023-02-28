@@ -26,9 +26,9 @@ target_link_libraries(${UTEST_NAME}
     ${CONAN_LIBS}
 )
 
-add_test(NAME ${UTEST_NAME} 
+add_test(NAME ${UTEST_NAME}
         COMMAND  $<TARGET_FILE:${UTEST_NAME}>)
-  
+
 target_include_directories(${UTEST_NAME}
     PRIVATE
         ${SOURCES_DIR}

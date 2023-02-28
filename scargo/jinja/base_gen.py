@@ -3,12 +3,13 @@
 # #
 
 from pathlib import Path
+from typing import Any, Dict
 
 from jinja2 import Environment, FileSystemLoader
 
-from scargo.scargo_src.sc_logger import get_logger
-from scargo.scargo_src.sc_src import get_scargo_config_or_exit
-from scargo.scargo_src.utils import get_config_file_path, get_project_root
+from scargo.config_utils import get_scargo_config_or_exit
+from scargo.logger import get_logger
+from scargo.path_utils import get_config_file_path, get_project_root
 
 
 class BaseGen:
@@ -23,10 +24,10 @@ class BaseGen:
         self,
         template: str,
         output_path: Path,
+        template_params: Dict[str, Any],
         overwrite: bool = True,
-        **template_kwargs,
     ) -> None:
-        """Function creates file using jinja template on output path, creates dirs if necessary"""
+        """Creates file using jinja template on output path, creates dirs if necessary"""
         if (
             self._is_file_excluded(output_path)
             or output_path.exists()
@@ -35,14 +36,14 @@ class BaseGen:
             return
 
         output_path.parent.mkdir(parents=True, exist_ok=True)
-        content = self.jinja_env.get_template(template).render(template_kwargs)
+        content = self.jinja_env.get_template(template).render(template_params)
         output_path.write_text(content, encoding="utf-8")
 
         logger = get_logger()
         logger.info("Generated %s", output_path)
 
     @staticmethod
-    def _is_file_excluded(output_path: Path):
+    def _is_file_excluded(output_path: Path) -> bool:
         # BaseGen is used in scargo new as well as scargo update, so sometimes
         # scargo.lock does not exist yet. Take values from toml instead.
         config_path = get_config_file_path("scargo.lock") or get_config_file_path(

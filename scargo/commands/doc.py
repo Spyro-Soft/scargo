@@ -9,10 +9,10 @@ from pathlib import Path
 
 import typer
 
-from scargo.scargo_src.sc_config import Config
-from scargo.scargo_src.sc_logger import get_logger
-from scargo.scargo_src.sc_src import prepare_config
-from scargo.scargo_src.utils import find_program_path, get_project_root
+from scargo.config import Config
+from scargo.config_utils import prepare_config
+from scargo.logger import get_logger
+from scargo.path_utils import find_program_path, get_project_root
 
 
 class _ScargoGenDoc:
@@ -24,14 +24,14 @@ class _ScargoGenDoc:
         self._doxygen_path = doxygen_path
         self._doc_dir_path = doc_dir_path
 
-    def create_default_doxyfile(self):
+    def create_default_doxyfile(self) -> None:
         """Create default doxyfile"""
         subprocess.check_call("doxygen -g", shell=True, cwd=self._doc_dir_path)
 
-    def update_doxyfile(self):
+    def update_doxyfile(self) -> None:
         """Update Doxyfile configuration according specified values"""
         project_name = self._config.project.name
-        project_path = Path(Path().absolute())
+        project_path = get_project_root()
         exclude = " ".join(
             f"{project_path}/{dir}"
             for dir in self.EXCLUDE_LIST + self._config.doc.exclude
@@ -42,7 +42,7 @@ class _ScargoGenDoc:
             "EXTRACT_ALL": "YES",
             "INPUT": project_path,
             "RECURSIVE": "YES",
-            "EXCLUDE": exclude,
+            "EXCLUDE_PATTERNS": exclude,
             "GENERATE_LATEX": "NO",
         }
 
@@ -57,12 +57,12 @@ class _ScargoGenDoc:
         with doxyfile_path.open("w", encoding="utf-8") as doxyfile:
             doxyfile.writelines(rewrite_file)
 
-    def generate_doxygen(self):
+    def generate_doxygen(self) -> None:
         """Generate doxygen according to doxyfile"""
         subprocess.check_call("doxygen", shell=True, cwd=self._doc_dir_path)
 
 
-def _open_doc(doc_dir_path: Path):
+def _open_doc(doc_dir_path: Path) -> None:
     logger = get_logger()
 
     html_file_path = doc_dir_path / "html/index.html"

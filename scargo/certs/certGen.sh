@@ -29,26 +29,26 @@ while (( "$#" )); do
         exit 0
         ;;
 
-    --output) 
+    --output)
         OUTPUT_DIR=$2
         echo -e "${GREEN}Output dir: ${OUTPUT_DIR} ${NC}" >&1
         shift 2
         ;;
-    
-    -n|--name) 
+
+    -n|--name)
         DEVICE_NAME=$2
         echo -e "${GREEN}Device name: ${DEVICE_NAME} ${NC}" >&1
         shift 2
         ;;
 
-    --create_device_certificate) 
+    --create_device_certificate)
         ACTION_COMMAND=create_device_certificate
         ACTION_PARAM=$2
         echo -e "${GREEN}Action command:${ACTION_COMMAND}: ${ACTION_PARAM} ${NC}" >&1
         shift 2
         ;;
 
-    --create_root_and_intermediate) 
+    --create_root_and_intermediate)
         ACTION_COMMAND=create_root_and_intermediate
         echo -e "${GREEN}Action command: ${ACTION_COMMAND} ${NC}" >&1
         shift 1

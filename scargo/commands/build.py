@@ -7,14 +7,14 @@ import subprocess
 import sys
 from pathlib import Path
 
-from scargo.scargo_src.sc_logger import get_logger
-from scargo.scargo_src.sc_publish import (
+from scargo.commands.publish import (
     conan_add_conancenter,
     conan_add_remote,
     conan_clean_remote,
 )
-from scargo.scargo_src.sc_src import prepare_config
-from scargo.scargo_src.utils import get_project_root
+from scargo.config_utils import prepare_config
+from scargo.logger import get_logger
+from scargo.path_utils import get_project_root
 
 
 def scargo_build(profile: str) -> None:
@@ -47,13 +47,11 @@ def scargo_build(profile: str) -> None:
 
     try:
         subprocess.check_call(
-            f"conan install . -if {build_dir}",
-            shell=True,
+            ["conan", "install", ".", "-if", build_dir],
             cwd=project_dir,
         )
         subprocess.check_call(
-            f"cmake -DCMAKE_BUILD_TYPE={profile} {project_dir}",
-            shell=True,
+            ["cmake", f"-DCMAKE_BUILD_TYPE={profile}", project_dir],
             cwd=build_dir,
         )
         subprocess.check_call("cmake --build . --parallel", shell=True, cwd=build_dir)

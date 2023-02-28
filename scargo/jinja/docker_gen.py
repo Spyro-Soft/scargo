@@ -7,11 +7,11 @@ import shutil
 from pathlib import Path
 
 from scargo import __version__
+from scargo.config import ProjectConfig
+from scargo.global_values import SCARGO_PGK_PATH
 from scargo.jinja.base_gen import BaseGen
-from scargo.scargo_src.global_values import SCARGO_PGK_PATH
-from scargo.scargo_src.sc_config import ProjectConfig
-from scargo.scargo_src.sc_logger import get_logger
-from scargo.scargo_src.utils import get_project_root
+from scargo.logger import get_logger
+from scargo.path_utils import get_project_root
 
 
 class _DockerComposeTemplate(BaseGen):
@@ -33,12 +33,13 @@ class _DockerComposeTemplate(BaseGen):
             self._gen_file_list.extend([("stm32.cfg.j2", docker_path / "stm32.cfg")])
         self.project_config = project_config
 
-    def generate_docker_env(self):
+    def generate_docker_env(self) -> None:
         """Generate dirs and files"""
         custom_docker = ""
         self.create_file_from_template(
             "Dockerfile-custom.j2",
             self.docker_path / "Dockerfile-custom",
+            template_params={},
             overwrite=False,
         )
 
@@ -58,20 +59,22 @@ class _DockerComposeTemplate(BaseGen):
             self.create_file_from_template(
                 template,
                 output_path,
-                project=self.project_config,
-                scargo_package_version=scargo_package_version,
-                custom_docker=custom_docker,
+                template_params={
+                    "project": self.project_config,
+                    "scargo_package_version": scargo_package_version,
+                    "custom_docker": custom_docker,
+                },
             )
 
     def _set_up_package_version(self) -> str:
-        if whl_path := os.getenv("SCARGO_DOCKER_INSTALL_LOCAL"):
+        if whl_path_str := os.getenv("SCARGO_DOCKER_INSTALL_LOCAL"):
             repo_root = Path(__file__).parent.parent.parent
-            whl_path = repo_root / whl_path
+            whl_path = repo_root / whl_path_str
             shutil.copy(repo_root / whl_path, self.docker_path)
             return whl_path.name
         return f"scargo=={__version__}"
 
 
-def generate_docker_compose(docker_path: Path, project_config: ProjectConfig):
+def generate_docker_compose(docker_path: Path, project_config: ProjectConfig) -> None:
     docker_compose_template = _DockerComposeTemplate(project_config, docker_path)
     docker_compose_template.generate_docker_env()

@@ -7,10 +7,10 @@ import subprocess
 import sys
 from pathlib import Path
 
-from scargo.scargo_src.sc_config import Config
-from scargo.scargo_src.sc_logger import get_logger
-from scargo.scargo_src.sc_src import prepare_config
-from scargo.scargo_src.utils import get_project_root
+from scargo.config import Config
+from scargo.config_utils import prepare_config
+from scargo.logger import get_logger
+from scargo.path_utils import get_project_root
 
 
 def scargo_test(verbose: bool) -> None:
@@ -40,13 +40,11 @@ def scargo_test(verbose: bool) -> None:
     try:
         # Run CMake and build tests.
         subprocess.check_call(
-            f"conan install {tests_src_dir} -if {test_build_dir}",
-            shell=True,
+            ["conan", "install", tests_src_dir, "-if", test_build_dir],
             cwd=project_dir,
         )
         subprocess.check_call(
-            f"conan build {tests_src_dir} -bf {test_build_dir}",
-            shell=True,
+            ["conan", "build", tests_src_dir, "-bf", test_build_dir],
             cwd=project_dir,
         )
     except subprocess.CalledProcessError:
@@ -59,48 +57,58 @@ def scargo_test(verbose: bool) -> None:
 
 def run_ut(config: Config, verbose: bool, cwd: Path) -> None:
     # Run tests.
-    cmd = "ctest"
+    cmd = ["ctest"]
 
     if verbose:
-        cmd += " --verbose"
+        cmd.append("--verbose")
     try:
         # Using `subprocess.run` because tests can fail,
         # and we do not want Python to throw exception.
-        subprocess.run(cmd, shell=True, cwd=cwd)
+        subprocess.run(cmd, cwd=cwd, check=False)
 
         # Run code coverage.
-        cmd = "gcovr -r ut . --html ut-coverage.html"
+        cmd = ["gcovr", "-r", "ut", ".", "--html", "ut-coverage.html"]
 
         gcov_executable = config.tests.gcov_executable
 
         if gcov_executable != "":
-            cmd = cmd + ' --gcov-executable "' + gcov_executable + '"'
+            cmd.extend(["--gcov-executable", gcov_executable])
 
-        subprocess.check_call(cmd, shell=True, cwd=cwd)
+        subprocess.check_call(cmd, cwd=cwd)
     except subprocess.CalledProcessError:
         logger = get_logger()
         logger.error("Fail to run project tests")
         sys.exit(1)
 
 
-def run_it(config: Config, verbose: bool):
+def run_it(config: Config, verbose: bool) -> None:
     # Run tests.
-    cmd = "ctest"
+    cmd = ["ctest"]
 
     if verbose:
-        cmd += " --verbose"
+        cmd.append("--verbose")
 
-    subprocess.run(cmd, shell=True)  # Using `subprocess.run` because tests
-    # can fail and we do not want Python to
+    subprocess.run(cmd, check=False)
+    # Using `subprocess.run` because tests
+    # can fail, and we do not want Python to
     # throw exception.
 
     # Run code coverage.
-    cmd = "gcovr -r it . --txt it-coverage.txt --html it-coverage.html"
+    cmd = [
+        "gcovr",
+        "-r",
+        "it",
+        ".",
+        "--txt",
+        "it-coverage.txt",
+        "--html",
+        "it-coverage.html",
+    ]
 
     gcov_executable = config.tests.gcov_executable
 
     if gcov_executable != "":
-        cmd = cmd + ' --gcov-executable "' + gcov_executable + '"'
+        cmd.extend(["--gcov-executable", gcov_executable])
 
-    subprocess.check_call(cmd, shell=True)
+    subprocess.check_call(cmd)
     subprocess.check_call("cat it-coverage.txt", shell=True)

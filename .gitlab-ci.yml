@@ -1,4 +1,4 @@
-image: spyrosoftsa/scargo-dev:1.1
+image: spyrosoftsa/scargo-dev:1.2
 
 stages:
   - build
@@ -17,7 +17,7 @@ stages:
 
 .merge_request_main:
   rules:
-    - if: $CI_COMMIT_MESSAGE =~ /(?i)^(WIP|Draft:)/ 
+    - if: $CI_COMMIT_MESSAGE =~ /(?i)^(WIP|Draft:)/
       when: never
     - if: '$CI_PIPELINE_SOURCE == "merge_request_event" && $CI_MERGE_REQUEST_TITLE =~ /^(WIP|Draft:)/'
       when: never
@@ -29,7 +29,7 @@ workflow:
   rules:
     - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
     - if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH'
-    
+
 #______________________________________________________________________________________________BUILD
 debug:
   stage: build
@@ -44,7 +44,7 @@ debug:
     refs:
       - master
   script:
-    - flit build 
+    - flit build
   artifacts:
     expire_in: 1 hour
     paths:
@@ -118,7 +118,7 @@ pylint:
   extends: .merge_request
   allow_failure: false
   script:
-    - ./common_dev/scripts/pylintchecker.py -c scargo/ -s 9.5 --exclude=tests/
+    - ./common_dev/scripts/pylintchecker.py -c scargo/ -s 9.9 --exclude=tests/
 #______________________________________________________________________________________________CHECK_TAG
 check_tag:
   stage: publish
@@ -127,7 +127,7 @@ check_tag:
     - git config --global --add safe.directory "${CI_PROJECT_DIR}"
     - git fetch --tags
     - tag=release_$(grep -w __version__ scargo/__init__.py | grep -Eo "[[:digit:]]+\.[[:digit:]]+\.[[:digit:]]+")
-    - if [[ $(git tag -l "$tag") ]]; then echo "tag $tag exist"; exit 1; else echo "tag $tag does not exist "; fi  
+    - if [[ $(git tag -l "$tag") ]]; then echo "tag $tag exist"; exit 1; else echo "tag $tag does not exist "; fi
 
 #______________________________________________________________________________________________RELEASING
 releasing:

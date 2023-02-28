@@ -4,10 +4,10 @@
 
 from pathlib import Path
 
+from scargo.config import Config, Target
+from scargo.global_values import SCARGO_PGK_PATH
 from scargo.jinja.base_gen import BaseGen
-from scargo.scargo_src.global_values import SCARGO_PGK_PATH
-from scargo.scargo_src.sc_config import Config, Target
-from scargo.scargo_src.utils import get_project_root
+from scargo.path_utils import get_project_root
 
 
 class _CppTemplateGen(BaseGen):
@@ -15,43 +15,44 @@ class _CppTemplateGen(BaseGen):
     This class is a container cpp files creation with multilayer approach
     """
 
-    def __init__(self):
+    def __init__(self) -> None:
         self.template_dir = Path(SCARGO_PGK_PATH, "jinja", "cpp")
         BaseGen.__init__(self, self.template_dir)
 
-    def _set_src_dir(self, target: Target):
+    def _set_src_dir(self, target: Target) -> None:
         self._src_dir = get_project_root() / target.source_dir
 
-    def _generate_bin(self, target: str, bin_name: str):
+    def _generate_bin(self, target: Target, bin_name: str) -> None:
         """Function which creates main.cpp file using jinja"""
         self.create_file_from_template(
             "main.cpp.j2",
             Path(self._src_dir, f"{bin_name.lower()}.cpp"),
-            target=target,
-            bin_name=bin_name,
+            template_params={"target": target, "bin_name": bin_name},
         )
 
-    def _generate_lib(self, lib_name: str):
+    def _generate_lib(self, lib_name: str) -> None:
         """Function which creates a lib files using jinja"""
         self.create_file_from_template(
             "lib.cpp.j2",
             Path(self._src_dir, f"{lib_name.lower()}.cpp"),
-            lib_name=lib_name,
+            template_params={"lib_name": lib_name},
         )
         self.create_file_from_template(
-            "lib.h.j2", Path(self._src_dir, f"{lib_name.lower()}.h"), lib_name=lib_name
+            "lib.h.j2",
+            Path(self._src_dir, f"{lib_name.lower()}.h"),
+            {"lib_name": lib_name},
         )
 
-    def _generate_cmake(self, config: Config):
+    def _generate_cmake(self, config: Config) -> None:
         target = config.project.target
 
         self.create_file_from_template(
             f"cmake-src-{target.family}.j2",
             Path(self._src_dir, "CMakeLists.txt"),
-            config=config,
+            template_params={"config": config},
         )
 
-    def generate_cpp(self, config: Config):
+    def generate_cpp(self, config: Config) -> None:
         """Generate dirs and files"""
         target = config.project.target
         self._set_src_dir(target)
@@ -67,6 +68,6 @@ class _CppTemplateGen(BaseGen):
         self._generate_cmake(config)
 
 
-def generate_cpp(config: Config):
+def generate_cpp(config: Config) -> None:
     cpp_template = _CppTemplateGen()
     cpp_template.generate_cpp(config)

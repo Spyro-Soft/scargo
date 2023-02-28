@@ -1,5 +1,5 @@
 {% if config.esp32.extra_component_dirs %}
-set(EXTRA_COMPONENT_DIRS 
+set(EXTRA_COMPONENT_DIRS
 {% for dirs in config.esp32.extra_component_dirs %}
     {{ dirs }}
 {% endfor %}

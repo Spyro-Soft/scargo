@@ -1,18 +1,20 @@
 import os
 from pathlib import Path
+from typing import Generator
+from unittest.mock import MagicMock, patch
 
 import pytest
 
-from scargo import Target
-from scargo.scargo_src.sc_new import scargo_new
-from scargo.scargo_src.sc_src import prepare_config
-from scargo.scargo_src.sc_update import scargo_update
+from scargo.commands.new import scargo_new
+from scargo.commands.update import scargo_update
+from scargo.config import Config, Target
+from scargo.config_utils import prepare_config
 
 TARGET_X86 = Target.get_target_by_id("x86")
 
 
 @pytest.fixture
-def create_new_project(tmp_path):
+def create_new_project(tmp_path: Path) -> None:
     os.chdir(tmp_path)
     project_name = "test_project"
     scargo_new(project_name, None, None, TARGET_X86, False, False)
@@ -20,7 +22,7 @@ def create_new_project(tmp_path):
 
 
 @pytest.fixture
-def create_new_project_docker(tmp_path):
+def create_new_project_docker(tmp_path: Path) -> None:
     os.chdir(tmp_path)
     project_name = "test_project"
     scargo_new(project_name, None, None, TARGET_X86, True, False)
@@ -28,5 +30,11 @@ def create_new_project_docker(tmp_path):
 
 
 @pytest.fixture()
-def get_lock_file():
+def get_lock_file() -> Config:
     return prepare_config()
+
+
+@pytest.fixture
+def mock_subprocess_run() -> Generator[MagicMock, None, None]:
+    with patch("subprocess.run") as mock_subprocess_run:
+        yield mock_subprocess_run

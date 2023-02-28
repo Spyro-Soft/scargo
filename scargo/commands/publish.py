@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 # #
 # @copyright Copyright (C) 2023 SpyroSoft Solutions S.A. All rights reserved.
 # #
@@ -9,11 +8,10 @@ import os
 import subprocess
 import sys
 from pathlib import Path
-from typing import Union
 
-from scargo.scargo_src.sc_logger import get_logger
-from scargo.scargo_src.sc_src import prepare_config
-from scargo.scargo_src.utils import get_project_root
+from scargo.config_utils import prepare_config
+from scargo.logger import get_logger
+from scargo.path_utils import get_project_root
 
 
 def scargo_publish(repo: str) -> None:
@@ -46,12 +44,18 @@ def scargo_publish(repo: str) -> None:
         logger.error("Unable to create package")
 
     # Upload package to artifactory
-    conan_repo = f"-r {repo}" if repo else ""
+    conan_repo = ["-r", repo] if repo else []
     try:
         subprocess.check_call(
-            f"conan upload {project_name}/{version} {conan_repo} --all --confirm",
+            [
+                "conan",
+                "upload",
+                f"{project_name}/{version}",
+                *conan_repo,
+                "--all",
+                "--confirm",
+            ],
             cwd=project_path,
-            shell=True,
         )
     except subprocess.CalledProcessError:
         logger.error("Unable to publish package")
@@ -71,9 +75,8 @@ def conan_add_remote(project_path: Path) -> None:
     for repo_name, repo_url in conan_repo.items():
         try:
             subprocess.check_call(
-                f"conan remote add {repo_name} {repo_url}",
+                ["conan", "remote", "add", repo_name, repo_url],
                 cwd=project_path,
-                shell=True,
             )
         except subprocess.CalledProcessError:
             logger.error("Unable to add remote repository")
@@ -116,7 +119,7 @@ def conan_add_user(remote: str) -> None:
     :return: None
     """
     conan_user = subprocess.run(
-        "conan user", capture_output=True, shell=True
+        "conan user", capture_output=True, shell=True, check=False
     ).stdout.decode("utf-8")
 
     env_conan_user = os.environ.get("CONAN_LOGIN_USERNAME", "")
@@ -125,8 +128,7 @@ def conan_add_user(remote: str) -> None:
     if env_conan_user not in conan_user:
         try:
             subprocess.check_call(
-                f"conan user -p {env_conan_passwd} -r {remote} {env_conan_user}",
-                shell=True,
+                ["conan", "user", "-p", env_conan_passwd, "-r", remote, env_conan_user],
             )
         except subprocess.CalledProcessError:
             logger = get_logger()

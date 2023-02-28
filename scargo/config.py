@@ -3,12 +3,16 @@
 # #
 from enum import Enum
 from pathlib import Path
-from typing import Dict, List, Optional
+from typing import Any, Dict, List, Optional
 
 import toml
-from pydantic import BaseModel, Extra, Field
+from pydantic import BaseModel, Extra, Field, root_validator
 
-from scargo.scargo_src.global_values import SCARGO_DEFAULT_BUILD_ENV
+from scargo.global_values import SCARGO_DEFAULT_BUILD_ENV
+
+
+class ConfigError(Exception):
+    pass
 
 
 class Config(BaseModel):
@@ -22,6 +26,25 @@ class Config(BaseModel):
     stm32: Optional["Stm32Config"]
     esp32: Optional["Esp32Config"]
     scargo: "ScargoConfig" = Field(default_factory=lambda: ScargoConfig())
+
+    def get_stm32_config(self) -> "Stm32Config":
+        if not self.stm32:
+            raise ConfigError("No [stm32] section in config")
+        return self.stm32
+
+    def get_esp32_config(self) -> "Esp32Config":
+        if not self.esp32:
+            raise ConfigError("No [esp32] section in config")
+        return self.esp32
+
+    @root_validator
+    def validate_special_configs(cls, values: Dict[str, Any]) -> Dict[str, Any]:
+        target_id = values["project"].target_id
+        if target_id == "stm32" and not values["stm32"]:
+            raise ConfigError("No [stm32] section in config")
+        if target_id == "esp32" and not values["esp32"]:
+            raise ConfigError("No [esp32] section in config")
+        return values
 
 
 class ProjectConfig(BaseModel):
@@ -58,7 +81,7 @@ class Target(BaseModel):
     cxx: str
 
     @classmethod
-    def get_target_by_id(cls, target_id):
+    def get_target_by_id(cls, target_id: str) -> "Target":
         return TARGETS[target_id]
 
 
@@ -89,7 +112,7 @@ TARGETS = {
 
 
 # for typer
-ScargoTargets = Enum(
+ScargoTargets = Enum(  # type: ignore[misc]
     "ScargoTargets", {target.id: target.id for target in TARGETS.values()}
 )
 
@@ -99,7 +122,7 @@ class ProfileConfig(BaseModel, extra=Extra.allow):
     cxxflags: Optional[str]
 
     @property
-    def extras(self):
+    def extras(self) -> Dict[str, Any]:
         return {
             key: value
             for key, value in dict(self).items()
@@ -136,7 +159,7 @@ class TestConfig(BaseModel, extra=Extra.allow):
     gcov_executable: str = Field(..., alias="gcov-executable")
 
     @property
-    def extras(self):
+    def extras(self) -> Dict[str, Any]:
         return {
             key: value
             for key, value in dict(self).items()

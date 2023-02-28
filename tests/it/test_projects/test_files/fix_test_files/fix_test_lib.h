@@ -9,4 +9,4 @@ class fix_test_lib
 public:
                   fix_test_lib();
          }                              ;
-}  // namespace spyro   
+}  // namespace spyro

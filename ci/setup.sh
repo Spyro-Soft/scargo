@@ -18,7 +18,7 @@ SSH_PORT=2000\n\
 DOCKER_IMAGE_ROOT=ubuntu:20.04\n\
 CONAN_USERNAME=\"\"\n\
 CONAN_PASS_KEY=\"\"\n" > ${SCRIPT_DIR}/.env
-  
+
 grep -qxF 'xhost +local:' ~/.bashrc || echo "xhost +local:" >>  ~/.bashrc
 
 if ! command -v docker-compose &> /dev/null

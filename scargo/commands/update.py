@@ -5,9 +5,12 @@
 """Update project"""
 import shutil
 import subprocess
+import sys
 from pathlib import Path
 
-from scargo import __version__ as ver
+from scargo.commands.docker import scargo_docker_build
+from scargo.config_utils import check_scargo_version, get_scargo_config_or_exit
+from scargo.global_values import SCARGO_DOCKER_ENV, SCARGO_LOCK_FILE, SCARGO_PGK_PATH
 from scargo.jinja.cicd_gen import generate_cicd
 from scargo.jinja.cmake_gen import generate_cmake
 from scargo.jinja.conan_gen import generate_conanfile
@@ -15,15 +18,8 @@ from scargo.jinja.docker_gen import generate_docker_compose
 from scargo.jinja.env_gen import generate_env
 from scargo.jinja.readme_gen import generate_readme
 from scargo.jinja.tests_gen import generate_tests
-from scargo.scargo_src.global_values import (
-    SCARGO_DOCKER_ENV,
-    SCARGO_LOCK_FILE,
-    SCARGO_PGK_PATH,
-)
-from scargo.scargo_src.sc_docker import scargo_docker_build
-from scargo.scargo_src.sc_logger import get_logger
-from scargo.scargo_src.sc_src import check_scargo_version, get_scargo_config_or_exit
-from scargo.scargo_src.utils import get_project_root
+from scargo.logger import get_logger
+from scargo.path_utils import get_project_root
 
 
 def copy_file_if_not_exists() -> None:
@@ -52,13 +48,13 @@ def scargo_update(config_file_path: Path) -> None:
     config = get_scargo_config_or_exit(config_file_path)
     if not config.project:
         logger.error("File `%s`: Section `project` not found.", config_file_path)
-        return
+        sys.exit(1)
 
     if not config.project.name:
         logger.error(
             "File `{config_file_path}`: `name` not found under `project` section."
         )
-        return
+        sys.exit(1)
 
     # Copy templates project files to repo directory
     copy_file_if_not_exists()
@@ -86,7 +82,7 @@ def scargo_update(config_file_path: Path) -> None:
             out.write(
                 "# ESP-IDF Partition Table\n# Name,   Type, SubType, Offset,  Size, Flags\n"
             )
-            partitions = config.esp32.partitions
+            partitions = config.get_esp32_config().partitions
             for line in partitions:
                 out.write(line + "\n")
             out.write("\n")
