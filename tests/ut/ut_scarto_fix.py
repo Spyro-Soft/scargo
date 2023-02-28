@@ -1,6 +1,6 @@
 import pytest
 
-from scargo.commands.check import check_copyright, check_pragma
+from scargo.commands.check import CopyrightChecker, PragmaChecker
 from scargo.config import Config
 
 
@@ -8,7 +8,7 @@ def test_fix_pragma(
     create_new_project: None, caplog: pytest.LogCaptureFixture, get_lock_file: Config
 ) -> None:
     lock_file = get_lock_file
-    check_pragma(lock_file, True)
+    PragmaChecker(lock_file, fix_errors=True).check()
     assert "Fixed" in caplog.text
 
 
@@ -16,7 +16,7 @@ def test_check_copyright(
     create_new_project: None, caplog: pytest.LogCaptureFixture, get_lock_file: Config
 ) -> None:
     lock_file = get_lock_file
-    check_copyright(lock_file, True)
+    CopyrightChecker(lock_file, fix_errors=True).check()
     assert "Fixed" in caplog.text
 
 
