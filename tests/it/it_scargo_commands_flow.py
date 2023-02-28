@@ -1,9 +1,15 @@
 import os
 from pathlib import Path
 from shutil import copy, copytree
+from unittest.mock import patch
 
 import pytest
-from utils import (  # type: ignore[import]
+
+from scargo.cli import cli
+from scargo.jinja.docker_gen import _DockerComposeTemplate
+from scargo.jinja.env_gen import generate_env
+from scargo.path_utils import get_project_root
+from tests.it.utils import (
     ScargoTestRunner,
     add_profile_to_toml,
     assert_str_in_CMakeLists,
@@ -12,10 +18,6 @@ from utils import (  # type: ignore[import]
     get_copyright_text,
     get_project_name,
 )
-
-from scargo.cli import cli
-from scargo.jinja.env_gen import generate_env
-from scargo.path_utils import get_project_root
 
 TEST_PROJECT_NAME = "common_scargo_project"
 TEST_PROJECT_ESP32_NAME = "common_scargo_project_esp32"
@@ -124,7 +126,9 @@ def copy_project_stm32() -> None:
 
 @pytest.mark.parametrize("project_creation", PROJECT_CREATION_x86)
 def test_project_x86_dev_flow(
-    project_creation: str, request: pytest.FixtureRequest
+    project_creation: str,
+    request: pytest.FixtureRequest,
+    use_local_scargo: None,
 ) -> None:
     # Arrange
     build_dir_path = Path("build")
@@ -215,7 +219,9 @@ def test_project_x86_dev_flow(
 
 @pytest.mark.parametrize("project_creation", PROJECT_CREATION_esp32)
 def test_project_esp32_dev_flow(
-    project_creation: str, request: pytest.FixtureRequest
+    project_creation: str,
+    request: pytest.FixtureRequest,
+    use_local_scargo: None,
 ) -> None:
     # ARRANGE
     runner = ScargoTestRunner()
@@ -257,7 +263,9 @@ def test_project_esp32_dev_flow(
 
 @pytest.mark.parametrize("project_creation", PROJECT_CREATION_stm32)
 def test_project_stm32_dev_flow(
-    project_creation: str, request: pytest.FixtureRequest
+    project_creation: str,
+    request: pytest.FixtureRequest,
+    use_local_scargo: None,
 ) -> None:
     # Arrange
     runner = ScargoTestRunner()
@@ -286,3 +294,14 @@ def test_project_stm32_dev_flow(
     # Test
     result = runner.invoke(cli, ["test"])
     assert result.exit_code == 0
+
+
+def test_project_x86_scargo_from_pypi() -> None:
+    # Test new and update work with pypi scargo version
+    runner = ScargoTestRunner()
+
+    with patch.object(
+        _DockerComposeTemplate, "_set_up_package_version", return_value="scargo"
+    ):
+        result = runner.invoke(cli, ["new", NEW_TEST_PROJECT_NAME, "--target=x86"])
+        assert result.exit_code == 0

@@ -11,7 +11,7 @@ def create_tmp_directory(tmp_path: Path) -> None:
     os.chdir(tmp_path)
 
 
-@pytest.fixture(autouse=True, scope="session")
+@pytest.fixture(scope="session")
 def use_local_scargo() -> None:
     # This is necessary so we can test latest changes in docker
     # Might be worth to rework with devpi later on
