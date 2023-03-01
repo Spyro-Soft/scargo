@@ -224,7 +224,7 @@ def gen(  # pylint: disable=too-many-arguments
         dir_okay=True,
         help="Directory with root and intermediate certificates.",
     ),
-    certs_passwd: Optional[Path] = Option(
+    certs_passwd: Optional[str] = Option(
         None,
         "--passwd",
         "-p",
@@ -248,7 +248,17 @@ def gen(  # pylint: disable=too-many-arguments
         )
         sys.exit(1)
 
-    scargo_gen(project_profile_path, gen_ut, gen_mock, certs, certs_mode, certs_input, file_system, single_bin)
+    scargo_gen(
+        project_profile_path,
+        gen_ut,
+        gen_mock,
+        certs,
+        certs_mode,
+        certs_input,
+        certs_passwd,
+        file_system,
+        single_bin,
+    )
 
 
 ###############################################################################

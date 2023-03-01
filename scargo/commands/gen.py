@@ -29,6 +29,7 @@ def scargo_gen(
     certs: Optional[str],
     certs_mode: Optional[str],
     certs_input: Optional[Path],
+    certs_passwd: Optional[str],
     fs: bool,
     single_bin: bool,
 ) -> None:
@@ -48,7 +49,7 @@ def scargo_gen(
             logger.info(f"Skipping: {gen_mock}")
 
     if certs:
-        generate_certs(certs, certs_mode, certs_input)
+        generate_certs(certs, certs_mode, certs_input, certs_passwd)
 
     if fs:
         generate_fs(config)
@@ -57,7 +58,12 @@ def scargo_gen(
         gen_single_binary(project_profile_path, config)
 
 
-def generate_certs(device_name: str, mode_for_certs: str, certs_in_dir: Path) -> None:
+def generate_certs(
+    device_name: str,
+    mode_for_certs: str,
+    certs_in_dir: Path,
+    certs_passwd: str,
+) -> None:
     project_path = get_project_root()
 
     in_certs_dir = Path(SCARGO_PGK_PATH, "certs")
@@ -65,6 +71,8 @@ def generate_certs(device_name: str, mode_for_certs: str, certs_in_dir: Path) ->
     certs_out_dir = projects_builds_path / "certs"
     if not certs_in_dir:
         certs_in_dir = projects_builds_path / "certs"
+    if not certs_passwd:
+        certs_passwd = "1234"
 
     if mode_for_certs == "all":
         mode_for_certs = "All-certificates"
@@ -85,6 +93,8 @@ def generate_certs(device_name: str, mode_for_certs: str, certs_in_dir: Path) ->
             certs_out_dir,
             "--input",
             certs_in_dir,
+            "--passwd",
+            certs_passwd,
         ]
     )
 
