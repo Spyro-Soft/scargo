@@ -149,7 +149,6 @@ class PragmaChecker(CheckerFixer):
 
     def check_file(self, file_path: Path) -> CheckResult:
         with open(file_path, encoding="utf-8") as file:
-            print(file_path)
             for line in file.readlines():
                 if "#pragma once" in line:
                     return CheckResult(0)
@@ -175,15 +174,13 @@ class CopyrightChecker(CheckerFixer):
         if not copyright_desc:
             logger.warning("No copyrights in defined in toml")
             return
+        self.copyright_desc = copyright_desc
         super().check()
 
     def check_file(self, file_path: Path) -> CheckResult:
-        copyright_desc = self.get_check_config().description
-        assert copyright_desc
-
         with open(file_path, encoding="utf-8") as file:
             for line in file.readlines():
-                if copyright_desc in line:
+                if self.copyright_desc in line:
                     return CheckResult(problems_found=0)
                 if "copyright" in line.lower():
                     logger.warning(
@@ -194,14 +191,12 @@ class CopyrightChecker(CheckerFixer):
         return CheckResult(problems_found=1)
 
     def fix_file(self, file_path: Path) -> None:
-        copyright_desc = self.get_check_config().description
-
         with open(file_path, encoding="utf-8") as file:
             old = file.read()
 
         with open(file_path, "w", encoding="utf-8") as file:
             file.write("//\n")
-            file.write(f"// {copyright_desc}\n")
+            file.write(f"// {self.copyright_desc}\n")
             file.write("//\n")
             file.write("\n")
             file.write(old)
