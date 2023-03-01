@@ -19,8 +19,10 @@ set -o pipefail # Exit if pipe failed
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 ACTION_COMMAND=""
 ACTION_PARAM=""
-DEVICE_NAME="new-device"
-OUTPUT_DIR=/repo/out/cert
+ACTION_PARAM2=""
+DEVICE_NAME="iot-device"
+OUTPUT_DIR=/workspace/build/cert
+INPUT_DIR=""
 
 while (( "$#" )); do
     case "$1" in
@@ -41,11 +43,26 @@ while (( "$#" )); do
         shift 2
         ;;
 
+    -p|--password) 
+        CUSTOM_PASSWD=$2
+        echo -e "${GREEN}Using password: ${CUSTOM_PASSWD} ${NC}" >&1
+        shift 2
+        ;;
+
     --create_device_certificate)
         ACTION_COMMAND=create_device_certificate
         ACTION_PARAM=$2
-        echo -e "${GREEN}Action command:${ACTION_COMMAND}: ${ACTION_PARAM} ${NC}" >&1
-        shift 2
+        ACTION_PARAM2=$3
+        echo -e "${GREEN}Action command:${ACTION_COMMAND}: ${ACTION_PARAM} ${ACTION_PARAM2} ${NC}" >&1
+        shift 3
+        ;;
+
+    --create_device_certificate_from_intermediate) 
+        ACTION_COMMAND=create_device_certificate_from_intermediate
+        ACTION_PARAM=$2
+        ACTION_PARAM2=$3
+        echo -e "${GREEN}Action command:${ACTION_COMMAND}: ${ACTION_PARAM} ${ACTION_PARAM2} ${NC}" >&1
+        shift 3
         ;;
 
     --create_root_and_intermediate)
@@ -75,14 +92,14 @@ COUNTRY="US"
 STATE="WA"
 LOCALITY="Redmond"
 ORGANIZATION_NAME="My Organization"
-root_ca_password="1234"
 key_bits_length="4096"
+root_ca_password=${CUSTOM_PASSWD:="1234"}
+intermediate_ca_password=${CUSTOM_PASSWD:="1234"}
 days_till_expire=365
 ca_chain_prefix="azure-iot-test-only.chain.ca"
 intermediate_ca_dir="."
 openssl_root_config_file="${SCRIPT_DIR}/openssl_root_ca.cnf"
 openssl_intermediate_config_file="${SCRIPT_DIR}/openssl_device_intermediate_ca.cnf"
-intermediate_ca_password="1234"
 root_ca_prefix="azure-iot-test-only.root.ca"
 intermediate_ca_prefix="azure-iot-test-only.intermediate"
 
@@ -240,6 +257,7 @@ function generate_device_certificate_common()
 {
     local common_name="${1}"
     local device_prefix="${2}"
+    local output_dir="${OUTPUT_DIR}"
     local certificate_dir="${3}"
     local ca_password="${4}"
     local server_pfx_password="1234"
@@ -248,60 +266,72 @@ function generate_device_certificate_common()
     local openssl_config_extension="${6}"
     local cert_type_diagnostic="${7}"
 
+    echo common_name=${common_name}
+    echo device_prefix=${device_prefix}
+    echo OUTPUT_DIR=${OUTPUT_DIR}
+    echo certificate_dir=${certificate_dir}
+    echo ca_password=${ca_password}
+    echo server_pfx_password=${server_pfx_password}
+    echo password_cmd=${password_cmd}
+    echo openssl_config_file=${openssl_config_file}
+    echo openssl_config_extension=${openssl_config_extension}
+    echo cert_type_diagnostic=${cert_type_diagnostic}
+
     echo "Creating ${cert_type_diagnostic} Certificate"
     echo "----------------------------------------"
-    cd "${home_dir}"
-
+    cd "${certificate_dir}"
+    
+            #-out "${certificate_dir}/private/${device_prefix}.key.pem" \
     openssl "${algorithm}" \
-            -out "${certificate_dir}/private/${device_prefix}.key.pem" \
+            -out "./private/${device_prefix}.key.pem" \
             ${key_bits_length}
     [ $? -eq 0 ] || exit $?
-    chmod 444 "${certificate_dir}/private/${device_prefix}.key.pem"
+    chmod 444 "./private/${device_prefix}.key.pem"
     [ $? -eq 0 ] || exit $?
 
     echo "Create the ${cert_type_diagnostic} Certificate Request"
     echo "----------------------------------------"
     openssl req -config "${openssl_config_file}" \
-        -key "${certificate_dir}/private/${device_prefix}.key.pem" \
+        -key "./private/${device_prefix}.key.pem" \
         -subj "$(make_CN_subject "${common_name}")" \
-        -new -sha256 -out "${certificate_dir}/csr/${device_prefix}.csr.pem"
+        -new -sha256 -out "./csr/${device_prefix}.csr.pem"
     [ $? -eq 0 ] || exit $?
 
     openssl ca -batch -config "${openssl_config_file}" \
             ${password_cmd} \
             -extensions "${openssl_config_extension}" \
             -days ${days_till_expire} -notext -md sha256 \
-            -in "${certificate_dir}/csr/${device_prefix}.csr.pem" \
-            -out "${certificate_dir}/certs/${device_prefix}.cert.pem"
+            -in "./csr/${device_prefix}.csr.pem" \
+            -out "./certs/${device_prefix}.cert.pem"
     [ $? -eq 0 ] || exit $?
-    chmod 444 "${certificate_dir}/certs/${device_prefix}.cert.pem"
+    chmod 444 "./certs/${device_prefix}.cert.pem"
     [ $? -eq 0 ] || exit $?
 
     echo "Verify signature of the ${cert_type_diagnostic}" \
          " certificate with the signer"
     echo "-----------------------------------"
     openssl verify \
-            -CAfile "${certificate_dir}/certs/${ca_chain_prefix}.cert.pem" \
-            "${certificate_dir}/certs/${device_prefix}.cert.pem"
+            -CAfile "./certs/${ca_chain_prefix}.cert.pem" \
+            "./certs/${device_prefix}.cert.pem"
     [ $? -eq 0 ] || exit $?
 
     echo "${cert_type_diagnostic} Certificate Generated At:"
     echo "----------------------------------------"
-    echo "    ${certificate_dir}/certs/${device_prefix}.cert.pem"
+    echo "    ./certs/${device_prefix}.cert.pem"
     echo ""
     openssl x509 -noout -text \
-            -in "${certificate_dir}/certs/${device_prefix}.cert.pem"
+            -in "./certs/${device_prefix}.cert.pem"
     [ $? -eq 0 ] || exit $?
     echo "Create the ${cert_type_diagnostic} PFX Certificate"
     echo "----------------------------------------"
-    openssl pkcs12 -in "${certificate_dir}/certs/${device_prefix}.cert.pem" \
-            -inkey "${certificate_dir}/private/${device_prefix}.key.pem" \
+    openssl pkcs12 -in "./certs/${device_prefix}.cert.pem" \
+            -inkey "./private/${device_prefix}.key.pem" \
             -password pass:${server_pfx_password} \
-            -export -out "${certificate_dir}/certs/${device_prefix}.cert.pfx"
+            -export -out "./certs/${device_prefix}.cert.pfx"
     [ $? -eq 0 ] || exit $?
     echo "${cert_type_diagnostic} PFX Certificate Generated At:"
     echo "--------------------------------------------"
-    echo "    ${certificate_dir}/certs/${device_prefix}.cert.pfx"
+    echo "    ./certs/${device_prefix}.cert.pfx"
     [ $? -eq 0 ] || exit $?
 }
 
@@ -389,17 +419,20 @@ function generate_verification_certificate()
 # Generates a certificate for a device, chained directly to the root.
 ###############################################################################
 function generate_device_certificate()
-{
+{   
+    device_name_and_id=${1}
+    input_dir=${2}
+
     if [ -z $1 ]; then
         echo "Usage: create_device_certificate <subjectName>"
         exit 1
     fi
 
-    rm -f ${root_ca_dir}/private/${DEVICE_NAME}.key.pem
-    rm -f ${root_ca_dir}/certs/${DEVICE_NAME}.key.pem
-    rm -f ${root_ca_dir}/certs/${DEVICE_NAME}-full-chain.cert.pem
-    generate_leaf_certificate "${1}" "${DEVICE_NAME}" \
-                              "${root_ca_dir}" "${root_ca_password}" \
+    rm -f ${input_dir}/private/${DEVICE_NAME}.key.pem
+    rm -f ${input_dir}/certs/${DEVICE_NAME}.key.pem
+    rm -f ${input_dir}/certs/${DEVICE_NAME}-full-chain.cert.pem
+    generate_leaf_certificate "${device_name_and_id}" "${DEVICE_NAME}" \
+                              "${input_dir}" "${root_ca_password}" \
                               "${openssl_root_config_file}"
 }
 
@@ -408,18 +441,31 @@ function generate_device_certificate()
 # Generates a certificate for a device, chained to the intermediate.
 ###############################################################################
 function generate_device_certificate_from_intermediate()
-{
+{   
+    device_name_and_id=${1}
+    input_dir=${2}
+
     if [ -z $1 ]; then
         echo "Usage: create_device_certificate_from_intermediate <subjectName>"
         exit 1
     fi
 
-    rm -f ${root_ca_dir}/private/${DEVICE_NAME}.key.pem
-    rm -f ${root_ca_dir}/certs/${DEVICE_NAME}.key.pem
-    rm -f ${root_ca_dir}/certs/${DEVICE_NAME}-full-chain.cert.pem
-    generate_leaf_certificate "${1}" "${DEVICE_NAME}" \
-                              "${intermediate_ca_dir}" "${intermediate_ca_password}" \
+    FILE="/workspace/build/cert/index.txt"
+    SEQUENCE="CN=${device_name_and_id}"
+
+    if grep -q "$SEQUENCE" "$FILE"; then
+        echo "Device certificate was already generated for this device name"
+    else
+        rm -f ${input_dir}/certs/${DEVICE_NAME}.cert.pem
+        rm -f ${input_dir}/certs/${DEVICE_NAME}.cert.pfx
+        rm -f ${input_dir}/certs/${DEVICE_NAME}-full-chain.cert.pem
+        rm -f ${input_dir}/csr/${DEVICE_NAME}.csr.pem
+        rm -f ${input_dir}/private/${DEVICE_NAME}.key.pem
+        generate_leaf_certificate "${device_name_and_id}" "${DEVICE_NAME}" \
+                              "${input_dir}" "${intermediate_ca_password}" \
                               "${openssl_intermediate_config_file}"
+    fi
+    
 }
 
 
@@ -456,9 +502,9 @@ if [ "${ACTION_COMMAND}" == "create_root_and_intermediate" ]; then
 elif [ "${ACTION_COMMAND}" == "create_verification_certificate" ]; then
     generate_verification_certificate "${ACTION_PARAM}"
 elif [ "${ACTION_COMMAND}" == "create_device_certificate" ]; then
-    generate_device_certificate "${ACTION_PARAM}"
+    generate_device_certificate "${ACTION_PARAM}" "${ACTION_PARAM2}"
 elif [ "${ACTION_COMMAND}" == "create_device_certificate_from_intermediate" ]; then
-    generate_device_certificate_from_intermediate "${ACTION_PARAM}"
+    generate_device_certificate_from_intermediate "${ACTION_PARAM}" "${ACTION_PARAM2}"
 elif [ "${ACTION_COMMAND}" == "create_edge_device_certificate" ]; then
     generate_edge_device_certificate "${ACTION_PARAM}"
 else
