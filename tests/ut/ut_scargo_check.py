@@ -3,13 +3,13 @@ from _pytest.logging import LogCaptureFixture
 from pytest_subprocess import FakeProcess
 
 from scargo.commands.check import (
-    check_clang_format,
-    check_clang_tidy,
-    check_copyright,
-    check_cppcheck,
-    check_cyclomatic,
-    check_pragma,
-    check_todo,
+    ClangFormatChecker,
+    ClangTidyChecker,
+    CopyrightChecker,
+    CppcheckChecker,
+    CyclomaticChecker,
+    PragmaChecker,
+    TodoChecker,
     scargo_check,
 )
 from scargo.config import Config
@@ -23,7 +23,7 @@ def test_check_pragma(
     create_new_project: None, caplog: LogCaptureFixture, get_lock_file: Config
 ) -> None:
     lock_file = get_lock_file
-    check_pragma(lock_file, False)
+    PragmaChecker(lock_file).check()
     assert "Finished pragma check." in caplog.text
 
 
@@ -31,7 +31,7 @@ def test_check_copyright(
     create_new_project: None, caplog: LogCaptureFixture, get_lock_file: Config
 ) -> None:
     lock_file = get_lock_file
-    check_copyright(lock_file, False)
+    CopyrightChecker(lock_file).check()
     assert "Finished copyright check." in caplog.text
 
 
@@ -39,7 +39,7 @@ def test_check_todo(
     create_new_project: None, caplog: LogCaptureFixture, get_lock_file: Config
 ) -> None:
     lock_file = get_lock_file
-    check_todo(lock_file)
+    TodoChecker(lock_file).check()
     assert "Finished todo check." in caplog.text
 
 
@@ -51,7 +51,7 @@ def test_check_clang_format(
 ) -> None:
     lock_file = get_lock_file
     fp.register(CLANG_FORMAT_CALL)
-    check_clang_format(lock_file, False, False)
+    ClangFormatChecker(lock_file).check()
     assert "Finished clang-format check." in caplog.text
 
 
@@ -63,7 +63,7 @@ def test_check_clang_tidy(
 ) -> None:
     lock_file = get_lock_file
     fp.register(CLANG_TIDY_CALL)
-    check_clang_tidy(lock_file, False)
+    ClangTidyChecker(lock_file).check()
     assert "Finished clang-tidy check." in caplog.text
 
 
@@ -71,7 +71,7 @@ def test_check_cyclomatic(
     create_new_project: None, caplog: LogCaptureFixture, get_lock_file: Config
 ) -> None:
     lock_file = get_lock_file
-    check_cyclomatic(lock_file)
+    CyclomaticChecker(lock_file).check()
     assert "Finished cyclomatic check." in caplog.text
 
 
@@ -82,7 +82,8 @@ def test_check_cpp_check(
     fp: FakeProcess,
 ) -> None:
     fp.register(CPPCHECK_CALL)
-    check_cppcheck()
+    lock_file = get_lock_file
+    CppcheckChecker(lock_file).check()
     assert "Finished cppcheck check." in caplog.text
 
 
