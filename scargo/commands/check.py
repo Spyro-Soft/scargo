@@ -85,9 +85,9 @@ class CheckResult(NamedTuple):
 
 
 class CheckerFixer(abc.ABC):
-    check_name: str = NotImplemented
+    check_name: str
     headers_only = False
-    can_fix = True
+    can_fix = False
 
     def __init__(
         self, config: Config, fix_errors: bool = False, verbose: bool = False
@@ -130,7 +130,9 @@ class CheckerFixer(abc.ABC):
         return f"problems in {count} files"
 
     def get_check_config(self) -> CheckConfig:
-        return getattr(self._config.check, self.check_name.replace("-", "_"))  # type: ignore[no-any-return]
+        return getattr(  # type: ignore[no-any-return]
+            self._config.check, self.check_name.replace("-", "_")
+        )
 
     @abc.abstractmethod
     def check_file(self, file_path: Path) -> CheckResult:
@@ -143,6 +145,7 @@ class CheckerFixer(abc.ABC):
 class PragmaChecker(CheckerFixer):
     check_name = "pragma"
     headers_only = True
+    can_fix = True
 
     def check_file(self, file_path: Path) -> CheckResult:
         with open(file_path, encoding="utf-8") as file:
@@ -165,6 +168,7 @@ class PragmaChecker(CheckerFixer):
 
 class CopyrightChecker(CheckerFixer):
     check_name = "copyright"
+    can_fix = True
 
     def check(self) -> None:
         copyright_desc = self.get_check_config().description
@@ -205,7 +209,6 @@ class CopyrightChecker(CheckerFixer):
 
 class TodoChecker(CheckerFixer):
     check_name = "todo"
-    can_fix = False
 
     @staticmethod
     def format_problem_count(count: int) -> str:
@@ -227,6 +230,7 @@ class TodoChecker(CheckerFixer):
 
 class ClangFormatChecker(CheckerFixer):
     check_name = "clang-format"
+    can_fix = True
 
     def check_file(self, file_path: Path) -> CheckResult:
         cmd = "clang-format -style=file --dry-run " + str(file_path)
@@ -237,8 +241,7 @@ class ClangFormatChecker(CheckerFixer):
             else:
                 logger.warning("clang-format found error in file %s", file_path)
             return CheckResult(1)
-        else:
-            return CheckResult(0)
+        return CheckResult(0)
 
     def fix_file(self, file_path: Path) -> None:
         subprocess.check_call(["clang-format", "-style=file", "-i", str(file_path)])
@@ -246,7 +249,6 @@ class ClangFormatChecker(CheckerFixer):
 
 class ClangTidyChecker(CheckerFixer):
     check_name = "clang-tidy"
-    can_fix = False
 
     def check_file(self, file_path: Path) -> CheckResult:
         cmd = "clang-tidy " + str(file_path) + " --assume-filename=.hxx --"
@@ -258,8 +260,7 @@ class ClangTidyChecker(CheckerFixer):
             else:
                 logger.warning("clang-tidy found error in file %s", file_path)
             return CheckResult(1)
-        else:
-            return CheckResult(0)
+        return CheckResult(0)
 
 
 def find_files(
