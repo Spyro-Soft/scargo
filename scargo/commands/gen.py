@@ -60,17 +60,17 @@ def scargo_gen(
 
 def generate_certs(
     device_name: str,
-    mode_for_certs: str,
-    certs_in_dir: Path,
-    certs_passwd: str,
+    mode_for_certs: Optional[str],
+    certs_intermediate_dir: Optional[Path],
+    certs_passwd: Optional[str],
 ) -> None:
     project_path = get_project_root()
 
-    in_certs_dir = Path(SCARGO_PGK_PATH, "certs")
+    internal_certs_dir = Path(SCARGO_PGK_PATH, "certs")
     projects_builds_path = get_project_root() / "build"
     certs_out_dir = projects_builds_path / "certs"
-    if not certs_in_dir:
-        certs_in_dir = projects_builds_path / "certs"
+    if not certs_intermediate_dir:
+        certs_intermediate_dir = projects_builds_path / "certs"
     if not certs_passwd:
         certs_passwd = "1234"
 
@@ -84,7 +84,7 @@ def generate_certs(
     certs_out_dir.mkdir(parents=True, exist_ok=True)
     subprocess.call(
         [
-            in_certs_dir / "generateAllCertificates.sh",
+            internal_certs_dir / "generateAllCertificates.sh",
             "--name",
             device_name,
             "--mode",
@@ -92,7 +92,7 @@ def generate_certs(
             "--output",
             certs_out_dir,
             "--input",
-            certs_in_dir,
+            certs_intermediate_dir,
             "--passwd",
             certs_passwd,
         ]
