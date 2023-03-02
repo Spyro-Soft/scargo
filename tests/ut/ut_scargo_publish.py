@@ -1,18 +1,19 @@
 import os
-from pathlib import Path
-import pytest
-from unittest.mock import patch, MagicMock
 import subprocess
+from pathlib import Path
+from unittest.mock import MagicMock, patch
+
+import pytest
 from _pytest.logging import LogCaptureFixture
 
-from scargo.config import Config
 from scargo.commands.publish import (
-    scargo_publish,
-    conan_clean_remote,
     conan_add_conancenter,
-    conan_add_user,
     conan_add_remote,
+    conan_add_user,
+    conan_clean_remote,
+    scargo_publish,
 )
+from scargo.config import Config
 from tests.ut.utils import get_test_project_config
 
 
@@ -32,7 +33,7 @@ def scargo_publish_test_setup(
         lambda: test_project_config,
     )
 
-    yield test_project_config
+    return test_project_config
 
 
 def test_publish(
@@ -51,7 +52,7 @@ def test_publish(
     version = project_config.project.version
 
     all_called_cmds = [cmd.args[0] for cmd in mock_subprocess_check_call.call_args_list]
-    if any((type(cmd) == list for cmd in all_called_cmds)):
+    if any(type(cmd) == list for cmd in all_called_cmds):
         all_called_cmds = [
             " ".join(cmd) if type(cmd) == list else cmd for cmd in all_called_cmds
         ]
@@ -72,6 +73,30 @@ def test_publish(
     assert conan_add_conacenter_cmd in all_called_cmds
     assert conan_export_cmd in all_called_cmds
     assert conan_upload_cmd in all_called_cmds
+
+
+def test_conan_add_user(
+    mock_subprocess_check_call: MagicMock,
+) -> None:
+    # ARRANGE
+    remote_repo = "repo_name"
+    env_conan_user = "mock_user_name"
+    env_conan_password = "mock_password"
+
+    # ACT
+    with patch.dict(
+        os.environ,
+        {"CONAN_LOGIN_USERNAME": env_conan_user, "CONAN_PASSWORD": env_conan_password},
+    ):
+        conan_add_user(remote_repo)
+
+    # ASSERT
+    add_user_cmd = (
+        f"conan user -p {env_conan_password} -r {remote_repo} {env_conan_user}"
+    )
+    called_cmd = " ".join(mock_subprocess_check_call.call_args_list[0].args[0])
+
+    assert add_user_cmd == called_cmd
 
 
 def test_conan_add_remote_fail(
@@ -160,20 +185,13 @@ def test_conan_add_user_fail(
 ) -> None:
     # ARRANGE
     remote_repo = "repo_name"
-    run_mock = MagicMock()
     check_call_mock = MagicMock()
-
-    run_mock.side_effect = [
-        subprocess.CompletedProcess(
-            args="conan user", returncode=1, stdout=b"wrong_user_name"
-        ),
-    ]
-
     check_call_mock.side_effect = [
         subprocess.CalledProcessError(returncode=1, cmd=""),
     ]
 
     # ACT & ASSERT
-    with patch("subprocess.run", run_mock):
-        conan_add_user(remote_repo)
-        # assert "Unable to add user" in caplog.text
+    with patch.dict(os.environ, {"CONAN_LOGIN_USERNAME": "mock-value"}):
+        with patch("subprocess.check_call", check_call_mock):
+            conan_add_user(remote_repo)
+            assert "Unable to add user" in caplog.text
