@@ -16,7 +16,7 @@ def test_scargo_test_no_test_dir(create_new_project: None) -> None:
 
 
 def test_scargo_test_no_cmake_file(
-    create_new_project: None, caplog: pytest.LogCaptureFixture, get_lock_file: Config
+    create_new_project: None, caplog: pytest.LogCaptureFixture, config: Config
 ) -> None:
     Path("tests/CMakeLists.txt").unlink()
     with pytest.raises(SystemExit):

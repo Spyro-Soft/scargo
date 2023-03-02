@@ -1,5 +1,5 @@
 import pytest
-from _pytest.logging import LogCaptureFixture
+from pytest import LogCaptureFixture
 from pytest_subprocess import FakeProcess
 
 from scargo.commands.check import (
@@ -8,7 +8,6 @@ from scargo.commands.check import (
     CopyrightChecker,
     CppcheckChecker,
     CyclomaticChecker,
-    PragmaChecker,
     TodoChecker,
     scargo_check,
 )
@@ -19,71 +18,57 @@ CLANG_FORMAT_CALL = "clang-format -style=file --dry-run src/test_project.cpp"
 CLANG_TIDY_CALL = "clang-tidy src/test_project.cpp --assume-filename=.hxx --"
 
 
-def test_check_pragma(
-    create_new_project: None, caplog: LogCaptureFixture, get_lock_file: Config
-) -> None:
-    lock_file = get_lock_file
-    PragmaChecker(lock_file).check()
-    assert "Finished pragma check." in caplog.text
-
-
 def test_check_copyright(
-    create_new_project: None, caplog: LogCaptureFixture, get_lock_file: Config
+    create_new_project: None, caplog: LogCaptureFixture, config: Config
 ) -> None:
-    lock_file = get_lock_file
-    CopyrightChecker(lock_file).check()
+    CopyrightChecker(config).check()
     assert "Finished copyright check." in caplog.text
 
 
 def test_check_todo(
-    create_new_project: None, caplog: LogCaptureFixture, get_lock_file: Config
+    create_new_project: None, caplog: LogCaptureFixture, config: Config
 ) -> None:
-    lock_file = get_lock_file
-    TodoChecker(lock_file).check()
+    TodoChecker(config).check()
     assert "Finished todo check." in caplog.text
 
 
 def test_check_clang_format(
     create_new_project: None,
     caplog: LogCaptureFixture,
-    get_lock_file: Config,
+    config: Config,
     fp: FakeProcess,
 ) -> None:
-    lock_file = get_lock_file
     fp.register(CLANG_FORMAT_CALL)
-    ClangFormatChecker(lock_file).check()
+    ClangFormatChecker(config).check()
     assert "Finished clang-format check." in caplog.text
 
 
 def test_check_clang_tidy(
     create_new_project: None,
     caplog: LogCaptureFixture,
-    get_lock_file: Config,
+    config: Config,
     fp: FakeProcess,
 ) -> None:
-    lock_file = get_lock_file
     fp.register(CLANG_TIDY_CALL)
-    ClangTidyChecker(lock_file).check()
+    ClangTidyChecker(config).check()
     assert "Finished clang-tidy check." in caplog.text
 
 
 def test_check_cyclomatic(
-    create_new_project: None, caplog: LogCaptureFixture, get_lock_file: Config
+    create_new_project: None, caplog: LogCaptureFixture, config: Config
 ) -> None:
-    lock_file = get_lock_file
-    CyclomaticChecker(lock_file).check()
+    CyclomaticChecker(config).check()
     assert "Finished cyclomatic check." in caplog.text
 
 
 def test_check_cpp_check(
     create_new_project: None,
     caplog: LogCaptureFixture,
-    get_lock_file: Config,
+    config: Config,
     fp: FakeProcess,
 ) -> None:
     fp.register(CPPCHECK_CALL)
-    lock_file = get_lock_file
-    CppcheckChecker(lock_file).check()
+    CppcheckChecker(config).check()
     assert "Finished cppcheck check." in caplog.text
 
 
