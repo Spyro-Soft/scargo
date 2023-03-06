@@ -8,7 +8,13 @@ from scargo.commands.check import ClangFormatChecker
 from scargo.config import Config
 from tests.ut.utils import get_log_data
 
-CLANG_FORMAT_COMMAND = ["clang-format", "-style=file", "--dry-run", "foo/bar.hpp"]
+CLANG_FORMAT_COMMAND = [
+    "clang-format",
+    "--style=file",
+    "--dry-run",
+    "-Werror",
+    "foo/bar.hpp",
+]
 
 CLANG_FORMAT_FIX_COMMAND = ["clang-format", "-style=file", "-i", "foo/bar.hpp"]
 
@@ -43,7 +49,9 @@ def test_check_clang_format_fail(
     mock_find_files: MagicMock,
     fake_process: FakeProcess,
 ) -> None:
-    fake_process.register(CLANG_FORMAT_COMMAND, stdout=CLANG_FORMAT_ERROR_OUTPUT)
+    fake_process.register(
+        CLANG_FORMAT_COMMAND, stdout=CLANG_FORMAT_ERROR_OUTPUT, returncode=1
+    )
     with pytest.raises(SystemExit) as wrapped_exception:
         ClangFormatChecker(config, verbose=verbose).check()
     assert wrapped_exception.value.code == 1
@@ -53,7 +61,9 @@ def test_check_clang_format_fail(
 def test_check_clang_format_fix(
     config: Config, mock_find_files: MagicMock, fake_process: FakeProcess
 ) -> None:
-    fake_process.register(CLANG_FORMAT_COMMAND, stdout=CLANG_FORMAT_ERROR_OUTPUT)
+    fake_process.register(
+        CLANG_FORMAT_COMMAND, stdout=CLANG_FORMAT_ERROR_OUTPUT, returncode=1
+    )
     fake_process.register(CLANG_FORMAT_FIX_COMMAND)
     ClangFormatChecker(config, fix_errors=True).check()
     assert fake_process.call_count(CLANG_FORMAT_FIX_COMMAND) == 1
