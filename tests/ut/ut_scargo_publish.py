@@ -16,17 +16,24 @@ from scargo.commands.publish import (
 from scargo.config import Config
 from tests.ut.utils import get_test_project_config
 
+REMOTE_REPO_NAME_1 = "remote_repo_name_1"
+REMOTE_REPO_NAME_2 = "remote_repo_name_2"
+EXAMPLE_URL = "example.com"
+REPO_NAME = "repo_name"
+
 
 @pytest.fixture
-def scargo_publish_test_setup(
-    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
-) -> Config:
-    os.chdir(tmp_path)
-    monkeypatch.setattr("scargo.commands.publish.get_project_root", lambda: tmp_path)
+def mock_get_project_root(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setattr(
+        "scargo.commands.publish.get_project_root", lambda: Path("some_path")
+    )
 
+
+@pytest.fixture
+def config(monkeypatch: pytest.MonkeyPatch) -> Config:
     test_project_config = get_test_project_config()
-    test_project_config.conan.repo["remote_repo_name_1"] = "https://some-url.io"
-    test_project_config.conan.repo["remote_repo_name_2"] = "https://some-url.io"
+    test_project_config.conan.repo[REMOTE_REPO_NAME_1] = EXAMPLE_URL
+    test_project_config.conan.repo[REMOTE_REPO_NAME_2] = EXAMPLE_URL
 
     monkeypatch.setattr(
         "scargo.commands.publish.prepare_config",
@@ -37,42 +44,41 @@ def scargo_publish_test_setup(
 
 
 def test_publish(
-    scargo_publish_test_setup: Config,
+    config: Config,
+    mock_get_project_root: None,
     mock_subprocess_check_call: MagicMock,
 ) -> None:
-    # ARRANGE
-    repo_name = "repo_name"
-
     # ACT
-    scargo_publish(repo_name)
+    scargo_publish(REPO_NAME)
 
     # ASSERT
-    project_config = scargo_publish_test_setup
-    project_name = project_config.project.name
-    version = project_config.project.version
-
-    all_called_cmds = [cmd.args[0] for cmd in mock_subprocess_check_call.call_args_list]
-    if any(type(cmd) == list for cmd in all_called_cmds):
-        all_called_cmds = [
-            " ".join(cmd) if type(cmd) == list else cmd for cmd in all_called_cmds
-        ]
+    project = config
+    project_name = project.project.name
+    version = project.project.version
 
     conan_clean_cmd = "conan remote clean"
-    conan_add_remote_cmds = [
-        f"conan remote add {repo_name} {repo_url}"
-        for repo_name, repo_url in project_config.conan.repo.items()
-    ]
+    conan_add_remote_1_cmd = ["conan", "remote", "add", REMOTE_REPO_NAME_1, EXAMPLE_URL]
+    conan_add_remote_2_cmd = ["conan", "remote", "add", REMOTE_REPO_NAME_2, EXAMPLE_URL]
     conan_add_conacenter_cmd = "conan remote add conancenter https://center.conan.io"
     conan_export_cmd = "conan export-pkg . -f"
-    conan_upload_cmd = (
-        f"conan upload {project_name}/{version} -r {repo_name} --all --confirm"
-    )
+    conan_upload_cmd = [
+        "conan",
+        "upload",
+        f"{project_name}/{version}",
+        "-r",
+        REPO_NAME,
+        "--all",
+        "--confirm",
+    ]
 
-    assert conan_clean_cmd in all_called_cmds
-    assert all(cmd in all_called_cmds for cmd in conan_add_remote_cmds)
-    assert conan_add_conacenter_cmd in all_called_cmds
-    assert conan_export_cmd in all_called_cmds
-    assert conan_upload_cmd in all_called_cmds
+    assert mock_subprocess_check_call.mock_calls[0].args[0] == conan_clean_cmd
+    assert mock_subprocess_check_call.mock_calls[0].kwargs["shell"] is True
+    assert mock_subprocess_check_call.mock_calls[1].args[0] == conan_add_remote_1_cmd
+    assert mock_subprocess_check_call.mock_calls[2].args[0] == conan_add_remote_2_cmd
+    assert mock_subprocess_check_call.mock_calls[3].args[0] == conan_add_conacenter_cmd
+    assert mock_subprocess_check_call.mock_calls[4].args[0] == conan_export_cmd
+    assert mock_subprocess_check_call.mock_calls[4].kwargs["shell"] is True
+    assert mock_subprocess_check_call.mock_calls[5].args[0] == conan_upload_cmd
 
 
 def test_conan_add_user(
@@ -91,16 +97,21 @@ def test_conan_add_user(
         conan_add_user(remote_repo)
 
     # ASSERT
-    add_user_cmd = (
-        f"conan user -p {env_conan_password} -r {remote_repo} {env_conan_user}"
-    )
-    called_cmd = " ".join(mock_subprocess_check_call.call_args_list[0].args[0])
+    add_user_cmd = [
+        "conan",
+        "user",
+        "-p",
+        env_conan_password,
+        "-r",
+        remote_repo,
+        env_conan_user,
+    ]
 
-    assert add_user_cmd == called_cmd
+    assert mock_subprocess_check_call.call_args.args[0] == add_user_cmd
 
 
 def test_conan_add_remote_fail(
-    scargo_publish_test_setup: Config,
+    config: Config,
     caplog: pytest.LogCaptureFixture,
 ) -> None:
     # ARRANGE
@@ -136,11 +147,11 @@ def test_conan_clean_remote_fail(caplog: LogCaptureFixture) -> None:
 
 
 def test_create_package_fail(
-    scargo_publish_test_setup: Config,
+    config: Config,
+    mock_get_project_root: None,
     caplog: LogCaptureFixture,
 ) -> None:
     # ARRANGE
-    repo_name = "repo_name"
     check_call_mock = MagicMock()
     check_call_mock.side_effect = [
         subprocess.CompletedProcess(args="", returncode=1),  # conan clean
@@ -153,16 +164,15 @@ def test_create_package_fail(
 
     # ACT & ASSERT
     with patch("subprocess.check_call", check_call_mock):
-        scargo_publish(repo_name)
+        scargo_publish(REPO_NAME)
         assert "Unable to create package" in caplog.text
 
 
 def test_upload_package_fail(
-    scargo_publish_test_setup: Config,
+    mock_get_project_root: None,
     caplog: LogCaptureFixture,
 ) -> None:
     # ARRANGE
-    repo_name = "repo_name"
     check_call_mock = MagicMock()
     check_call_mock.side_effect = [
         subprocess.CompletedProcess(args="", returncode=1),  # conan clean
@@ -176,7 +186,7 @@ def test_upload_package_fail(
     # ACT & ASSERT
     with patch("subprocess.check_call", check_call_mock):
         with pytest.raises(SystemExit):
-            scargo_publish(repo_name)
+            scargo_publish(REPO_NAME)
             assert "Unable to publish package" in caplog.text
 
 
