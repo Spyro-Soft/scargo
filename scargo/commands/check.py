@@ -236,11 +236,12 @@ class ClangFormatChecker(CheckerFixer):
     can_fix = True
 
     def check_file(self, file_path: Path) -> CheckResult:
-        cmd = "clang-format -style=file --dry-run " + str(file_path)
-        out = subprocess.getoutput(cmd)
-        if out != "":
+        cmd = ["clang-format", "--style=file", "--dry-run", "-Werror", str(file_path)]
+        try:
+            subprocess.check_output(cmd)
+        except subprocess.CalledProcessError as e:
             if self._verbose:
-                logger.info(out)
+                logger.info(e.output.decode())
             else:
                 logger.warning("clang-format found error in file %s", file_path)
             return CheckResult(1)
@@ -254,12 +255,12 @@ class ClangTidyChecker(CheckerFixer):
     check_name = "clang-tidy"
 
     def check_file(self, file_path: Path) -> CheckResult:
-        cmd = "clang-tidy " + str(file_path) + " --assume-filename=.hxx --"
-        out = subprocess.getoutput(cmd)
-
-        if "error:" in out:
+        cmd = ["clang-tidy", str(file_path), "--assume-filename=.hxx"]
+        try:
+            subprocess.check_output(cmd)
+        except subprocess.CalledProcessError as e:
             if self._verbose:
-                logger.info(out)
+                logger.info(e.output.decode())
             else:
                 logger.warning("clang-tidy found error in file %s", file_path)
             return CheckResult(1)
