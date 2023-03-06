@@ -18,7 +18,7 @@ from tests.ut.utils import get_test_project_config
 
 REMOTE_REPO_NAME_1 = "remote_repo_name_1"
 REMOTE_REPO_NAME_2 = "remote_repo_name_2"
-EXAMPLE_URL = "example.com"
+EXAMPLE_URL = "https://example.com"
 REPO_NAME = "repo_name"
 
 
@@ -52,9 +52,8 @@ def test_publish(
     scargo_publish(REPO_NAME)
 
     # ASSERT
-    project = config
-    project_name = project.project.name
-    version = project.project.version
+    project_name = config.project.name
+    version = config.project.version
 
     conan_clean_cmd = "conan remote clean"
     conan_add_remote_1_cmd = ["conan", "remote", "add", REMOTE_REPO_NAME_1, EXAMPLE_URL]
