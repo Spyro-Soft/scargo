@@ -62,6 +62,7 @@ dev = [
     "pylint",
     "pytest-bdd",
     "pytest-cov",
+    "pytest-mock",
     "pytest-subprocess",
     "pytest",
     "types-clang",
