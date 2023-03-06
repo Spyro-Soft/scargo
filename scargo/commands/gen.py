@@ -27,6 +27,9 @@ def scargo_gen(
     gen_ut: Optional[Path],
     gen_mock: Optional[Path],
     certs: Optional[str],
+    certs_mode: Optional[str],
+    certs_input: Optional[Path],
+    certs_passwd: Optional[str],
     fs: bool,
     single_bin: bool,
 ) -> None:
@@ -46,7 +49,7 @@ def scargo_gen(
             logger.info(f"Skipping: {gen_mock}")
 
     if certs:
-        generate_certs(certs)
+        generate_certs(certs, certs_mode, certs_input, certs_passwd)
 
     if fs:
         generate_fs(config)
@@ -55,21 +58,43 @@ def scargo_gen(
         gen_single_binary(project_profile_path, config)
 
 
-def generate_certs(device_name: str) -> None:
+def generate_certs(
+    device_name: str,
+    mode_for_certs: Optional[str],
+    certs_intermediate_dir: Optional[Path],
+    certs_passwd: Optional[str],
+) -> None:
     project_path = get_project_root()
 
-    in_certs_dir = Path(SCARGO_PGK_PATH, "certs")
+    internal_certs_dir = Path(SCARGO_PGK_PATH, "certs")
     projects_builds_path = get_project_root() / "build"
     certs_out_dir = projects_builds_path / "certs"
+    if not certs_intermediate_dir:
+        certs_intermediate_dir = projects_builds_path / "certs"
+    if not certs_passwd:
+        certs_passwd = "1234"
+
+    if mode_for_certs == "all":
+        mode_for_certs = "All-certificates"
+    elif mode_for_certs == "device":
+        mode_for_certs = "Device-certificate"
+    else:
+        mode_for_certs = "All-certificates"
 
     certs_out_dir.mkdir(parents=True, exist_ok=True)
     subprocess.call(
         [
-            in_certs_dir / "generateAllCertificates.sh",
+            internal_certs_dir / "generateAllCertificates.sh",
             "--name",
             device_name,
+            "--mode",
+            mode_for_certs,
             "--output",
             certs_out_dir,
+            "--input",
+            certs_intermediate_dir,
+            "--passwd",
+            certs_passwd,
         ]
     )
 
@@ -79,22 +104,26 @@ def generate_certs(device_name: str) -> None:
     certs_out_uc_dir.mkdir(parents=True, exist_ok=True)
     certs_out_azure_dir.mkdir(parents=True, exist_ok=True)
 
-    copyfile(
-        certs_out_dir / "certs" / "new-device.cert.pem",
-        certs_out_uc_dir / "device_cert.pem",
-    )
-    copyfile(
-        certs_out_dir / "private" / "new-device.key.pem",
-        certs_out_uc_dir / "device_priv_key.pem",
-    )
-    copyfile(certs_out_dir / "ca.pem", certs_out_uc_dir / "ca.pem")
-
-    copyfile(
-        certs_out_dir / "certs" / "azure-iot-test-only.root.ca.cert.pem",
-        certs_out_azure_dir / f"{device_name}-root-ca.pem",
-    )
     logger = get_logger()
-    logger.info("Cert generated for dev: %s", device_name)
+    try:
+        copyfile(
+            certs_out_dir / "certs" / "iot-device.cert.pem",
+            certs_out_uc_dir / "device_cert.pem",
+        )
+        copyfile(
+            certs_out_dir / "private" / "iot-device.key.pem",
+            certs_out_uc_dir / "device_priv_key.pem",
+        )
+        copyfile(certs_out_dir / "ca.pem", certs_out_uc_dir / "ca.pem")
+
+        copyfile(
+            certs_out_dir / "certs" / "azure-iot-test-only.root.ca.cert.pem",
+            certs_out_azure_dir / f"{device_name}-root-ca.pem",
+        )
+        logger.info("Cert generated for dev: %s", device_name)
+    except FileNotFoundError as e:
+        logger.error("Failed to copy certificate %s", e.filename)
+        sys.exit(1)
 
 
 def generate_fs(config: Config) -> None:

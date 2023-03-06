@@ -210,6 +210,27 @@ def gen(  # pylint: disable=too-many-arguments
         metavar="<DEVICE ID>",
         help="Generate cert files for azure based on device ID.",
     ),
+    certs_mode: Optional[str] = Option(
+        None,
+        "--type",
+        "-t",
+        metavar="[all, device]",
+        help="Mode for generating certificates.",
+    ),
+    certs_input: Optional[Path] = Option(
+        None,
+        "--in",
+        "-i",
+        dir_okay=True,
+        help="Directory with root and intermediate certificates.",
+    ),
+    certs_passwd: Optional[str] = Option(
+        None,
+        "--passwd",
+        "-p",
+        metavar="<PASSWORD>",
+        help="Password to be set for generated certificates",
+    ),
     file_system: bool = Option(
         False, "--fs", "-f", help="Build the filesystem, base on spiffs dir content."
     ),
@@ -227,7 +248,17 @@ def gen(  # pylint: disable=too-many-arguments
         )
         sys.exit(1)
 
-    scargo_gen(project_profile_path, gen_ut, gen_mock, certs, file_system, single_bin)
+    scargo_gen(
+        project_profile_path,
+        gen_ut,
+        gen_mock,
+        certs,
+        certs_mode,
+        certs_input,
+        certs_passwd,
+        file_system,
+        single_bin,
+    )
 
 
 ###############################################################################
