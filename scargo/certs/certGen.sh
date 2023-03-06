@@ -21,7 +21,7 @@ ACTION_COMMAND=""
 ACTION_PARAM=""
 ACTION_PARAM2=""
 DEVICE_NAME="iot-device"
-OUTPUT_DIR=/workspace/build/cert
+OUTPUT_DIR="$PWD/build/cert"
 INPUT_DIR=""
 
 while (( "$#" )); do
@@ -43,7 +43,7 @@ while (( "$#" )); do
         shift 2
         ;;
 
-    -p|--password) 
+    -p|--password)
         CUSTOM_PASSWD=$2
         echo -e "${GREEN}Using password: ${CUSTOM_PASSWD} ${NC}" >&1
         shift 2
@@ -57,7 +57,7 @@ while (( "$#" )); do
         shift 3
         ;;
 
-    --create_device_certificate_from_intermediate) 
+    --create_device_certificate_from_intermediate)
         ACTION_COMMAND=create_device_certificate_from_intermediate
         ACTION_PARAM=$2
         ACTION_PARAM2=$3
@@ -280,7 +280,7 @@ function generate_device_certificate_common()
     echo "Creating ${cert_type_diagnostic} Certificate"
     echo "----------------------------------------"
     cd "${certificate_dir}"
-    
+
             #-out "${certificate_dir}/private/${device_prefix}.key.pem" \
     openssl "${algorithm}" \
             -out "./private/${device_prefix}.key.pem" \
@@ -419,7 +419,7 @@ function generate_verification_certificate()
 # Generates a certificate for a device, chained directly to the root.
 ###############################################################################
 function generate_device_certificate()
-{   
+{
     device_name_and_id=${1}
     input_dir=${2}
 
@@ -441,7 +441,7 @@ function generate_device_certificate()
 # Generates a certificate for a device, chained to the intermediate.
 ###############################################################################
 function generate_device_certificate_from_intermediate()
-{   
+{
     device_name_and_id=${1}
     input_dir=${2}
 
@@ -465,7 +465,7 @@ function generate_device_certificate_from_intermediate()
                               "${input_dir}" "${intermediate_ca_password}" \
                               "${openssl_intermediate_config_file}"
     fi
-    
+
 }
 
 
