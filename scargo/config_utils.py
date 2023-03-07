@@ -1,4 +1,3 @@
-import os
 import sys
 from pathlib import Path
 from typing import Optional
@@ -8,7 +7,7 @@ import tomlkit
 from scargo import __version__
 from scargo.config import Config, ConfigError, parse_config
 from scargo.docker_utils import run_scargo_again_in_docker
-from scargo.global_values import SCARGO_DOCKER_ENV, SCARGO_LOCK_FILE
+from scargo.global_values import SCARGO_LOCK_FILE
 from scargo.logger import get_logger
 from scargo.path_utils import get_config_file_path
 
@@ -35,7 +34,7 @@ def get_scargo_config_or_exit(
         sys.exit(1)
 
 
-def prepare_config() -> Config:
+def prepare_config(run_in_docker: bool = True) -> Config:
     """
     Prepare configuration file
 
@@ -43,12 +42,8 @@ def prepare_config() -> Config:
     """
     config = get_scargo_config_or_exit()
     check_scargo_version(config)
-    ###########################################################################
-    project_config = config.project
-    build_env = project_config.build_env
-    if build_env == SCARGO_DOCKER_ENV and not os.path.exists("/.dockerenv"):
-        run_scargo_again_in_docker(project_config)
-    ###########################################################################
+    if run_in_docker:
+        run_scargo_again_in_docker(config.project)
     return config
 
 
