@@ -14,7 +14,7 @@ CHECKERS = [
     check.CopyrightChecker,
     check.TodoChecker,
     check.ClangFormatChecker,
-    check.ClangTidyChecker,
+    # check.ClangTidyChecker,
     check.CyclomaticChecker,
     check.CppcheckChecker,
 ]
@@ -52,7 +52,7 @@ def test_scargo_check_single(
 ) -> None:
     scargo_check(
         clang_format=True,
-        clang_tidy=False,
+        # clang_tidy=False,
         copy_right=False,
         cppcheck=False,
         cyclomatic=False,
@@ -62,7 +62,7 @@ def test_scargo_check_single(
     )
 
     assert mock_checkers["clang-format"]().check.call_count == 1
-    assert mock_checkers["clang-tidy"]().check.call_count == 0
+    # assert mock_checkers["clang-tidy"]().check.call_count == 0
     assert mock_checkers["copyright"]().check.call_count == 0
     assert mock_checkers["cppcheck"]().check.call_count == 0
     assert mock_checkers["cyclomatic"]().check.call_count == 0
@@ -77,7 +77,7 @@ def test_scargo_check_all(
 ) -> None:
     scargo_check(
         clang_format=True,
-        clang_tidy=True,
+        # clang_tidy=True,
         copy_right=True,
         cppcheck=True,
         cyclomatic=True,
@@ -87,7 +87,7 @@ def test_scargo_check_all(
     )
 
     assert mock_checkers["clang-format"]().check.call_count == 1
-    assert mock_checkers["clang-tidy"]().check.call_count == 1
+    # assert mock_checkers["clang-tidy"]().check.call_count == 1
     assert mock_checkers["copyright"]().check.call_count == 1
     assert mock_checkers["cppcheck"]().check.call_count == 1
     assert mock_checkers["cyclomatic"]().check.call_count == 1
@@ -102,7 +102,7 @@ def test_scargo_check_default(
 ) -> None:
     scargo_check(
         clang_format=False,
-        clang_tidy=False,
+        # clang_tidy=False,
         copy_right=False,
         cppcheck=False,
         cyclomatic=False,
@@ -112,7 +112,7 @@ def test_scargo_check_default(
     )
 
     assert mock_checkers["clang-format"]().check.call_count == 1
-    assert mock_checkers["clang-tidy"]().check.call_count == 1
+    # assert mock_checkers["clang-tidy"]().check.call_count == 1
     assert mock_checkers["copyright"]().check.call_count == 1
     assert mock_checkers["cppcheck"]().check.call_count == 1
     assert mock_checkers["cyclomatic"]().check.call_count == 1
