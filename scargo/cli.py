@@ -6,7 +6,7 @@ import sys
 from pathlib import Path
 from typing import List, Optional
 
-from typer import Argument, Context, Option, Typer
+from typer import Argument, Option, Typer
 
 from scargo.commands.build import scargo_build
 from scargo.commands.check import scargo_check
@@ -148,18 +148,17 @@ docker = Typer(help="Manage the docker environment for the project")
 @docker.command(
     "build", context_settings={"allow_extra_args": True, "ignore_unknown_options": True}
 )
-def docker_build(ctx: Context, base_dir: Optional[Path] = BASE_DIR_OPTION) -> None:
+def docker_build(docker_opts: List[str], base_dir: Optional[Path] = BASE_DIR_OPTION) -> None:
     """Build docker layers for this project depending on the target"""
     if base_dir:
         os.chdir(base_dir)
-    scargo_docker_build(ctx.args)
+    scargo_docker_build(docker_opts)
 
 
 @docker.command(
     "run", context_settings={"allow_extra_args": True, "ignore_unknown_options": True}
 )
 def docker_run(
-    ctx: Context,
     command: str = Option(
         "bash",
         "-c",
@@ -168,21 +167,22 @@ def docker_run(
         help="Select command to be used with docker run.",
     ),
     base_dir: Optional[Path] = BASE_DIR_OPTION,
+    docker_opts: List[str] = Argument(None),
 ) -> None:
     """Run project in docker environment"""
     if base_dir:
         os.chdir(base_dir)
-    scargo_docker_run(docker_opts=ctx.args, command=command)
+    scargo_docker_run(docker_opts=docker_opts, command=command)
 
 
 @docker.command(
     "exec", context_settings={"allow_extra_args": True, "ignore_unknown_options": True}
 )
-def docker_exec(ctx: Context, base_dir: Optional[Path] = BASE_DIR_OPTION) -> None:
+def docker_exec(base_dir: Optional[Path] = BASE_DIR_OPTION, docker_opts: List[str] = Argument(None)) -> None:
     """Attach to existing docker environment"""
     if base_dir:
         os.chdir(base_dir)
-    scargo_docker_exec(ctx.args)
+    scargo_docker_exec(docker_opts)
 
 
 cli.add_typer(docker, name="docker")
