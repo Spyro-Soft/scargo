@@ -1,10 +1,12 @@
 import os
 import subprocess
 from pathlib import Path
-from unittest.mock import MagicMock, patch
+from unittest.mock import patch
 
 import pytest
 from _pytest.logging import LogCaptureFixture
+from pytest_subprocess import FakeProcess
+from pytest_subprocess.fake_popen import FakePopen
 
 from scargo.commands.publish import (
     conan_add_conancenter,
@@ -20,6 +22,8 @@ REMOTE_REPO_NAME_1 = "remote_repo_name_1"
 REMOTE_REPO_NAME_2 = "remote_repo_name_2"
 EXAMPLE_URL = "https://example.com"
 REPO_NAME = "repo_name"
+ENV_CONAN_USER = "mock_user_name"
+ENV_CONAN_PASSWORD = "mock_password"
 
 
 @pytest.fixture
@@ -43,11 +47,15 @@ def config(monkeypatch: pytest.MonkeyPatch) -> Config:
     return test_project_config
 
 
-def test_publish(
-    config: Config,
-    mock_get_project_root: None,
-    mock_subprocess_check_call: MagicMock,
-) -> None:
+def raise_callled_process_error(process: FakePopen) -> None:
+    raise subprocess.CalledProcessError(returncode=1, cmd="")
+
+
+def test_publish(config: Config, mock_get_project_root: None, fp: FakeProcess) -> None:
+    # ARRANGE
+    fp.keep_last_process(True)
+    fp.register([fp.any()])
+
     # ACT
     scargo_publish(REPO_NAME)
 
@@ -58,6 +66,7 @@ def test_publish(
     conan_clean_cmd = "conan remote clean"
     conan_add_remote_1_cmd = ["conan", "remote", "add", REMOTE_REPO_NAME_1, EXAMPLE_URL]
     conan_add_remote_2_cmd = ["conan", "remote", "add", REMOTE_REPO_NAME_2, EXAMPLE_URL]
+    conan_user_cmd = "conan user"
     conan_add_conacenter_cmd = "conan remote add conancenter https://center.conan.io"
     conan_export_cmd = "conan export-pkg . -f"
     conan_upload_cmd = [
@@ -70,137 +79,148 @@ def test_publish(
         "--confirm",
     ]
 
-    assert mock_subprocess_check_call.mock_calls[0].args[0] == conan_clean_cmd
-    assert mock_subprocess_check_call.mock_calls[0].kwargs["shell"] is True
-    assert mock_subprocess_check_call.mock_calls[1].args[0] == conan_add_remote_1_cmd
-    assert mock_subprocess_check_call.mock_calls[2].args[0] == conan_add_remote_2_cmd
-    assert mock_subprocess_check_call.mock_calls[3].args[0] == conan_add_conacenter_cmd
-    assert mock_subprocess_check_call.mock_calls[4].args[0] == conan_export_cmd
-    assert mock_subprocess_check_call.mock_calls[4].kwargs["shell"] is True
-    assert mock_subprocess_check_call.mock_calls[5].args[0] == conan_upload_cmd
+    assert fp.calls[0] == conan_clean_cmd
+    assert fp.calls[1] == conan_add_remote_1_cmd
+    assert fp.calls[2] == conan_user_cmd
+    assert fp.calls[3] == conan_add_remote_2_cmd
+    assert fp.calls[4] == conan_user_cmd
+    assert fp.calls[5] == conan_add_conacenter_cmd
+    assert fp.calls[6] == conan_export_cmd
+    assert fp.calls[7] == conan_upload_cmd
+    assert len(fp.calls) == 8
 
 
-def test_conan_add_user(
-    mock_subprocess_check_call: MagicMock,
-) -> None:
+def test_conan_add_user(fp: FakeProcess) -> None:
     # ARRANGE
-    remote_repo = "repo_name"
-    env_conan_user = "mock_user_name"
-    env_conan_password = "mock_password"
+    fp.keep_last_process(True)
+    fp.register([fp.any()])
 
     # ACT
     with patch.dict(
         os.environ,
-        {"CONAN_LOGIN_USERNAME": env_conan_user, "CONAN_PASSWORD": env_conan_password},
+        {"CONAN_LOGIN_USERNAME": ENV_CONAN_USER, "CONAN_PASSWORD": ENV_CONAN_PASSWORD},
     ):
-        conan_add_user(remote_repo)
+        conan_add_user(REPO_NAME)
 
     # ASSERT
+    conan_user_cmd = "conan user"
     add_user_cmd = [
         "conan",
         "user",
         "-p",
-        env_conan_password,
+        ENV_CONAN_PASSWORD,
         "-r",
-        remote_repo,
-        env_conan_user,
+        REPO_NAME,
+        ENV_CONAN_USER,
     ]
 
-    assert mock_subprocess_check_call.call_args.args[0] == add_user_cmd
+    assert fp.calls[0] == conan_user_cmd
+    assert fp.calls[1] == add_user_cmd
+    assert len(fp.calls) == 2
 
 
 def test_conan_add_remote_fail(
-    config: Config,
-    caplog: pytest.LogCaptureFixture,
+    config: Config, caplog: pytest.LogCaptureFixture, fp: FakeProcess
 ) -> None:
     # ARRANGE
-    check_call_mock = MagicMock()
-    check_call_mock.side_effect = subprocess.CalledProcessError(returncode=1, cmd="")
+    cmd = ["conan", "remote", "add", REMOTE_REPO_NAME_1, EXAMPLE_URL]
+    fp.register(cmd, callback=raise_callled_process_error)
+    fp.keep_last_process(True)
+    fp.register([fp.any()])
 
-    # ACT & ASSERT
-    with patch("subprocess.check_call", check_call_mock):
-        conan_add_remote(Path("some_path"))
-        assert "Unable to add remote repository" in caplog.text
+    # ACT
+    conan_add_remote(Path("some_path"))
+
+    # ASSERT
+    assert "Unable to add remote repository" in caplog.text
 
 
-def test_conan_add_conancenter_fail(caplog: LogCaptureFixture) -> None:
+def test_conan_add_conancenter_fail(caplog: LogCaptureFixture, fp: FakeProcess) -> None:
     # ARRANGE
-    check_call_mock = MagicMock()
-    check_call_mock.side_effect = subprocess.CalledProcessError(returncode=1, cmd="")
+    cmd = "conan remote add conancenter https://center.conan.io"
+    fp.register(cmd, callback=raise_callled_process_error)
 
-    # ACT & ASSERT
-    with patch("subprocess.check_call", check_call_mock):
-        conan_add_conancenter()
-        assert "Unable to add conancenter remote repository" in caplog.text
+    # ACT
+    conan_add_conancenter()
+
+    # ASSERT
+    assert "Unable to add conancenter remote repository" in caplog.text
 
 
-def test_conan_clean_remote_fail(caplog: LogCaptureFixture) -> None:
+def test_conan_clean_remote_fail(caplog: LogCaptureFixture, fp: FakeProcess) -> None:
     # ARRANGE
-    check_call_mock = MagicMock()
-    check_call_mock.side_effect = subprocess.CalledProcessError(returncode=1, cmd="")
+    cmd = "conan remote clean"
+    fp.register(cmd, callback=raise_callled_process_error)
 
-    # ACT & ASSERT
-    with patch("subprocess.check_call", check_call_mock):
-        conan_clean_remote()
-        assert "Unable to clean remote repository list" in caplog.text
+    # ACT
+    conan_clean_remote()
+
+    # ASSERT
+    assert "Unable to clean remote repository list" in caplog.text
 
 
 def test_create_package_fail(
     config: Config,
     mock_get_project_root: None,
     caplog: LogCaptureFixture,
+    fp: FakeProcess,
 ) -> None:
     # ARRANGE
-    check_call_mock = MagicMock()
-    check_call_mock.side_effect = [
-        subprocess.CompletedProcess(args="", returncode=1),  # conan clean
-        subprocess.CompletedProcess(args="", returncode=1),  # add remote_1
-        subprocess.CompletedProcess(args="", returncode=1),  # add remote_2
-        subprocess.CompletedProcess(args="", returncode=1),  # add con center
-        subprocess.CalledProcessError(returncode=1, cmd=""),  # create package
-        subprocess.CompletedProcess(args="", returncode=1),  # upload package
-    ]
+    cmd = "conan export-pkg . -f"
+    fp.register(cmd, callback=raise_callled_process_error)
+    fp.keep_last_process(True)
+    fp.register([fp.any()])
 
-    # ACT & ASSERT
-    with patch("subprocess.check_call", check_call_mock):
-        scargo_publish(REPO_NAME)
-        assert "Unable to create package" in caplog.text
+    # ACT
+    scargo_publish(REPO_NAME)
+
+    # ASSERT
+    assert "Unable to create package" in caplog.text
 
 
 def test_upload_package_fail(
+    config: Config,
     mock_get_project_root: None,
     caplog: LogCaptureFixture,
+    fp: FakeProcess,
 ) -> None:
     # ARRANGE
-    check_call_mock = MagicMock()
-    check_call_mock.side_effect = [
-        subprocess.CompletedProcess(args="", returncode=1),  # conan clean
-        subprocess.CompletedProcess(args="", returncode=1),  # add remote 1
-        subprocess.CompletedProcess(args="", returncode=1),  # add remote 2
-        subprocess.CompletedProcess(args="", returncode=1),  # add con center
-        subprocess.CompletedProcess(args="", returncode=1),  # create package
-        subprocess.CalledProcessError(returncode=1, cmd=""),  # upload package
+    project_name = config.project.name
+    version = config.project.version
+    cmd = [
+        "conan",
+        "upload",
+        f"{project_name}/{version}",
+        "-r",
+        REPO_NAME,
+        "--all",
+        "--confirm",
     ]
+    fp.register(cmd, callback=raise_callled_process_error)
+    fp.keep_last_process(True)
+    fp.register([fp.any()])
 
-    # ACT & ASSERT
-    with patch("subprocess.check_call", check_call_mock):
-        with pytest.raises(SystemExit):
-            scargo_publish(REPO_NAME)
-            assert "Unable to publish package" in caplog.text
+    # ACT
+    with pytest.raises(SystemExit) as error:
+        scargo_publish(REPO_NAME)
+
+    # ASSERT
+    assert "Unable to publish package" in caplog.text
+    assert error.value.code == 1
 
 
-def test_conan_add_user_fail(
-    caplog: pytest.LogCaptureFixture,
-) -> None:
+def test_conan_add_user_fail(caplog: pytest.LogCaptureFixture, fp: FakeProcess) -> None:
     # ARRANGE
-    remote_repo = "repo_name"
-    check_call_mock = MagicMock()
-    check_call_mock.side_effect = [
-        subprocess.CalledProcessError(returncode=1, cmd=""),
-    ]
+    cmd = ["conan", "user", "-p", ENV_CONAN_PASSWORD, "-r", REPO_NAME, ENV_CONAN_USER]
+    fp.register(cmd, callback=raise_callled_process_error)
+    fp.pass_command("conan user")
 
-    # ACT & ASSERT
-    with patch.dict(os.environ, {"CONAN_LOGIN_USERNAME": "mock-value"}):
-        with patch("subprocess.check_call", check_call_mock):
-            conan_add_user(remote_repo)
-            assert "Unable to add user" in caplog.text
+    # ACT
+    with patch.dict(
+        os.environ,
+        {"CONAN_LOGIN_USERNAME": ENV_CONAN_USER, "CONAN_PASSWORD": ENV_CONAN_PASSWORD},
+    ):
+        conan_add_user(REPO_NAME)
+
+    # ASSERT
+    assert "Unable to add user" in caplog.text
