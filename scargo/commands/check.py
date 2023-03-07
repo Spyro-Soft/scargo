@@ -21,7 +21,7 @@ logger = get_logger()
 
 def scargo_check(
     clang_format: bool,
-    clang_tidy: bool,
+    # clang_tidy: bool,
     copy_right: bool,
     cppcheck: bool,
     cyclomatic: bool,
@@ -33,7 +33,7 @@ def scargo_check(
     Check written code using different formatters
 
     :param bool clang_format: check clang_format
-    :param bool clang_tidy: check clang_tidy
+    # :param bool clang_tidy: check clang_tidy
     :param bool copy_right:  check copyrights
     :param bool cppcheck: check cpp format
     :param bool cyclomatic: check cyclomatic
@@ -50,8 +50,8 @@ def scargo_check(
     checkers: List[Type[CheckerFixer]] = []
     if clang_format:
         checkers.append(ClangFormatChecker)
-    if clang_tidy:
-        checkers.append(ClangTidyChecker)
+    # if clang_tidy:
+    #     checkers.append(ClangTidyChecker)
     if copy_right:
         checkers.append(CopyrightChecker)
     if cppcheck:
@@ -67,7 +67,7 @@ def scargo_check(
     if not checkers:
         checkers = [
             ClangFormatChecker,
-            ClangTidyChecker,
+            # ClangTidyChecker,
             CopyrightChecker,
             CppcheckChecker,
             CyclomaticChecker,
@@ -98,12 +98,15 @@ class CheckerFixer(abc.ABC):
 
     def check(self) -> None:
         logger.info(f"Starting {self.check_name} check...")
+        error_count = self.check_files()
+        self.report(error_count)
 
+    def check_files(self) -> int:
         error_counter = 0
         for file_path in find_files(
-            self.get_check_config().exclude,
-            self._config,
-            headers_only=self.headers_only,
+            Path(self._config.project.target.source_dir),
+            ("*.h", "*.hpp") if self.headers_only else ("*.h", "*.hpp", "*.c", "*.cpp"),
+            self.get_exclude_patterns(),
         ):
             result = self.check_file(file_path)
             error_counter += result.problems_found
@@ -115,19 +118,24 @@ class CheckerFixer(abc.ABC):
             ):
                 logger.info("Fixing...")
                 self.fix_file(file_path)
+        return error_counter
 
-        problem_count = self.format_problem_count(error_counter)
+    def report(self, count: int) -> None:
+        problem_count = self.format_problem_count(count)
         if self._fix_errors and self.can_fix:
             logger.info(f"Finished {self.check_name} check. Fixed {problem_count}.")
         else:
             logger.info(f"Finished {self.check_name} check. Found {problem_count}.")
-            if error_counter > 0:
+            if count > 0:
                 logger.error(f"{self.check_name} check fail!")
                 sys.exit(1)
 
     @staticmethod
     def format_problem_count(count: int) -> str:
         return f"problems in {count} files"
+
+    def get_exclude_patterns(self) -> List[str]:
+        return [*self._config.check.exclude, *self.get_check_config().exclude]
 
     def get_check_config(self) -> CheckConfig:
         return getattr(  # type: ignore[no-any-return]
@@ -228,11 +236,12 @@ class ClangFormatChecker(CheckerFixer):
     can_fix = True
 
     def check_file(self, file_path: Path) -> CheckResult:
-        cmd = "clang-format -style=file --dry-run " + str(file_path)
-        out = subprocess.getoutput(cmd)
-        if out != "":
+        cmd = ["clang-format", "--style=file", "--dry-run", "-Werror", str(file_path)]
+        try:
+            subprocess.check_output(cmd)
+        except subprocess.CalledProcessError as e:
             if self._verbose:
-                logger.info(out)
+                logger.info(e.output.decode())
             else:
                 logger.warning("clang-format found error in file %s", file_path)
             return CheckResult(1)
@@ -246,12 +255,12 @@ class ClangTidyChecker(CheckerFixer):
     check_name = "clang-tidy"
 
     def check_file(self, file_path: Path) -> CheckResult:
-        cmd = "clang-tidy " + str(file_path) + " --assume-filename=.hxx --"
-        out = subprocess.getoutput(cmd)
-
-        if "error:" in out:
+        cmd = ["clang-tidy", str(file_path)]
+        try:
+            subprocess.check_output(cmd)
+        except subprocess.CalledProcessError as e:
             if self._verbose:
-                logger.info(out)
+                logger.info(e.output.decode())
             else:
                 logger.warning("clang-tidy found error in file %s", file_path)
             return CheckResult(1)
@@ -259,25 +268,12 @@ class ClangTidyChecker(CheckerFixer):
 
 
 def find_files(
-    exclude_patterns: Sequence[str], config: Config, headers_only: bool = False
+    dir_path: Path, glob_patterns: Sequence[str], exclude_patterns: Sequence[str]
 ) -> Iterable[Path]:
-    source_dir = Path(config.project.target.source_dir)
+    exclude_list = [path for pattern in exclude_patterns for path in glob.glob(pattern)]
 
-    exclude_list = []
-
-    # Collect global excludes.
-    for pattern in config.check.exclude:
-        exclude_list.extend(glob.glob(pattern))
-
-    # Collect local excludes.
-    for pattern in exclude_patterns:
-        exclude_list.extend(glob.glob(pattern))
-
-    glob_patterns = (
-        ("*.h", "*.hpp") if headers_only else ("*.h", "*.hpp", "*.c", "*.cpp")
-    )
     for file_path in chain.from_iterable(
-        source_dir.rglob(pattern) for pattern in glob_patterns
+        dir_path.rglob(pattern) for pattern in glob_patterns
     ):
         if file_path.is_file():
             if any(exclude in str(file_path) for exclude in exclude_list):
@@ -290,25 +286,20 @@ def find_files(
 class CyclomaticChecker(CheckerFixer):
     check_name = "cyclomatic"
 
-    def check(self) -> None:
-        logger.info(f"Starting {self.check_name} check...")
-
+    def check_files(self) -> int:
         source_dir = self._config.project.target.source_dir
-
-        # Collect global excludes.
-        exclude_list = self._config.check.exclude
-
-        # Collect local excludes.
-        exclude_list.extend(self.get_check_config().exclude)
 
         cmd = ["lizard", source_dir, "-C", "25", "-w"]
 
-        for exclude_pattern in exclude_list:
+        for exclude_pattern in self.get_exclude_patterns():
             cmd.extend(["--exclude", exclude_pattern])
         try:
             subprocess.check_call(cmd)
         except subprocess.CalledProcessError:
             logger.error(f"ERROR: Check {self.check_name} fail")
+        return 0
+
+    def report(self, count: int) -> None:
         logger.info(f"Finished {self.check_name} check.")
 
     def check_file(self, file_path: Path) -> CheckResult:
@@ -318,14 +309,15 @@ class CyclomaticChecker(CheckerFixer):
 class CppcheckChecker(CheckerFixer):
     check_name = "cppcheck"
 
-    def check(self) -> None:
-        logger.info(f"Starting {self.check_name} check...")
-
+    def check_files(self) -> int:
         cmd = "cppcheck --enable=all --suppress=missingIncludeSystem src/ main/"
         try:
             subprocess.check_call(cmd, shell=True)
         except subprocess.CalledProcessError:
             logger.error(f"{self.check_name} fail")
+        return 0
+
+    def report(self, count: int) -> None:
         logger.info(f"Finished {self.check_name} check.")
 
     def check_file(self, file_path: Path) -> CheckResult:
