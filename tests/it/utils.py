@@ -36,6 +36,7 @@ class ScargoTestRunner(CliRunner):
             **extra,
         )
         sys.argv = temp
+        print(result.output)
         return result
 
 

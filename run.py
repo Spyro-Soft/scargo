@@ -116,7 +116,6 @@ def perform_tests(test_path: str, test_postfix: str, *test_flags: str) -> str:
             "--cov=scargo",
             "--gherkin-terminal-reporter",
             "-v",
-            "-s",
             test_path,
         ]
 
