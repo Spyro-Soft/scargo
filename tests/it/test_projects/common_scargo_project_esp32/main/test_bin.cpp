@@ -9,14 +9,14 @@
 
 extern "C"
 {
-    void app_main(void);
+    void appMain(void);
 }
 
 /**
  * @brief Main freeRTOS task
  *
  */
-void app_main(void)
+void appMain(void)
 {
     for (;;)
     {
