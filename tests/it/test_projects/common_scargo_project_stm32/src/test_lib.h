@@ -10,9 +10,9 @@
  */
 namespace spyro
 {
-class test_lib
+class TestLib
 {
 public:
-    test_lib();
+    TestLib();
 };
 }  // namespace spyro
