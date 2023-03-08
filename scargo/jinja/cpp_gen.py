@@ -32,15 +32,19 @@ class _CppTemplateGen(BaseGen):
 
     def _generate_lib(self, lib_name: str) -> None:
         """Function which creates a lib files using jinja"""
+
+        lib_name = lib_name.lower()
+        class_name = "".join(lib_name.replace("_", " ").title().split())
+
         self.create_file_from_template(
             "lib.cpp.j2",
-            Path(self._src_dir, f"{lib_name.lower()}.cpp"),
-            template_params={"lib_name": lib_name},
+            Path(self._src_dir, f"{lib_name}.cpp"),
+            template_params={"class_name": class_name, "lib_name": lib_name},
         )
         self.create_file_from_template(
             "lib.h.j2",
-            Path(self._src_dir, f"{lib_name.lower()}.h"),
-            {"lib_name": lib_name},
+            Path(self._src_dir, f"{lib_name}.h"),
+            {"lib_name": class_name},
         )
 
     def _generate_cmake(self, config: Config) -> None:
