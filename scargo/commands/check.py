@@ -90,7 +90,7 @@ class CheckerFixer(abc.ABC):
     can_fix = False
 
     def __init__(
-        self, config: Config, fix_errors: bool = False, verbose: bool = True
+        self, config: Config, fix_errors: bool = False, verbose: bool = False
     ) -> None:
         self._config = config
         self._fix_errors = fix_errors
