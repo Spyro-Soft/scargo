@@ -44,7 +44,7 @@ class _CppTemplateGen(BaseGen):
         self.create_file_from_template(
             "lib.h.j2",
             Path(self._src_dir, f"{lib_name}.h"),
-            {"lib_name": class_name},
+            {"class_name": class_name},
         )
 
     def _generate_cmake(self, config: Config) -> None:
