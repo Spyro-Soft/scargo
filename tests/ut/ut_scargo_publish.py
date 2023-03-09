@@ -1,12 +1,10 @@
 import os
-import subprocess
 from pathlib import Path
 from unittest.mock import patch
 
 import pytest
 from _pytest.logging import LogCaptureFixture
 from pytest_subprocess import FakeProcess
-from pytest_subprocess.fake_popen import FakePopen
 
 from scargo.commands.publish import (
     conan_add_conancenter,
@@ -22,8 +20,8 @@ REMOTE_REPO_NAME_1 = "remote_repo_name_1"
 REMOTE_REPO_NAME_2 = "remote_repo_name_2"
 EXAMPLE_URL = "https://example.com"
 REPO_NAME = "repo_name"
-ENV_CONAN_USER = "mock_user_name"
-ENV_CONAN_PASSWORD = "mock_password"
+ENV_CONAN_USER = "env_conan_user_name"
+ENV_CONAN_PASSWORD = "env_conan_password"
 
 
 @pytest.fixture
@@ -45,10 +43,6 @@ def config(monkeypatch: pytest.MonkeyPatch) -> Config:
     )
 
     return test_project_config
-
-
-def raise_callled_process_error(process: FakePopen) -> None:
-    raise subprocess.CalledProcessError(returncode=1, cmd="")
 
 
 def test_publish(config: Config, mock_get_project_root: None, fp: FakeProcess) -> None:
@@ -120,25 +114,28 @@ def test_conan_add_user(fp: FakeProcess) -> None:
 
 
 def test_conan_add_remote_fail(
-    config: Config, caplog: pytest.LogCaptureFixture, fp: FakeProcess
+    config: Config,
+    caplog: pytest.LogCaptureFixture,
+    fp: FakeProcess,
 ) -> None:
     # ARRANGE
-    cmd = ["conan", "remote", "add", REMOTE_REPO_NAME_1, EXAMPLE_URL]
-    fp.register(cmd, callback=raise_callled_process_error)
-    fp.keep_last_process(True)
-    fp.register([fp.any()])
+    fp.register(["conan", "remote", "add", REMOTE_REPO_NAME_1, EXAMPLE_URL])
+    fp.register(
+        ["conan", "remote", "add", REMOTE_REPO_NAME_2, EXAMPLE_URL], returncode=1
+    )
 
     # ACT
-    conan_add_remote(Path("some_path"))
+    with pytest.raises(fp.exceptions.ProcessNotRegisteredError):
+        conan_add_remote(Path("some_path"))
 
-    # ASSERT
-    assert "Unable to add remote repository" in caplog.text
+        # ASSERT
+        assert "Unable to add remote repository" in caplog.text
 
 
 def test_conan_add_conancenter_fail(caplog: LogCaptureFixture, fp: FakeProcess) -> None:
     # ARRANGE
     cmd = "conan remote add conancenter https://center.conan.io"
-    fp.register(cmd, callback=raise_callled_process_error)
+    fp.register(cmd, returncode=1)
 
     # ACT
     conan_add_conancenter()
@@ -150,7 +147,7 @@ def test_conan_add_conancenter_fail(caplog: LogCaptureFixture, fp: FakeProcess) 
 def test_conan_clean_remote_fail(caplog: LogCaptureFixture, fp: FakeProcess) -> None:
     # ARRANGE
     cmd = "conan remote clean"
-    fp.register(cmd, callback=raise_callled_process_error)
+    fp.register(cmd, returncode=1)
 
     # ACT
     conan_clean_remote()
@@ -167,15 +164,14 @@ def test_create_package_fail(
 ) -> None:
     # ARRANGE
     cmd = "conan export-pkg . -f"
-    fp.register(cmd, callback=raise_callled_process_error)
-    fp.keep_last_process(True)
-    fp.register([fp.any()])
+    fp.register(cmd, returncode=1)
 
     # ACT
-    scargo_publish(REPO_NAME)
+    with pytest.raises(fp.exceptions.ProcessNotRegisteredError):
+        scargo_publish(REPO_NAME)
 
-    # ASSERT
-    assert "Unable to create package" in caplog.text
+        # ASSERT
+        assert "Unable to create package" in caplog.text
 
 
 def test_upload_package_fail(
@@ -196,24 +192,23 @@ def test_upload_package_fail(
         "--all",
         "--confirm",
     ]
-    fp.register(cmd, callback=raise_callled_process_error)
-    fp.keep_last_process(True)
-    fp.register([fp.any()])
+    fp.register(cmd, returncode=1)
 
     # ACT
-    with pytest.raises(SystemExit) as error:
-        scargo_publish(REPO_NAME)
+    with pytest.raises(fp.exceptions.ProcessNotRegisteredError):
+        with pytest.raises(SystemExit) as error:
+            scargo_publish(REPO_NAME)
 
-    # ASSERT
-    assert "Unable to publish package" in caplog.text
-    assert error.value.code == 1
+            # ASSERT
+            assert "Unable to publish package" in caplog.text
+            assert error.value.code == 1
 
 
 def test_conan_add_user_fail(caplog: pytest.LogCaptureFixture, fp: FakeProcess) -> None:
     # ARRANGE
     cmd = ["conan", "user", "-p", ENV_CONAN_PASSWORD, "-r", REPO_NAME, ENV_CONAN_USER]
-    fp.register(cmd, callback=raise_callled_process_error)
-    fp.pass_command("conan user")
+    fp.register(cmd, returncode=1)
+    fp.register("conan user", stdout="user_name")
 
     # ACT
     with patch.dict(
