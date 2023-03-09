@@ -4,9 +4,9 @@
  */
 namespace spyro
 {
-class fix_test_lib
+class FixTestLib
 {
 public:
-                  fix_test_lib();
+                  FixTestLib();
          }                              ;
 }  // namespace spyro

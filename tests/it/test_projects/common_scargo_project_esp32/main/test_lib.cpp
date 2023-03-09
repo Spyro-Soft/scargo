@@ -7,7 +7,7 @@
 
 using namespace spyro;
 
-test_lib::test_lib()
+TestLib::TestLib()
 {
     std::cout << "Hello from lib1" << std::endl;
 }
