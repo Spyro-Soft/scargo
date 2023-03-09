@@ -25,8 +25,6 @@ TEST_PROJECT_STM32_NAME = "common_scargo_project_stm32"
 NEW_TEST_PROJECT_NAME = "test_new_project"
 IT_PATH = Path("tests", "it").absolute()
 TEST_PROJECT_PATH = Path(IT_PATH, "test_projects", TEST_PROJECT_NAME)
-TEST_LIBS_PATH = Path(IT_PATH, "test_projects", "test_files", "test_libs")
-ESP_32_BUILD_PATH = Path(IT_PATH, "test_projects", "test_files", "esp_32_build")
 TEST_PROJECT_ESP32_PATH = Path(IT_PATH, "test_projects", TEST_PROJECT_ESP32_NAME)
 TEST_PROJECT_STM32_PATH = Path(IT_PATH, "test_projects", TEST_PROJECT_STM32_NAME)
 
