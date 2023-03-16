@@ -204,7 +204,10 @@ class CopyrightChecker(CheckerFixer):
 
         with open(file_path, "w", encoding="utf-8") as file:
             file.write("//\n")
-            file.write(f"// {self.copyright_desc}\n")
+            for line in self.copyright_desc.split("\n"):
+                if line == "":
+                    continue
+                file.write(f"// {line}\n")
             file.write("//\n")
             file.write("\n")
             file.write(old)
