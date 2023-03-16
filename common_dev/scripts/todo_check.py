@@ -14,7 +14,7 @@ file_extensions = (".py", ".md", ".txt", ".sh", "Dockerfile")
 
 def option_parser_init() -> Tuple[Namespace, List[str]]:
     parser = ArgumentParser(
-        epilog="The scripts checks if copyright info in files is correct."
+        epilog="The scripts checks if there are any TODOs in the repository."
     )
     parser.add_argument(
         "-e",
