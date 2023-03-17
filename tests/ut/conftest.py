@@ -19,6 +19,7 @@ from scargo.config import (
     ScargoConfig,
     Target,
     TestConfig,
+    TodoCheckConfig,
 )
 
 TARGET_X86 = Target.get_target_by_id("x86")
@@ -90,7 +91,9 @@ def config() -> Config:
                 "exclude": [],
                 "pragma": CheckConfig(description=None, exclude=[]),
                 "copyright": CheckConfig(description="Copyright", exclude=[]),
-                "todo": CheckConfig(description=None, exclude=[]),
+                "todo": TodoCheckConfig(
+                    description=None, exclude=[], keywords=["TODO", "todo"]
+                ),
                 "clang-format": CheckConfig(description=None, exclude=[]),
                 "clang-tidy": CheckConfig(description=None, exclude=[]),
                 "cyclomatic": CheckConfig(description=None, exclude=[]),

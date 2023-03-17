@@ -74,9 +74,13 @@ This section describes possible options which can be set in the scargo.toml file
 -----------------
 **exclude** = (string list)(path to excluded dirs e.g. [])
 
+**description** = (string)(copyright information to be included in source files)
+
 [check.todo]
 ------------
 **exclude** = (string list)(path to excluded dirs e.g. [])
+
+**keywords** = (string list)(keywords for todo check, e.g. ["tbd", "todo", "TODO", "fixme"])
 
 [check.clang-format]
 --------------------

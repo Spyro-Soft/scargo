@@ -46,6 +46,7 @@ description = "Copyright"
 exclude = []
 
 [check.todo]
+keywords = ["tbd", "todo", "TODO", "fixme"]
 exclude = []
 
 [check.clang-format]

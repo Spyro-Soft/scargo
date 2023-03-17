@@ -1,28 +1,39 @@
 from unittest.mock import MagicMock
 
 import pytest
+from pytest_mock import MockerFixture
 
+from scargo.clang_utils import get_comment_lines
 from scargo.commands.check import TodoChecker
 from scargo.config import Config
 from tests.ut.utils import get_log_data
 
-FILE_CONTENTS_WITHOUT_TODO = [
-    "int main(void);",
+COMMENT_LINES_WITHOUT_TODO = [
+    (1, "// Copyright Mastodon 2023"),
 ]
 
-FILE_CONTENTS_WITH_TODO = [
-    "// TODO add more stuff",
-    "int main(void);",
+COMMENT_LINES_WITH_TODO = [
+    (1, "// TODO add more stuff"),
 ]
+
+
+@pytest.fixture
+def mock_get_comment_lines(
+    request: pytest.FixtureRequest, mocker: MockerFixture
+) -> MagicMock:
+    return mocker.patch(
+        f"{TodoChecker.__module__}.{get_comment_lines.__name__}",
+        return_value=request.param,
+    )
 
 
 @pytest.mark.parametrize(
-    "mock_file_contents",
-    [FILE_CONTENTS_WITHOUT_TODO],
+    "mock_get_comment_lines",
+    [COMMENT_LINES_WITHOUT_TODO],
     indirect=True,
 )
 def test_check_todo_pass(
-    mock_file_contents: MagicMock,
+    mock_get_comment_lines: MagicMock,
     caplog: pytest.LogCaptureFixture,
     config: Config,
     mock_find_files: MagicMock,
@@ -34,12 +45,12 @@ def test_check_todo_pass(
 
 
 @pytest.mark.parametrize(
-    "mock_file_contents",
-    [FILE_CONTENTS_WITH_TODO],
+    "mock_get_comment_lines",
+    [COMMENT_LINES_WITH_TODO],
     indirect=True,
 )
 def test_check_todo_fail(
-    mock_file_contents: MagicMock,
+    mock_get_comment_lines: MagicMock,
     caplog: pytest.LogCaptureFixture,
     config: Config,
     mock_find_files: MagicMock,
