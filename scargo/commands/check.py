@@ -255,20 +255,44 @@ class ClangFormatChecker(CheckerFixer):
 
 class ClangTidyChecker(CheckerFixer):
     check_name = "clang-tidy"
-    build_path = "./build/"
+    build_path = Path("./build/")
+
+    def _generate_compile_commands_json(self) -> None:
+        if self._config.project.target.family == "esp32":
+            cmd = ["idf.py", "clang-check"]  # creates compilation database
+            try:
+                subprocess.check_call(cmd)
+            except subprocess.CalledProcessError:
+                logger.warning("'idf.py clang-check' failed")
+        else:
+            profile = "Debug"
+            project_dir = get_project_root()
+            build_dir = project_dir / "build" / profile
+            build_dir.mkdir(parents=True, exist_ok=True)
+            subprocess.check_call(
+                [
+                    "cmake",
+                    f"-DCMAKE_BUILD_TYPE={profile}",
+                    "-DCMAKE_EXPORT_COMPILE_COMMANDS=ON",
+                    project_dir,
+                ],
+                cwd=build_dir,
+            )
 
     def check_file(self, file_path: Path) -> CheckResult:
+        target_family = self._config.project.target.family
+        if target_family == "esp32":
+            build_path = self.build_path
+        else:
+            build_path = self.build_path / "Debug"
+        if not Path(build_path, "compile_commands.json").exists():
+            self._generate_compile_commands_json()
+
         cmd: List[str]
-        if self._config.project.target.family == "esp32":
-            if not os.path.exists(str(self.build_path)):
-                cmd = ["idf.py", "clang-check"]  # creates compilation database
-                try:
-                    subprocess.check_output(cmd)
-                except subprocess.CalledProcessError:
-                    logger.warning("'idf.py clang-check' failed")
+        if target_family == "esp32":
             cmd = ["run-clang-tidy.py", "-p", str(self.build_path), str(file_path)]
         else:
-            cmd = ["clang-tidy", str(file_path), "-p", str(self.build_path)]
+            cmd = ["clang-tidy", str(file_path), "-p", str(build_path)]
             if file_path.suffix == ".h":
                 cmd.extend(["--", "-x", "c++"])
         try:
