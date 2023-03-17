@@ -186,15 +186,41 @@ class CopyrightChecker(CheckerFixer):
         super().check()
 
     def check_file(self, file_path: Path) -> CheckResult:
+        copyrights = self.copyright_desc.split("\n")
         with open(file_path, encoding="utf-8") as file:
-            for line in file.readlines():
-                if self.copyright_desc in line:
-                    return CheckResult(problems_found=0)
+            lines = (line for line in file.readlines()[1:])
+            # for line in file.readlines():
+            #     if self.copyright_desc in line:
+            #         return CheckResult(problems_found=0)
+            #     if "copyright" in line.lower():
+            #         logger.warning(
+            #             "Incorrect and not excluded copyright in %s", file_path
+            #         )
+            #         return CheckResult(problems_found=1, fix=False)
+        copyrights_in_line = False
+        error_found = False
+        i = -1
+        for line in lines:
+            i += 1
+            if i < len(copyrights):
                 if "copyright" in line.lower():
-                    logger.warning(
-                        "Incorrect and not excluded copyright in %s", file_path
-                    )
-                    return CheckResult(problems_found=1, fix=False)
+                    copyrights_in_line = True
+                if copyrights[i] in line:
+                    continue
+                else:
+                    error_found = True
+                    break
+            else:
+                break
+
+        if not error_found:
+            return CheckResult(problems_found=0)
+        elif copyrights_in_line and error_found:
+            logger.warning(
+                "Incorrect and not excluded copyright in %s", file_path
+            )
+            return CheckResult(problems_found=1, fix=False)
+
         logger.info("Missing copyright in %s.", file_path)
         return CheckResult(problems_found=1)
 
