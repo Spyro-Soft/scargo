@@ -179,11 +179,13 @@ class CopyrightChecker(CheckerFixer):
 
     def __init__(self, config: Config, fix_errors: bool = False, verbose: bool = False):
         super().__init__(config, fix_errors, verbose)
-        copyright_desc = self.get_check_config().description
-        if not copyright_desc:
+        self.copyright_desc = self.get_check_config().description or ""
+
+    def check(self) -> None:
+        if not self.copyright_desc:
             logger.warning("No copyrights in defined in toml")
             return
-        self.copyright_desc = copyright_desc
+        super().check()
 
     def check_file(self, file_path: Path) -> CheckResult:
         with open(file_path, encoding="utf-8") as file:
