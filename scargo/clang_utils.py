@@ -1,7 +1,10 @@
 from pathlib import Path
 from typing import Iterable, Tuple
 
-from clang.cindex import Index, TokenKind
+from clang import native  # type: ignore[attr-defined]
+from clang.cindex import Config, Index, TokenKind
+
+Config().set_library_file(str(Path(native.__file__).with_name("libclang.so")))
 
 
 def get_comment_lines(file_path: Path) -> Iterable[Tuple[int, str]]:
@@ -9,7 +12,7 @@ def get_comment_lines(file_path: Path) -> Iterable[Tuple[int, str]]:
     translation_unit = index.parse(str(file_path), args=["-x", "c++"])
 
     for token in translation_unit.cursor.get_tokens():
-        if token.kind == TokenKind.COMMENT:
+        if token.kind == TokenKind.COMMENT:  # pylint: disable=no-member
             yield from enumerate(
                 # there's a bug in types-clang: https://github.com/tgockel/types-clang/issues/8
                 # when it's fixed in a new release, we can remove the type ignore comment
