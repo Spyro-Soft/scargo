@@ -9,6 +9,7 @@ import subprocess
 import sys
 from itertools import chain
 from pathlib import Path
+import shutil
 from typing import Iterable, List, NamedTuple, Sequence, Type
 
 from scargo.config import CheckConfig, Config
@@ -21,7 +22,7 @@ logger = get_logger()
 
 def scargo_check(
     clang_format: bool,
-    # clang_tidy: bool,
+    clang_tidy: bool,
     copy_right: bool,
     cppcheck: bool,
     cyclomatic: bool,
@@ -50,8 +51,8 @@ def scargo_check(
     checkers: List[Type[CheckerFixer]] = []
     if clang_format:
         checkers.append(ClangFormatChecker)
-    # if clang_tidy:
-    #     checkers.append(ClangTidyChecker)
+    if clang_tidy:
+        checkers.append(ClangTidyChecker)
     if copy_right:
         checkers.append(CopyrightChecker)
     if cppcheck:
@@ -67,7 +68,7 @@ def scargo_check(
     if not checkers:
         checkers = [
             ClangFormatChecker,
-            # ClangTidyChecker,
+            ClangTidyChecker,
             CopyrightChecker,
             CppcheckChecker,
             CyclomaticChecker,
@@ -90,7 +91,7 @@ class CheckerFixer(abc.ABC):
     can_fix = False
 
     def __init__(
-        self, config: Config, fix_errors: bool = False, verbose: bool = False
+        self, config: Config, fix_errors: bool = False, verbose: bool = True
     ) -> None:
         self._config = config
         self._fix_errors = fix_errors
@@ -255,9 +256,25 @@ class ClangFormatChecker(CheckerFixer):
 
 class ClangTidyChecker(CheckerFixer):
     check_name = "clang-tidy"
+    build_path = "./build/"
 
     def check_file(self, file_path: Path) -> CheckResult:
-        cmd = ["clang-tidy", str(file_path)]
+        cmd =[]
+        if self._config.project.target.family == "esp32" :
+            if not os.path.exists(str(self.build_path)):
+                cmd = ["idf.py",  "clang-check"] #creates compilation database
+                try:
+                    subprocess.check_output(cmd)
+                except subprocess.CalledProcessError as e:
+                    if self._verbose:
+                        logger.info(e.output.decode())
+                    else:
+                        logger.warning("clang-tidy found error in file %s", file_path)
+            cmd = ["run-clang-tidy.py",  "-p", str(self.build_path), str(file_path)]
+        else:
+            cmd = ["clang-tidy", str(file_path), "-p", str(self.build_path)]
+            if file_path.suffix == ".h":    
+                cmd.extend(["--", "-x", "c++"])
         try:
             subprocess.check_output(cmd)
         except subprocess.CalledProcessError as e:
@@ -267,6 +284,7 @@ class ClangTidyChecker(CheckerFixer):
                 logger.warning("clang-tidy found error in file %s", file_path)
             return CheckResult(1)
         return CheckResult(0)
+
 
 
 def find_files(
