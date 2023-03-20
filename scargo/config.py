@@ -68,6 +68,10 @@ class ProjectConfig(BaseModel):
     cflags: str
     cxxflags: str
 
+    cmake_variables: Dict[str, str] = Field(
+        default_factory=dict, alias="cmake-variables"
+    )
+
     @property
     def target(self) -> "Target":
         return Target.get_target_by_id(self.target_id)

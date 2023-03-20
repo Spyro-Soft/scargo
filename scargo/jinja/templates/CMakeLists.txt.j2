@@ -30,6 +30,9 @@ set(CMAKE_C_FLAGS   "{{ config.project.cflags }}")
 {% if config.project.cxxflags %}
 set(CMAKE_CXX_FLAGS "{{ config.project.cxxflags }}")
 {% endif %}
+{% for key, value in config.project.cmake_variables.items() %}
+set({{ key }} "{{ value }}")
+{% endfor %}
 {% for profile_name, profile in config.profiles.items() %}
 # {{ profile_name }}
     {% if profile.cflags  %}
