@@ -50,7 +50,7 @@ def build(profile: str = Option("Debug", "--profile")) -> None:
 
 
 @cli.command()
-def check(  # pylint: disable=too-many-arguments
+def check(
     clang_format: bool = Option(False, "--clang-format", help="Run clang-format."),
     # clang_tidy: bool = Option(False, "--clang-tidy", help="Run clang-tidy."),
     copy_right: bool = Option(False, "--copyright", help="Run copyright check."),
@@ -186,7 +186,7 @@ def flash(
 
 
 @cli.command()
-def gen(  # pylint: disable=too-many-arguments
+def gen(
     profile: str = Option("Debug", "--profile", "-p"),
     gen_ut: Optional[Path] = Option(
         None,
@@ -265,7 +265,7 @@ def gen(  # pylint: disable=too-many-arguments
 
 
 @cli.command()
-def new(  # pylint: disable=too-many-arguments
+def new(
     name: str,
     bin_name: Optional[str] = Option(
         None,
@@ -376,6 +376,6 @@ def version() -> None:
 if __name__ == "__main__":
     try:
         cli()
-    except Exception as e:
+    except Exception as e:  # pylint: disable=broad-exception-caught
         print(f"\nA fatal error occurred: {e}")
         sys.exit(2)
