@@ -5,7 +5,6 @@
 import abc
 import glob
 import os
-import shutil
 import subprocess
 import sys
 from itertools import chain
@@ -34,7 +33,7 @@ def scargo_check(
     Check written code using different formatters
 
     :param bool clang_format: check clang_format
-    # :param bool clang_tidy: check clang_tidy
+    :param bool clang_tidy: check clang_tidy
     :param bool copy_right:  check copyrights
     :param bool cppcheck: check cpp format
     :param bool cyclomatic: check cyclomatic
@@ -259,17 +258,14 @@ class ClangTidyChecker(CheckerFixer):
     build_path = "./build/"
 
     def check_file(self, file_path: Path) -> CheckResult:
-        cmd = []
+        cmd: List[str]
         if self._config.project.target.family == "esp32":
             if not os.path.exists(str(self.build_path)):
                 cmd = ["idf.py", "clang-check"]  # creates compilation database
                 try:
                     subprocess.check_output(cmd)
-                except subprocess.CalledProcessError as e:
-                    if self._verbose:
-                        logger.info(e.output.decode())
-                    else:
-                        logger.warning("clang-tidy found error in file %s", file_path)
+                except subprocess.CalledProcessError:
+                    logger.warning("'idf.py clang-check' failed")
             cmd = ["run-clang-tidy.py", "-p", str(self.build_path), str(file_path)]
         else:
             cmd = ["clang-tidy", str(file_path), "-p", str(self.build_path)]

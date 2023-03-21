@@ -4,7 +4,7 @@ ARG ESPRESSIF_IDF_TAG="v4.4.3"
 ARG ESPRESSIF_IDF_VERSION="${ESPRESSIF_IDF_TAG}"
 ARG ESPRESSIF_IDF_PATH="/opt/esp-idf"
 ARG ESPRESSIF_IDF_REPO_URL="https://github.com/espressif/esp-idf.git"
-ARG RUN_CLANG_TIDY_SCRIPT_URL="https://raw.githubusercontent.com/llvm/llvm-project/main/clang-tools-extra/clang-tidy/tool/run-clang-tidy.py"
+ARG RUN_CLANG_TIDY_SCRIPT_URL="https://raw.githubusercontent.com/llvm/llvm-project/llvmorg-16.0.0/clang-tools-extra/clang-tidy/tool/run-clang-tidy.py"
 ARG ESPRESSIF_TOOLS_PATH="/root/.espressif"
 ENV  IDF_TOOLS_PATH ${ESPRESSIF_IDF_PATH}
 ENV  IDF_PATH ${ESPRESSIF_IDF_PATH}

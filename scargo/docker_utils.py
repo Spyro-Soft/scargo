@@ -32,7 +32,6 @@ def run_scargo_again_in_docker(project_config: ProjectConfig) -> None:
         entrypoint = "/opt/esp/entrypoint.sh"
 
     docker_tag = project_config.docker_image_tag
-    print(docker_tag)
     client = dock.from_env()
 
     run_command_in_docker(
