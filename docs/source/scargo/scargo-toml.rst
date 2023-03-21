@@ -16,7 +16,7 @@ This section describes possible options which can be set in the scargo.toml file
 
 **description** = (string) <Project short description e.g. "Proj desc">
 
-**homepage-url** = (string) <project www as url e.g. "www.hello-world.com">
+**homepage-url** = (string) <project www as url e.g. "https://example.com">
 
 **target** = (string) <target to build the project e.g. "esp32" or "x86">
 
@@ -121,7 +121,10 @@ Add external dependencies in conan style e.g.:
 
 [conan.repo]
 ------------
-**gitlab** = (string) (url to conan repo e.g. "https://git.spyrosoft.it/api/v4/projects/159/packages/conan")
+key-value pairs of short names and conan remote urls, e.g.
+::
+
+    conancenter = "https://center.conan.io"
 
 Applicable for esp32 only
 -------------------------
