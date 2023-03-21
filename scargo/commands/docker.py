@@ -13,6 +13,8 @@ import docker
 from scargo.config_utils import get_scargo_config_or_exit
 from scargo.logger import get_logger
 
+logger = get_logger()
+
 
 def scargo_docker_build(docker_opts: Sequence[str]) -> None:
     """
@@ -21,7 +23,6 @@ def scargo_docker_build(docker_opts: Sequence[str]) -> None:
     :param docker_opts: additional docker options
     :raises CalledProcessError: if docker build fail
     """
-    logger = get_logger()
     logger.debug("Build docker environment.")
 
     config = get_scargo_config_or_exit()
@@ -48,7 +49,6 @@ def scargo_docker_run(
     :param command: command to run in the container
     :raises CalledProcessError: if docker did not start
     """
-    logger = get_logger()
     logger.debug("Run docker environment.")
 
     config = get_scargo_config_or_exit()
@@ -79,7 +79,6 @@ def scargo_docker_exec(docker_opts: List[str]) -> None:
     :param docker_opts: additional docker options
     :raises CalledProcessError: if docker did not start
     """
-    logger = get_logger()
     logger.debug("Exec docker environment.")
 
     config = get_scargo_config_or_exit()
@@ -111,7 +110,6 @@ def scargo_docker_exec(docker_opts: List[str]) -> None:
 def _get_docker_path(project_path: Path) -> Path:
     # do not rebuild dockers in the docker
     if Path(project_path, ".dockerenv").exists():
-        logger = get_logger()
         logger.error("Cannot used docker command inside the docker container.")
         sys.exit(1)
     return Path(project_path, ".devcontainer")

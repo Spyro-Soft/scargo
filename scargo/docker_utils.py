@@ -9,6 +9,8 @@ from scargo.config import ProjectConfig
 from scargo.global_values import SCARGO_DOCKER_ENV
 from scargo.logger import get_logger
 
+logger = get_logger()
+
 
 def run_scargo_again_in_docker(
     project_config: ProjectConfig, project_path: Path
@@ -63,7 +65,6 @@ def run_command_in_docker(  # type: ignore[no-any-unimported]
     project_path: Path,
     path_in_docker: Path,
 ) -> int:
-    logger = get_logger()
     logger.info(f"Running '{' '.join(command)}' command in docker.")
     container = client.containers.run(
         docker_tag,

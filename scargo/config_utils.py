@@ -11,6 +11,8 @@ from scargo.global_values import SCARGO_LOCK_FILE
 from scargo.logger import get_logger
 from scargo.path_utils import get_config_file_path
 
+logger = get_logger()
+
 
 def get_scargo_config_or_exit(
     config_file_path: Optional[Path] = None,
@@ -19,7 +21,6 @@ def get_scargo_config_or_exit(
     :param config_file_path
     :return: project configuration as dict
     """
-    logger = get_logger()
     if config_file_path is None:
         config_file_path = get_config_file_path(SCARGO_LOCK_FILE)
     if config_file_path is None or not config_file_path.exists():
@@ -58,7 +59,6 @@ def check_scargo_version(config: Config) -> None:
     if not version_lock:
         add_version_to_scargo_lock()
     elif __version__ != version_lock:
-        logger = get_logger()
         logger.warning("Warning: scargo package is different then in lock file")
         logger.info("Run scargo update")
 
@@ -69,7 +69,6 @@ def add_version_to_scargo_lock() -> None:
     """
     scargo_lock = get_config_file_path(SCARGO_LOCK_FILE)
     if not scargo_lock:
-        logger = get_logger()
         logger.error("ERROR: File `%s` does not exist.", SCARGO_LOCK_FILE)
         logger.info("Did you run `scargo update`?")
         sys.exit(1)

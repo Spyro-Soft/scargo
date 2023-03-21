@@ -11,6 +11,8 @@ from typing import List, Optional
 from scargo.config_utils import prepare_config
 from scargo.logger import get_logger
 
+logger = get_logger()
+
 
 def scargo_run(bin_path: Optional[Path], profile: str, params: List[str]) -> None:
     """
@@ -21,7 +23,6 @@ def scargo_run(bin_path: Optional[Path], profile: str, params: List[str]) -> Non
     :param str params: params for bin file
     :return: None
     """
-    logger = get_logger()
     logger.info('Running "%s" build', profile)
 
     config = prepare_config()

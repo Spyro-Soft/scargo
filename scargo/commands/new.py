@@ -18,6 +18,8 @@ from scargo.file_generators.toml_gen import generate_toml
 from scargo.global_values import SCARGO_DEFAULT_CONFIG_FILE, SCARGO_DOCKER_ENV
 from scargo.logger import get_logger
 
+logger = get_logger()
+
 
 def scargo_new(
     name: str,
@@ -39,8 +41,6 @@ def scargo_new(
     :return: None
     :raises FileExistsError: if project with provided name exist
     """
-    logger = get_logger()
-
     if not re.match(r"[a-zA-Z][\w-]*$", name):
         logger.error(
             "Name must consist of letters, digits, dash and undescore only,"

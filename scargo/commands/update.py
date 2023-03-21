@@ -20,6 +20,8 @@ from scargo.file_generators.tests_gen import generate_tests
 from scargo.global_values import SCARGO_DOCKER_ENV, SCARGO_LOCK_FILE, SCARGO_PKG_PATH
 from scargo.logger import get_logger
 
+logger = get_logger()
+
 
 def copy_file_if_not_exists(project_path: Path) -> None:
     """
@@ -40,7 +42,6 @@ def scargo_update(config_file_path: Path) -> None:
     :param config_file_path: path to .toml configuration file (e.g. scargo.toml)
     :return: None
     """
-    logger = get_logger()
     project_path = config_file_path.parent
     docker_path = Path(project_path, ".devcontainer")
     config = get_scargo_config_or_exit(config_file_path)
@@ -102,7 +103,6 @@ def scargo_update(config_file_path: Path) -> None:
 
 
 def pull_docker_image(docker_path: Path) -> bool:
-    logger = get_logger()
     logger.info("Pulling the image from docker registry...")
     try:
         result = subprocess.run(
