@@ -8,7 +8,7 @@ from scargo.commands.check import ClangTidyChecker
 from scargo.config import Config
 from tests.ut.utils import get_log_data
 
-CLANG_TIDY_COMMAND = ["clang-tidy", "foo/bar.hpp", "-p", "./build/", "--", "-x", "c++"]
+CLANG_TIDY_COMMAND = ["clang-tidy", "foo/bar.hpp", "-p", "build/Debug"]
 
 CLANG_TIDY_NORMAL_OUTPUT = "everything is tidy!"
 CLANG_TIDY_ERROR_OUTPUT = "error: something is not tidy!"
@@ -21,6 +21,14 @@ def test_check_clang_tidy_pass(
     fake_process: FakeProcess,
 ) -> None:
     fake_process.register(CLANG_TIDY_COMMAND, stdout=CLANG_TIDY_NORMAL_OUTPUT)
+    fake_process.register(
+        [
+            "cmake",
+            "-DCMAKE_BUILD_TYPE=Debug",
+            "-DCMAKE_EXPORT_COMPILE_COMMANDS=ON",
+            fake_process.any(min=1, max=1),
+        ]
+    )
     ClangTidyChecker(config).check()
     assert all(
         level not in ("WARNING", "ERROR") for level, msg in get_log_data(caplog.records)
@@ -44,6 +52,14 @@ def test_check_clang_tidy_fail(
 ) -> None:
     fake_process.register(
         CLANG_TIDY_COMMAND, stdout=CLANG_TIDY_ERROR_OUTPUT, returncode=1
+    )
+    fake_process.register(
+        [
+            "cmake",
+            "-DCMAKE_BUILD_TYPE=Debug",
+            "-DCMAKE_EXPORT_COMPILE_COMMANDS=ON",
+            fake_process.any(min=1, max=1),
+        ]
     )
     with pytest.raises(SystemExit) as wrapped_exception:
         ClangTidyChecker(config, verbose=verbose).check()
