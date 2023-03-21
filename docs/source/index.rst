@@ -43,7 +43,7 @@ For Windows
 -----------
 1) Install Python >=3.8 with pip from https://www.python.org/downloads/windows/
 2) Install Docker for Windows (e.g. https://desktop.docker.com/win/main/amd64/Docker%20Desktop%20Installer.exe)
-3) Install scargo (``pip install .`` or ``pip install scargo``) and add the program to your env paths
+3) Install scargo (``pip install scargo``) and add the program to your env paths
 
 
 System Properties -> Environment Variables, double click on "Path" and add entry with your scargo installation e.g.
