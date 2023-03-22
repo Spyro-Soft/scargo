@@ -260,10 +260,11 @@ class ClangTidyChecker(CheckerFixer):
     def _generate_compile_commands_json(self) -> None:
         if self._config.project.target.family == "esp32":
             cmd = ["idf.py", "clang-check"]  # creates compilation database
-            try:
-                subprocess.check_call(cmd)
-            except subprocess.CalledProcessError:
-                logger.warning("'idf.py clang-check' failed")
+            # this will fail after creating the database, because
+            # there's no run-clang-tidy.py in PATH, but it's not a problem
+            subprocess.run(
+                cmd, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, check=False
+            )
         else:
             profile = "Debug"
             project_dir = get_project_root()
@@ -280,21 +281,13 @@ class ClangTidyChecker(CheckerFixer):
             )
 
     def check_file(self, file_path: Path) -> CheckResult:
-        target_family = self._config.project.target.family
-        if target_family == "esp32":
-            build_path = self.build_path
-        else:
-            build_path = self.build_path / "Debug"
-        if not Path(build_path, "compile_commands.json").exists():
-            self._generate_compile_commands_json()
-
-        cmd: List[str]
-        if target_family == "esp32":
-            cmd = ["run-clang-tidy.py", "-p", str(self.build_path), str(file_path)]
-        else:
-            cmd = ["clang-tidy", str(file_path), "-p", str(build_path)]
-            if file_path.suffix == ".h":
-                cmd.extend(["--", "-x", "c++"])
+        cmd = ["clang-tidy", str(file_path)]
+        if self._config.project.target.family == "esp32":
+            cmd.extend(["-p", str(self.build_path)])
+            if not Path(self.build_path, "compile_commands.json").exists():
+                self._generate_compile_commands_json()
+        if file_path.suffix == ".h":
+            cmd.extend(["--", "-x", "c++"])
         try:
             subprocess.check_output(cmd)
         except subprocess.CalledProcessError as e:
