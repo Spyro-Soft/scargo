@@ -257,35 +257,20 @@ class ClangTidyChecker(CheckerFixer):
     check_name = "clang-tidy"
     build_path = Path("./build/")
 
-    def _generate_compile_commands_json(self) -> None:
-        if self._config.project.target.family == "esp32":
-            cmd = ["idf.py", "clang-check"]  # creates compilation database
-            # this will fail after creating the database, because
-            # there's no run-clang-tidy.py in PATH, but it's not a problem
-            subprocess.run(
-                cmd, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, check=False
-            )
-        else:
-            profile = "Debug"
-            project_dir = get_project_root()
-            build_dir = project_dir / "build" / profile
-            build_dir.mkdir(parents=True, exist_ok=True)
-            subprocess.check_call(
-                [
-                    "cmake",
-                    f"-DCMAKE_BUILD_TYPE={profile}",
-                    "-DCMAKE_EXPORT_COMPILE_COMMANDS=ON",
-                    project_dir,
-                ],
-                cwd=build_dir,
-            )
-
     def check_file(self, file_path: Path) -> CheckResult:
         cmd = ["clang-tidy", str(file_path)]
         if self._config.project.target.family == "esp32":
             cmd.extend(["-p", str(self.build_path)])
             if not Path(self.build_path, "compile_commands.json").exists():
-                self._generate_compile_commands_json()
+                cmd = ["idf.py", "clang-check"]  # creates compilation database
+                # this will fail after creating the database, because
+                # there's no run-clang-tidy.py in PATH, but it's not a problem
+                subprocess.run(
+                    cmd,
+                    stdout=subprocess.DEVNULL,
+                    stderr=subprocess.DEVNULL,
+                    check=False,
+                )
         if file_path.suffix == ".h":
             cmd.extend(["--", "-x", "c++"])
         try:
