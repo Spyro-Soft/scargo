@@ -5,13 +5,15 @@
 import abc
 import glob
 import os
+import re
 import subprocess
 import sys
 from itertools import chain
 from pathlib import Path
 from typing import Iterable, List, NamedTuple, Sequence, Type
 
-from scargo.config import CheckConfig, Config
+from scargo.clang_utils import get_comment_lines
+from scargo.config import CheckConfig, Config, TodoCheckConfig
 from scargo.config_utils import prepare_config
 from scargo.logger import get_logger
 from scargo.path_utils import get_project_root
@@ -222,17 +224,22 @@ class TodoChecker(CheckerFixer):
         return f"{count} problems"
 
     def check_file(self, file_path: Path) -> CheckResult:
-        keywords = ("tbd", "todo", "TODO", "fixme")
+        keywords = self.get_check_config().keywords
+        keyword_patterns = [
+            re.compile(rf"\b{re.escape(keyword)}\b") for keyword in keywords
+        ]
         error_counter = 0
-        with open(file_path, encoding="utf-8") as file:
-            for line_number, line in enumerate(file.readlines(), start=1):
-                for keyword in keywords:
-                    if keyword in line:
-                        error_counter += 1
-                        logger.warning(
-                            f"Found {keyword} in {file_path} at line {line_number}"
-                        )
+        for line_number, line in get_comment_lines(file_path):
+            for keyword, keyword_pattern in zip(keywords, keyword_patterns):
+                if keyword_pattern.search(line):
+                    error_counter += 1
+                    logger.warning(
+                        f"Found {keyword} in {file_path} at line {line_number}"
+                    )
         return CheckResult(error_counter)
+
+    def get_check_config(self) -> TodoCheckConfig:
+        return self._config.check.todo
 
 
 class ClangFormatChecker(CheckerFixer):

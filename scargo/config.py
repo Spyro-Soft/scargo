@@ -144,7 +144,7 @@ class ChecksConfig(BaseModel):
     exclude: List[str]
     pragma: "CheckConfig"
     copyright: "CheckConfig"
-    todo: "CheckConfig"
+    todo: "TodoCheckConfig"
     clang_format: "CheckConfig" = Field(..., alias="clang-format")
     clang_tidy: "CheckConfig" = Field(..., alias="clang-tidy")
     cyclomatic: "CheckConfig"
@@ -153,6 +153,10 @@ class ChecksConfig(BaseModel):
 class CheckConfig(BaseModel):
     description: Optional[str]
     exclude: List[str] = Field(default_factory=list)
+
+
+class TodoCheckConfig(CheckConfig):
+    keywords: List[str] = Field(default_factory=list)
 
 
 class DocConfig(BaseModel):
