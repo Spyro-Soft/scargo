@@ -262,9 +262,9 @@ class ClangTidyChecker(CheckerFixer):
         if self._config.project.target.family == "esp32":
             cmd.extend(["-p", str(self.build_path)])
             if not Path(self.build_path, "compile_commands.json").exists():
-                cmd = ["idf.py", "clang-check"]  # creates compilation database
-                # this will fail after creating the database, because
-                # there's no run-clang-tidy.py in PATH, but it's not a problem
+                # creates compilation database and runs run-clang-tidy.py on the whole project
+                # (the latter is not needed, but there's no option to suppress it)
+                cmd = ["idf.py", "clang-check"]
                 subprocess.run(
                     cmd,
                     stdout=subprocess.DEVNULL,
