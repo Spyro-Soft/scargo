@@ -426,6 +426,7 @@ def update(
     ),
     base_dir: Optional[Path] = BASE_DIR_OPTION,
 ) -> None:
+    """Read .toml config file and generate `CMakeLists.txt`."""
     if base_dir:
         os.chdir(base_dir)
     logger = get_logger()
@@ -434,7 +435,6 @@ def update(
         if not config_file_path:
             logger.error("Config file not found.")
             sys.exit(1)
-    # Read .toml config file and generate `CMakeLists.txt`.
     scargo_update(config_file_path)
 
 
