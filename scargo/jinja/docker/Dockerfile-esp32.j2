@@ -38,7 +38,6 @@ exec "$@"' >  /opt/esp/entrypoint.sh && chmod 775 /opt/esp/entrypoint.sh
 
 RUN umask 0002 && /opt/esp-idf/python_env/idf4.4_py3.8_env/bin/pip install pyclang
 
-
 # Install QEMU
 ARG QEMU_VER=esp-develop-20220919
 ARG QEMU_DIST=qemu-${QEMU_VER}.tar.bz2
