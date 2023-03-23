@@ -43,7 +43,8 @@ def scargo_new(
 
     if not re.match(r"[a-zA-Z][\w-]*$", name):
         logger.error(
-            "Name must consist of letters, digits, dash and undescore only, and the first character must be a letter"
+            "Name must consist of letters, digits, dash and undescore only,"
+            " and the first character must be a letter"
         )
         sys.exit(1)
 

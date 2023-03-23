@@ -66,7 +66,7 @@ class _ScargoDebug:
             sys.exit(1)
 
         chip_script = f"target/{self._chip[:7].lower()}x.cfg"
-        openocd = subprocess.Popen(
+        openocd = subprocess.Popen(  # pylint: disable=consider-using-with
             [
                 openocd_path,
                 "-f",
