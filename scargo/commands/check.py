@@ -23,7 +23,7 @@ logger = get_logger()
 
 def scargo_check(
     clang_format: bool,
-    # clang_tidy: bool,
+    clang_tidy: bool,
     copy_right: bool,
     cppcheck: bool,
     cyclomatic: bool,
@@ -35,7 +35,7 @@ def scargo_check(
     Check written code using different formatters
 
     :param bool clang_format: check clang_format
-    # :param bool clang_tidy: check clang_tidy
+    :param bool clang_tidy: check clang_tidy
     :param bool copy_right:  check copyrights
     :param bool cppcheck: check cpp format
     :param bool cyclomatic: check cyclomatic
@@ -52,8 +52,8 @@ def scargo_check(
     checkers: List[Type[CheckerFixer]] = []
     if clang_format:
         checkers.append(ClangFormatChecker)
-    # if clang_tidy:
-    #     checkers.append(ClangTidyChecker)
+    if clang_tidy:
+        checkers.append(ClangTidyChecker)
     if copy_right:
         checkers.append(CopyrightChecker)
     if cppcheck:
@@ -69,7 +69,7 @@ def scargo_check(
     if not checkers:
         checkers = [
             ClangFormatChecker,
-            # ClangTidyChecker,
+            ClangTidyChecker,
             CopyrightChecker,
             CppcheckChecker,
             CyclomaticChecker,
@@ -264,9 +264,24 @@ class ClangFormatChecker(CheckerFixer):
 
 class ClangTidyChecker(CheckerFixer):
     check_name = "clang-tidy"
+    build_path = Path("./build/")
 
     def check_file(self, file_path: Path) -> CheckResult:
         cmd = ["clang-tidy", str(file_path)]
+        if self._config.project.target.family == "esp32":
+            cmd.extend(["-p", str(self.build_path)])
+            if not Path(self.build_path, "compile_commands.json").exists():
+                # creates compilation database and runs run-clang-tidy.py on the whole project
+                # (the latter is not needed, but there's no option to suppress it)
+                cmd = ["idf.py", "clang-check"]
+                subprocess.run(
+                    cmd,
+                    stdout=subprocess.DEVNULL,
+                    stderr=subprocess.DEVNULL,
+                    check=False,
+                )
+        if file_path.suffix == ".h":
+            cmd.extend(["--", "-x", "c++"])
         try:
             subprocess.check_output(cmd)
         except subprocess.CalledProcessError as e:

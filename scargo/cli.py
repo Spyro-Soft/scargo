@@ -52,7 +52,7 @@ def build(profile: str = Option("Debug", "--profile")) -> None:
 @cli.command()
 def check(
     clang_format: bool = Option(False, "--clang-format", help="Run clang-format."),
-    # clang_tidy: bool = Option(False, "--clang-tidy", help="Run clang-tidy."),
+    clang_tidy: bool = Option(False, "--clang-tidy", help="Run clang-tidy."),
     copy_right: bool = Option(False, "--copyright", help="Run copyright check."),
     cppcheck: bool = Option(False, "--cppcheck", help="Run cppcheck."),
     cyclomatic: bool = Option(False, "--cyclomatic", help="Run python-lizard."),
@@ -63,7 +63,7 @@ def check(
     """Check source code in directory `src`."""
     scargo_check(
         clang_format,
-        # clang_tidy,
+        clang_tidy,
         copy_right,
         cppcheck,
         cyclomatic,
