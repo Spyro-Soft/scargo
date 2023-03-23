@@ -38,6 +38,11 @@ This section describes possible options which can be set in the scargo.toml file
 
 **in-repo-conan-cache** = (bool) (If set to true conan cache is placed in the repo root - so it persists)
 
+[project.cmake-variables]
+-------------------------
+
+(definitions of additional cmake variables independent of profile)
+
 [profile.Debug]
 ------------------
 **cflags**   = (string) (c compiler flags e.g. "-g")
