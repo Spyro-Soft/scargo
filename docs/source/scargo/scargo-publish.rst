@@ -41,6 +41,12 @@ Options
 
 Publish conan artifact to particular repo defined by its name. Should be in line with the names provided in scargo.toml file.
 
+::
+
+    -B, --base-dir Arg
+
+Specify the base project path. Allows running scargo commands from any directory.
+
 Example
 ^^^^^^^
 

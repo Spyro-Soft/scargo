@@ -51,6 +51,12 @@ Chose the target on which you would like to build and manage the project ['x86',
 ESP32 support: Presently following models are supported 'esp32', 'esp32c2', 'esp32c3', 'esp32s2', 'esp32s3'.
 STM32 support: Presently there is support for stm32l4 only. The proper STM uC model should be updated in scargo.toml file.
 
+::
+
+    -B, --base-dir Arg
+
+Specify the base project path. Allows running scargo commands from any directory.
+
 Notes
 ^^^^^
 Each target must have an unique name. Error if two targets have the same name.
