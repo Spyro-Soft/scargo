@@ -30,6 +30,12 @@ This should run
 
     ctest --verbose.
 
+::
+
+    -B, --base-dir Arg
+
+Specify the base project path. Allows running scargo commands from any directory.
+
 Example
 ^^^^^^^
 The project is compiled with a compiler for the target system, but tests must be compiled with the system compiler on the developer's computer. For example, a project could be compiled with arm-none-eabi-gcc but tests must be compiled with a system compiler, which is usually gcc. Programs compiled with ARM's compiler cannot be executed on desktop PC.

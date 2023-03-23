@@ -116,7 +116,6 @@ def perform_tests(test_path: str, test_postfix: str, *test_flags: str) -> str:
             "--cov=scargo",
             "--gherkin-terminal-reporter",
             "-v",
-            "-s",
             test_path,
         ]
 
@@ -243,8 +242,7 @@ def run_pylint() -> None:
         "-c",
         "scargo/",
         "-s",
-        "9.9",
-        "--exclude=tests/*.py",
+        "9.95",
     ]
     subprocess.check_call(command)
 

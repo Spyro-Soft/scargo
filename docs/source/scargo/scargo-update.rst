@@ -27,6 +27,12 @@ Path to scargo.toml file.
 
 If the option is not specified, the default value is scargo.toml in the project root directory.
 
+::
+
+-B, --base-dir Arg
+
+Specify the base project path. Allows running scargo commands from any directory.
+
 List of options in "scargo.toml" and "CMakeLists.txt"
 scargo.toml:
 

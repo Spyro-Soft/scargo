@@ -54,6 +54,7 @@ repos:
           pydantic,
           pytest,
           pytest_subprocess,
+          pytest-mock,
           python-dotenv,
           tomlkit,
           typer,

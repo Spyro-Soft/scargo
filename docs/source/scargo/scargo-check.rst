@@ -70,6 +70,12 @@ Run cppcheck.
 
 Show less output.
 
+::
+
+-B, --base-dir Arg
+
+Specify the base project path. Allows running scargo commands from any directory.
+
 Exclusions
 ^^^^^^^^^^
 There is a possibility to exclude directories or single files from all checkers or from particular checkers only.

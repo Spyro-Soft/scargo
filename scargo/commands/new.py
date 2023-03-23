@@ -4,6 +4,7 @@
 
 """Create new project"""
 import os
+import re
 import subprocess
 import sys
 from pathlib import Path
@@ -38,13 +39,19 @@ def scargo_new(
     :return: None
     :raises FileExistsError: if project with provided name exist
     """
+    logger = get_logger()
+
+    if not re.match(r"[a-zA-Z][\w-]*$", name):
+        logger.error(
+            "Name must consist of letters, digits, dash and undescore only,"
+            " and the first character must be a letter"
+        )
+        sys.exit(1)
 
     # If neither binary target nor library target is specified then create a
     # binary target named same as the project name.
     if not bin_name and not lib_name:
         bin_name = name  # One item tuple.
-
-    logger = get_logger()
 
     try:
         project_dir = Path(name)
@@ -67,7 +74,7 @@ def scargo_new(
         cflags=cflags,
         cxxflags=cxxflags,
         version=__version__,
-        docker_image_tag=f"{name}-dev:1.0",
+        docker_image_tag=f"{name.lower()}-dev:1.0",
         lib_name=lib_name,
         bin_name=bin_name,
     )

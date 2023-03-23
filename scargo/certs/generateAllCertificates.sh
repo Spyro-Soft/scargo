@@ -22,6 +22,9 @@ The following flags can be used to alter the defaults:
 
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 OUTPUT_DIR=$SCRIPT_DIR
+INPUT_DIR=""
+MODE=""
+PASSWD="1234"
 
 while (( "$#" )); do
     case "$1" in
@@ -36,9 +39,27 @@ while (( "$#" )); do
         shift 2
         ;;
 
+    --mode)
+        MODE=$2
+        echo -e "${GREEN}Mode: ${MODE} ${NC}" >&1
+        shift 2
+        ;;
+
+    --input) #directory of root_ca, depending if we want to generate all certificates or only device certificate
+        INPUT_DIR=$2
+        echo -e "${GREEN}Input dir: ${INPUT_DIR} ${NC}" >&1
+        shift 2
+        ;;
+
     --output)
         OUTPUT_DIR=$2
         echo -e "${GREEN}Output dir: ${OUTPUT_DIR} ${NC}" >&1
+        shift 2
+        ;;
+
+    --passwd)
+        PASSWD=$2
+        echo -e "${GREEN}Set password: ${PASSWD} ${NC}" >&1
         shift 2
         ;;
 
@@ -66,14 +87,43 @@ if [ -z "$DEVICE_NAME" ]
 mkdir -p ${OUTPUT_DIR}
 
 #Download CA certificate for IoT Hub
+BALTIMORE_CERT=${OUTPUT_DIR}/baltimore.pem
+DIGIROOT_CERT=${OUTPUT_DIR}/digiroot.pem
+CA_PEM=${OUTPUT_DIR}/ca.pem
 
-wget https://cacerts.digicert.com/BaltimoreCyberTrustRoot.crt.pem -O ${OUTPUT_DIR}/ca.pem
+rm -f ${OUTPUT_DIR}/ca.pem
 
-#Generate device cert and private key
+if [ -f "$BALTIMORE_CERT" ]; then
+    echo "$BALTIMORE_CERT already exists."
+else
+    wget https://cacerts.digicert.com/BaltimoreCyberTrustRoot.crt.pem -O ${OUTPUT_DIR}/baltimore.pem
+fi
 
-${SCRIPT_DIR}/certGen.sh --create_root_and_intermediate --output ${OUTPUT_DIR}
+if [ -f "$DIGIROOT_CERT" ]; then
+    echo "$DIGIROOT_CERT already exists."
+else
+    wget https://cacerts.digicert.com/DigiCertGlobalRootG2.crt.pem -O ${OUTPUT_DIR}/digiroot.pem
+fi
 
-${SCRIPT_DIR}/certGen.sh --create_device_certificate ${DEVICE_NAME} --output ${OUTPUT_DIR}
+cat ${OUTPUT_DIR}/baltimore.pem >> ${OUTPUT_DIR}/ca_temp.pem
+cat ${OUTPUT_DIR}/digiroot.pem >> ${OUTPUT_DIR}/ca_temp.pem
+grep . ${OUTPUT_DIR}/ca_temp.pem > ${OUTPUT_DIR}/ca.pem
+rm -f ${OUTPUT_DIR}/ca_temp.pem
+
+if [ ${MODE} == "Device-certificate" ]; then
+    #Generate only device cert
+    CERT_DIR=${INPUT_DIR:="/workspace/build/certs"}
+    ${SCRIPT_DIR}/certGen.sh --create_device_certificate_from_intermediate ${DEVICE_NAME} ${CERT_DIR} \
+        --output ${OUTPUT_DIR} \
+        --password ${PASSWD}
+elif [ ${MODE} == "All-certificates" ]; then
+    #Generate all certificates
+    CERT_DIR=${INPUT_DIR:="/workspace/build/certs"}
+    ${SCRIPT_DIR}/certGen.sh --create_root_and_intermediate --output ${OUTPUT_DIR} --password ${PASSWD}
+    ${SCRIPT_DIR}/certGen.sh --create_device_certificate ${DEVICE_NAME} ${CERT_DIR} --output ${OUTPUT_DIR} --password ${PASSWD}
+else
+    echo "Wrong input directory"
+fi
 
 echo -e \
 "${RED}/**********************************************************************************************************************************************************************************${NC}";

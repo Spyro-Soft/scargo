@@ -84,7 +84,9 @@ def test_docker_run_with_command(
         "run",
         rm,
         service_name,
-        *command.split(),
+        "bash",
+        "-c",
+        command,
     ]
     assert mock_subprocess_run.call_args.args[0] == called_subprocess_cmd
 

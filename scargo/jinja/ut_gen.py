@@ -9,7 +9,7 @@ from typing import List, Sequence
 from scargo.config import Config
 from scargo.global_values import SCARGO_PGK_PATH
 from scargo.jinja.base_gen import BaseGen
-from scargo.jinja.mock_utils.cmake_utlis import add_subdirs_to_cmake
+from scargo.jinja.mock_utils.cmake_utils import add_subdirs_to_cmake
 from scargo.path_utils import get_project_root
 
 HEADER_EXTENSIONS = (".h", ".hpp")

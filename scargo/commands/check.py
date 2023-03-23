@@ -2,18 +2,23 @@
 # @copyright Copyright (C) 2023 SpyroSoft Solutions S.A. All rights reserved.
 # #
 """Check written code with formatters"""
+import abc
 import glob
 import os
+import re
 import subprocess
 import sys
 from itertools import chain
 from pathlib import Path
-from typing import Iterable, Sequence
+from typing import Iterable, List, NamedTuple, Sequence, Type
 
-from scargo.config import Config
+from scargo.clang_utils import get_comment_lines
+from scargo.config import CheckConfig, Config, TodoCheckConfig
 from scargo.config_utils import prepare_config
 from scargo.logger import get_logger
 from scargo.path_utils import get_project_root
+
+logger = get_logger()
 
 
 def scargo_check(
@@ -41,284 +46,260 @@ def scargo_check(
     """
     config = prepare_config()
 
-    # Run all checks by default. If any of checks is specified then do not
-    # run all checks; then run only specified checks.
-    run_all = not any(
-        [
-            clang_format,
-            clang_tidy,
-            copy_right,
-            cppcheck,
-            cyclomatic,
-            pragma,
-            todo,
-        ]
-    )
-
     # Todo, remove chdir and change cwd for checks
     os.chdir(get_project_root())
 
-    if clang_format or run_all:
-        check_clang_format(config, False, verbose)
+    checkers: List[Type[CheckerFixer]] = []
+    if clang_format:
+        checkers.append(ClangFormatChecker)
+    if clang_tidy:
+        checkers.append(ClangTidyChecker)
+    if copy_right:
+        checkers.append(CopyrightChecker)
+    if cppcheck:
+        checkers.append(CppcheckChecker)
+    if cyclomatic:
+        checkers.append(CyclomaticChecker)
+    if pragma:
+        checkers.append(PragmaChecker)
+    if todo:
+        checkers.append(TodoChecker)
 
-    if clang_tidy or run_all:
-        check_clang_tidy(config, verbose)
+    # Run all checks by default
+    if not checkers:
+        checkers = [
+            ClangFormatChecker,
+            ClangTidyChecker,
+            CopyrightChecker,
+            CppcheckChecker,
+            CyclomaticChecker,
+            PragmaChecker,
+            TodoChecker,
+        ]
 
-    if copy_right or run_all:
-        check_copyright(config, False)
-
-    if cppcheck or run_all:
-        check_cppcheck()
-
-    if cyclomatic or run_all:
-        check_cyclomatic(config)
-
-    if pragma or run_all:
-        check_pragma(config, False)
-
-    if todo or run_all:
-        check_todo(config)
+    for checker_class in checkers:
+        checker_class(config, verbose=verbose).check()
 
 
-def check_pragma(config: Config, fix_errors: bool) -> None:
-    """
-    Private function used in commands `scargo check` and `scargo fix`.
+class CheckResult(NamedTuple):
+    problems_found: int
+    fix: bool = True
 
-    :param Config config: project configuration
-    :param bool fix_errors: if fix errors during code checking
-    :return:
-    """
 
-    logger = get_logger()
-    logger.info("Starting pragma check...")
+class CheckerFixer(abc.ABC):
+    check_name: str
+    headers_only = False
+    can_fix = False
 
-    error_counter = 0
+    def __init__(
+        self, config: Config, fix_errors: bool = False, verbose: bool = False
+    ) -> None:
+        self._config = config
+        self._fix_errors = fix_errors
+        self._verbose = verbose
 
-    for file_path in find_files(config.check.pragma.exclude, config, headers_only=True):
-        found_pragma_once = False
+    def check(self) -> None:
+        logger.info(f"Starting {self.check_name} check...")
+        error_count = self.check_files()
+        self.report(error_count)
 
+    def check_files(self) -> int:
+        error_counter = 0
+        for file_path in find_files(
+            Path(self._config.project.target.source_dir),
+            ("*.h", "*.hpp") if self.headers_only else ("*.h", "*.hpp", "*.c", "*.cpp"),
+            self.get_exclude_patterns(),
+        ):
+            result = self.check_file(file_path)
+            error_counter += result.problems_found
+            if (
+                result.problems_found > 0
+                and self._fix_errors
+                and self.can_fix
+                and result.fix
+            ):
+                logger.info("Fixing...")
+                self.fix_file(file_path)
+        return error_counter
+
+    def report(self, count: int) -> None:
+        problem_count = self.format_problem_count(count)
+        if self._fix_errors and self.can_fix:
+            logger.info(f"Finished {self.check_name} check. Fixed {problem_count}.")
+        else:
+            logger.info(f"Finished {self.check_name} check. Found {problem_count}.")
+            if count > 0:
+                logger.error(f"{self.check_name} check fail!")
+                sys.exit(1)
+
+    @staticmethod
+    def format_problem_count(count: int) -> str:
+        return f"problems in {count} files"
+
+    def get_exclude_patterns(self) -> List[str]:
+        return [*self._config.check.exclude, *self.get_check_config().exclude]
+
+    def get_check_config(self) -> CheckConfig:
+        return getattr(  # type: ignore[no-any-return]
+            self._config.check, self.check_name.replace("-", "_")
+        )
+
+    @abc.abstractmethod
+    def check_file(self, file_path: Path) -> CheckResult:
+        pass
+
+    def fix_file(self, file_path: Path) -> None:
+        pass
+
+
+class PragmaChecker(CheckerFixer):
+    check_name = "pragma"
+    headers_only = True
+    can_fix = True
+
+    def check_file(self, file_path: Path) -> CheckResult:
         with open(file_path, encoding="utf-8") as file:
-            print(file_path)
             for line in file.readlines():
                 if "#pragma once" in line:
-                    found_pragma_once = True
-                    break
+                    return CheckResult(0)
+        logger.warning("Missing pragma in %s", file_path)
+        return CheckResult(1)
 
-        if not found_pragma_once:
-            error_counter += 1
-            logger.warning("Missing pragma in %s", file_path)
+    def fix_file(self, file_path: Path) -> None:
+        with open(file_path, encoding="utf-8") as file:
+            old = file.read()
 
-            if fix_errors:
-                logger.info("Fixing...")
-
-                with open(file_path, encoding="utf-8") as file:
-                    old = file.read()
-
-                with open(file_path, "w", encoding="utf-8") as file:
-                    file.write("#pragma once\n")
-                    file.write("\n")
-                    file.write(old)
-
-    if fix_errors:
-        logger.info("Finished pragma check. Fixed problems in %s files.", error_counter)
-    else:
-        logger.info("Finished pragma check. Found problems in %s files.", error_counter)
-        if error_counter > 0:
-            logger.error("pragma check fail!")
-            sys.exit(1)
+        with open(file_path, "w", encoding="utf-8") as file:
+            file.write("#pragma once\n")
+            file.write("\n")
+            file.write(old)
 
 
-def check_copyright(config: Config, fix_errors: bool) -> None:
-    """
-    Private function used in commands `scargo check` and `scargo fix`.
+class CopyrightChecker(CheckerFixer):
+    check_name = "copyright"
+    can_fix = True
 
-    :param Config config: project configuration
-    :param bool fix_errors: if fix errors during code checking
-    :return:
-    """
-    logger = get_logger()
-    logger.info("Starting copyright check...")
+    def __init__(self, config: Config, fix_errors: bool = False, verbose: bool = False):
+        super().__init__(config, fix_errors, verbose)
+        self.copyright_desc = self.get_check_config().description or ""
 
-    error_counter = 0
+    def check(self) -> None:
+        if not self.copyright_desc:
+            logger.warning("No copyrights in defined in toml")
+            return
+        super().check()
 
-    copyright_desc = config.check.copyright.description
-    if not copyright_desc:
-        logger.warning("No copyrights in defined in toml")
-        return
-
-    for file_path in find_files(config.check.copyright.exclude, config):
-        found_copyright = False
-        any_copyright = False
-
+    def check_file(self, file_path: Path) -> CheckResult:
         with open(file_path, encoding="utf-8") as file:
             for line in file.readlines():
-                if copyright_desc in line:
-                    found_copyright = True
-                    break
+                if self.copyright_desc in line:
+                    return CheckResult(problems_found=0)
                 if "copyright" in line.lower():
-                    any_copyright = True
-                    break
+                    logger.warning(
+                        "Incorrect and not excluded copyright in %s", file_path
+                    )
+                    return CheckResult(problems_found=1, fix=False)
+        logger.info("Missing copyright in %s.", file_path)
+        return CheckResult(problems_found=1)
 
-        if not found_copyright:
-            error_counter += 1
-            if any_copyright:
-                logger.warning("Incorrect and not excluded copyright in %s", file_path)
-            else:
-                logger.info("Missing copyright in %s.", file_path)
-
-            if fix_errors and not any_copyright:
-                logger.info("Fixing...")
-                with open(file_path, encoding="utf-8") as file:
-                    old = file.read()
-
-                with open(file_path, "w", encoding="utf-8") as file:
-                    file.write("//\n")
-                    file.write(f"// {copyright_desc}\n")
-                    file.write("//\n")
-                    file.write("\n")
-                    file.write(old)
-
-    if fix_errors:
-        logger.info(
-            "Finished copyright check. Fixed problems in %s files.", error_counter
-        )
-    else:
-        logger.info(
-            "Finished copyright check. Found problems in %s files.", error_counter
-        )
-        if error_counter > 0:
-            logger.error("copyright check fail!")
-            sys.exit(1)
-
-
-def check_todo(config: Config) -> None:
-    """
-    Private function used in command `scargo check`.
-
-    :param Config config: project configuration
-    :return: None
-    """
-
-    logger = get_logger()
-    logger.info("Starting todo check...")
-
-    keywords = ("tbd", "todo", "TODO", "fixme")
-    error_counter = 0
-
-    for file_path in find_files(config.check.todo.exclude, config):
+    def fix_file(self, file_path: Path) -> None:
         with open(file_path, encoding="utf-8") as file:
-            for line_number, line in enumerate(file.readlines(), start=1):
-                for keyword in keywords:
-                    if keyword in line:
-                        error_counter += 1
-                        logger.warning(
-                            f"Found {keyword} in {file_path} at line {line_number}"
-                        )
+            old = file.read()
 
-    logger.info("Finished todo check. Found %s problems.", error_counter)
-    if error_counter > 0:
-        logger.error("todo check fail!")
-        sys.exit(1)
+        with open(file_path, "w", encoding="utf-8") as file:
+            file.write("//\n")
+            for line in self.copyright_desc.split("\n"):
+                if line != "":
+                    file.write(f"// {line}\n")
+            file.write("//\n")
+            file.write("\n")
+            file.write(old)
 
 
-def check_clang_format(config: Config, fix_errors: bool, verbose: bool) -> None:
-    """
-    Private function used in commands `scargo check` and `scargo fix`.
+class TodoChecker(CheckerFixer):
+    check_name = "todo"
 
-    :param Config config: project configuration
-    :param bool fix_errors: if fix errors during check
-    :param bool verbose: if verbose
-    :return: None
-    """
-    logger = get_logger()
-    logger.info("Starting clang-format check...")
+    @staticmethod
+    def format_problem_count(count: int) -> str:
+        return f"{count} problems"
 
-    error_counter = 0
+    def check_file(self, file_path: Path) -> CheckResult:
+        keywords = self.get_check_config().keywords
+        keyword_patterns = [
+            re.compile(rf"\b{re.escape(keyword)}\b") for keyword in keywords
+        ]
+        error_counter = 0
+        for line_number, line in get_comment_lines(file_path):
+            for keyword, keyword_pattern in zip(keywords, keyword_patterns):
+                if keyword_pattern.search(line):
+                    error_counter += 1
+                    logger.warning(
+                        f"Found {keyword} in {file_path} at line {line_number}"
+                    )
+        return CheckResult(error_counter)
 
-    for file_path in find_files(config.check.clang_format.exclude, config):
-        cmd = "clang-format -style=file --dry-run " + str(file_path)
-        out = subprocess.getoutput(cmd)
+    def get_check_config(self) -> TodoCheckConfig:
+        return self._config.check.todo
 
-        if out != "":
-            error_counter += 1
 
-            if verbose:
-                logger.info(out)
+class ClangFormatChecker(CheckerFixer):
+    check_name = "clang-format"
+    can_fix = True
+
+    def check_file(self, file_path: Path) -> CheckResult:
+        cmd = ["clang-format", "--style=file", "--dry-run", "-Werror", str(file_path)]
+        try:
+            subprocess.check_output(cmd)
+        except subprocess.CalledProcessError as e:
+            if self._verbose:
+                logger.info(e.output.decode())
             else:
                 logger.warning("clang-format found error in file %s", file_path)
+            return CheckResult(1)
+        return CheckResult(0)
 
-            if fix_errors:
-                logger.info("Fixing...")
+    def fix_file(self, file_path: Path) -> None:
+        subprocess.check_call(["clang-format", "-style=file", "-i", str(file_path)])
 
-                subprocess.check_call(
-                    ["clang-format", "-style=file", "-i", str(file_path)]
+
+class ClangTidyChecker(CheckerFixer):
+    check_name = "clang-tidy"
+    build_path = Path("./build/")
+
+    def check_file(self, file_path: Path) -> CheckResult:
+        cmd = ["clang-tidy", str(file_path)]
+        if self._config.project.target.family == "esp32":
+            cmd.extend(["-p", str(self.build_path)])
+            if not Path(self.build_path, "compile_commands.json").exists():
+                # creates compilation database and runs run-clang-tidy.py on the whole project
+                # (the latter is not needed, but there's no option to suppress it)
+                cmd = ["idf.py", "clang-check"]
+                subprocess.run(
+                    cmd,
+                    stdout=subprocess.DEVNULL,
+                    stderr=subprocess.DEVNULL,
+                    check=False,
                 )
-
-    if fix_errors:
-        logger.info(
-            "Finished clang-format check. Fixed problems in %s files.", error_counter
-        )
-    else:
-        logger.info(
-            "Finished clang-format check. Found problems in %s files.", error_counter
-        )
-        if error_counter > 0:
-            logger.error("clang-format check fail!")
-            sys.exit(1)
-
-
-def check_clang_tidy(config: Config, verbose: bool) -> None:
-    """
-    Private function used in command `scargo check`.
-
-    :param Config config: project configuration
-    :param bool verbose: if verbose
-    :return: None
-    """
-    logger = get_logger()
-    logger.info("Starting clang-tidy check...")
-
-    error_counter = 0
-
-    for file_path in find_files(config.check.clang_tidy.exclude, config):
-        cmd = "clang-tidy " + str(file_path) + " --assume-filename=.hxx --"
-        out = subprocess.getoutput(cmd)
-
-        if "error:" in out:
-            error_counter += 1
-
-            if verbose:
-                logger.info(out)
+        if file_path.suffix == ".h":
+            cmd.extend(["--", "-x", "c++"])
+        try:
+            subprocess.check_output(cmd)
+        except subprocess.CalledProcessError as e:
+            if self._verbose:
+                logger.info(e.output.decode())
             else:
                 logger.warning("clang-tidy found error in file %s", file_path)
-
-    logger.info("Finished clang-tidy check. Found problems in %s files.", error_counter)
-    if error_counter > 0:
-        logger.error("clang-tidy check fail!")
-        sys.exit(1)
+            return CheckResult(1)
+        return CheckResult(0)
 
 
 def find_files(
-    exclude_patterns: Sequence[str], config: Config, headers_only: bool = False
+    dir_path: Path, glob_patterns: Sequence[str], exclude_patterns: Sequence[str]
 ) -> Iterable[Path]:
-    logger = get_logger()
-    source_dir = Path(config.project.target.source_dir)
+    exclude_list = [path for pattern in exclude_patterns for path in glob.glob(pattern)]
 
-    exclude_list = []
-
-    # Collect global excludes.
-    for pattern in config.check.exclude:
-        exclude_list.extend(glob.glob(pattern))
-
-    # Collect local excludes.
-    for pattern in exclude_patterns:
-        exclude_list.extend(glob.glob(pattern))
-
-    glob_patterns = (
-        ("*.h", "*.hpp") if headers_only else ("*.h", "*.hpp", "*.c", "*.cpp")
-    )
     for file_path in chain.from_iterable(
-        source_dir.rglob(pattern) for pattern in glob_patterns
+        dir_path.rglob(pattern) for pattern in glob_patterns
     ):
         if file_path.is_file():
             if any(exclude in str(file_path) for exclude in exclude_list):
@@ -328,49 +309,42 @@ def find_files(
             yield file_path
 
 
-def check_cyclomatic(config: Config) -> None:
-    """
-    Private function used in command `scargo check`.
+class CyclomaticChecker(CheckerFixer):
+    check_name = "cyclomatic"
 
-    :param Config config: project configuration
-    :return: None
-    :raises CalledProcessError: if cyclomatic check fail
-    """
+    def check_files(self) -> int:
+        source_dir = self._config.project.target.source_dir
 
-    logger = get_logger()
-    logger.info("Starting cyclomatic check...")
+        cmd = ["lizard", source_dir, "-C", "25", "-w"]
 
-    source_dir = config.project.target.source_dir
+        for exclude_pattern in self.get_exclude_patterns():
+            cmd.extend(["--exclude", exclude_pattern])
+        try:
+            subprocess.check_call(cmd)
+        except subprocess.CalledProcessError:
+            logger.error(f"ERROR: Check {self.check_name} fail")
+        return 0
 
-    # Collect global excludes.
-    exclude_list = config.check.exclude
+    def report(self, count: int) -> None:
+        logger.info(f"Finished {self.check_name} check.")
 
-    # Collect local excludes.
-    exclude_list.extend(config.check.cyclomatic.exclude)
-
-    cmd = ["lizard", source_dir, "-C", "25", "-w"]
-
-    for exclude_pattern in exclude_list:
-        cmd.extend(["--exclude", exclude_pattern])
-    try:
-        subprocess.check_call(cmd)
-    except subprocess.CalledProcessError:
-        logger.error("ERROR: Check cyclomatic fail")
-    logger.info("Finished cyclomatic check.")
+    def check_file(self, file_path: Path) -> CheckResult:
+        raise NotImplementedError
 
 
-def check_cppcheck() -> None:
-    """
-    Private function used in command `scargo check`.
+class CppcheckChecker(CheckerFixer):
+    check_name = "cppcheck"
 
-    :return: None
-    """
-    logger = get_logger()
-    logger.info("Starting cppcheck check...")
+    def check_files(self) -> int:
+        cmd = "cppcheck --enable=all --suppress=missingIncludeSystem src/ main/"
+        try:
+            subprocess.check_call(cmd, shell=True)
+        except subprocess.CalledProcessError:
+            logger.error(f"{self.check_name} fail")
+        return 0
 
-    cmd = "cppcheck --enable=all --suppress=missingIncludeSystem src/ main/"
-    try:
-        subprocess.check_call(cmd, shell=True)
-    except subprocess.CalledProcessError:
-        logger.error("cppcheck fail")
-    logger.info("Finished cppcheck check.")
+    def report(self, count: int) -> None:
+        logger.info(f"Finished {self.check_name} check.")
+
+    def check_file(self, file_path: Path) -> CheckResult:
+        raise NotImplementedError

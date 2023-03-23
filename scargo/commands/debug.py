@@ -10,6 +10,7 @@ from typing import Optional
 
 from scargo.config import Config
 from scargo.config_utils import prepare_config
+from scargo.docker_utils import run_scargo_again_in_docker
 from scargo.logger import get_logger
 from scargo.path_utils import find_program_path, get_project_root
 
@@ -65,7 +66,7 @@ class _ScargoDebug:
             sys.exit(1)
 
         chip_script = f"target/{self._chip[:7].lower()}x.cfg"
-        openocd = subprocess.Popen(
+        openocd = subprocess.Popen(  # pylint: disable=consider-using-with
             [
                 openocd_path,
                 "-f",
@@ -99,6 +100,8 @@ class _ScargoDebug:
 
 
 def scargo_debug(bin_path: Optional[Path]) -> None:
-    config = prepare_config()
+    config = prepare_config(run_in_docker=False)
+    if config.project.target.family != "x86":
+        run_scargo_again_in_docker(config.project)
     debug = _ScargoDebug(config, bin_path)
     debug.run_debugger()

@@ -1,4 +1,4 @@
 # #
 # @copyright Copyright (C) 2023 SpyroSoft Solutions S.A. All rights reserved.
 # #
-__version__ = "1.0.7"
+__version__ = "1.1.0"

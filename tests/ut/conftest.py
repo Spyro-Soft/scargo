@@ -7,8 +7,20 @@ import pytest
 
 from scargo.commands.new import scargo_new
 from scargo.commands.update import scargo_update
-from scargo.config import Config, Target
-from scargo.config_utils import prepare_config
+from scargo.config import (
+    CheckConfig,
+    ChecksConfig,
+    ConanConfig,
+    Config,
+    Dependencies,
+    DocConfig,
+    ProfileConfig,
+    ProjectConfig,
+    ScargoConfig,
+    Target,
+    TestConfig,
+    TodoCheckConfig,
+)
 
 TARGET_X86 = Target.get_target_by_id("x86")
 
@@ -17,7 +29,14 @@ TARGET_X86 = Target.get_target_by_id("x86")
 def create_new_project(tmp_path: Path) -> None:
     os.chdir(tmp_path)
     project_name = "test_project"
-    scargo_new(project_name, None, None, TARGET_X86, False, False)
+    scargo_new(
+        project_name,
+        bin_name=None,
+        lib_name=None,
+        target=TARGET_X86,
+        create_docker=False,
+        git=False,
+    )
     scargo_update(Path("scargo.toml"))
 
 
@@ -25,13 +44,84 @@ def create_new_project(tmp_path: Path) -> None:
 def create_new_project_docker(tmp_path: Path) -> None:
     os.chdir(tmp_path)
     project_name = "test_project"
-    scargo_new(project_name, None, None, TARGET_X86, True, False)
+    scargo_new(
+        project_name,
+        bin_name=None,
+        lib_name=None,
+        target=TARGET_X86,
+        create_docker=True,
+        git=False,
+    )
     scargo_update(Path("scargo.toml"))
 
 
 @pytest.fixture()
-def get_lock_file() -> Config:
-    return prepare_config()
+def config() -> Config:
+    return Config(
+        project=ProjectConfig(
+            **{
+                "name": "test_project",
+                "version": "0.1.0",
+                "description": "Project description.",
+                "homepage_url": "www.example.com",
+                "bin_name": "test_project",
+                "lib_name": None,
+                "target": "x86",
+                "build_env": "native",
+                "docker-file": Path(".devcontainer/Dockerfile-custom"),
+                "docker-image-tag": "test_project-dev:1.0",
+                "in-repo-conan-cache": False,
+                "cc": "gcc",
+                "cxx": "g++",
+                "cxxstandard": "17",
+                "cflags": "-Wall -Wextra",
+                "cxxflags": "-Wall -Wextra",
+            }
+        ),
+        profile={
+            "Debug": ProfileConfig(cflags="-g", cxxflags="-g"),
+            "Release": ProfileConfig(cflags="-O3 -DNDEBUG", cxxflags="-O3 -DNDEBUG"),
+            "RelWithDebInfo": ProfileConfig(
+                cflags="-O2 -g -DNDEBUG", cxxflags="-O2 -g -DNDEBUG"
+            ),
+            "MinSizeRel": ProfileConfig(cflags="-Os -DNDEBUG", cxxflags="-Os -DNDEBUG"),
+        },
+        check=ChecksConfig(
+            **{
+                "exclude": [],
+                "pragma": CheckConfig(description=None, exclude=[]),
+                "copyright": CheckConfig(description="Copyright", exclude=[]),
+                "todo": TodoCheckConfig(
+                    description=None, exclude=[], keywords=["TODO", "todo"]
+                ),
+                "clang-format": CheckConfig(description=None, exclude=[]),
+                "clang-tidy": CheckConfig(description=None, exclude=[]),
+                "cyclomatic": CheckConfig(description=None, exclude=[]),
+            }
+        ),
+        doc=DocConfig(exclude=[]),
+        tests=TestConfig(
+            **{
+                "cc": "gcc",
+                "cxx": "g++",
+                "cflags": "-Wall -Wextra -Og --coverage -fkeep-inline-functions -fkeep-static-consts",
+                "cxxflags": "-Wall -Wextra -Og --coverage -fkeep-inline-functions -fkeep-static-consts",
+                "gcov-executable": "",
+            }
+        ),
+        dependencies=Dependencies(
+            general=[], build=[], tool=[], test=["gtest/cci.20210126"]
+        ),
+        conan=ConanConfig(repo={}),
+        stm32=None,
+        esp32=None,
+        scargo=ScargoConfig(
+            console_log_level="INFO",
+            file_log_level="WARNING",
+            update_exclude=[],
+            version="1.0.7",
+        ),
+    )
 
 
 @pytest.fixture

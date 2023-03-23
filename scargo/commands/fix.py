@@ -3,8 +3,14 @@
 # #
 """Format project code using formatter"""
 import os
+from typing import List, Type
 
-from scargo.commands.check import check_clang_format, check_copyright, check_pragma
+from scargo.commands.check import (
+    CheckerFixer,
+    ClangFormatChecker,
+    CopyrightChecker,
+    PragmaChecker,
+)
 from scargo.config_utils import prepare_config
 from scargo.path_utils import get_project_root
 
@@ -20,22 +26,19 @@ def scargo_fix(pragma: bool, copy_right: bool, clang_format: bool) -> None:
     """
     config = prepare_config()
 
-    run_all = not any(
-        [
-            pragma,
-            copy_right,
-            clang_format,
-        ]
-    )
+    checkers: List[Type[CheckerFixer]] = []
+    if pragma:
+        checkers.append(PragmaChecker)
+    if copy_right:
+        checkers.append(CopyrightChecker)
+    if clang_format:
+        checkers.append(ClangFormatChecker)
+
+    if not checkers:
+        checkers = [PragmaChecker, CopyrightChecker, ClangFormatChecker]
 
     # Todo, remove chdir and change cwd for checks
     os.chdir(get_project_root())
 
-    if pragma or run_all:
-        check_pragma(config, True)
-
-    if copy_right or run_all:
-        check_copyright(config, True)
-
-    if clang_format or run_all:
-        check_clang_format(config, True, False)
+    for checker_class in checkers:
+        checker_class(config, fix_errors=True).check()
