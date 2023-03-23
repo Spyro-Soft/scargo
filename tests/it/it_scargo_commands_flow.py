@@ -123,7 +123,7 @@ def copy_project_stm32() -> None:
 
 
 @pytest.mark.parametrize("project_creation", PROJECT_CREATION_x86)
-def xxxtest_project_x86_dev_flow(
+def test_project_x86_dev_flow(
     project_creation: str,
     request: pytest.FixtureRequest,
     use_local_scargo: None,
@@ -216,7 +216,7 @@ def xxxtest_project_x86_dev_flow(
 
 
 @pytest.mark.parametrize("project_creation", PROJECT_CREATION_esp32)
-def xxxtest_project_esp32_dev_flow(
+def test_project_esp32_dev_flow(
     project_creation: str,
     request: pytest.FixtureRequest,
     use_local_scargo: None,
