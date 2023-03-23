@@ -1,6 +1,7 @@
 # #
 # @copyright Copyright (C) 2023 SpyroSoft Solutions S.A. All rights reserved.
 # #
+import os
 import sys
 from pathlib import Path
 from typing import List, Optional
@@ -37,12 +38,27 @@ from scargo.path_utils import get_config_file_path, get_project_root
 cli = Typer(context_settings={"help_option_names": ["-h", "--help"]}, help=DESCRIPTION)
 
 
+BASE_DIR_OPTION = Option(
+    None,
+    "--base-dir",
+    "-B",
+    exists=True,
+    file_okay=False,
+    help="Base directory of the project",
+)
+
+
 ###############################################################################
 
 
 @cli.command()
-def build(profile: str = Option("Debug", "--profile")) -> None:
+def build(
+    profile: str = Option("Debug", "--profile"),
+    base_dir: Optional[Path] = BASE_DIR_OPTION,
+) -> None:
     """Compile sources."""
+    if base_dir:
+        os.chdir(base_dir)
     scargo_build(profile)
 
 
@@ -59,8 +75,11 @@ def check(
     pragma: bool = Option(False, "--pragma", help="Run pragma check."),
     todo: bool = Option(False, "--todo", help="Run TODO check."),
     silent: bool = Option(False, "--silent", "-s", help="Show less output."),
+    base_dir: Optional[Path] = BASE_DIR_OPTION,
 ) -> None:
     """Check source code in directory `src`."""
+    if base_dir:
+        os.chdir(base_dir)
     scargo_check(
         clang_format,
         clang_tidy,
@@ -77,8 +96,10 @@ def check(
 
 
 @cli.command()
-def clean() -> None:
+def clean(base_dir: Optional[Path] = BASE_DIR_OPTION) -> None:
     """Remove directory `build`."""
+    if base_dir:
+        os.chdir(base_dir)
     scargo_clean()
 
 
@@ -88,10 +109,19 @@ def clean() -> None:
 @cli.command()
 def debug(
     bin_path: Optional[Path] = Option(
-        None, "--bin", "-b", exists=True, dir_okay=False, help="Path to bin file"
-    )
+        None,
+        "--bin",
+        "-b",
+        exists=True,
+        dir_okay=False,
+        resolve_path=True,
+        help="Path to bin file",
+    ),
+    base_dir: Optional[Path] = BASE_DIR_OPTION,
 ) -> None:
     """Use gdb cli to debug"""
+    if base_dir:
+        os.chdir(base_dir)
     scargo_debug(bin_path)
 
 
@@ -100,9 +130,12 @@ def debug(
 
 @cli.command()
 def doc(
-    open_doc: bool = Option(False, "--open", help="Open html documentation")
+    open_doc: bool = Option(False, "--open", help="Open html documentation"),
+    base_dir: Optional[Path] = BASE_DIR_OPTION,
 ) -> None:
     """Create project documentation"""
+    if base_dir:
+        os.chdir(base_dir)
     scargo_doc(open_doc)
 
 
@@ -115,8 +148,10 @@ docker = Typer(help="Manage the docker environment for the project")
 @docker.command(
     "build", context_settings={"allow_extra_args": True, "ignore_unknown_options": True}
 )
-def docker_build(ctx: Context) -> None:
+def docker_build(ctx: Context, base_dir: Optional[Path] = BASE_DIR_OPTION) -> None:
     """Build docker layers for this project depending on the target"""
+    if base_dir:
+        os.chdir(base_dir)
     scargo_docker_build(ctx.args)
 
 
@@ -132,16 +167,21 @@ def docker_run(
         metavar="COMMAND",
         help="Select command to be used with docker run.",
     ),
+    base_dir: Optional[Path] = BASE_DIR_OPTION,
 ) -> None:
     """Run project in docker environment"""
+    if base_dir:
+        os.chdir(base_dir)
     scargo_docker_run(docker_opts=ctx.args, command=command)
 
 
 @docker.command(
     "exec", context_settings={"allow_extra_args": True, "ignore_unknown_options": True}
 )
-def docker_exec(ctx: Context) -> None:
+def docker_exec(ctx: Context, base_dir: Optional[Path] = BASE_DIR_OPTION) -> None:
     """Attach to existing docker environment"""
+    if base_dir:
+        os.chdir(base_dir)
     scargo_docker_exec(ctx.args)
 
 
@@ -158,8 +198,11 @@ def fix(
     ),
     copy_right: bool = Option(False, "--copyright", help="Fix copyrights violations"),
     pragma: bool = Option(False, "--pragma", help="Fix pragma violations"),
+    base_dir: Optional[Path] = BASE_DIR_OPTION,
 ) -> None:
     """Fix violations reported by command `check`."""
+    if base_dir:
+        os.chdir(base_dir)
     scargo_fix(pragma, copy_right, clang_format)
 
 
@@ -177,8 +220,11 @@ def flash(
         None,
         help="port where the target device of the command is connected to, e.g. /dev/ttyUSB0",
     ),
+    base_dir: Optional[Path] = BASE_DIR_OPTION,
 ) -> None:
     """Flash the target (only available for esp32 for now)."""
+    if base_dir:
+        os.chdir(base_dir)
     scargo_flash(app, file_system, flash_profile, port)
 
 
@@ -193,6 +239,7 @@ def gen(
         "--unit-test",
         "-u",
         exists=True,
+        resolve_path=True,
         help="Generate unit test for chosen file or all headers in directory",
     ),
     gen_mock: Optional[Path] = Option(
@@ -201,6 +248,7 @@ def gen(
         "-m",
         exists=True,
         dir_okay=False,
+        resolve_path=True,
         help="Generate mock of chosen file",
     ),
     certs: Optional[str] = Option(
@@ -222,6 +270,7 @@ def gen(
         "--in",
         "-i",
         dir_okay=True,
+        resolve_path=True,
         help="Directory with root and intermediate certificates.",
     ),
     certs_passwd: Optional[str] = Option(
@@ -237,8 +286,11 @@ def gen(
     single_bin: bool = Option(
         False, "--bin", "-b", help="Generate single binary image."
     ),
+    base_dir: Optional[Path] = BASE_DIR_OPTION,
 ) -> None:
     """Manage the auto file generator"""
+    if base_dir:
+        os.chdir(base_dir)
     project_profile_path = get_project_root() / "build" / profile
     if (gen_ut is gen_mock is certs is None) and not (file_system or single_bin):
         logger = get_logger()
@@ -286,8 +338,11 @@ def new(
         True, "--docker/--no-docker", help="Initialize docker environment."
     ),
     git: bool = Option(True, "--git/--no-git", help="Initialize git repository."),
+    base_dir: Optional[Path] = BASE_DIR_OPTION,
 ) -> None:
     """Create new project template."""
+    if base_dir:
+        os.chdir(base_dir)
     scargo_new(
         name,
         bin_name,
@@ -303,8 +358,13 @@ def new(
 
 
 @cli.command()
-def publish(repo: str = Option("", "--repo", "-r", help="Repo name")) -> None:
+def publish(
+    repo: str = Option("", "--repo", "-r", help="Repo name"),
+    base_dir: Optional[Path] = BASE_DIR_OPTION,
+) -> None:
     """Upload conan pkg to repo"""
+    if base_dir:
+        os.chdir(base_dir)
     scargo_publish(repo)
 
 
@@ -314,13 +374,22 @@ def publish(repo: str = Option("", "--repo", "-r", help="Repo name")) -> None:
 @cli.command()
 def run(
     bin_path: Optional[Path] = Option(
-        None, "--bin", "-b", exists=True, dir_okay=False, help="Path to bin file"
+        None,
+        "--bin",
+        "-b",
+        exists=True,
+        dir_okay=False,
+        resolve_path=True,
+        help="Path to bin file",
     ),
     profile: str = Option("Debug", "--profile", "-p"),
     skip_build: bool = Option(False, "--skip-build", help="Skip calling scargo build"),
     bin_params: List[str] = Argument(None),
+    base_dir: Optional[Path] = BASE_DIR_OPTION,
 ) -> None:
     """Build and run project"""
+    if base_dir:
+        os.chdir(base_dir)
     if not skip_build:
         scargo_build(profile)
     project_profile_path = get_project_root() / "build" / profile
@@ -332,9 +401,12 @@ def run(
 
 @cli.command()
 def test(
-    verbose: bool = Option(False, "--verbose", "-v", help="Verbose mode.")
+    verbose: bool = Option(False, "--verbose", "-v", help="Verbose mode."),
+    base_dir: Optional[Path] = BASE_DIR_OPTION,
 ) -> None:
     """Compile and run all tests in directory `test`."""
+    if base_dir:
+        os.chdir(base_dir)
     scargo_test(verbose)
 
 
@@ -349,9 +421,13 @@ def update(
         "-c",
         exists=True,
         dir_okay=False,
+        resolve_path=True,
         help="Path to .toml configuration file.",
     ),
+    base_dir: Optional[Path] = BASE_DIR_OPTION,
 ) -> None:
+    if base_dir:
+        os.chdir(base_dir)
     logger = get_logger()
     if config_file_path is None:
         config_file_path = get_config_file_path(SCARGO_DEFAULT_CONFIG_FILE)

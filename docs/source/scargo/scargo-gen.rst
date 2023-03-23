@@ -55,3 +55,9 @@ For esp32 file, the system will be generated based on the interior of main/fs di
 
 (Only for uC) Generate the single binary image from all binary partitions.
 For esp32 file, the system will generate build/flash_image.bin file
+
+::
+
+    -B, --base-dir Arg
+
+Specify the base project path. Allows running scargo commands from any directory.

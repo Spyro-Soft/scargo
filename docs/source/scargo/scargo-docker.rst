@@ -13,6 +13,15 @@ Description
 ^^^^^^^^^^^
 Manage docker environment. For a list of supported OPTIONS please refer to official docker documentation of corresponding SUBCOMMAND.
 
+Common Options
+^^^^^^^^^^^^^^
+
+::
+
+-B, --base-dir Arg
+
+Specify the base project path. Allows running scargo commands from any directory.
+
 Subcommands
 ^^^^^^^^^^^
 ::

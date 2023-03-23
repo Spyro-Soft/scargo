@@ -27,6 +27,12 @@ Users can define their profiles. Those should be added under the ``[profile.(cus
 
 If this option is not used, then the default profile is Debug.
 
+::
+
+-B, --base-dir Arg
+
+Specify the base project path. Allows running scargo commands from any directory.
+
 Example 1
 ^^^^^^^^^
 Command:
