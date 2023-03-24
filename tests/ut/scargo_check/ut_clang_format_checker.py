@@ -28,7 +28,8 @@ def test_check_clang_format_pass(
     fake_process: FakeProcess,
 ) -> None:
     fake_process.register(CLANG_FORMAT_COMMAND)
-    ClangFormatChecker(config).check()
+    result = ClangFormatChecker(config).check()
+    assert result == 0
     assert all(
         level not in ("WARNING", "ERROR") for level, msg in get_log_data(caplog.records)
     )
@@ -52,9 +53,8 @@ def test_check_clang_format_fail(
     fake_process.register(
         CLANG_FORMAT_COMMAND, stdout=CLANG_FORMAT_ERROR_OUTPUT, returncode=1
     )
-    with pytest.raises(SystemExit) as wrapped_exception:
-        ClangFormatChecker(config, verbose=verbose).check()
-    assert wrapped_exception.value.code == 1
+    result = ClangFormatChecker(config, verbose=verbose).check()
+    assert result == 1
     assert expected_message in get_log_data(caplog.records)
 
 
@@ -65,5 +65,6 @@ def test_check_clang_format_fix(
         CLANG_FORMAT_COMMAND, stdout=CLANG_FORMAT_ERROR_OUTPUT, returncode=1
     )
     fake_process.register(CLANG_FORMAT_FIX_COMMAND)
-    ClangFormatChecker(config, fix_errors=True).check()
+    result = ClangFormatChecker(config, fix_errors=True).check()
+    assert result == 1
     assert fake_process.call_count(CLANG_FORMAT_FIX_COMMAND) == 1

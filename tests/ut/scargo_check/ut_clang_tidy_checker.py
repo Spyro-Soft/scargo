@@ -21,7 +21,8 @@ def test_check_clang_tidy_pass(
     fake_process: FakeProcess,
 ) -> None:
     fake_process.register(CLANG_TIDY_COMMAND, stdout=CLANG_TIDY_NORMAL_OUTPUT)
-    ClangTidyChecker(config).check()
+    result = ClangTidyChecker(config).check()
+    assert result == 0
     assert all(
         level not in ("WARNING", "ERROR") for level, msg in get_log_data(caplog.records)
     )
@@ -45,7 +46,6 @@ def test_check_clang_tidy_fail(
     fake_process.register(
         CLANG_TIDY_COMMAND, stdout=CLANG_TIDY_ERROR_OUTPUT, returncode=1
     )
-    with pytest.raises(SystemExit) as wrapped_exception:
-        ClangTidyChecker(config, verbose=verbose).check()
-    assert wrapped_exception.value.code == 1
+    result = ClangTidyChecker(config, verbose=verbose).check()
+    assert result == 1
     assert expected_message in get_log_data(caplog.records)

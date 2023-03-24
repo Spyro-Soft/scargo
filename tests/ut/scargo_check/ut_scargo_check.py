@@ -21,12 +21,16 @@ CHECKERS = [
 
 @pytest.fixture
 def mock_checkers(mocker: MockerFixture) -> Dict[str, MagicMock]:
-    return {
+    checkers = {
         checker_class.check_name: mocker.patch(
             f"{scargo_check.__module__}.{checker_class.__name__}"
         )
         for checker_class in CHECKERS
     }
+    for name, checker in checkers.items():
+        checker.check_name = name
+        checker().check.return_value = 0
+    return checkers
 
 
 @pytest.fixture

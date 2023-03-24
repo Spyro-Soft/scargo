@@ -105,9 +105,8 @@ class TestCheckerFixer:
         config: Config,
         mock_find_files: MagicMock,
     ) -> None:
-        with pytest.raises(SystemExit) as wrapped_exception:
-            checker_class(config).check()
-        assert wrapped_exception.value.code == 1
+        result = checker_class(config).check()
+        assert result == 1
         expected = [
             ("INFO", "Starting failing check..."),
             ("INFO", "Finished failing check. Found problems in 1 files."),
