@@ -16,7 +16,7 @@ from scargo.path_utils import find_program_path, get_project_root
 
 
 class _ScargoDebug:
-    SUPPORTED_TARGETS = ["x86", "stm32"]
+    SUPPORTED_TARGETS = ["x86", "stm32", "esp32"]
 
     def __init__(self, config: Config, bin_path: Optional[Path]):
         self._logger = get_logger()
@@ -55,6 +55,8 @@ class _ScargoDebug:
             self._debug_x86()
         elif self._target.family == "stm32":
             self._debug_stm32()
+        elif self._target.family == "esp32":
+            self._debug_esp32()
 
     def _debug_x86(self) -> None:
         subprocess.run(["gdb", self._bin_path], check=False)
@@ -91,10 +93,44 @@ class _ScargoDebug:
         finally:
             openocd.terminate()
 
+    def _debug_esp32(self) -> None:
+        openocd_path = find_program_path("openocd")
+        if not openocd_path:
+            self._logger.error("Could not find openocd.")
+            sys.exit(1)
+
+        openocd = subprocess.Popen(  # pylint: disable=consider-using-with
+            [
+                openocd_path,
+                "-f",
+                "interface/ftdi/esp32_devkitj_v1.cfg",
+                "-f",
+                "board/esp-wroom-32.cfg",
+            ],
+        )
+        # Wait for openocd to start
+        sleep(1)
+        try:
+            subprocess.run(
+                [
+                    "xtensa-esp32-elf-gdb",
+                    self._bin_path,
+                    "--eval-command=target extended-remote localhost:3333",
+                ],
+                check=True,
+            )
+        finally:
+            openocd.terminate()
+
     def _get_bin_path(self, bin_name: str) -> Path:
         project_path = get_project_root()
-        bin_path = Path(project_path, "build/Debug/bin", bin_name).absolute()
-        if self._target.family == "stm32" and bin_path.suffix != "elf":
+        if self._target.family == "esp32":
+            bin_path = Path(project_path, "build/Debug", bin_name).absolute()
+        else:
+            bin_path = Path(project_path, "build/Debug/bin", bin_name).absolute()
+        if (
+            self._target.family == "stm32" or self._target.family == "esp32"
+        ) and bin_path.suffix != "elf":
             bin_path = bin_path.with_suffix(".elf")
         return bin_path
 
