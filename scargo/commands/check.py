@@ -203,7 +203,7 @@ class CopyrightChecker(CheckerFixer):
                 logger.warning(
                     "Incorrect and not excluded copyright in %s", file_path
                 )
-                return CheckResult(problems_found=1, fix=False)
+                return CheckResult(problems_found=1, fix=True)
 
         logger.info("Missing copyright in %s.", file_path)
         return CheckResult(problems_found=1)
