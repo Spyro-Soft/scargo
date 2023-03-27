@@ -188,6 +188,7 @@ class CopyrightChecker(CheckerFixer):
     def check_file(self, file_path: Path) -> CheckResult:
         copyrights = self.copyright_desc.split("\n")[:-1]
         slice_present = 0
+        copyright_present = False
         with open(file_path, encoding="utf-8") as file:
             for line in file.readlines():
                 for copyrights_slice in copyrights:
@@ -195,7 +196,10 @@ class CopyrightChecker(CheckerFixer):
                         slice_present += 1
                     if slice_present == len(copyrights):
                         return CheckResult(problems_found=0)
-            if "copyright" in line.lower() and slice_present != len(copyrights):
+                    if "copyright" in line.lower():
+                        copyright_present = True
+
+            if copyright_present and slice_present != len(copyrights):
                 logger.warning(
                     "Incorrect and not excluded copyright in %s", file_path
                 )
