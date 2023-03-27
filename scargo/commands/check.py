@@ -196,7 +196,7 @@ class CopyrightChecker(CheckerFixer):
                         slice_present += 1
                     if slice_present == len(copyrights):
                         return CheckResult(problems_found=0)
-                    if "copyright" in line.lower():
+                    if self.check_name in line.lower():
                         copyright_present = True
 
             if copyright_present and slice_present != len(copyrights):
