@@ -20,14 +20,14 @@ logger = get_logger()
 
 
 def scargo_check(
-    clang_format: bool,
-    # clang_tidy: bool,
-    copy_right: bool,
-    cppcheck: bool,
-    cyclomatic: bool,
-    pragma: bool,
-    todo: bool,
-    verbose: bool,
+        clang_format: bool,
+        # clang_tidy: bool,
+        copy_right: bool,
+        cppcheck: bool,
+        cyclomatic: bool,
+        pragma: bool,
+        todo: bool,
+        verbose: bool,
 ) -> None:
     """
     Check written code using different formatters
@@ -90,7 +90,7 @@ class CheckerFixer(abc.ABC):
     can_fix = False
 
     def __init__(
-        self, config: Config, fix_errors: bool = False, verbose: bool = False
+            self, config: Config, fix_errors: bool = False, verbose: bool = False
     ) -> None:
         self._config = config
         self._fix_errors = fix_errors
@@ -104,17 +104,17 @@ class CheckerFixer(abc.ABC):
     def check_files(self) -> int:
         error_counter = 0
         for file_path in find_files(
-            Path(self._config.project.target.source_dir),
-            ("*.h", "*.hpp") if self.headers_only else ("*.h", "*.hpp", "*.c", "*.cpp"),
-            self.get_exclude_patterns(),
+                Path(self._config.project.target.source_dir),
+                ("*.h", "*.hpp") if self.headers_only else ("*.h", "*.hpp", "*.c", "*.cpp"),
+                self.get_exclude_patterns(),
         ):
             result = self.check_file(file_path)
             error_counter += result.problems_found
             if (
-                result.problems_found > 0
-                and self._fix_errors
-                and self.can_fix
-                and result.fix
+                    result.problems_found > 0
+                    and self._fix_errors
+                    and self.can_fix
+                    and result.fix
             ):
                 logger.info("Fixing...")
                 self.fix_file(file_path)
@@ -186,40 +186,20 @@ class CopyrightChecker(CheckerFixer):
         super().check()
 
     def check_file(self, file_path: Path) -> CheckResult:
-        copyrights = self.copyright_desc.split("\n")
+        copyrights = self.copyright_desc.split("\n")[:-1]
+        slice_present = 0
         with open(file_path, encoding="utf-8") as file:
-            lines = (line for line in file.readlines()[1:])
-            # for line in file.readlines():
-            #     if self.copyright_desc in line:
-            #         return CheckResult(problems_found=0)
-            #     if "copyright" in line.lower():
-            #         logger.warning(
-            #             "Incorrect and not excluded copyright in %s", file_path
-            #         )
-            #         return CheckResult(problems_found=1, fix=False)
-        copyrights_in_line = False
-        error_found = False
-        i = -1
-        for line in lines:
-            i += 1
-            if i < len(copyrights):
-                if "copyright" in line.lower():
-                    copyrights_in_line = True
-                if copyrights[i] in line:
-                    continue
-                else:
-                    error_found = True
-                    break
-            else:
-                break
-
-        if not error_found:
-            return CheckResult(problems_found=0)
-        elif copyrights_in_line and error_found:
-            logger.warning(
-                "Incorrect and not excluded copyright in %s", file_path
-            )
-            return CheckResult(problems_found=1, fix=False)
+            for line in file.readlines():
+                for copyrights_slice in copyrights:
+                    if copyrights_slice in line:
+                        slice_present += 1
+                    if slice_present == len(copyrights):
+                        return CheckResult(problems_found=0)
+            if "copyright" in line.lower() and slice_present != len(copyrights):
+                logger.warning(
+                    "Incorrect and not excluded copyright in %s", file_path
+                )
+                return CheckResult(problems_found=1, fix=False)
 
         logger.info("Missing copyright in %s.", file_path)
         return CheckResult(problems_found=1)
@@ -296,12 +276,12 @@ class ClangTidyChecker(CheckerFixer):
 
 
 def find_files(
-    dir_path: Path, glob_patterns: Sequence[str], exclude_patterns: Sequence[str]
+        dir_path: Path, glob_patterns: Sequence[str], exclude_patterns: Sequence[str]
 ) -> Iterable[Path]:
     exclude_list = [path for pattern in exclude_patterns for path in glob.glob(pattern)]
 
     for file_path in chain.from_iterable(
-        dir_path.rglob(pattern) for pattern in glob_patterns
+            dir_path.rglob(pattern) for pattern in glob_patterns
     ):
         if file_path.is_file():
             if any(exclude in str(file_path) for exclude in exclude_list):
