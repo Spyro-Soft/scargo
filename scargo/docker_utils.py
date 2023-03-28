@@ -73,7 +73,7 @@ def run_command_in_docker(  # type: ignore[no-any-unimported]
         detach=True,
         working_dir=str(path_in_docker),
     )
-    output = container.attach(stdout=True, stream=True, logs=True)
+    output = container.attach(stdout=True, stream=True, logs=True, stderr=True)
     for line in output:
         print(line.decode(), end="")
     result = container.wait()

@@ -80,7 +80,9 @@ def get_cmdline_arguments() -> argparse.Namespace:
 def main() -> None:
     args = get_cmdline_arguments()
 
-    result = run_pylint_on_specific_directory(args.directory, args.score, args.exclude)
+    result = run_pylint_on_specific_directory(
+        args.directory, args.score, args.exclude or []
+    )
     sys.exit(result)
 
 

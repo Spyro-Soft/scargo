@@ -39,14 +39,17 @@ Getting started is easy:
 
         $ scargo --help/-h
 
-For windows
+For Windows
 -----------
-1) Install python >3.8 with pip (e.g. https://www.python.org/ftp/python/3.8.7/python-3.8.7-amd64.exe)
-2) Install docker for windows(e.g. https://desktop.docker.com/win/main/amd64/Docker%20Desktop%20Installer.exe?utm_source=docker&utm_medium=webreferral&utm_campaign=dd-smartbutton&utm_location=module)
-3) install scargo (pip install . or pip install scargo) and add the program to you env paths
+1) Install Python >=3.8 with pip from https://www.python.org/downloads/windows/
+2) Install Docker for Windows (e.g. https://desktop.docker.com/win/main/amd64/Docker%20Desktop%20Installer.exe)
+3) Install scargo (``pip install scargo``) and add the program to your env paths
 
 
-System Properties -> Environment Variables, double click on "Path" and add entry with your scargo installation e.g. C:\Users\aak\AppData\Roaming\Python\Python38\Scripts
+System Properties -> Environment Variables, double click on "Path" and add entry with your scargo installation e.g.
+::
+
+    C:\Users\username\AppData\Roaming\Python\Python38\Scripts
 
 More Information
 ----------------

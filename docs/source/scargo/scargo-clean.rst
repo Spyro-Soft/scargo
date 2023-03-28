@@ -20,7 +20,11 @@ Remove directory build.
 Options
 ^^^^^^^
 
-No options for now.
+::
+
+-B, --base-dir Arg
+
+Specify the base project path. Allows running scargo commands from any directory.
 
 Example
 ^^^^^^^

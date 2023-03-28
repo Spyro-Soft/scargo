@@ -45,3 +45,9 @@ Fix if there is no copyright info at the top of each file.
 --clang-format
 
 Fix formatting reported by clang-format.
+
+::
+
+-B, --base-dir Arg
+
+Specify the base project path. Allows running scargo commands from any directory.

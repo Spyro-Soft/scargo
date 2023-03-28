@@ -34,3 +34,9 @@ Flash filesystem only
 --profile TEXT
 
 Flash base on previously built profile  [default: Debug]
+
+::
+
+-B, --base-dir Arg
+
+Specify the base project path. Allows running scargo commands from any directory.

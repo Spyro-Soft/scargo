@@ -41,3 +41,9 @@ This option specifies which profile binary should be built and run.
 --skip-build
 
 Skip running scargo build.
+
+::
+
+-B, --base-dir Arg
+
+Specify the base project path. Allows running scargo commands from any directory.

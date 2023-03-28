@@ -6,7 +6,7 @@ import subprocess
 import sys
 from pathlib import Path
 from time import sleep
-from typing import Optional
+from typing import List, Optional
 
 from scargo.config import Config
 from scargo.config_utils import prepare_config
@@ -16,7 +16,7 @@ from scargo.path_utils import find_program_path, get_project_root
 
 
 class _ScargoDebug:
-    SUPPORTED_TARGETS = ["x86", "stm32"]
+    SUPPORTED_TARGETS = ["x86", "stm32", "esp32"]
 
     def __init__(self, config: Config, bin_path: Optional[Path]):
         self._logger = get_logger()
@@ -55,34 +55,26 @@ class _ScargoDebug:
             self._debug_x86()
         elif self._target.family == "stm32":
             self._debug_stm32()
+        elif self._target.family == "esp32":
+            self._debug_esp32()
 
     def _debug_x86(self) -> None:
         subprocess.run(["gdb", self._bin_path], check=False)
 
-    def _debug_stm32(self) -> None:
+    def _debug_embedded(self, openocd_args: List[str], gdb_bin: str) -> None:
         openocd_path = find_program_path("openocd")
         if not openocd_path:
             self._logger.error("Could not find openocd.")
             sys.exit(1)
+        openocd_call = [openocd_path] + openocd_args
 
-        chip_script = f"target/{self._chip[:7].lower()}x.cfg"
-        openocd = subprocess.Popen(
-            [
-                openocd_path,
-                "-f",
-                "interface/stlink-v2-1.cfg",
-                "-f",
-                chip_script,
-                "-f",
-                ".devcontainer/stm32.cfg",
-            ]
-        )
+        openocd = subprocess.Popen(openocd_call)  # pylint: disable=consider-using-with
         # Wait for openocd to start
         sleep(1)
         try:
             subprocess.run(
                 [
-                    "gdb-multiarch",
+                    gdb_bin,
                     self._bin_path,
                     "--eval-command=target extended-remote localhost:3333",
                 ],
@@ -91,10 +83,36 @@ class _ScargoDebug:
         finally:
             openocd.terminate()
 
+    def _debug_stm32(self) -> None:
+        chip_script = f"target/{self._chip[:7].lower()}x.cfg"
+        openocd_args = [
+            "-f",
+            "interface/stlink-v2-1.cfg",
+            "-f",
+            chip_script,
+            "-f",
+            ".devcontainer/stm32.cfg",
+        ]
+        self._debug_embedded(openocd_args, "gdb-multiarch")
+
+    def _debug_esp32(self) -> None:
+        openocd_args = [
+            "-f",
+            "interface/ftdi/esp32_devkitj_v1.cfg",
+            "-f",
+            "board/esp-wroom-32.cfg",
+        ]
+        self._debug_embedded(openocd_args, "xtensa-esp32-elf-gdb")
+
     def _get_bin_path(self, bin_name: str) -> Path:
         project_path = get_project_root()
-        bin_path = Path(project_path, "build/Debug/bin", bin_name).absolute()
-        if self._target.family == "stm32" and bin_path.suffix != "elf":
+        if self._target.family == "esp32":
+            bin_path = Path(project_path, "build/Debug", bin_name).absolute()
+        else:
+            bin_path = Path(project_path, "build/Debug/bin", bin_name).absolute()
+        if (
+            self._target.family == "stm32" or self._target.family == "esp32"
+        ) and bin_path.suffix != "elf":
             bin_path = bin_path.with_suffix(".elf")
         return bin_path
 

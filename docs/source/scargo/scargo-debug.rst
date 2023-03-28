@@ -30,3 +30,9 @@ Options
 -b, --bin FILE
 
 Path to a binary file
+
+::
+
+-B, --base-dir Arg
+
+Specify the base project path. Allows running scargo commands from any directory.

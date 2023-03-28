@@ -16,7 +16,11 @@ Generate documentation from project comments using doxygen. Comments should be i
 Options
 ^^^^^^^
 
-No options for now.
+::
+
+-B, --base-dir Arg
+
+Specify the base project path. Allows running scargo commands from any directory.
 
 Example 1
 ^^^^^^^^^

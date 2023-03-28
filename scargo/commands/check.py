@@ -5,13 +5,15 @@
 import abc
 import glob
 import os
+import re
 import subprocess
 import sys
 from itertools import chain
 from pathlib import Path
 from typing import Iterable, List, NamedTuple, Sequence, Type
 
-from scargo.config import CheckConfig, Config
+from scargo.clang_utils import get_comment_lines
+from scargo.config import CheckConfig, Config, TodoCheckConfig
 from scargo.config_utils import prepare_config
 from scargo.logger import get_logger
 from scargo.path_utils import get_project_root
@@ -20,20 +22,20 @@ logger = get_logger()
 
 
 def scargo_check(
-        clang_format: bool,
-        # clang_tidy: bool,
-        copy_right: bool,
-        cppcheck: bool,
-        cyclomatic: bool,
-        pragma: bool,
-        todo: bool,
-        verbose: bool,
+    clang_format: bool,
+    clang_tidy: bool,
+    copy_right: bool,
+    cppcheck: bool,
+    cyclomatic: bool,
+    pragma: bool,
+    todo: bool,
+    verbose: bool,
 ) -> None:
     """
     Check written code using different formatters
 
     :param bool clang_format: check clang_format
-    # :param bool clang_tidy: check clang_tidy
+    :param bool clang_tidy: check clang_tidy
     :param bool copy_right:  check copyrights
     :param bool cppcheck: check cpp format
     :param bool cyclomatic: check cyclomatic
@@ -50,8 +52,8 @@ def scargo_check(
     checkers: List[Type[CheckerFixer]] = []
     if clang_format:
         checkers.append(ClangFormatChecker)
-    # if clang_tidy:
-    #     checkers.append(ClangTidyChecker)
+    if clang_tidy:
+        checkers.append(ClangTidyChecker)
     if copy_right:
         checkers.append(CopyrightChecker)
     if cppcheck:
@@ -67,7 +69,7 @@ def scargo_check(
     if not checkers:
         checkers = [
             ClangFormatChecker,
-            # ClangTidyChecker,
+            ClangTidyChecker,
             CopyrightChecker,
             CppcheckChecker,
             CyclomaticChecker,
@@ -90,7 +92,7 @@ class CheckerFixer(abc.ABC):
     can_fix = False
 
     def __init__(
-            self, config: Config, fix_errors: bool = False, verbose: bool = False
+        self, config: Config, fix_errors: bool = False, verbose: bool = False
     ) -> None:
         self._config = config
         self._fix_errors = fix_errors
@@ -104,17 +106,17 @@ class CheckerFixer(abc.ABC):
     def check_files(self) -> int:
         error_counter = 0
         for file_path in find_files(
-                Path(self._config.project.target.source_dir),
-                ("*.h", "*.hpp") if self.headers_only else ("*.h", "*.hpp", "*.c", "*.cpp"),
-                self.get_exclude_patterns(),
+            Path(self._config.project.target.source_dir),
+            ("*.h", "*.hpp") if self.headers_only else ("*.h", "*.hpp", "*.c", "*.cpp"),
+            self.get_exclude_patterns(),
         ):
             result = self.check_file(file_path)
             error_counter += result.problems_found
             if (
-                    result.problems_found > 0
-                    and self._fix_errors
-                    and self.can_fix
-                    and result.fix
+                result.problems_found > 0
+                and self._fix_errors
+                and self.can_fix
+                and result.fix
             ):
                 logger.info("Fixing...")
                 self.fix_file(file_path)
@@ -177,12 +179,14 @@ class CopyrightChecker(CheckerFixer):
     check_name = "copyright"
     can_fix = True
 
+    def __init__(self, config: Config, fix_errors: bool = False, verbose: bool = False):
+        super().__init__(config, fix_errors, verbose)
+        self.copyright_desc = self.get_check_config().description or ""
+
     def check(self) -> None:
-        copyright_desc = self.get_check_config().description
-        if not copyright_desc:
+        if not self.copyright_desc:
             logger.warning("No copyrights in defined in toml")
             return
-        self.copyright_desc = copyright_desc
         super().check()
 
     def check_file(self, file_path: Path) -> CheckResult:
@@ -200,9 +204,7 @@ class CopyrightChecker(CheckerFixer):
                         copyright_present = True
 
             if copyright_present and slice_present != len(copyrights):
-                logger.warning(
-                    "Incorrect and not excluded copyright in %s", file_path
-                )
+                logger.warning("Incorrect and not excluded copyright in %s", file_path)
                 return CheckResult(problems_found=1, fix=True)
 
         logger.info("Missing copyright in %s.", file_path)
@@ -230,17 +232,22 @@ class TodoChecker(CheckerFixer):
         return f"{count} problems"
 
     def check_file(self, file_path: Path) -> CheckResult:
-        keywords = ("tbd", "todo", "TODO", "fixme")
+        keywords = self.get_check_config().keywords
+        keyword_patterns = [
+            re.compile(rf"\b{re.escape(keyword)}\b") for keyword in keywords
+        ]
         error_counter = 0
-        with open(file_path, encoding="utf-8") as file:
-            for line_number, line in enumerate(file.readlines(), start=1):
-                for keyword in keywords:
-                    if keyword in line:
-                        error_counter += 1
-                        logger.warning(
-                            f"Found {keyword} in {file_path} at line {line_number}"
-                        )
+        for line_number, line in get_comment_lines(file_path):
+            for keyword, keyword_pattern in zip(keywords, keyword_patterns):
+                if keyword_pattern.search(line):
+                    error_counter += 1
+                    logger.warning(
+                        f"Found {keyword} in {file_path} at line {line_number}"
+                    )
         return CheckResult(error_counter)
+
+    def get_check_config(self) -> TodoCheckConfig:
+        return self._config.check.todo
 
 
 class ClangFormatChecker(CheckerFixer):
@@ -265,9 +272,24 @@ class ClangFormatChecker(CheckerFixer):
 
 class ClangTidyChecker(CheckerFixer):
     check_name = "clang-tidy"
+    build_path = Path("./build/")
 
     def check_file(self, file_path: Path) -> CheckResult:
         cmd = ["clang-tidy", str(file_path)]
+        if self._config.project.target.family == "esp32":
+            cmd.extend(["-p", str(self.build_path)])
+            if not Path(self.build_path, "compile_commands.json").exists():
+                # creates compilation database and runs run-clang-tidy.py on the whole project
+                # (the latter is not needed, but there's no option to suppress it)
+                cmd = ["idf.py", "clang-check"]
+                subprocess.run(
+                    cmd,
+                    stdout=subprocess.DEVNULL,
+                    stderr=subprocess.DEVNULL,
+                    check=False,
+                )
+        if file_path.suffix == ".h":
+            cmd.extend(["--", "-x", "c++"])
         try:
             subprocess.check_output(cmd)
         except subprocess.CalledProcessError as e:
@@ -280,12 +302,12 @@ class ClangTidyChecker(CheckerFixer):
 
 
 def find_files(
-        dir_path: Path, glob_patterns: Sequence[str], exclude_patterns: Sequence[str]
+    dir_path: Path, glob_patterns: Sequence[str], exclude_patterns: Sequence[str]
 ) -> Iterable[Path]:
     exclude_list = [path for pattern in exclude_patterns for path in glob.glob(pattern)]
 
     for file_path in chain.from_iterable(
-            dir_path.rglob(pattern) for pattern in glob_patterns
+        dir_path.rglob(pattern) for pattern in glob_patterns
     ):
         if file_path.is_file():
             if any(exclude in str(file_path) for exclude in exclude_list):

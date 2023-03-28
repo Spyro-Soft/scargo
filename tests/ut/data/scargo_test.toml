@@ -46,6 +46,7 @@ description = "Copyright"
 exclude = []
 
 [check.todo]
+keywords = ["tbd", "todo", "TODO", "fixme"]
 exclude = []
 
 [check.clang-format]
@@ -79,7 +80,7 @@ test = [
 ]
 
 [conan.repo]
-# gitlab = "https://git.spyrosoft.it/api/v4/projects/159/packages/conan"
+# conancenter = "https://center.conan.io"
 
 
 [scargo]
