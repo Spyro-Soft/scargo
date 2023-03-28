@@ -48,7 +48,7 @@ to update the environment with your credential.
 - pip
 - scargo
 - docker
-- docker-compose version 1.29.2
+- docker-compose
 
 # STM32 configure
 External dependencies are delivered with conan package "stm32_cmake/0.1.0" . It consist of cmsis and HAL from stm.

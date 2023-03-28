@@ -29,7 +29,7 @@ You can find all information on how to work with scargo on official documentatio
 # Project dependencies
 ## Working with docker (recommended)
 - docker
-- docker-compose version 1.29.2
+- docker-compose
 - pip
 - python3
 
