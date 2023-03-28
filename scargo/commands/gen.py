@@ -43,7 +43,7 @@ def scargo_gen(
         if gen_mock.suffix not in (".h", ".hpp"):
             logger.error("Not a header file. Please chose .h or .hpp file.")
             sys.exit(1)
-        if generate_mocks(gen_mock):
+        if generate_mocks(gen_mock, config.project.target.source_dir):
             logger.info(f"Generated: {gen_mock}")
         else:
             logger.info(f"Skipping: {gen_mock}")

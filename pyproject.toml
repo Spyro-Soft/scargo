@@ -36,7 +36,7 @@ dependencies = [
     "docker==6.0.1",
     "esptool==4.5.1",
     "jinja2==3.1.2",
-    "libclang==15.0.6.1",
+    "libclang==16.0.0",
     "lizard==1.17.10",
     "pydantic==1.10.6",
     "shellingham==1.5.0.post1",

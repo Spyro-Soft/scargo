@@ -17,12 +17,9 @@ astroid==2.15.0
 attrs==22.2.0
     # via
     #   allure-python-commons
-    #   jsonschema
     #   pytest
 babel==2.12.1
     # via sphinx
-bcrypt==4.0.1
-    # via paramiko
 bitstring==4.0.1
     # via esptool
 black==23.1.0
@@ -32,9 +29,7 @@ bottle==0.12.25
 certifi==2022.12.7
     # via requests
 cffi==1.15.1
-    # via
-    #   cryptography
-    #   pynacl
+    # via cryptography
 cfgv==3.3.1
     # via pre-commit
 charset-normalizer==3.1.0
@@ -60,27 +55,15 @@ coverage[toml]==6.5.0
     #   pytest-cov
     #   scargo (pyproject.toml)
 cryptography==39.0.2
-    # via
-    #   esptool
-    #   paramiko
+    # via esptool
 dill==0.3.6
     # via pylint
 distlib==0.3.6
     # via virtualenv
 distro==1.8.0
-    # via
-    #   conan
-    #   docker-compose
-docker[ssh]==6.0.1
-    # via
-    #   docker-compose
-    #   scargo (pyproject.toml)
-docker-compose==1.29.2
+    # via conan
+docker==6.0.1
     # via scargo (pyproject.toml)
-dockerpty==0.4.1
-    # via docker-compose
-docopt==0.6.2
-    # via docker-compose
 docutils==0.17.1
     # via
     #   flit
@@ -127,11 +110,9 @@ jinja2==3.1.2
     #   gcovr
     #   scargo (pyproject.toml)
     #   sphinx
-jsonschema==3.2.0
-    # via docker-compose
 lazy-object-proxy==1.9.0
     # via astroid
-libclang==15.0.6.1
+libclang==16.0.0
     # via scargo (pyproject.toml)
 lizard==1.17.10
     # via scargo (pyproject.toml)
@@ -165,8 +146,6 @@ packaging==23.0
     #   docker
     #   pytest
     #   sphinx
-paramiko==3.1.0
-    # via docker
 parse==1.19.0
     # via
     #   parse-type
@@ -215,10 +194,6 @@ pyjwt==2.6.0
     # via conan
 pylint==2.17.0
     # via scargo (pyproject.toml)
-pynacl==1.5.0
-    # via paramiko
-pyrsistent==0.19.3
-    # via jsonschema
 pyserial==3.5
     # via esptool
 pytest==7.2.2
@@ -239,14 +214,11 @@ pytest-subprocess==1.5.0
     # via scargo (pyproject.toml)
 python-dateutil==2.8.2
     # via conan
-python-dotenv==0.21.1
-    # via docker-compose
 pytz==2022.7.1
     # via babel
 pyyaml==5.4.1
     # via
     #   conan
-    #   docker-compose
     #   pre-commit
 recommonmark==0.7.1
     # via scargo (pyproject.toml)
@@ -256,7 +228,6 @@ requests==2.28.2
     # via
     #   conan
     #   docker
-    #   docker-compose
     #   flit
     #   sphinx
 shellingham==1.5.0.post1
@@ -264,9 +235,7 @@ shellingham==1.5.0.post1
 six==1.16.0
     # via
     #   conan
-    #   dockerpty
     #   ecdsa
-    #   jsonschema
     #   parse-type
     #   python-dateutil
     #   websocket-client
@@ -294,8 +263,6 @@ sphinxcontrib-qthelp==1.0.3
     # via sphinx
 sphinxcontrib-serializinghtml==1.1.5
     # via sphinx
-texttable==1.6.7
-    # via docker-compose
 toml==0.10.2
     # via scargo (pyproject.toml)
 tomli==2.0.1
@@ -337,9 +304,7 @@ urllib3==1.26.15
 virtualenv==20.21.0
     # via pre-commit
 websocket-client==0.59.0
-    # via
-    #   docker
-    #   docker-compose
+    # via docker
 wrapt==1.15.0
     # via astroid
 zipp==3.15.0
