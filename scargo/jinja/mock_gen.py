@@ -32,13 +32,13 @@ jinja_env = Environment(
 missing_mocks_json = absolute_path / "mock_utils" / "missing_mocks.json"
 
 
-def generate_mocks(src_header: Path) -> bool:
+def generate_mocks(src_header: Path, src_dir: str) -> bool:
     """
     Generates mock header and implementations for specified source headers.
     Creates directories and CMake lists where required.
     :param src_header Path to source directory or header
+    :param src_dir source directory name (dependent on target)
     """
-    src_dir = src_header.parent.name
 
     dst_header = get_mock_path(src_header, src_dir)
 
@@ -72,6 +72,7 @@ def get_mock_path(path: Path, src_dir: str) -> Path:
 
 
 def gen_header(path: Path, template_name: str, header_data: HeaderDescriptor) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
     with path.open("w", encoding="utf-8") as out:
         out.write(jinja_env.get_template(template_name).render(header=header_data))
 
