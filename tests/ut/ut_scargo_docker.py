@@ -113,12 +113,11 @@ def test_docker_exec(
     monkeypatch: pytest.MonkeyPatch,
     scargo_docker_test_setup: Config,
 ) -> None:
-    id = "some_hash"
-    docker_opts = "-it"
-    monkeypatch.setattr("docker.from_env", lambda: FakeDockerClient(id))
-    scargo_docker_exec([docker_opts])
+    container_id = "some_hash"
+    monkeypatch.setattr("docker.from_env", lambda: FakeDockerClient(container_id))
+    scargo_docker_exec([])
 
-    called_subprocess_cmd = ["docker", "exec", docker_opts, id, "bash"]
+    called_subprocess_cmd = ["docker", "exec", "-it", container_id, "bash"]
     assert mock_subprocess_run.call_args.args[0] == called_subprocess_cmd
 
 
