@@ -98,7 +98,7 @@ def scargo_docker_exec(docker_opts: List[str]) -> None:
         sys.exit(1)
 
     bash_command = ["bash"]
-    cmd = ["docker", "exec"] + docker_opts + [newest_container[0].id] + bash_command
+    cmd = ["docker", "exec", "-it", *docker_opts, newest_container[0].id, *bash_command]
     try:
         subprocess.run(cmd, check=True)
         logger.info("Stop exec docker environment.")
