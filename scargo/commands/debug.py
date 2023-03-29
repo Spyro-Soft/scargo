@@ -110,9 +110,7 @@ class _ScargoDebug:
             bin_path = Path(project_path, "build/Debug", bin_name).absolute()
         else:
             bin_path = Path(project_path, "build/Debug/bin", bin_name).absolute()
-        if (
-            self._target.family == "stm32" or self._target.family == "esp32"
-        ) and bin_path.suffix != "elf":
+        if self._target.family in ("stm32", "esp32") and bin_path.suffix != "elf":
             bin_path = bin_path.with_suffix(".elf")
         return bin_path
 

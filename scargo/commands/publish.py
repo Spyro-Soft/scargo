@@ -33,7 +33,6 @@ def scargo_publish(repo: str) -> None:
     conan_add_conancenter()
 
     # Export package
-    # TODO discuss where to put package
     try:
         subprocess.check_call(
             "conan export-pkg . -f",
