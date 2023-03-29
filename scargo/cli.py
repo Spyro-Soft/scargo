@@ -148,7 +148,9 @@ docker = Typer(help="Manage the docker environment for the project")
 @docker.command(
     "build", context_settings={"allow_extra_args": True, "ignore_unknown_options": True}
 )
-def docker_build(docker_opts: List[str], base_dir: Optional[Path] = BASE_DIR_OPTION) -> None:
+def docker_build(
+    docker_opts: List[str], base_dir: Optional[Path] = BASE_DIR_OPTION
+) -> None:
     """Build docker layers for this project depending on the target"""
     if base_dir:
         os.chdir(base_dir)
@@ -178,7 +180,9 @@ def docker_run(
 @docker.command(
     "exec", context_settings={"allow_extra_args": True, "ignore_unknown_options": True}
 )
-def docker_exec(base_dir: Optional[Path] = BASE_DIR_OPTION, docker_opts: List[str] = Argument(None)) -> None:
+def docker_exec(
+    base_dir: Optional[Path] = BASE_DIR_OPTION, docker_opts: List[str] = Argument(None)
+) -> None:
     """Attach to existing docker environment"""
     if base_dir:
         os.chdir(base_dir)
