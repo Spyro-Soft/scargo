@@ -48,7 +48,7 @@ to update the environment with your credential.
 - pip
 - scargo
 - docker
-- docker-compose version 1.29.2
+- docker-compose
 
 # ESP32 configure
 On the beginning of project is strongly recommended to configure the project using `idf.py menuconfig`
