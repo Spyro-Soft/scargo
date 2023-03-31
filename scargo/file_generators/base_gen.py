@@ -35,7 +35,12 @@ def create_file_from_template(
         and not overwrite
     ):
         return
+    write_template(output_path, template_path, template_params)
 
+
+def write_template(
+    output_path: Path, template_path: str, template_params: Dict[str, Any]
+) -> None:
     output_path.parent.mkdir(parents=True, exist_ok=True)
     content = _JINJA_ENV.get_template(template_path).render(template_params)
     output_path.write_text(content, encoding="utf-8")
