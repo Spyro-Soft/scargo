@@ -5,7 +5,7 @@
 from pathlib import Path
 
 from scargo.config import ProjectConfig
-from scargo.global_values import SCARGO_PGK_PATH
+from scargo.global_values import SCARGO_PKG_PATH
 from scargo.jinja.base_gen import BaseGen
 from scargo.path_utils import get_project_root
 
@@ -14,7 +14,7 @@ class _ReadmeTemplate(BaseGen):
     """This class is a container for readme md file"""
 
     def __init__(self) -> None:
-        self.template_dir = Path(SCARGO_PGK_PATH, "jinja", "templates")
+        self.template_dir = Path(SCARGO_PKG_PATH, "jinja", "templates")
         BaseGen.__init__(self, self.template_dir)
 
     def generate_readme(self, project_config: ProjectConfig) -> None:

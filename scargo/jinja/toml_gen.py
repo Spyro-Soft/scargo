@@ -7,7 +7,7 @@ from typing import Any, Dict
 
 from jinja2 import Environment, FileSystemLoader
 
-from scargo.global_values import SCARGO_PGK_PATH
+from scargo.global_values import SCARGO_PKG_PATH
 from scargo.logger import get_logger
 
 
@@ -18,7 +18,7 @@ class TomlTemplate:
     """
 
     def __init__(self, output_path: str, values: Dict[str, Any]) -> None:
-        self.scargo_path = SCARGO_PGK_PATH
+        self.scargo_path = SCARGO_PKG_PATH
         self.output_path = output_path
         self.values = values
         self.jinja_env = Environment(

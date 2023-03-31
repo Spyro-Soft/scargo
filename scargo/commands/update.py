@@ -10,7 +10,7 @@ from pathlib import Path
 
 from scargo.commands.docker import scargo_docker_build
 from scargo.config_utils import check_scargo_version, get_scargo_config_or_exit
-from scargo.global_values import SCARGO_DOCKER_ENV, SCARGO_LOCK_FILE, SCARGO_PGK_PATH
+from scargo.global_values import SCARGO_DOCKER_ENV, SCARGO_LOCK_FILE, SCARGO_PKG_PATH
 from scargo.jinja.cicd_gen import generate_cicd
 from scargo.jinja.cmake_gen import generate_cmake
 from scargo.jinja.conan_gen import generate_conanfile
@@ -27,7 +27,7 @@ def copy_file_if_not_exists(project_path: Path) -> None:
 
     :return: None
     """
-    files_to_copy = Path(SCARGO_PGK_PATH, "templates").glob("*")
+    files_to_copy = Path(SCARGO_PKG_PATH, "templates").glob("*")
     for file in files_to_copy:
         if not Path(project_path, file.name).exists():
             shutil.copy2(file, project_path)
