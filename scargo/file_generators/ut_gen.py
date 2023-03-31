@@ -7,8 +7,8 @@ from pathlib import Path
 from typing import List, Sequence
 
 from scargo.config import Config
-from scargo.jinja.base_gen import create_file_from_template
-from scargo.jinja.mock_utils.cmake_utils import add_subdirs_to_cmake
+from scargo.file_generators.base_gen import create_file_from_template
+from scargo.file_generators.mock_utils.cmake_utils import add_subdirs_to_cmake
 from scargo.path_utils import get_project_root
 
 HEADER_EXTENSIONS = (".h", ".hpp")

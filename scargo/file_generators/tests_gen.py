@@ -7,14 +7,14 @@ from pathlib import Path
 from shutil import copytree
 
 from scargo.config import Config
+from scargo.file_generators.base_gen import create_file_from_template
 from scargo.global_values import SCARGO_PKG_PATH
-from scargo.jinja.base_gen import create_file_from_template
 from scargo.path_utils import get_project_root
 
 
 def generate_tests(config: Config) -> None:
     """Generate dirs and files"""
-    tests_template_dir = Path(SCARGO_PKG_PATH, "jinja", "templates", "tests")
+    tests_template_dir = Path(SCARGO_PKG_PATH, "file_generators", "templates", "tests")
     project_path = get_project_root()
 
     # List of files to generate once (template_path, output_path)

@@ -9,7 +9,7 @@ from typing import List, Optional
 from clang.cindex import Cursor, CursorKind, Index
 from jinja2 import Environment, FileSystemLoader
 
-from scargo.jinja.mock_utils.data_classes import (
+from scargo.file_generators.mock_utils.data_classes import (
     ArgumentDescriptor,
     HeaderDescriptor,
     MockClassDescriptor,

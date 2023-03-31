@@ -10,14 +10,14 @@ from pathlib import Path
 
 from scargo.commands.docker import scargo_docker_build
 from scargo.config_utils import check_scargo_version, get_scargo_config_or_exit
+from scargo.file_generators.cicd_gen import generate_cicd
+from scargo.file_generators.cmake_gen import generate_cmake
+from scargo.file_generators.conan_gen import generate_conanfile
+from scargo.file_generators.docker_gen import generate_docker_compose
+from scargo.file_generators.env_gen import generate_env
+from scargo.file_generators.readme_gen import generate_readme
+from scargo.file_generators.tests_gen import generate_tests
 from scargo.global_values import SCARGO_DOCKER_ENV, SCARGO_LOCK_FILE, SCARGO_PKG_PATH
-from scargo.jinja.cicd_gen import generate_cicd
-from scargo.jinja.cmake_gen import generate_cmake
-from scargo.jinja.conan_gen import generate_conanfile
-from scargo.jinja.docker_gen import generate_docker_compose
-from scargo.jinja.env_gen import generate_env
-from scargo.jinja.readme_gen import generate_readme
-from scargo.jinja.tests_gen import generate_tests
 from scargo.logger import get_logger
 
 

@@ -3,7 +3,7 @@
 # #
 
 from scargo.config import Config
-from scargo.jinja.base_gen import create_file_from_template
+from scargo.file_generators.base_gen import create_file_from_template
 
 
 def generate_cicd(config: Config) -> None:

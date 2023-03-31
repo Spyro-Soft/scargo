@@ -13,9 +13,9 @@ from typing import Optional, Tuple
 from scargo import __version__
 from scargo.config import Target
 from scargo.config_utils import get_scargo_config_or_exit
+from scargo.file_generators.cpp_gen import generate_cpp
+from scargo.file_generators.toml_gen import generate_toml
 from scargo.global_values import SCARGO_DEFAULT_CONFIG_FILE, SCARGO_DOCKER_ENV
-from scargo.jinja.cpp_gen import generate_cpp
-from scargo.jinja.toml_gen import generate_toml
 from scargo.logger import get_logger
 
 
