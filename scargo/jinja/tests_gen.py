@@ -7,7 +7,7 @@ from pathlib import Path
 from shutil import copytree
 
 from scargo.config import Target, TestConfig
-from scargo.global_values import SCARGO_PGK_PATH
+from scargo.global_values import SCARGO_PKG_PATH
 from scargo.jinja.base_gen import BaseGen
 from scargo.path_utils import get_project_root
 
@@ -16,7 +16,7 @@ class _TestsTemplate(BaseGen):
     """Create cmake template in test dir"""
 
     def __init__(self) -> None:
-        self.tests_template_dir = Path(SCARGO_PGK_PATH, "jinja", "test_templates")
+        self.tests_template_dir = Path(SCARGO_PKG_PATH, "jinja", "test_templates")
         BaseGen.__init__(self, self.tests_template_dir)
         project_path = get_project_root()
         self.output_dir = project_path / "tests"

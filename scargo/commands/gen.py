@@ -13,7 +13,7 @@ from typing import Optional
 
 from scargo.config import Config
 from scargo.config_utils import prepare_config
-from scargo.global_values import SCARGO_PGK_PATH
+from scargo.global_values import SCARGO_PKG_PATH
 from scargo.jinja.mock_gen import generate_mocks
 from scargo.jinja.ut_gen import generate_ut
 from scargo.logger import get_logger
@@ -66,7 +66,7 @@ def generate_certs(
 ) -> None:
     project_path = get_project_root()
 
-    internal_certs_dir = Path(SCARGO_PGK_PATH, "certs")
+    internal_certs_dir = Path(SCARGO_PKG_PATH, "certs")
     projects_builds_path = get_project_root() / "build"
     certs_out_dir = projects_builds_path / "certs"
     if not certs_intermediate_dir:

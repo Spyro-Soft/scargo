@@ -5,7 +5,7 @@
 from pathlib import Path
 
 from scargo.config import Config
-from scargo.global_values import SCARGO_PGK_PATH
+from scargo.global_values import SCARGO_PKG_PATH
 from scargo.jinja.base_gen import BaseGen
 from scargo.path_utils import get_project_root
 
@@ -16,7 +16,7 @@ class _ConanTemplate(BaseGen):
     """
 
     def __init__(self) -> None:
-        template_dir = Path(SCARGO_PGK_PATH, "jinja", "conan")
+        template_dir = Path(SCARGO_PKG_PATH, "jinja", "conan")
         BaseGen.__init__(self, template_dir)
 
     def generate_conanfile(self, config: Config) -> None:

@@ -5,7 +5,7 @@
 from pathlib import Path
 
 from scargo.config import Config
-from scargo.global_values import SCARGO_PGK_PATH
+from scargo.global_values import SCARGO_PKG_PATH
 from scargo.jinja.base_gen import BaseGen
 from scargo.path_utils import get_project_root
 
@@ -16,7 +16,7 @@ class _CppTemplateGen(BaseGen):
     """
 
     def __init__(self, config: Config) -> None:
-        self.template_dir = Path(SCARGO_PGK_PATH, "jinja", "cpp")
+        self.template_dir = Path(SCARGO_PKG_PATH, "jinja", "cpp")
         self._config = config
         self._target = config.project.target
         self._src_dir = get_project_root() / self._target.source_dir

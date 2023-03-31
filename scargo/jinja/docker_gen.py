@@ -8,7 +8,7 @@ from pathlib import Path
 
 from scargo import __version__
 from scargo.config import ProjectConfig
-from scargo.global_values import SCARGO_PGK_PATH
+from scargo.global_values import SCARGO_PKG_PATH
 from scargo.jinja.base_gen import BaseGen
 from scargo.logger import get_logger
 from scargo.path_utils import get_project_root
@@ -20,7 +20,7 @@ class _DockerComposeTemplate(BaseGen):
     """
 
     def __init__(self, project_config: ProjectConfig, docker_path: Path):
-        template_dir = Path(SCARGO_PGK_PATH, "jinja", "docker")
+        template_dir = Path(SCARGO_PKG_PATH, "jinja", "docker")
         BaseGen.__init__(self, template_dir)
         self.docker_path = docker_path
         # List of files to generate (template_path, output_path)

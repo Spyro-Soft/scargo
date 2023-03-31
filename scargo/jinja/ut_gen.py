@@ -7,7 +7,7 @@ from pathlib import Path
 from typing import List, Sequence
 
 from scargo.config import Config
-from scargo.global_values import SCARGO_PGK_PATH
+from scargo.global_values import SCARGO_PKG_PATH
 from scargo.jinja.base_gen import BaseGen
 from scargo.jinja.mock_utils.cmake_utils import add_subdirs_to_cmake
 from scargo.path_utils import get_project_root
@@ -34,7 +34,7 @@ class HeaderDescriptor:
 
 class _UnitTestsGen(BaseGen):
     def __init__(self, config: Config):
-        template_dir = Path(SCARGO_PGK_PATH, "jinja", "ut_templates")
+        template_dir = Path(SCARGO_PKG_PATH, "jinja", "ut_templates")
         BaseGen.__init__(self, template_dir)
 
         self._config = config

@@ -7,7 +7,7 @@ import os
 from dataclasses import dataclass
 from pathlib import Path
 
-from scargo.global_values import ENV_DEFAULT_NAME, SCARGO_PGK_PATH
+from scargo.global_values import ENV_DEFAULT_NAME, SCARGO_PKG_PATH
 from scargo.jinja.base_gen import BaseGen
 
 
@@ -30,7 +30,7 @@ class _EnvTemplate(BaseGen):
     """
 
     def __init__(self, output_path: Path):
-        self.template_dir = Path(SCARGO_PGK_PATH, "jinja", "docker")
+        self.template_dir = Path(SCARGO_PKG_PATH, "jinja", "docker")
         BaseGen.__init__(self, self.template_dir)
         self.env_output_path = output_path / ENV_DEFAULT_NAME
 
