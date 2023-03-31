@@ -23,7 +23,7 @@ SRC_DIR = "src"
 MOCKS_DIR = "tests/mocks"
 
 jinja_env = Environment(
-    loader=FileSystemLoader(absolute_path / "mock_templates"),
+    loader=FileSystemLoader(absolute_path / "templates" / "mock"),
     trim_blocks=True,
     lstrip_blocks=True,
 )
