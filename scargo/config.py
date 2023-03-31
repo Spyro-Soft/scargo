@@ -20,16 +20,16 @@ class Config(BaseModel):
     profiles: Dict[str, "ProfileConfig"] = Field(..., alias="profile")
     check: "ChecksConfig"
     doc: "DocConfig" = Field(
-        default_factory=lambda: DocConfig()
-    )  # pylint: disable=unnecessary-lambda
+        default_factory=lambda: DocConfig()  # pylint: disable=unnecessary-lambda
+    )
     tests: "TestConfig"
     dependencies: "Dependencies"
     conan: "ConanConfig"
     stm32: Optional["Stm32Config"]
     esp32: Optional["Esp32Config"]
     scargo: "ScargoConfig" = Field(
-        default_factory=lambda: ScargoConfig()
-    )  # pylint: disable=unnecessary-lambda
+        default_factory=lambda: ScargoConfig()  # pylint: disable=unnecessary-lambda
+    )
 
     def get_stm32_config(self) -> "Stm32Config":
         if not self.stm32:
@@ -42,9 +42,9 @@ class Config(BaseModel):
         return self.esp32
 
     @root_validator
-    def validate_special_configs(
+    def validate_special_configs(  # pylint: disable=no-self-argument
         cls, values: Dict[str, Any]
-    ) -> Dict[str, Any]:  # pylint: disable=no-self-argument
+    ) -> Dict[str, Any]:
         target_id = values["project"].target_id
         if target_id == "stm32" and not values["stm32"]:
             raise ConfigError("No [stm32] section in config")
