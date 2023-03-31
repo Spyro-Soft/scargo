@@ -19,20 +19,18 @@ from scargo.jinja.env_gen import generate_env
 from scargo.jinja.readme_gen import generate_readme
 from scargo.jinja.tests_gen import generate_tests
 from scargo.logger import get_logger
-from scargo.path_utils import get_project_root
 
 
-def copy_file_if_not_exists() -> None:
+def copy_file_if_not_exists(project_path: Path) -> None:
     """
     Copy file from scargo pkg
 
     :return: None
     """
     files_to_copy = Path(SCARGO_PKG_PATH, "templates").glob("*")
-    project_abs_path = get_project_root()
     for file in files_to_copy:
-        if not Path(project_abs_path, file.name).exists():
-            shutil.copy2(file, project_abs_path)
+        if not Path(project_path, file.name).exists():
+            shutil.copy2(file, project_path)
 
 
 def scargo_update(config_file_path: Path) -> None:
@@ -43,7 +41,7 @@ def scargo_update(config_file_path: Path) -> None:
     :return: None
     """
     logger = get_logger()
-    project_path = get_project_root()
+    project_path = config_file_path.parent
     docker_path = Path(project_path, ".devcontainer")
     config = get_scargo_config_or_exit(config_file_path)
     if not config.project:
@@ -57,7 +55,7 @@ def scargo_update(config_file_path: Path) -> None:
         sys.exit(1)
 
     # Copy templates project files to repo directory
-    copy_file_if_not_exists()
+    copy_file_if_not_exists(project_path)
 
     # Copy config file and create lock file.
     shutil.copyfile(config_file_path, project_path / SCARGO_LOCK_FILE)
