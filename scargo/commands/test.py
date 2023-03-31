@@ -10,7 +10,6 @@ from pathlib import Path
 from scargo.config import Config
 from scargo.config_utils import prepare_config
 from scargo.logger import get_logger
-from scargo.path_utils import get_project_root
 
 
 def scargo_test(verbose: bool) -> None:
@@ -22,7 +21,7 @@ def scargo_test(verbose: bool) -> None:
     config = prepare_config()
 
     test_dir_name = "tests"
-    project_dir = get_project_root()
+    project_dir = config.project_root
     tests_src_dir = project_dir / test_dir_name
     test_build_dir = project_dir / "build" / test_dir_name
 

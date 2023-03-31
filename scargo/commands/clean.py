@@ -7,8 +7,8 @@ import shutil
 from pathlib import Path
 from typing import Optional
 
+from scargo.config_utils import get_scargo_config_or_exit
 from scargo.logger import get_logger
-from scargo.path_utils import get_project_root
 
 
 def _case_insensitive_find_dir(source_dir: Path, dirname: str) -> Optional[Path]:
@@ -23,7 +23,8 @@ def scargo_clean() -> None:
     """Clean project dir from unnecessary files"""
     logger = get_logger()
 
-    project_path = get_project_root()
+    config = get_scargo_config_or_exit()
+    project_path = config.project_root
     test_dir = _case_insensitive_find_dir(project_path, "test")
     source_directories = [project_path, test_dir]
 

@@ -30,6 +30,7 @@ class Config(BaseModel):
     scargo: "ScargoConfig" = Field(
         default_factory=lambda: ScargoConfig()  # pylint: disable=unnecessary-lambda
     )
+    project_root: Path
 
     def get_stm32_config(self) -> "Stm32Config":
         if not self.stm32:
@@ -217,4 +218,6 @@ Esp32Config.update_forward_refs()
 
 
 def parse_config(config_file_path: Path) -> Config:
-    return Config.parse_obj(toml.load(config_file_path))
+    config_obj = toml.load(config_file_path)
+    config_obj["project_root"] = config_file_path.parent.absolute()
+    return Config.parse_obj(config_obj)

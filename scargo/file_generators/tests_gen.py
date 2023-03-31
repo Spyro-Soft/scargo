@@ -9,13 +9,11 @@ from shutil import copytree
 from scargo.config import Config
 from scargo.file_generators.base_gen import create_file_from_template
 from scargo.global_values import SCARGO_PKG_PATH
-from scargo.path_utils import get_project_root
 
 
 def generate_tests(config: Config) -> None:
     """Generate dirs and files"""
     tests_template_dir = Path(SCARGO_PKG_PATH, "file_generators", "templates", "tests")
-    project_path = get_project_root()
 
     # List of files to generate once (template_path, output_path)
     gen_once_file_list = [
@@ -24,7 +22,7 @@ def generate_tests(config: Config) -> None:
         ("tests/CMakeLists-mocks.txt.j2", "tests/mocks/CMakeLists.txt"),
     ]
 
-    static_mock_dir = project_path / "tests" / "mocks" / "static_mock"
+    static_mock_dir = config.project_root / "tests" / "mocks" / "static_mock"
     if not static_mock_dir.exists():
         copytree(tests_template_dir / "static_mock", static_mock_dir)
 

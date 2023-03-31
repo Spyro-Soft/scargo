@@ -43,7 +43,7 @@ def prepare_config(run_in_docker: bool = True) -> Config:
     config = get_scargo_config_or_exit()
     check_scargo_version(config)
     if run_in_docker:
-        run_scargo_again_in_docker(config.project)
+        run_scargo_again_in_docker(config.project, config.project_root)
     return config
 
 

@@ -25,13 +25,6 @@ ENV_CONAN_PASSWORD = "env_conan_password"
 
 
 @pytest.fixture
-def mock_get_project_root(monkeypatch: pytest.MonkeyPatch) -> None:
-    monkeypatch.setattr(
-        "scargo.commands.publish.get_project_root", lambda: Path("some_path")
-    )
-
-
-@pytest.fixture
 def config(monkeypatch: pytest.MonkeyPatch) -> Config:
     test_project_config = get_test_project_config()
     test_project_config.conan.repo[REMOTE_REPO_NAME_1] = EXAMPLE_URL
@@ -45,7 +38,7 @@ def config(monkeypatch: pytest.MonkeyPatch) -> Config:
     return test_project_config
 
 
-def test_publish(config: Config, mock_get_project_root: None, fp: FakeProcess) -> None:
+def test_publish(config: Config, fp: FakeProcess) -> None:
     # ARRANGE
     project_name = config.project.name
     version = config.project.version
@@ -160,7 +153,6 @@ def test_conan_clean_remote_fail(caplog: LogCaptureFixture, fp: FakeProcess) -> 
 
 def test_create_package_fail(
     config: Config,
-    mock_get_project_root: None,
     caplog: LogCaptureFixture,
     fp: FakeProcess,
 ) -> None:
@@ -194,7 +186,6 @@ def test_create_package_fail(
 
 def test_upload_package_fail(
     config: Config,
-    mock_get_project_root: None,
     caplog: LogCaptureFixture,
     fp: FakeProcess,
 ) -> None:

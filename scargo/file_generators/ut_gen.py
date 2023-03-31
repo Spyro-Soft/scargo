@@ -9,7 +9,6 @@ from typing import List, Sequence
 from scargo.config import Config
 from scargo.file_generators.base_gen import create_file_from_template
 from scargo.file_generators.mock_utils.cmake_utils import add_subdirs_to_cmake
-from scargo.path_utils import get_project_root
 
 HEADER_EXTENSIONS = (".h", ".hpp")
 SRC_EXTENSIONS = (".c", ".cpp")
@@ -34,7 +33,7 @@ class HeaderDescriptor:
 class _UnitTestsGen:
     def __init__(self, config: Config):
         self._config = config
-        self._project_path = get_project_root()
+        self._project_path = config.project_root
         self._ut_dir = self._project_path / "tests/ut"
 
     def generate_tests(self, input_path: Path, overwrite: bool) -> None:

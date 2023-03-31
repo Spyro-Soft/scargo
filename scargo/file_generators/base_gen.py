@@ -10,7 +10,6 @@ from jinja2 import Environment, FileSystemLoader
 from scargo.config import Config
 from scargo.global_values import SCARGO_PKG_PATH
 from scargo.logger import get_logger
-from scargo.path_utils import get_project_root
 
 _TEMPLATE_ROOT = Path(SCARGO_PKG_PATH, "file_generators", "templates")
 _JINJA_ENV = Environment(
@@ -28,7 +27,7 @@ def create_file_from_template(
     overwrite: bool = True,
 ) -> None:
     """Creates file using jinja template on output path, creates dirs if necessary"""
-    project_path = get_project_root()
+    project_path = config.project_root
     output_path = Path(project_path, output_path)
     if (
         _is_file_excluded(output_path, project_path, config)

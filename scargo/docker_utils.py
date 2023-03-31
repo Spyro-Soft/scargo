@@ -8,20 +8,21 @@ from docker import DockerClient
 from scargo.config import ProjectConfig
 from scargo.global_values import SCARGO_DOCKER_ENV
 from scargo.logger import get_logger
-from scargo.path_utils import get_project_root
 
 
-def run_scargo_again_in_docker(project_config: ProjectConfig) -> None:
+def run_scargo_again_in_docker(
+    project_config: ProjectConfig, project_path: Path
+) -> None:
     """
     Run command in docker
 
     :param dict project_config: project configuration
+    :param Path project_path: path to project root
     :return: None
     """
     build_env = project_config.build_env
     if build_env != SCARGO_DOCKER_ENV or Path("/.dockerenv").exists():
         return
-    project_path = get_project_root()
     relative_path = Path.cwd().absolute().relative_to(project_path)
     path_in_docker = Path("/workspace", relative_path)
 

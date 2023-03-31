@@ -6,7 +6,7 @@ from pytest_subprocess import FakeProcess
 
 from scargo.commands.test import scargo_test
 from scargo.config import Config
-from scargo.path_utils import get_project_root
+from scargo.path_utils import get_project_root_or_none
 
 
 def test_scargo_test_no_test_dir(create_new_project: None) -> None:
@@ -24,7 +24,8 @@ def test_scargo_test_no_cmake_file(
 
 
 def test_scargo_test(create_new_project: None, fp: FakeProcess) -> None:
-    project_root = get_project_root()
+    project_root = get_project_root_or_none()
+    assert project_root is not None
     tests_src_dir = project_root / "tests"
     test_build_dir = project_root / "build/tests"
     html_coverage_file = "ut-coverage.html"

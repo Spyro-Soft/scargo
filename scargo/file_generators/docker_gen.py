@@ -10,7 +10,6 @@ from scargo import __version__
 from scargo.config import Config
 from scargo.file_generators.base_gen import create_file_from_template
 from scargo.logger import get_logger
-from scargo.path_utils import get_project_root
 
 
 class _DockerComposeTemplate:
@@ -43,7 +42,7 @@ class _DockerComposeTemplate:
             config=self._config,
         )
 
-        project_root = get_project_root()
+        project_root = self._config.project_root
         custom_docker_path = project_root / self._config.project.docker_file
         if custom_docker_path.is_file():
             custom_docker = custom_docker_path.read_text()

@@ -14,7 +14,6 @@ from scargo.commands.publish import (
 )
 from scargo.config_utils import prepare_config
 from scargo.logger import get_logger
-from scargo.path_utils import get_project_root
 
 
 def scargo_build(profile: str) -> None:
@@ -24,10 +23,10 @@ def scargo_build(profile: str) -> None:
     :param str profile: Profile
     :return: None
     """
-    prepare_config()
+    config = prepare_config()
     logger = get_logger()
 
-    project_dir = get_project_root()
+    project_dir = config.project_root
     if not project_dir:
         logger.error("Current working directory is not part of scargo project.")
         sys.exit(1)
