@@ -17,9 +17,9 @@ set(CONAN_DISABLE_CHECK_COMPILER ON)
 {% endif %}
 
 {% if config.project.target.family == 'stm32' %}
-{% include 'stm32.cmake.j2' %}
+{% include 'templates/stm32.cmake.j2' %}
 {% elif config.project.target.family == 'x86' %}
-{% include 'x86.cmake.j2' %}
+{% include 'templates/x86.cmake.j2' %}
 {% endif %}
 
 set(CMAKE_CXX_STANDARD {{ config.project.cxxstandard }})
@@ -52,7 +52,7 @@ ENDIF()
 {% endfor %}
 
 {% if config.project.target.family == "esp32" %}
-{% include 'esp32.cmake.j2' %}
+{% include 'templates/esp32.cmake.j2' %}
 {% else %}
 add_subdirectory(src)
 {% endif %}

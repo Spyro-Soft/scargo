@@ -25,7 +25,7 @@ RUN apt -y install cppcheck bzr lib32z1 \
     libcmocka0 libcmocka-dev plantuml
 
 FROM cpp AS {{ project.target.family }}
-{% include 'Dockerfile-' + project.target.family + '.j2' %}
+{% include 'docker/Dockerfile-' + project.target.family + '.j2' %}
 
 WORKDIR /opt
 

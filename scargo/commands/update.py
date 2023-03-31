@@ -66,8 +66,8 @@ def scargo_update(config_file_path: Path) -> None:
     target = project_config.target
 
     # Copy docker env files to repo directory
-    generate_docker_compose(docker_path, project_config)
-    generate_env(docker_path)
+    generate_docker_compose(docker_path, config)
+    generate_env(docker_path, config)
 
     generate_cmake(config)
     generate_conanfile(config)
@@ -85,9 +85,9 @@ def scargo_update(config_file_path: Path) -> None:
                 out.write(line + "\n")
             out.write("\n")
 
-    generate_cicd(project_config=project_config)
-    generate_tests(target, config.tests)
-    generate_readme(project_config)
+    generate_cicd(config=config)
+    generate_tests(config)
+    generate_readme(config)
 
     # do not rebuild dockers in the docker
     if target.family == "stm32" and not Path("third-party/stm32-cmake").is_dir():
