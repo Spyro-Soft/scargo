@@ -11,9 +11,9 @@ FILE_CONTENTS_WITHOUT_COPYRIGHT = [
 ]
 
 FILE_CONTENTS_WITH_COPYRIGHT = [
-    "//\n",
-    "// Copyright\n",
-    "//\n",
+    "//",
+    "// Copyright",
+    "//",
     "int main(void);",
 ]
 
@@ -23,6 +23,10 @@ FILE_CONTENTS_WITH_INCORRECT_COPYRIGHT = [
 ]
 
 MISSING_COPYRIGHT_WARNING = ("INFO", "Missing copyright in foo/bar.hpp.")
+INCORRECT_COPYRIGHT_WARNING = (
+    "WARNING",
+    "Incorrect and not excluded copyright in foo/bar.hpp",
+)
 
 
 @pytest.mark.parametrize(
