@@ -65,6 +65,7 @@ More Information
    Versions <versions>
    Architecture model <arch/index>
    About <about>
+   Contributing <contributing>
 
 .. =========================================================
 .. Project Documentation
