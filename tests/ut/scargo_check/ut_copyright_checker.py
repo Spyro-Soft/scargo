@@ -11,7 +11,9 @@ FILE_CONTENTS_WITHOUT_COPYRIGHT = [
 ]
 
 FILE_CONTENTS_WITH_COPYRIGHT = [
-    "// Copyright",
+    "//\n",
+    "// Copyright\n",
+    "//\n",
     "int main(void);",
 ]
 
@@ -21,10 +23,6 @@ FILE_CONTENTS_WITH_INCORRECT_COPYRIGHT = [
 ]
 
 MISSING_COPYRIGHT_WARNING = ("INFO", "Missing copyright in foo/bar.hpp.")
-INCORRECT_COPYRIGHT_WARNING = (
-    "WARNING",
-    "Incorrect and not excluded copyright in foo/bar.hpp",
-)
 
 
 @pytest.mark.parametrize(
@@ -33,13 +31,12 @@ INCORRECT_COPYRIGHT_WARNING = (
     indirect=True,
 )
 def test_check_copyright_pass(
-    mock_file_contents: MagicMock,
-    caplog: pytest.LogCaptureFixture,
-    config: Config,
-    mock_find_files: MagicMock,
+        mock_file_contents: MagicMock,
+        caplog: pytest.LogCaptureFixture,
+        config: Config,
+        mock_find_files: MagicMock,
 ) -> None:
     CopyrightChecker(config).check()
-
     assert all(level != "WARNING" for level, msg in get_log_data(caplog.records))
 
 
@@ -49,10 +46,10 @@ def test_check_copyright_pass(
     indirect=True,
 )
 def test_check_copyright_fail(
-    mock_file_contents: MagicMock,
-    caplog: pytest.LogCaptureFixture,
-    config: Config,
-    mock_find_files: MagicMock,
+        mock_file_contents: MagicMock,
+        caplog: pytest.LogCaptureFixture,
+        config: Config,
+        mock_find_files: MagicMock,
 ) -> None:
     with pytest.raises(SystemExit) as wrapped_exception:
         CopyrightChecker(config).check()
@@ -69,18 +66,18 @@ def test_check_copyright_fail(
     indirect=True,
 )
 def test_check_copyright_fail_incorrect(
-    mock_file_contents: MagicMock,
-    caplog: pytest.LogCaptureFixture,
-    config: Config,
-    mock_find_files: MagicMock,
+        mock_file_contents: MagicMock,
+        caplog: pytest.LogCaptureFixture,
+        config: Config,
+        mock_find_files: MagicMock,
 ) -> None:
     with pytest.raises(SystemExit) as wrapped_exception:
         CopyrightChecker(config).check()
 
     assert wrapped_exception.value.code == 1
     log_data = get_log_data(caplog.records)
-    assert INCORRECT_COPYRIGHT_WARNING in log_data
-    assert MISSING_COPYRIGHT_WARNING not in log_data
+    assert MISSING_COPYRIGHT_WARNING in log_data
+    assert INCORRECT_COPYRIGHT_WARNING not in log_data
 
 
 @pytest.mark.parametrize(
@@ -89,7 +86,7 @@ def test_check_copyright_fail_incorrect(
     indirect=True,
 )
 def test_check_copyright_fix(
-    mock_file_contents: MagicMock, config: Config, mock_find_files: MagicMock
+        mock_file_contents: MagicMock, config: Config, mock_find_files: MagicMock
 ) -> None:
     CopyrightChecker(config, fix_errors=True).check()
     assert mock_file_contents().write.mock_calls == [
@@ -106,15 +103,21 @@ def test_check_copyright_fix(
     [(FILE_CONTENTS_WITH_INCORRECT_COPYRIGHT,)],
     indirect=True,
 )
-def test_check_copyright_no_fix_incorrect(
-    mock_file_contents: MagicMock, config: Config, mock_find_files: MagicMock
+def test_check_copyright_fix_2(
+        mock_file_contents: MagicMock, config: Config, mock_find_files: MagicMock
 ) -> None:
     CopyrightChecker(config, fix_errors=True).check()
-    assert mock_file_contents().write.mock_calls == []
+    assert mock_file_contents().write.mock_calls == [
+        call("//\n"),
+        call("// Copyright\n"),
+        call("//\n"),
+        call("\n"),
+        call("// copyright\nint main(void);"),
+    ]
 
 
 def test_check_copyright_no_description(
-    config: Config, caplog: pytest.LogCaptureFixture
+        config: Config, caplog: pytest.LogCaptureFixture
 ) -> None:
     config.check.copyright.description = None
 
