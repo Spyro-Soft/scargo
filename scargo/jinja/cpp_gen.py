@@ -1,32 +1,31 @@
 # #
 # @copyright Copyright (C) 2023 SpyroSoft Solutions S.A. All rights reserved.
 # #
-
 from pathlib import Path
+from typing import Any, Dict
 
 from scargo.config import Config
-from scargo.global_values import SCARGO_PKG_PATH
-from scargo.jinja.base_gen import BaseGen
+from scargo.jinja.base_gen import create_file_from_template
 
 
-class _CppTemplateGen(BaseGen):
+class _CppTemplateGen:
     """
     This class is a container cpp files creation with multilayer approach
     """
 
     def __init__(self, config: Config) -> None:
-        self.template_dir = Path(SCARGO_PKG_PATH, "jinja", "cpp")
         self._config = config
-        self._target = config.project.target
-        self._src_dir = Path(self._target.source_dir).absolute()
-        BaseGen.__init__(self, self.template_dir)
+        self._src_dir = Path(config.project.target.source_dir).absolute()
 
     def _generate_bin(self, bin_name: str) -> None:
         """Function which creates main.cpp file using jinja"""
-        self.create_file_from_template(
-            "main.cpp.j2",
-            Path(self._src_dir, f"{bin_name.lower()}.cpp"),
-            template_params={"target": self._target, "bin_name": bin_name},
+        self._create_file_from_template(
+            "cpp/main.cpp.j2",
+            f"{bin_name.lower()}.cpp",
+            template_params={
+                "target": self._config.project.target,
+                "bin_name": bin_name,
+            },
         )
 
     def _generate_lib(self, lib_name: str) -> None:
@@ -35,22 +34,35 @@ class _CppTemplateGen(BaseGen):
         lib_name = lib_name.lower()
         class_name = "".join(lib_name.replace("_", " ").title().split())
 
-        self.create_file_from_template(
-            "lib.cpp.j2",
-            Path(self._src_dir, f"{lib_name}.cpp"),
+        self._create_file_from_template(
+            "cpp/lib.cpp.j2",
+            f"{lib_name}.cpp",
             template_params={"class_name": class_name, "lib_name": lib_name},
         )
-        self.create_file_from_template(
-            "lib.h.j2",
-            Path(self._src_dir, f"{lib_name}.h"),
-            {"class_name": class_name},
+        self._create_file_from_template(
+            "cpp/lib.h.j2",
+            f"{lib_name}.h",
+            template_params={"class_name": class_name},
         )
 
     def _generate_cmake(self) -> None:
-        self.create_file_from_template(
-            f"cmake-src-{self._target.family}.j2",
-            Path(self._src_dir, "CMakeLists.txt"),
+        self._create_file_from_template(
+            f"cpp/cmake-src-{self._config.project.target.family}.j2",
+            "CMakeLists.txt",
             template_params={"config": self._config},
+        )
+
+    def _create_file_from_template(
+        self,
+        template_path: str,
+        output_filename: str,
+        template_params: Dict[str, Any],
+    ) -> None:
+        create_file_from_template(
+            template_path,
+            self._src_dir / output_filename,
+            template_params=template_params,
+            config=self._config,
         )
 
     def generate_cpp(self) -> None:

@@ -7,8 +7,7 @@ from pathlib import Path
 from typing import List, Sequence
 
 from scargo.config import Config
-from scargo.global_values import SCARGO_PKG_PATH
-from scargo.jinja.base_gen import BaseGen
+from scargo.jinja.base_gen import create_file_from_template
 from scargo.jinja.mock_utils.cmake_utils import add_subdirs_to_cmake
 from scargo.path_utils import get_project_root
 
@@ -32,11 +31,8 @@ class HeaderDescriptor:
         self.namespaces = namespaces
 
 
-class _UnitTestsGen(BaseGen):
+class _UnitTestsGen:
     def __init__(self, config: Config):
-        template_dir = Path(SCARGO_PKG_PATH, "jinja", "ut_templates")
-        BaseGen.__init__(self, template_dir)
-
         self._config = config
         self._project_path = get_project_root()
         self._ut_dir = self._project_path / "tests/ut"
@@ -71,11 +67,12 @@ class _UnitTestsGen(BaseGen):
         :param bool overwrite: overwrite if exists
         """
         header_descriptor = self._parse_header_file(input_file_path)
-        self.create_file_from_template(
-            "ut.cpp.j2",
+        create_file_from_template(
+            "ut_templates/ut.cpp.j2",
             output_file_path,
             overwrite=overwrite,
             template_params={"header": header_descriptor},
+            config=self._config,
         )
 
     def _generate_cmake(self, src_dir_path: Path, ut_dir_path: Path) -> None:
@@ -104,8 +101,8 @@ class _UnitTestsGen(BaseGen):
             if p.name != main_cpp
         ]
 
-        self.create_file_from_template(
-            "CMakeLists.txt.j2",
+        create_file_from_template(
+            "ut_templates/CMakeLists.txt.j2",
             ut_dir_path / "CMakeLists.txt",
             overwrite=True,
             template_params={
@@ -113,6 +110,7 @@ class _UnitTestsGen(BaseGen):
                 "utest_name": ut_name,
                 "ut_files": ut_files,
             },
+            config=self._config,
         )
 
     def _get_unit_test_path(self, input_src_path: Path) -> Path:

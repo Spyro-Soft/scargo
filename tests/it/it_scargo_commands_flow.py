@@ -6,6 +6,7 @@ from unittest.mock import patch
 import pytest
 
 from scargo.cli import cli
+from scargo.config import parse_config
 from scargo.jinja.docker_gen import _DockerComposeTemplate
 from scargo.jinja.env_gen import generate_env
 from scargo.path_utils import get_project_root
@@ -103,7 +104,8 @@ def copy_project_x86() -> None:
     copytree(TEST_PROJECT_PATH, os.getcwd(), dirs_exist_ok=True)
     project_path = get_project_root()
     docker_path = Path(project_path, ".devcontainer")
-    generate_env(docker_path)
+    config = parse_config(project_path / "scargo.lock")
+    generate_env(docker_path, config)
 
 
 @pytest.fixture()
@@ -111,7 +113,8 @@ def copy_project_esp32() -> None:
     copytree(TEST_PROJECT_ESP32_PATH, os.getcwd(), dirs_exist_ok=True)
     project_path = get_project_root()
     docker_path = Path(project_path, ".devcontainer")
-    generate_env(docker_path)
+    config = parse_config(project_path / "scargo.lock")
+    generate_env(docker_path, config)
 
 
 @pytest.fixture()
@@ -119,7 +122,8 @@ def copy_project_stm32() -> None:
     copytree(TEST_PROJECT_STM32_PATH, os.getcwd(), dirs_exist_ok=True)
     project_path = get_project_root()
     docker_path = Path(project_path, ".devcontainer")
-    generate_env(docker_path)
+    config = parse_config(project_path / "scargo.lock")
+    generate_env(docker_path, config)
 
 
 @pytest.mark.parametrize("project_creation", PROJECT_CREATION_x86)

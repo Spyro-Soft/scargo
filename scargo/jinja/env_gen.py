@@ -7,8 +7,9 @@ import os
 from dataclasses import dataclass
 from pathlib import Path
 
-from scargo.global_values import ENV_DEFAULT_NAME, SCARGO_PKG_PATH
-from scargo.jinja.base_gen import BaseGen
+from scargo.config import Config
+from scargo.global_values import ENV_DEFAULT_NAME
+from scargo.jinja.base_gen import create_file_from_template
 
 
 @dataclass
@@ -23,26 +24,16 @@ class _EnvironmentDescriptor:
     conan_passwd: str = ""
 
 
-class _EnvTemplate(BaseGen):
+def generate_env(output_dir_path: Path, config: Config) -> None:
     """
-    This class is a container for env file which is used by docker compose
-    Is providing basic environmental variable setup
+    Generate .env file which is used by docker compose
+    providing environmental variables
     """
-
-    def __init__(self, output_path: Path):
-        self.template_dir = Path(SCARGO_PKG_PATH, "jinja", "docker")
-        BaseGen.__init__(self, self.template_dir)
-        self.env_output_path = output_path / ENV_DEFAULT_NAME
-
-    def generate_env(self) -> None:
-        self.create_file_from_template(
-            "env.txt.j2",
-            self.env_output_path,
-            overwrite=False,
-            template_params={"env": _EnvironmentDescriptor()},
-        )
-
-
-def generate_env(output_dir_path: Path) -> None:
-    env_compose_template = _EnvTemplate(output_dir_path)
-    env_compose_template.generate_env()
+    env_output_path = output_dir_path / ENV_DEFAULT_NAME
+    create_file_from_template(
+        "docker/env.txt.j2",
+        env_output_path,
+        overwrite=False,
+        template_params={"env": _EnvironmentDescriptor()},
+        config=config,
+    )

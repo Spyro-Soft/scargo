@@ -3,53 +3,48 @@
 # #
 
 from pathlib import Path
-from typing import Any, Dict
+from typing import Any, Dict, Union
 
 from jinja2 import Environment, FileSystemLoader
 
-from scargo.config_utils import get_scargo_config_or_exit
+from scargo.config import Config
+from scargo.global_values import SCARGO_PKG_PATH
 from scargo.logger import get_logger
-from scargo.path_utils import get_config_file_path, get_project_root
+from scargo.path_utils import get_project_root
+
+_TEMPLATE_ROOT = Path(SCARGO_PKG_PATH, "jinja")
+_JINJA_ENV = Environment(
+    loader=FileSystemLoader(_TEMPLATE_ROOT),
+    trim_blocks=True,
+    lstrip_blocks=True,
+)
 
 
-class BaseGen:
-    def __init__(self, templates_path: Path) -> None:
-        self.jinja_env = Environment(
-            loader=FileSystemLoader(templates_path),
-            trim_blocks=True,
-            lstrip_blocks=True,
-        )
+def create_file_from_template(
+    template_path: str,
+    output_path: Union[Path, str],
+    template_params: Dict[str, Any],
+    config: Config,
+    overwrite: bool = True,
+) -> None:
+    """Creates file using jinja template on output path, creates dirs if necessary"""
+    project_path = get_project_root()
+    output_path = Path(project_path, output_path)
+    if (
+        _is_file_excluded(output_path, project_path, config)
+        or output_path.exists()
+        and not overwrite
+    ):
+        return
 
-    def create_file_from_template(
-        self,
-        template: str,
-        output_path: Path,
-        template_params: Dict[str, Any],
-        overwrite: bool = True,
-    ) -> None:
-        """Creates file using jinja template on output path, creates dirs if necessary"""
-        if (
-            self._is_file_excluded(output_path)
-            or output_path.exists()
-            and not overwrite
-        ):
-            return
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+    content = _JINJA_ENV.get_template(template_path).render(template_params)
+    output_path.write_text(content, encoding="utf-8")
 
-        output_path.parent.mkdir(parents=True, exist_ok=True)
-        content = self.jinja_env.get_template(template).render(template_params)
-        output_path.write_text(content, encoding="utf-8")
+    logger = get_logger()
+    logger.info("Generated %s", output_path)
 
-        logger = get_logger()
-        logger.info("Generated %s", output_path)
 
-    @staticmethod
-    def _is_file_excluded(output_path: Path) -> bool:
-        # BaseGen is used in scargo new as well as scargo update, so sometimes
-        # scargo.lock does not exist yet. Take values from toml instead.
-        config_path = get_config_file_path("scargo.lock") or get_config_file_path(
-            "scargo.toml"
-        )
-        toml_data = get_scargo_config_or_exit(config_path)
-        exclude_list = toml_data.scargo.update_exclude
-        project_path = get_project_root()
-        return str(output_path.absolute().relative_to(project_path)) in exclude_list
+def _is_file_excluded(output_path: Path, project_path: Path, config: Config) -> bool:
+    exclude_list = config.scargo.update_exclude
+    return str(output_path.absolute().relative_to(project_path)) in exclude_list
