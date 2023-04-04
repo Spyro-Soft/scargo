@@ -189,7 +189,7 @@ class CopyrightChecker(CheckerFixer):
             return
         super().check()
 
-    def __cfile_copyrights(self) -> List[str]:
+    def __get_copyright_lines(self) -> List[str]:
         return ["//\n"] + [f"// {el}\n" for el in self.copyright_desc.split("\n")] + ["//\n"]
 
     def check_file(self, file_path: Path) -> CheckResult:
@@ -198,7 +198,7 @@ class CopyrightChecker(CheckerFixer):
             if all(
                 line_from_file == line_from_description
                 for line_from_file, line_from_description in zip(
-                    file.readlines(), self.__cfile_copyrights()
+                    file.readlines(), self.__get_copyright_lines()
                 )
             ):
                 return CheckResult(problems_found=0)
@@ -211,7 +211,7 @@ class CopyrightChecker(CheckerFixer):
             old = file.read()
 
         with open(file_path, "w", encoding="utf-8") as file:
-            for line in self.__cfile_copyrights():
+            for line in self.__get_copyright_lines():
                 file.write(line)
             file.write("\n")
             file.write(old)
