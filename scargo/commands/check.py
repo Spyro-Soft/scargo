@@ -206,16 +206,15 @@ class CopyrightChecker(CheckerFixer):
         logger.info("Missing copyright in %s.", file_path)
         return CheckResult(problems_found=1)
 
+    def fix_file(self, file_path: Path) -> None:
+        with open(file_path, encoding="utf-8") as file:
+            old = file.read()
 
-def fix_file(self, file_path: Path) -> None:
-    with open(file_path, encoding="utf-8") as file:
-        old = file.read()
-
-    with open(file_path, "w", encoding="utf-8") as file:
-        for line in self.__cfile_copyrights():
-            file.write(line)
-        file.write("\n")
-        file.write(old)
+        with open(file_path, "w", encoding="utf-8") as file:
+            for line in self.__cfile_copyrights():
+                file.write(line)
+            file.write("\n")
+            file.write(old)
 
 
 class TodoChecker(CheckerFixer):
