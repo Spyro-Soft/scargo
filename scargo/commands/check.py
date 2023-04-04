@@ -192,10 +192,9 @@ class CopyrightChecker(CheckerFixer):
     def check_file(self, file_path: Path) -> CheckResult:
         copyright_lines = (
             ["//\n"]
-            + [f"// {el}\n".replace(" \n", "\n") for el in self.copyright_desc.split("\n")]
+            + [f"// {el}\n" for el in self.copyright_desc.split("\n")]
+            + ["//\n"]
         )
-        if len(copyright_lines) == 2:
-            copyright_lines += ["//\n"]
 
         with open(file_path, encoding="utf-8") as file:
             if all(
@@ -216,8 +215,7 @@ class CopyrightChecker(CheckerFixer):
         with open(file_path, "w", encoding="utf-8") as file:
             file.write("//\n")
             for line in self.copyright_desc.split("\n"):
-                if line != "":
-                    file.write(f"// {line}\n")
+                file.write(f"// {line}\n")
             file.write("//\n")
             file.write("\n")
             file.write(old)
