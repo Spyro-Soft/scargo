@@ -189,18 +189,16 @@ class CopyrightChecker(CheckerFixer):
             return
         super().check()
 
+    def __cfile_copyrights(self) -> List[str]:
+        return ["//\n"] + [f"// {el}\n" for el in self.copyright_desc.split("\n")] + ["//\n"]
+
     def check_file(self, file_path: Path) -> CheckResult:
-        copyright_lines = (
-            ["//\n"]
-            + [f"// {el}\n" for el in self.copyright_desc.split("\n")]
-            + ["//\n"]
-        )
 
         with open(file_path, encoding="utf-8") as file:
             if all(
                 line_from_file == line_from_description
                 for line_from_file, line_from_description in zip(
-                    file.readlines(), copyright_lines
+                    file.readlines(), self.__cfile_copyrights()
                 )
             ):
                 return CheckResult(problems_found=0)
@@ -208,17 +206,16 @@ class CopyrightChecker(CheckerFixer):
         logger.info("Missing copyright in %s.", file_path)
         return CheckResult(problems_found=1)
 
-    def fix_file(self, file_path: Path) -> None:
-        with open(file_path, encoding="utf-8") as file:
-            old = file.read()
 
-        with open(file_path, "w", encoding="utf-8") as file:
-            file.write("//\n")
-            for line in self.copyright_desc.split("\n"):
-                file.write(f"// {line}\n")
-            file.write("//\n")
-            file.write("\n")
-            file.write(old)
+def fix_file(self, file_path: Path) -> None:
+    with open(file_path, encoding="utf-8") as file:
+        old = file.read()
+
+    with open(file_path, "w", encoding="utf-8") as file:
+        for line in self.__cfile_copyrights():
+            file.write(line)
+        file.write("\n")
+        file.write(old)
 
 
 class TodoChecker(CheckerFixer):
