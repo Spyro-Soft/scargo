@@ -33,9 +33,8 @@ def _extract_namespace_params(cursor: Cursor) -> MockNamespaceDescriptor:
 
 
 def _extract_class_params(cursor: Cursor) -> MockClassDescriptor:
-    cls = MockClassDescriptor(cursor.spelling, f"Mock{cursor.spelling}")
-    cls.methods = _extract_cxx_methods(cursor)
-    return cls
+    methods = _extract_cxx_methods(cursor)
+    return MockClassDescriptor(cursor.spelling, f"Mock{cursor.spelling}", methods)
 
 
 def _extract_cxx_methods(cursor: Cursor) -> List[MockFunctionDescriptor]:

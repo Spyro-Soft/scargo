@@ -53,10 +53,12 @@ class MockFunctionDescriptor:
 class MockClassDescriptor:
     """Contains class names and function definitions"""
 
-    def __init__(self, name: str, mock_name: str):
+    def __init__(
+        self, name: str, mock_name: str, methods: List[MockFunctionDescriptor]
+    ):
         self.name = name
         self.mock_name = mock_name
-        self.methods: List[MockFunctionDescriptor] = []
+        self.methods: List[MockFunctionDescriptor] = methods
         self.constructors: List[str] = []  # this is never set to anything else
         self.destructor = ""  # this is never set to anything else
 
