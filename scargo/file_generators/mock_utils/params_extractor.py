@@ -10,16 +10,6 @@ from scargo.file_generators.mock_utils.data_classes import (
 )
 
 
-def _extract_cxx_methods(cursor: Cursor) -> List[MockFunctionDescriptor]:
-    descriptors = (
-        _extract_method_params(descendant)
-        for descendant in cursor.walk_preorder()
-        if descendant.kind == CursorKind.CXX_METHOD
-    )
-
-    return [x for x in descriptors if x is not None]
-
-
 def extract_namespaces(cursor: Cursor, filename: str) -> List[MockNamespaceDescriptor]:
     return [
         _extract_namespace_params(descendant)
@@ -36,6 +26,26 @@ def extract_classes(cursor: Cursor, filename: str) -> List[MockClassDescriptor]:
         if descendant.kind == CursorKind.CLASS_DECL
         and descendant.location.file == filename
     ]
+
+
+def _extract_namespace_params(cursor: Cursor) -> MockNamespaceDescriptor:
+    return MockNamespaceDescriptor(cursor.spelling)
+
+
+def _extract_class_params(cursor: Cursor) -> MockClassDescriptor:
+    cls = MockClassDescriptor(cursor.spelling, f"Mock{cursor.spelling}")
+    cls.methods = _extract_cxx_methods(cursor)
+    return cls
+
+
+def _extract_cxx_methods(cursor: Cursor) -> List[MockFunctionDescriptor]:
+    descriptors = (
+        _extract_method_params(descendant)
+        for descendant in cursor.walk_preorder()
+        if descendant.kind == CursorKind.CXX_METHOD
+    )
+
+    return [x for x in descriptors if x is not None]
 
 
 def _extract_method_params(
@@ -56,13 +66,3 @@ def _extract_method_params(
         if i.kind == CursorKind.PARM_DECL:
             fun_args.append(ArgumentDescriptor(i.spelling, i.type.spelling))
     return MockFunctionDescriptor(fun_name, fun_ret_val, specifiers, arguments=fun_args)
-
-
-def _extract_namespace_params(cursor: Cursor) -> MockNamespaceDescriptor:
-    return MockNamespaceDescriptor(cursor.spelling)
-
-
-def _extract_class_params(cursor: Cursor) -> MockClassDescriptor:
-    cls = MockClassDescriptor(cursor.spelling, f"Mock{cursor.spelling}")
-    cls.methods = _extract_cxx_methods(cursor)
-    return cls
