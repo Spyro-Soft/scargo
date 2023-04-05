@@ -5,6 +5,7 @@
 import os
 import shutil
 from pathlib import Path
+from typing import Any, Dict
 
 from scargo import __version__
 from scargo.config import Config
@@ -19,42 +20,60 @@ class _DockerComposeTemplate:
 
     def __init__(self, config: Config, docker_path: Path):
         self.docker_path = docker_path
-        # List of files to generate (template_path, output_path)
-        self._gen_file_list = [
-            ("docker/docker-compose.yaml.j2", docker_path / "docker-compose.yaml"),
-            ("docker/Dockerfile.j2", docker_path / "Dockerfile"),
-            ("docker/devcontainer.json.j2", docker_path / "devcontainer.json"),
-        ]
-        if config.project.target.family == "stm32":
-            self._gen_file_list.extend(
-                [("docker/stm32.cfg.j2", docker_path / "stm32.cfg")]
-            )
         self._config = config
 
     def generate_docker_env(self) -> None:
         """Generate dirs and files"""
-        create_file_from_template(
+        self._create_file_from_template(
             "docker/Dockerfile-custom.j2",
-            self.docker_path / "Dockerfile-custom",
+            "Dockerfile-custom",
             template_params={},
             overwrite=False,
-            config=self._config,
         )
+        self._create_file_from_template(
+            "docker/docker-compose.yaml.j2",
+            "docker-compose.yaml",
+            template_params={"project": self._config.project},
+        )
+        self._create_file_from_template(
+            "docker/devcontainer.json.j2",
+            "devcontainer.json",
+            template_params={"project": self._config.project},
+        )
+        if self._config.project.target.family == "stm32":
+            self._create_file_from_template(
+                "docker/stm32.cfg.j2",
+                "stm32.cfg",
+                template_params={},
+            )
 
         custom_docker = self._get_dockerfile_custom_content()
         scargo_package_version = self._set_up_package_version()
 
-        for template, output_path in self._gen_file_list:
-            create_file_from_template(
-                template,
-                output_path,
-                template_params={
-                    "project": self._config.project,
-                    "scargo_package_version": scargo_package_version,
-                    "custom_docker": custom_docker,
-                },
-                config=self._config,
-            )
+        self._create_file_from_template(
+            "docker/Dockerfile.j2",
+            "Dockerfile",
+            template_params={
+                "project": self._config.project,
+                "scargo_package_version": scargo_package_version,
+                "custom_docker": custom_docker,
+            },
+        )
+
+    def _create_file_from_template(
+        self,
+        template_path: str,
+        output_filename: str,
+        template_params: Dict[str, Any],
+        overwrite: bool = True,
+    ) -> None:
+        create_file_from_template(
+            template_path,
+            self.docker_path / output_filename,
+            template_params=template_params,
+            config=self._config,
+            overwrite=overwrite,
+        )
 
     def _get_dockerfile_custom_content(self) -> str:
         project_root = self._config.project_root
