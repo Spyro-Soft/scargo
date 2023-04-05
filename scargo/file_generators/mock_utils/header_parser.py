@@ -3,7 +3,10 @@ from pathlib import Path
 from clang.cindex import Index
 
 from scargo.file_generators.mock_utils.data_classes import HeaderDescriptor
-from scargo.file_generators.mock_utils.params_extractor import ParamsExtractor
+from scargo.file_generators.mock_utils.params_extractor import (
+    extract_classes,
+    extract_namespaces,
+)
 
 
 def parse_file(file_path: Path) -> HeaderDescriptor:
@@ -15,17 +18,9 @@ def parse_file(file_path: Path) -> HeaderDescriptor:
     dict of classes where keys are "public", "private" and "mock_class_name"
     and list of namespaces, i.e. strings that start with "namespace".
     """
-    file_name = file_path.name
-
-    hdr = HeaderDescriptor(file_name)
-
     idx = Index.create()
     translation_unit = idx.parse(str(file_path), ["-x", "c++"])
 
-    hdr.namespaces = ParamsExtractor.extract_namespaces(
-        translation_unit.cursor, str(file_path)
-    )
-    hdr.classes = ParamsExtractor.extract_classes(
-        translation_unit.cursor, str(file_path)
-    )
-    return hdr
+    namespaces = extract_namespaces(translation_unit.cursor, str(file_path))
+    classes = extract_classes(translation_unit.cursor, str(file_path))
+    return HeaderDescriptor(name=file_path.name, namespaces=namespaces, classes=classes)
