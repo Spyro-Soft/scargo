@@ -1,7 +1,7 @@
 # #
 # @copyright Copyright (C) 2023 SpyroSoft Solutions S.A. All rights reserved.
 # #
-from typing import Any, List, Sequence
+from typing import List, Sequence
 
 
 class ArgumentDescriptor:
@@ -59,8 +59,6 @@ class MockClassDescriptor:
         self.name = name
         self.mock_name = mock_name
         self.methods: List[MockFunctionDescriptor] = methods
-        self.constructors: List[str] = []  # this is never set to anything else
-        self.destructor = ""  # this is never set to anything else
 
 
 class MockNamespaceDescriptor:
@@ -71,11 +69,12 @@ class MockNamespaceDescriptor:
 class HeaderDescriptor:
     """Parsed header definitions"""
 
-    def __init__(self, name: str, **kwargs: Any):
+    def __init__(
+        self,
+        name: str,
+        classes: List[MockClassDescriptor],
+        namespaces: List[MockNamespaceDescriptor],
+    ):
         self.name = name
-        self.directives = kwargs.get("directives", [])
-        self.includes = kwargs.get("includes", [])
-        self.classes = kwargs.get("classes", [])
-        self.one_line_classes = kwargs.get("one_line_classes", [])
-        self.namespaces = kwargs.get("namespaces", [])
-        self.c_style_header = kwargs.get("c_style_header", False)
+        self.classes = classes
+        self.namespaces = namespaces
