@@ -7,8 +7,8 @@ import pytest
 
 from scargo.cli import cli
 from scargo.config import parse_config
-from scargo.jinja.docker_gen import _DockerComposeTemplate
-from scargo.jinja.env_gen import generate_env
+from scargo.file_generators.docker_gen import _DockerComposeTemplate
+from scargo.file_generators.env_gen import generate_env
 from scargo.path_utils import get_project_root
 from tests.it.utils import (
     ScargoTestRunner,

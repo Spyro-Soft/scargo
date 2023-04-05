@@ -8,8 +8,8 @@ from dataclasses import dataclass
 from pathlib import Path
 
 from scargo.config import Config
+from scargo.file_generators.base_gen import create_file_from_template
 from scargo.global_values import ENV_DEFAULT_NAME
-from scargo.jinja.base_gen import create_file_from_template
 
 
 @dataclass

@@ -22,7 +22,7 @@ class TomlTemplate:
         self.output_path = output_path
         self.values = values
         self.jinja_env = Environment(
-            loader=FileSystemLoader(self.scargo_path / "jinja/templates"),
+            loader=FileSystemLoader(self.scargo_path / "file_generators/templates"),
             trim_blocks=True,
             lstrip_blocks=True,
         )

@@ -13,9 +13,9 @@ from typing import Optional
 
 from scargo.config import Config
 from scargo.config_utils import prepare_config
+from scargo.file_generators.mock_gen import generate_mocks
+from scargo.file_generators.ut_gen import generate_ut
 from scargo.global_values import SCARGO_PKG_PATH
-from scargo.jinja.mock_gen import generate_mocks
-from scargo.jinja.ut_gen import generate_ut
 from scargo.logger import get_logger
 from scargo.path_utils import get_project_root
 

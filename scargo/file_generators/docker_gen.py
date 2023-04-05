@@ -8,7 +8,7 @@ from pathlib import Path
 
 from scargo import __version__
 from scargo.config import Config
-from scargo.jinja.base_gen import create_file_from_template
+from scargo.file_generators.base_gen import create_file_from_template
 from scargo.logger import get_logger
 from scargo.path_utils import get_project_root
 
