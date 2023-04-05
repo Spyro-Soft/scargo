@@ -5,6 +5,8 @@ from pathlib import Path
 
 import pytest
 
+from scargo.global_values import SCARGO_PKG_PATH
+
 
 @pytest.fixture(autouse=True)
 def create_tmp_directory(tmp_path: Path) -> None:
@@ -15,7 +17,7 @@ def create_tmp_directory(tmp_path: Path) -> None:
 def use_local_scargo() -> None:
     # This is necessary so we can test latest changes in docker
     # Might be worth to rework with devpi later on
-    scargo_repo_root = Path(__file__).parent.parent.parent
+    scargo_repo_root = SCARGO_PKG_PATH.parent
     result = subprocess.run(
         ["flit", "build"],
         cwd=scargo_repo_root,
