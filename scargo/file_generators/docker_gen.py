@@ -9,9 +9,7 @@ from pathlib import Path
 from scargo import __version__
 from scargo.config import Config
 from scargo.file_generators.base_gen import create_file_from_template
-from scargo.logger import get_logger
-
-logger = get_logger()
+from scargo.global_values import SCARGO_PKG_PATH
 
 
 class _DockerComposeTemplate:
@@ -35,7 +33,6 @@ class _DockerComposeTemplate:
 
     def generate_docker_env(self) -> None:
         """Generate dirs and files"""
-        custom_docker = ""
         create_file_from_template(
             "docker/Dockerfile-custom.j2",
             self.docker_path / "Dockerfile-custom",
@@ -44,15 +41,7 @@ class _DockerComposeTemplate:
             config=self._config,
         )
 
-        project_root = self._config.project_root
-        custom_docker_path = project_root / self._config.project.docker_file
-        if custom_docker_path.is_file():
-            custom_docker = custom_docker_path.read_text()
-
-        logger.debug(
-            "Custom docker file path: %s", custom_docker_path.relative_to(project_root)
-        )
-
+        custom_docker = self._get_dockerfile_custom_content()
         scargo_package_version = self._set_up_package_version()
 
         for template, output_path in self._gen_file_list:
@@ -67,11 +56,18 @@ class _DockerComposeTemplate:
                 config=self._config,
             )
 
+    def _get_dockerfile_custom_content(self) -> str:
+        project_root = self._config.project_root
+        custom_docker_path = project_root / self._config.project.docker_file
+        if custom_docker_path.is_file():
+            return custom_docker_path.read_text()
+        return ""
+
     def _set_up_package_version(self) -> str:
         if whl_path_str := os.getenv("SCARGO_DOCKER_INSTALL_LOCAL"):
-            repo_root = Path(__file__).parent.parent.parent
+            repo_root = SCARGO_PKG_PATH.parent
             whl_path = repo_root / whl_path_str
-            shutil.copy(repo_root / whl_path, self.docker_path)
+            shutil.copy(whl_path, self.docker_path)
             return whl_path.name
         return f"scargo=={__version__}"
 
