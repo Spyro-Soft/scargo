@@ -12,7 +12,7 @@ from scargo.global_values import SCARGO_PKG_PATH
 from scargo.logger import get_logger
 from scargo.path_utils import get_project_root
 
-_TEMPLATE_ROOT = Path(SCARGO_PKG_PATH, "jinja")
+_TEMPLATE_ROOT = Path(SCARGO_PKG_PATH, "jinja", "templates")
 _JINJA_ENV = Environment(
     loader=FileSystemLoader(_TEMPLATE_ROOT),
     trim_blocks=True,

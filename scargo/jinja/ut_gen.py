@@ -68,7 +68,7 @@ class _UnitTestsGen:
         """
         header_descriptor = self._parse_header_file(input_file_path)
         create_file_from_template(
-            "ut_templates/ut.cpp.j2",
+            "ut/ut.cpp.j2",
             output_file_path,
             overwrite=overwrite,
             template_params={"header": header_descriptor},
@@ -102,7 +102,7 @@ class _UnitTestsGen:
         ]
 
         create_file_from_template(
-            "ut_templates/CMakeLists.txt.j2",
+            "ut/CMakeLists.txt.j2",
             ut_dir_path / "CMakeLists.txt",
             overwrite=True,
             template_params={

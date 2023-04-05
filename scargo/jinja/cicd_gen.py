@@ -9,7 +9,7 @@ from scargo.jinja.base_gen import create_file_from_template
 def generate_cicd(config: Config) -> None:
     """Create a gitlab-ci.yml file"""
     create_file_from_template(
-        "templates/.gitlab-ci.yml.j2",
+        ".gitlab-ci.yml.j2",
         ".gitlab-ci.yml",
         template_params={"project": config.project},
         config=config,
