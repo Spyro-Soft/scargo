@@ -17,13 +17,12 @@ from scargo.file_generators.mock_gen import generate_mocks
 from scargo.file_generators.ut_gen import generate_ut
 from scargo.global_values import SCARGO_PKG_PATH
 from scargo.logger import get_logger
-from scargo.path_utils import get_project_root
 
 OUT_FS_DIR = Path("build", "fs")
 
 
 def scargo_gen(
-    project_profile_path: Path,
+    profile: str,
     gen_ut: Optional[Path],
     gen_mock: Optional[Path],
     certs: Optional[str],
@@ -49,12 +48,15 @@ def scargo_gen(
             logger.info(f"Skipping: {gen_mock}")
 
     if certs:
-        generate_certs(certs, certs_mode, certs_input, certs_passwd)
+        generate_certs(
+            certs, certs_mode, certs_input, certs_passwd, config.project_root
+        )
 
     if fs:
         generate_fs(config)
 
     if single_bin:
+        project_profile_path = config.project_root / "build" / profile
         gen_single_binary(project_profile_path, config)
 
 
@@ -63,11 +65,10 @@ def generate_certs(
     mode_for_certs: Optional[str],
     certs_intermediate_dir: Optional[Path],
     certs_passwd: Optional[str],
+    project_path: Path,
 ) -> None:
-    project_path = get_project_root()
-
     internal_certs_dir = Path(SCARGO_PKG_PATH, "certs")
-    projects_builds_path = get_project_root() / "build"
+    projects_builds_path = project_path / "build"
     certs_out_dir = projects_builds_path / "certs"
     if not certs_intermediate_dir:
         certs_intermediate_dir = projects_builds_path / "certs"
@@ -155,7 +156,7 @@ def gen_fs_esp32(config: Config) -> None:
             fs_size = int(re.sub(",", "", split_list[4]), 16)
 
     try:
-        project_path = get_project_root()
+        project_path = config.project_root
         fs_in_dir = project_path / "main/fs"
         fs_out_dir = project_path / OUT_FS_DIR
         fs_out_bin = project_path / "build/spiffs.bin"
@@ -223,7 +224,7 @@ def gen_single_binary_esp32(project_profile_path: Path, config: Config) -> None:
 
     try:
         logger.info("Running: %s", " ".join(command))
-        subprocess.check_call(command, cwd=get_project_root())
+        subprocess.check_call(command, cwd=config.project_root)
     except subprocess.CalledProcessError:
         logger.error("Generation of single binary failed")
         sys.exit(1)

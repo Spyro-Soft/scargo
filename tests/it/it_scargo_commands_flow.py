@@ -9,7 +9,7 @@ from scargo.cli import cli
 from scargo.config import parse_config
 from scargo.file_generators.docker_gen import _DockerComposeTemplate
 from scargo.file_generators.env_gen import generate_env
-from scargo.path_utils import get_project_root
+from scargo.path_utils import get_project_root_or_none
 from tests.it.utils import (
     ScargoTestRunner,
     add_profile_to_toml,
@@ -102,7 +102,8 @@ def new_project_stm32() -> None:
 @pytest.fixture()
 def copy_project_x86() -> None:
     copytree(TEST_PROJECT_PATH, os.getcwd(), dirs_exist_ok=True)
-    project_path = get_project_root()
+    project_path = get_project_root_or_none()
+    assert project_path is not None
     docker_path = Path(project_path, ".devcontainer")
     config = parse_config(project_path / "scargo.lock")
     generate_env(docker_path, config)
@@ -111,7 +112,8 @@ def copy_project_x86() -> None:
 @pytest.fixture()
 def copy_project_esp32() -> None:
     copytree(TEST_PROJECT_ESP32_PATH, os.getcwd(), dirs_exist_ok=True)
-    project_path = get_project_root()
+    project_path = get_project_root_or_none()
+    assert project_path is not None
     docker_path = Path(project_path, ".devcontainer")
     config = parse_config(project_path / "scargo.lock")
     generate_env(docker_path, config)
@@ -120,7 +122,8 @@ def copy_project_esp32() -> None:
 @pytest.fixture()
 def copy_project_stm32() -> None:
     copytree(TEST_PROJECT_STM32_PATH, os.getcwd(), dirs_exist_ok=True)
-    project_path = get_project_root()
+    project_path = get_project_root_or_none()
+    assert project_path is not None
     docker_path = Path(project_path, ".devcontainer")
     config = parse_config(project_path / "scargo.lock")
     generate_env(docker_path, config)

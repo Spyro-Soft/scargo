@@ -12,7 +12,6 @@ from scargo.commands.check import (
     PragmaChecker,
 )
 from scargo.config_utils import prepare_config
-from scargo.path_utils import get_project_root
 
 
 def scargo_fix(pragma: bool, copy_right: bool, clang_format: bool) -> None:
@@ -38,7 +37,7 @@ def scargo_fix(pragma: bool, copy_right: bool, clang_format: bool) -> None:
         checkers = [PragmaChecker, CopyrightChecker, ClangFormatChecker]
 
     # Todo, remove chdir and change cwd for checks
-    os.chdir(get_project_root())
+    os.chdir(config.project_root)
 
     for checker_class in checkers:
         checker_class(config, fix_errors=True).check()

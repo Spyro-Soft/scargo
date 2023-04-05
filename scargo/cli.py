@@ -30,7 +30,7 @@ from scargo.commands.version import scargo_version
 from scargo.config import ScargoTargets, Target
 from scargo.global_values import DESCRIPTION, SCARGO_DEFAULT_CONFIG_FILE
 from scargo.logger import get_logger
-from scargo.path_utils import get_config_file_path, get_project_root
+from scargo.path_utils import get_config_file_path
 
 ###############################################################################
 
@@ -295,7 +295,6 @@ def gen(
     """Manage the auto file generator"""
     if base_dir:
         os.chdir(base_dir)
-    project_profile_path = get_project_root() / "build" / profile
     if (gen_ut is gen_mock is certs is None) and not (file_system or single_bin):
         logger = get_logger()
         logger.warning(
@@ -305,7 +304,7 @@ def gen(
         sys.exit(1)
 
     scargo_gen(
-        project_profile_path,
+        profile,
         gen_ut,
         gen_mock,
         certs,
@@ -396,8 +395,7 @@ def run(
         os.chdir(base_dir)
     if not skip_build:
         scargo_build(profile)
-    project_profile_path = get_project_root() / "build" / profile
-    scargo_run(bin_path, project_profile_path, bin_params)
+    scargo_run(bin_path, profile, bin_params)
 
 
 ###############################################################################

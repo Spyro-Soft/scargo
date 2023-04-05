@@ -33,10 +33,3 @@ def get_project_root_or_none() -> Optional[Path]:
         SCARGO_DEFAULT_CONFIG_FILE
     )
     return config_path.parent if config_path else None
-
-
-def get_project_root() -> Path:
-    project_root = get_project_root_or_none()
-    if not project_root:
-        raise FileNotFoundError("Config file not found!")
-    return project_root

@@ -11,7 +11,6 @@ from pathlib import Path
 
 from scargo.config_utils import prepare_config
 from scargo.logger import get_logger
-from scargo.path_utils import get_project_root
 
 
 def scargo_publish(repo: str) -> None:
@@ -23,7 +22,7 @@ def scargo_publish(repo: str) -> None:
     """
     logger = get_logger()
     config = prepare_config()
-    project_path = get_project_root()
+    project_path = config.project_root
     project_config = config.project
     project_name = project_config.name
     version = project_config.version

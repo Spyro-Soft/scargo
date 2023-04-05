@@ -12,25 +12,23 @@ from scargo.config_utils import prepare_config
 from scargo.logger import get_logger
 
 
-def scargo_run(
-    bin_path: Optional[Path], project_profile_path: Path, params: List[str]
-) -> None:
+def scargo_run(bin_path: Optional[Path], profile: str, params: List[str]) -> None:
     """
     Run command from CLI
 
     :param str bin_path: path to bin file
-    :param Path project_profile_path: path to build file
+    :param Path profile: build profile name
     :param str params: params for bin file
     :return: None
     """
     logger = get_logger()
-    logger.info('Running "%s" build', project_profile_path.name)
+    logger.info('Running "%s" build', profile)
 
-    target = prepare_config().project.target
-    if "x86" not in target.family:
+    config = prepare_config()
+    if "x86" not in config.project.target.family:
         logger.info(
             "Run project on x86 architecture is not implemented for %s yet.",
-            target.family,
+            config.project.target.family,
         )
         sys.exit(1)
 
@@ -42,6 +40,7 @@ def scargo_run(
         except subprocess.CalledProcessError:
             logger.error("bin file not found")
     else:
+        project_profile_path = config.project_root / "build" / profile
         bin_dir = project_profile_path / "bin"
         if bin_dir.is_dir():
             first_bin = next(bin_dir.iterdir())

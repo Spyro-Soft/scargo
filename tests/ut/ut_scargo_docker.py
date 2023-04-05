@@ -17,12 +17,12 @@ from tests.ut.utils import get_test_project_config
 @pytest.fixture
 def scargo_docker_test_setup(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> Config:
     os.chdir(tmp_path)
-    monkeypatch.setattr("scargo.commands.docker.get_project_root", lambda: tmp_path)
 
     test_project_config = get_test_project_config()
+    test_project_config.project_root = Path()
     monkeypatch.setattr(
-        "scargo.commands.docker._get_project_config",
-        lambda: test_project_config.project,
+        "scargo.commands.docker.get_scargo_config_or_exit",
+        lambda: test_project_config,
     )
 
     return test_project_config

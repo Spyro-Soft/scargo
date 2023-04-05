@@ -121,6 +121,7 @@ def config() -> Config:
             update_exclude=[],
             version="1.0.7",
         ),
+        project_root=Path(),
     )
 
 

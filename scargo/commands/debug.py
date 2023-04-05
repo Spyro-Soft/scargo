@@ -12,7 +12,7 @@ from scargo.config import Config
 from scargo.config_utils import prepare_config
 from scargo.docker_utils import run_scargo_again_in_docker
 from scargo.logger import get_logger
-from scargo.path_utils import find_program_path, get_project_root
+from scargo.path_utils import find_program_path
 
 
 class _ScargoDebug:
@@ -21,6 +21,7 @@ class _ScargoDebug:
     def __init__(self, config: Config, bin_path: Optional[Path]):
         self._logger = get_logger()
         self._target = config.project.target
+        self._project_root = config.project_root
 
         if self._target.family not in self.SUPPORTED_TARGETS:
             self._logger.error("Debugging currently not supported for %s", self._target)
@@ -105,11 +106,10 @@ class _ScargoDebug:
         self._debug_embedded(openocd_args, "xtensa-esp32-elf-gdb")
 
     def _get_bin_path(self, bin_name: str) -> Path:
-        project_path = get_project_root()
         if self._target.family == "esp32":
-            bin_path = Path(project_path, "build/Debug", bin_name).absolute()
+            bin_path = Path(self._project_root, "build/Debug", bin_name).absolute()
         else:
-            bin_path = Path(project_path, "build/Debug/bin", bin_name).absolute()
+            bin_path = Path(self._project_root, "build/Debug/bin", bin_name).absolute()
         if self._target.family in ("stm32", "esp32") and bin_path.suffix != "elf":
             bin_path = bin_path.with_suffix(".elf")
         return bin_path
@@ -118,6 +118,6 @@ class _ScargoDebug:
 def scargo_debug(bin_path: Optional[Path]) -> None:
     config = prepare_config(run_in_docker=False)
     if config.project.target.family != "x86":
-        run_scargo_again_in_docker(config.project)
+        run_scargo_again_in_docker(config.project, config.project_root)
     debug = _ScargoDebug(config, bin_path)
     debug.run_debugger()
