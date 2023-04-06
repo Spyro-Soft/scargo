@@ -42,33 +42,22 @@ def generate_mocks(src_header: Path, src_dir: str, config: Config) -> bool:
     if dst_header.is_file():
         return False
 
-    dst_mock = dst_header.with_name(f"mock_{dst_header.name}")
-    dst_mock_source = dst_header.with_name(f"mock_{dst_header.stem}.cpp")
+    template_and_output_paths = [
+        ("mock/class_interface.h.j2", dst_header),
+        ("mock/class_mock.h.j2", dst_header.with_name(f"mock_{dst_header.name}")),
+        ("mock/class_mock.cpp.j2", dst_header.with_name(f"mock_{dst_header.stem}.cpp")),
+    ]
 
     # Read classes and functions from the source header
     header_data = parse_file(src_header)
 
-    # generate public interface header
-    create_file_from_template(
-        "mock/class_interface.h.j2",
-        dst_header,
-        template_params={"header": header_data},
-        config=config,
-    )
-    # generate mock header
-    create_file_from_template(
-        "mock/class_mock.h.j2",
-        dst_mock,
-        template_params={"header": header_data},
-        config=config,
-    )
-    # generate mock implementation
-    create_file_from_template(
-        "mock/class_mock.cpp.j2",
-        dst_mock_source,
-        template_params={"header": header_data},
-        config=config,
-    )
+    for template_path, output_path in template_and_output_paths:
+        create_file_from_template(
+            template_path,
+            output_path,
+            template_params={"header": header_data},
+            config=config,
+        )
 
     return True
 
