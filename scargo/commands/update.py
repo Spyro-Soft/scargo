@@ -74,7 +74,7 @@ def scargo_update(config_file_path: Path) -> None:
     generate_conanfile(config)
 
     if target.family == "esp32":
-        Path(target.source_dir, "fs").mkdir(parents=True, exist_ok=True)
+        Path(config.source_dir_path, "fs").mkdir(parents=True, exist_ok=True)
         with open(Path(project_path, "version.txt"), "w", encoding="utf-8") as out:
             out.write(project_config.version)
         with open(Path(project_path, "partitions.csv"), "w", encoding="utf-8") as out:

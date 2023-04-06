@@ -74,7 +74,7 @@ def run_ut(config: Config, verbose: bool, cwd: Path) -> None:
             "ut",
             ".",
             "-f",
-            config.project_root.joinpath(config.project.target.source_dir),
+            config.source_dir_path,
             "--html",
             "ut-coverage.html",
         ]

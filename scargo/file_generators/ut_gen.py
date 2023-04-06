@@ -117,9 +117,8 @@ class _UnitTestsGen:
         :param Path input_src_path: Source path
         :return Path: output path for unit test
         """
-        input_src_path = input_src_path.absolute()
-        relative_to_src = input_src_path.relative_to(
-            self._project_path.absolute() / self._config.project.target.source_dir
+        relative_to_src = input_src_path.absolute().relative_to(
+            self._config.source_dir_path
         )
         return Path(self._ut_dir, relative_to_src).with_name(
             f"ut_{input_src_path.stem}.cpp"

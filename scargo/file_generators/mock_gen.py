@@ -47,7 +47,5 @@ def generate_mocks(src_header: Path, config: Config) -> bool:
 
 
 def get_mock_path(header_path: Path, config: Config) -> Path:
-    header_path_from_src = header_path.absolute().relative_to(
-        config.project_root / config.project.target.source_dir
-    )
+    header_path_from_src = header_path.absolute().relative_to(config.source_dir_path)
     return config.project_root / MOCKS_DIR / header_path_from_src
