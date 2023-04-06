@@ -37,6 +37,7 @@ def create_new_project(tmp_path: Path) -> None:
         create_docker=False,
         git=False,
     )
+    os.chdir(tmp_path / project_name)
     scargo_update(Path("scargo.toml"))
 
 

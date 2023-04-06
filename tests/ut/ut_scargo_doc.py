@@ -1,3 +1,4 @@
+import os
 from pathlib import Path
 
 import pytest
@@ -11,8 +12,9 @@ def verify_open_called(index_path: str) -> None:
 
 
 def test_doc_open_with_doxyfile(
-    create_new_project: None, monkeypatch: pytest.MonkeyPatch
+    create_new_project: None, monkeypatch: pytest.MonkeyPatch, tmp_path: Path
 ) -> None:
+    os.chdir(tmp_path / "test_project")
     scargo_doc(False)
     assert Path("build/doc/html/index.html").exists()
 
@@ -24,8 +26,9 @@ def test_doc_open_with_doxyfile(
 
 
 def test_doc_open_without_doc_file(
-    create_new_project: None, caplog: LogCaptureFixture
+    create_new_project: None, caplog: LogCaptureFixture, tmp_path: Path
 ) -> None:
+    os.chdir(tmp_path / "test_project")
     with pytest.raises(SystemExit) as e:
         scargo_doc(True)
     assert "Documentation not found" in caplog.text
@@ -44,7 +47,8 @@ def test_doc_without_doxygen(
     assert e.value.code == 1
 
 
-def test_doc_create(create_new_project: None) -> None:
+def test_doc_create(create_new_project: None, tmp_path: Path) -> None:
+    os.chdir(tmp_path / "test_project")
     scargo_doc(False)
     assert Path("build/doc/Doxyfile").exists()
     assert Path("build/doc/html/index.html").exists()

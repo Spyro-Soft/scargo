@@ -4,7 +4,6 @@
 
 import subprocess
 import sys
-from pathlib import Path
 from typing import Optional
 
 from scargo.config import Config
@@ -56,7 +55,7 @@ def flash_esp32(
                 command.append(f"--port={port}")
             subprocess.check_call(command, cwd=project_path)
         elif fs:
-            fs_path = Path("build") / "spiffs.bin"
+            fs_path = config.project_root / "build" / "spiffs.bin"
             command = [
                 "parttool.py",
                 "write_partition",
