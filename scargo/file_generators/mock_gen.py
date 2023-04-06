@@ -4,7 +4,6 @@
 # #
 
 from pathlib import Path
-from typing import List
 
 from scargo.config import Config
 from scargo.file_generators.base_gen import create_file_from_template
@@ -13,16 +12,15 @@ from scargo.file_generators.mock_utils.header_parser import parse_file
 MOCKS_DIR = "tests/mocks"
 
 
-def generate_mocks(src_header: Path, src_dir: str, config: Config) -> bool:
+def generate_mocks(src_header: Path, config: Config) -> bool:
     """
     Generates mock header and implementations for specified source headers.
     Creates directories and CMake lists where required.
     :param src_header Path to source directory or header
-    :param src_dir source directory name (dependent on target)
     :param config
     """
 
-    dst_header = get_mock_path(src_header, src_dir)
+    dst_header = get_mock_path(src_header, config)
 
     # Skip generation if destination header exists
     if dst_header.is_file():
@@ -48,10 +46,8 @@ def generate_mocks(src_header: Path, src_dir: str, config: Config) -> bool:
     return True
 
 
-def get_mock_path(path: Path, src_dir: str) -> Path:
-    parts: List[str] = list(path.parts)
-    for i, part in enumerate(parts):
-        if part == src_dir:
-            parts[i] = MOCKS_DIR
-            break
-    return Path(*parts)
+def get_mock_path(header_path: Path, config: Config) -> Path:
+    header_path_from_src = header_path.absolute().relative_to(
+        config.project_root / config.project.target.source_dir
+    )
+    return config.project_root / MOCKS_DIR / header_path_from_src
