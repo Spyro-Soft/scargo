@@ -7,8 +7,9 @@ from pathlib import Path
 from typing import List, Optional
 
 from clang.cindex import Cursor, CursorKind, Index
-from jinja2 import Environment, FileSystemLoader
 
+from scargo.config import Config
+from scargo.file_generators.base_gen import create_file_from_template
 from scargo.file_generators.mock_utils.data_classes import (
     ArgumentDescriptor,
     HeaderDescriptor,
@@ -22,22 +23,17 @@ absolute_path = Path(__file__).parent.absolute()
 SRC_DIR = "src"
 MOCKS_DIR = "tests/mocks"
 
-jinja_env = Environment(
-    loader=FileSystemLoader(absolute_path / "templates" / "mock"),
-    trim_blocks=True,
-    lstrip_blocks=True,
-)
-
 # json where the mock paths are held, which lack of implementation has been accepted
 missing_mocks_json = absolute_path / "mock_utils" / "missing_mocks.json"
 
 
-def generate_mocks(src_header: Path, src_dir: str) -> bool:
+def generate_mocks(src_header: Path, src_dir: str, config: Config) -> bool:
     """
     Generates mock header and implementations for specified source headers.
     Creates directories and CMake lists where required.
     :param src_header Path to source directory or header
     :param src_dir source directory name (dependent on target)
+    :param config
     """
 
     dst_header = get_mock_path(src_header, src_dir)
@@ -46,18 +42,22 @@ def generate_mocks(src_header: Path, src_dir: str) -> bool:
     if dst_header.is_file():
         return False
 
-    dst_mock = dst_header.with_name(f"mock_{dst_header.name}")
-    dst_mock_source = dst_header.with_name(f"mock_{dst_header.stem}.cpp")
+    template_and_output_paths = [
+        ("mock/class_interface.h.j2", dst_header),
+        ("mock/class_mock.h.j2", dst_header.with_name(f"mock_{dst_header.name}")),
+        ("mock/class_mock.cpp.j2", dst_header.with_name(f"mock_{dst_header.stem}.cpp")),
+    ]
 
     # Read classes and functions from the source header
     header_data = parse_file(src_header)
 
-    # generate public interface header
-    gen_header(dst_header, "class_interface.h.j2", header_data)
-    # generate mock header
-    gen_header(dst_mock, "class_mock.h.j2", header_data)
-    # generate mock implementation
-    gen_header(dst_mock_source, "class_mock.cpp.j2", header_data)
+    for template_path, output_path in template_and_output_paths:
+        create_file_from_template(
+            template_path,
+            output_path,
+            template_params={"header": header_data},
+            config=config,
+        )
 
     return True
 
@@ -69,12 +69,6 @@ def get_mock_path(path: Path, src_dir: str) -> Path:
             parts[i] = MOCKS_DIR
             break
     return Path(*parts)
-
-
-def gen_header(path: Path, template_name: str, header_data: HeaderDescriptor) -> None:
-    path.parent.mkdir(parents=True, exist_ok=True)
-    with path.open("w", encoding="utf-8") as out:
-        out.write(jinja_env.get_template(template_name).render(header=header_data))
 
 
 class ParamsExtractor:
