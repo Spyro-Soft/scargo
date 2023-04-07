@@ -34,6 +34,7 @@ def generate_tests(config: Config) -> None:
         template_params={
             "target": config.project.target,
             "tests": config.tests,
+            "cxxstandard": config.project.cxxstandard,
         },
         config=config,
     )
