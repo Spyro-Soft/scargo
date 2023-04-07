@@ -36,7 +36,21 @@ def test_update_project_content_with_docker(tmp_path: Path, fp: FakeProcess) -> 
     os.chdir(tmp_path)
     project_name = "test_project_with_docker"
     scargo_new(project_name, None, None, TARGET_X86, True, False)
+    fp.register("docker-compose pull")
+    scargo_update(Path("scargo.toml"))
+    for path in Path().iterdir():
+        assert path.name in EXPECTED_FILES_AND_DIRS
+
+
+def test_update_project_content_with_docker__build(
+    tmp_path: Path, fp: FakeProcess
+) -> None:
+    os.chdir(tmp_path)
+    project_name = "test_project_with_docker"
+    scargo_new(project_name, None, None, TARGET_X86, True, False)
+    fp.register("docker-compose pull", returncode=1)
     fp.register("docker-compose build")
     scargo_update(Path("scargo.toml"))
+    assert fp.call_count("docker-compose build") == 1
     for path in Path().iterdir():
         assert path.name in EXPECTED_FILES_AND_DIRS
