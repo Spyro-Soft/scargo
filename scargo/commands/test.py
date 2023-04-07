@@ -6,6 +6,7 @@
 import subprocess
 import sys
 from pathlib import Path
+from typing import List, Union
 
 from scargo.config import Config
 from scargo.config_utils import prepare_config
@@ -56,7 +57,7 @@ def scargo_test(verbose: bool) -> None:
 
 def run_ut(config: Config, verbose: bool, cwd: Path) -> None:
     # Run tests.
-    cmd = ["ctest"]
+    cmd: List[Union[str, Path]] = ["ctest"]
 
     if verbose:
         cmd.append("--verbose")
@@ -66,7 +67,16 @@ def run_ut(config: Config, verbose: bool, cwd: Path) -> None:
         subprocess.run(cmd, cwd=cwd, check=False)
 
         # Run code coverage.
-        cmd = ["gcovr", "-r", "ut", ".", "--html", "ut-coverage.html"]
+        cmd = [
+            "gcovr",
+            "-r",
+            "ut",
+            ".",
+            "-f",
+            config.project_root.joinpath(config.project.target.source_dir),
+            "--html",
+            "ut-coverage.html",
+        ]
 
         gcov_executable = config.tests.gcov_executable
 
