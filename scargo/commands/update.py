@@ -95,6 +95,30 @@ def scargo_update(config_file_path: Path) -> None:
 
     if project_config.build_env == SCARGO_DOCKER_ENV:
         if not Path(project_path, ".dockerenv").exists():
-            scargo_docker_build([])
+            if not pull_docker_image(docker_path):
+                scargo_docker_build([])
         else:
             logger.warning("Cannot run docker inside docker")
+
+
+def pull_docker_image(docker_path: Path) -> bool:
+    logger = get_logger()
+    logger.info("Pulling the image from docker registry...")
+    try:
+        result = subprocess.run(
+            ["docker-compose", "pull"],
+            cwd=docker_path,
+            stderr=subprocess.PIPE,
+            check=True,
+        )
+    except subprocess.CalledProcessError as e:
+        logger.warning(e.stderr.decode())
+    else:
+        # happens for the default tag, like "myproject-dev:1.0"
+        if (
+            "Some service image(s) must be built from source"
+            not in result.stderr.decode()
+        ):
+            logger.info("Docker image pulled successfully")
+            return True
+    return False
