@@ -26,6 +26,7 @@ def test_scargo_test_no_cmake_file(
 def test_scargo_test(create_new_project: None, fp: FakeProcess) -> None:
     project_root = get_project_root_or_none()
     assert project_root is not None
+    src_dir = project_root / "src"
     tests_src_dir = project_root / "tests"
     test_build_dir = project_root / "build/tests"
     html_coverage_file = "ut-coverage.html"
@@ -33,5 +34,5 @@ def test_scargo_test(create_new_project: None, fp: FakeProcess) -> None:
     fp.register(f"conan install {tests_src_dir} -if {test_build_dir}")
     fp.register(f"conan build {tests_src_dir} -bf {test_build_dir}")
     fp.register("ctest")
-    fp.register(f"gcovr -r ut . --html {html_coverage_file}")
+    fp.register(f"gcovr -r ut . -f {src_dir} --html {html_coverage_file}")
     scargo_test(False)
