@@ -163,3 +163,8 @@ Applicable for stm32 only
 **console-log-level** = (string)(define scargo log level to console for project default:"INFO")
 
 **file-log-level** = (string)(define scargo log level to file for project default:"WARNING")
+
+[docker-compose]
+----------------
+
+**ports** = (string list) (list of ports strings to include in docker-compose.yaml, e.g. ["15000-15020:15000-15020"])

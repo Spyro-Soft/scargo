@@ -30,6 +30,10 @@ class Config(BaseModel):
     scargo: "ScargoConfig" = Field(
         default_factory=lambda: ScargoConfig()  # pylint: disable=unnecessary-lambda
     )
+    docker_compose: "DockerComposeConfig" = Field(
+        default_factory=lambda: DockerComposeConfig(),  # pylint: disable=unnecessary-lambda
+        alias="docker-compose",
+    )
     project_root: Path
 
     def get_stm32_config(self) -> "Stm32Config":
@@ -208,6 +212,10 @@ class ScargoConfig(BaseModel):
     file_log_level: str = Field("WARNING", alias="file-log-level")
     update_exclude: List[str] = Field(alias="update-exclude", default_factory=list)
     version: Optional[str]
+
+
+class DockerComposeConfig(BaseModel):
+    ports: List[str] = Field(default_factory=list)
 
 
 Config.update_forward_refs()

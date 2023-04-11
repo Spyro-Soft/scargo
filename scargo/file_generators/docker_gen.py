@@ -33,7 +33,7 @@ class _DockerComposeTemplate:
         self._create_file_from_template(
             "docker/docker-compose.yaml.j2",
             "docker-compose.yaml",
-            template_params={"project": self._config.project},
+            template_params={"config": self._config},
         )
         self._create_file_from_template(
             "docker/devcontainer.json.j2",
