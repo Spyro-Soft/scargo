@@ -17,14 +17,15 @@ from scargo.file_generators.mock_utils.data_classes import (
     MockFunctionDescriptor,
     MockNamespaceDescriptor,
 )
+from scargo.global_values import SCARGO_PKG_PATH
 
 # define paths
-absolute_path = Path(__file__).parent.absolute()
-SRC_DIR = "src"
 MOCKS_DIR = "tests/mocks"
 
 # json where the mock paths are held, which lack of implementation has been accepted
-missing_mocks_json = absolute_path / "mock_utils" / "missing_mocks.json"
+missing_mocks_json = (
+    SCARGO_PKG_PATH / "file_generators" / "mock_utils" / "missing_mocks.json"
+)
 
 
 def generate_mocks(src_header: Path, src_dir: str, config: Config) -> bool:
