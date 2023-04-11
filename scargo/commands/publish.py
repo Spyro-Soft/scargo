@@ -12,6 +12,8 @@ from pathlib import Path
 from scargo.config_utils import prepare_config
 from scargo.logger import get_logger
 
+logger = get_logger()
+
 
 def scargo_publish(repo: str) -> None:
     """
@@ -20,7 +22,6 @@ def scargo_publish(repo: str) -> None:
     :param str repo: repository name
     :return: None
     """
-    logger = get_logger()
     config = prepare_config()
     project_path = config.project_root
     project_config = config.project
@@ -67,7 +68,6 @@ def conan_add_remote(project_path: Path) -> None:
     :param Path project_path: path to project
     :return: None
     """
-    logger = get_logger()
     config = prepare_config()
     conan_repo = config.conan.repo
     for repo_name, repo_url in conan_repo.items():
@@ -92,7 +92,6 @@ def conan_add_conancenter() -> None:
             "conan remote add conancenter https://center.conan.io", shell=True
         )
     except subprocess.CalledProcessError:
-        logger = get_logger()
         logger.error("Unable to add conancenter remote repository")
 
 
@@ -105,7 +104,6 @@ def conan_clean_remote() -> None:
     try:
         subprocess.check_call("conan remote clean", shell=True)
     except subprocess.CalledProcessError:
-        logger = get_logger()
         logger.error("Unable to clean remote repository list")
 
 
@@ -129,5 +127,4 @@ def conan_add_user(remote: str) -> None:
                 ["conan", "user", "-p", env_conan_passwd, "-r", remote, env_conan_user],
             )
         except subprocess.CalledProcessError:
-            logger = get_logger()
             logger.error("Unable to add user")

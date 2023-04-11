@@ -32,6 +32,8 @@ from scargo.global_values import DESCRIPTION, SCARGO_DEFAULT_CONFIG_FILE
 from scargo.logger import get_logger
 from scargo.path_utils import get_config_file_path
 
+logger = get_logger()
+
 ###############################################################################
 
 
@@ -296,7 +298,6 @@ def gen(
     if base_dir:
         os.chdir(base_dir)
     if (gen_ut is gen_mock is certs is None) and not (file_system or single_bin):
-        logger = get_logger()
         logger.warning(
             "Please add one of the following options to the command:"
             "\n--unit-test\n--mock\n--certs\n--fs\n--bin"
@@ -431,7 +432,6 @@ def update(
     """Read .toml config file and generate `CMakeLists.txt`."""
     if base_dir:
         os.chdir(base_dir)
-    logger = get_logger()
     if config_file_path is None:
         config_file_path = get_config_file_path(SCARGO_DEFAULT_CONFIG_FILE)
         if not config_file_path:

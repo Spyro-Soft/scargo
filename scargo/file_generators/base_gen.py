@@ -11,6 +11,8 @@ from scargo.config import Config
 from scargo.global_values import SCARGO_PKG_PATH
 from scargo.logger import get_logger
 
+logger = get_logger()
+
 _TEMPLATE_ROOT = Path(SCARGO_PKG_PATH, "file_generators", "templates")
 _JINJA_ENV = Environment(
     loader=FileSystemLoader(_TEMPLATE_ROOT),
@@ -45,7 +47,6 @@ def write_template(
     content = _JINJA_ENV.get_template(template_path).render(template_params)
     output_path.write_text(content, encoding="utf-8")
 
-    logger = get_logger()
     logger.info("Generated %s", output_path)
 
 

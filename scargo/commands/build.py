@@ -15,6 +15,8 @@ from scargo.commands.publish import (
 from scargo.config_utils import prepare_config
 from scargo.logger import get_logger
 
+logger = get_logger()
+
 
 def scargo_build(profile: str) -> None:
     """
@@ -24,7 +26,6 @@ def scargo_build(profile: str) -> None:
     :return: None
     """
     config = prepare_config()
-    logger = get_logger()
 
     project_dir = config.project_root
     if not project_dir:

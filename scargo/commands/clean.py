@@ -10,6 +10,8 @@ from typing import Optional
 from scargo.config_utils import get_scargo_config_or_exit
 from scargo.logger import get_logger
 
+logger = get_logger()
+
 
 def _case_insensitive_find_dir(source_dir: Path, dirname: str) -> Optional[Path]:
     if source_dir and source_dir.exists():
@@ -21,7 +23,6 @@ def _case_insensitive_find_dir(source_dir: Path, dirname: str) -> Optional[Path]
 
 def scargo_clean() -> None:
     """Clean project dir from unnecessary files"""
-    logger = get_logger()
 
     config = get_scargo_config_or_exit()
     project_path = config.project_root

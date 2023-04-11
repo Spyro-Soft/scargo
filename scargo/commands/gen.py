@@ -18,6 +18,8 @@ from scargo.file_generators.ut_gen import generate_ut
 from scargo.global_values import SCARGO_PKG_PATH
 from scargo.logger import get_logger
 
+logger = get_logger()
+
 OUT_FS_DIR = Path("build", "fs")
 
 
@@ -33,7 +35,6 @@ def scargo_gen(
     single_bin: bool,
 ) -> None:
     config = prepare_config()
-    logger = get_logger()
 
     if gen_ut:
         generate_ut(gen_ut, config)
@@ -105,7 +106,6 @@ def generate_certs(
     certs_out_uc_dir.mkdir(parents=True, exist_ok=True)
     certs_out_azure_dir.mkdir(parents=True, exist_ok=True)
 
-    logger = get_logger()
     try:
         copyfile(
             certs_out_dir / "certs" / "iot-device.cert.pem",
@@ -132,7 +132,6 @@ def generate_fs(config: Config) -> None:
     if target.family == "esp32":
         gen_fs_esp32(config)
     else:
-        logger = get_logger()
         logger.warning("Gen --fs command not supported for this target yet.")
 
 
@@ -141,13 +140,11 @@ def gen_single_binary(project_profile_path: Path, config: Config) -> None:
     if target.family == "esp32":
         gen_single_binary_esp32(project_profile_path, config)
     else:
-        logger = get_logger()
         logger.warning("Gen --bin command not supported for this target yet.")
 
 
 def gen_fs_esp32(config: Config) -> None:
     command = []
-    logger = get_logger()
     partition_list = config.get_esp32_config().partitions
     fs_size = 0
     for i in partition_list:
@@ -182,7 +179,6 @@ def gen_fs_esp32(config: Config) -> None:
 
 
 def gen_single_binary_esp32(project_profile_path: Path, config: Config) -> None:
-    logger = get_logger()
     partition_list = config.get_esp32_config().partitions
     target = config.project.target
 

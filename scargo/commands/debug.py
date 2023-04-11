@@ -14,18 +14,19 @@ from scargo.docker_utils import run_scargo_again_in_docker
 from scargo.logger import get_logger
 from scargo.path_utils import find_program_path
 
+logger = get_logger()
+
 
 class _ScargoDebug:
     SUPPORTED_TARGETS = ["x86", "stm32", "esp32"]
 
     def __init__(self, config: Config, bin_path: Optional[Path]):
-        self._logger = get_logger()
         self._target = config.project.target
         self._project_root = config.project_root
 
         if self._target.family not in self.SUPPORTED_TARGETS:
-            self._logger.error("Debugging currently not supported for %s", self._target)
-            self._logger.info(
+            logger.error("Debugging currently not supported for %s", self._target)
+            logger.info(
                 "Scargo currently supports debug for %s", self.SUPPORTED_TARGETS
             )
             sys.exit(1)
@@ -33,22 +34,20 @@ class _ScargoDebug:
         bin_name = config.project.bin_name
         bin_path = bin_path or (self._get_bin_path(bin_name) if bin_name else None)
         if not bin_path:
-            self._logger.error("No bin_name in config")
+            logger.error("No bin_name in config")
             sys.exit(1)
         self._bin_path = bin_path
         if not self._bin_path.exists():
-            self._logger.error("Binary %s does not exist", self._bin_path)
-            self._logger.info("Did you run scargo build --profile Debug?")
+            logger.error("Binary %s does not exist", self._bin_path)
+            logger.info("Did you run scargo build --profile Debug?")
             sys.exit(1)
 
         if self._target.family == "stm32":
             stm32_config = config.get_stm32_config()
             self._chip = stm32_config.chip
             if not self._chip:
-                self._logger.error("Chip label not defined in toml.")
-                self._logger.info(
-                    "Define chip under stm32 section and run scargo update."
-                )
+                logger.error("Chip label not defined in toml.")
+                logger.info("Define chip under stm32 section and run scargo update.")
                 sys.exit(1)
 
     def run_debugger(self) -> None:
@@ -65,7 +64,7 @@ class _ScargoDebug:
     def _debug_embedded(self, openocd_args: List[str], gdb_bin: str) -> None:
         openocd_path = find_program_path("openocd")
         if not openocd_path:
-            self._logger.error("Could not find openocd.")
+            logger.error("Could not find openocd.")
             sys.exit(1)
         openocd_call = [openocd_path] + openocd_args
 

@@ -11,13 +11,14 @@ from scargo.config import Config
 from scargo.config_utils import prepare_config
 from scargo.logger import get_logger
 
+logger = get_logger()
+
 
 def scargo_test(verbose: bool) -> None:
     """
     Run test
     :param bool verbose: if verbose
     """
-    logger = get_logger()
     config = prepare_config()
 
     test_dir_name = "tests"
@@ -75,7 +76,6 @@ def run_ut(config: Config, verbose: bool, cwd: Path) -> None:
 
         subprocess.check_call(cmd, cwd=cwd)
     except subprocess.CalledProcessError:
-        logger = get_logger()
         logger.error("Fail to run project tests")
         sys.exit(1)
 

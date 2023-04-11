@@ -11,6 +11,8 @@ from scargo.config import Config
 from scargo.file_generators.base_gen import create_file_from_template
 from scargo.logger import get_logger
 
+logger = get_logger()
+
 
 class _DockerComposeTemplate:
     """
@@ -47,7 +49,6 @@ class _DockerComposeTemplate:
         if custom_docker_path.is_file():
             custom_docker = custom_docker_path.read_text()
 
-        logger = get_logger()
         logger.debug(
             "Custom docker file path: %s", custom_docker_path.relative_to(project_root)
         )
