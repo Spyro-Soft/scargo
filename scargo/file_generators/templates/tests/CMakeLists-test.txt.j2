@@ -13,6 +13,8 @@ set(CMAKE_C_COMPILER   "{{ tests.cc }}")
 set(CMAKE_CXX_COMPILER "{{ tests.cxx }}")
 {% endif %} {# tests.cxx #}
 
+set(CMAKE_CXX_STANDARD {{ cxxstandard }})
+
 {% if tests.cflags %}
 set(CMAKE_C_FLAGS   "{{ tests.cflags }}")
 {% endif %} {# tests.cflags #}

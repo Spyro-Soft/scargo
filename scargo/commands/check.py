@@ -16,7 +16,6 @@ from scargo.clang_utils import get_comment_lines
 from scargo.config import CheckConfig, Config, TodoCheckConfig
 from scargo.config_utils import prepare_config
 from scargo.logger import get_logger
-from scargo.path_utils import get_project_root
 
 logger = get_logger()
 
@@ -47,7 +46,7 @@ def scargo_check(
     config = prepare_config()
 
     # Todo, remove chdir and change cwd for checks
-    os.chdir(get_project_root())
+    os.chdir(config.project_root)
 
     checkers: List[Type[CheckerFixer]] = []
     if clang_format:

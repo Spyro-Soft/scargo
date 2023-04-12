@@ -29,7 +29,7 @@ You can find all information on how to work with scargo on official documentatio
 # Project dependencies
 ## Working with docker (recommended)
 - docker
-- docker-compose version 1.29.2
+- docker-compose
 - pip
 - python3
 
@@ -60,3 +60,7 @@ Run scargo commands as you would do natively.
 
 ## Working natively
 1) Create a project with --no-docker flag (`scargo new <my_proj> --no-docker ...`).
+
+# Contributing
+
+See contributing guide on https://spyro-soft.github.io/scargo/contributing.html

@@ -12,14 +12,15 @@ import typer
 from scargo.config import Config
 from scargo.config_utils import prepare_config
 from scargo.logger import get_logger
-from scargo.path_utils import find_program_path, get_project_root
+from scargo.path_utils import find_program_path
+
+logger = get_logger()
 
 
 class _ScargoGenDoc:
     EXCLUDE_LIST = ["build"]
 
     def __init__(self, config: Config, doxygen_path: Path, doc_dir_path: Path):
-        self._logger = get_logger()
         self._config = config
         self._doxygen_path = doxygen_path
         self._doc_dir_path = doc_dir_path
@@ -31,7 +32,7 @@ class _ScargoGenDoc:
     def update_doxyfile(self) -> None:
         """Update Doxyfile configuration according specified values"""
         project_name = self._config.project.name
-        project_path = get_project_root()
+        project_path = self._config.project_root
         exclude = " ".join(
             f"{project_path}/{dir}"
             for dir in self.EXCLUDE_LIST + self._config.doc.exclude
@@ -63,8 +64,6 @@ class _ScargoGenDoc:
 
 
 def _open_doc(doc_dir_path: Path) -> None:
-    logger = get_logger()
-
     html_file_path = doc_dir_path / "html/index.html"
     if html_file_path.exists():
         try:
@@ -84,14 +83,11 @@ def scargo_doc(open_doc: bool) -> None:
     :param bool open_doc: if true open documentation instead creating it
     :return: None
     """
-    project_path = get_project_root()
-    doc_dir_path = project_path / "build/doc"
+    config = prepare_config()
+    doc_dir_path = config.project_root / "build/doc"
     if open_doc:
         _open_doc(doc_dir_path)
         sys.exit(0)
-
-    config = prepare_config()
-    logger = get_logger()
 
     doxygen_path = find_program_path("doxygen")
     if not doxygen_path:

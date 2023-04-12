@@ -17,12 +17,12 @@ from tests.ut.utils import get_test_project_config
 @pytest.fixture
 def scargo_docker_test_setup(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> Config:
     os.chdir(tmp_path)
-    monkeypatch.setattr("scargo.commands.docker.get_project_root", lambda: tmp_path)
 
     test_project_config = get_test_project_config()
+    test_project_config.project_root = Path()
     monkeypatch.setattr(
-        "scargo.commands.docker._get_project_config",
-        lambda: test_project_config.project,
+        "scargo.commands.docker.get_scargo_config_or_exit",
+        lambda: test_project_config,
     )
 
     return test_project_config
@@ -113,12 +113,11 @@ def test_docker_exec(
     monkeypatch: pytest.MonkeyPatch,
     scargo_docker_test_setup: Config,
 ) -> None:
-    id = "some_hash"
-    docker_opts = "-it"
-    monkeypatch.setattr("docker.from_env", lambda: FakeDockerClient(id))
-    scargo_docker_exec([docker_opts])
+    container_id = "some_hash"
+    monkeypatch.setattr("docker.from_env", lambda: FakeDockerClient(container_id))
+    scargo_docker_exec([])
 
-    called_subprocess_cmd = ["docker", "exec", docker_opts, id, "bash"]
+    called_subprocess_cmd = ["docker", "exec", "-it", container_id, "bash"]
     assert mock_subprocess_run.call_args.args[0] == called_subprocess_cmd
 
 

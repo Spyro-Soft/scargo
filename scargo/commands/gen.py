@@ -13,17 +13,18 @@ from typing import Optional
 
 from scargo.config import Config
 from scargo.config_utils import prepare_config
-from scargo.global_values import SCARGO_PGK_PATH
-from scargo.jinja.mock_gen import generate_mocks
-from scargo.jinja.ut_gen import generate_ut
+from scargo.file_generators.mock_gen import generate_mocks
+from scargo.file_generators.ut_gen import generate_ut
+from scargo.global_values import SCARGO_PKG_PATH
 from scargo.logger import get_logger
-from scargo.path_utils import get_project_root
+
+logger = get_logger()
 
 OUT_FS_DIR = Path("build", "fs")
 
 
 def scargo_gen(
-    project_profile_path: Path,
+    profile: str,
     gen_ut: Optional[Path],
     gen_mock: Optional[Path],
     certs: Optional[str],
@@ -34,7 +35,6 @@ def scargo_gen(
     single_bin: bool,
 ) -> None:
     config = prepare_config()
-    logger = get_logger()
 
     if gen_ut:
         generate_ut(gen_ut, config)
@@ -43,18 +43,21 @@ def scargo_gen(
         if gen_mock.suffix not in (".h", ".hpp"):
             logger.error("Not a header file. Please chose .h or .hpp file.")
             sys.exit(1)
-        if generate_mocks(gen_mock):
+        if generate_mocks(gen_mock, config.project.target.source_dir, config):
             logger.info(f"Generated: {gen_mock}")
         else:
             logger.info(f"Skipping: {gen_mock}")
 
     if certs:
-        generate_certs(certs, certs_mode, certs_input, certs_passwd)
+        generate_certs(
+            certs, certs_mode, certs_input, certs_passwd, config.project_root
+        )
 
     if fs:
         generate_fs(config)
 
     if single_bin:
+        project_profile_path = config.project_root / "build" / profile
         gen_single_binary(project_profile_path, config)
 
 
@@ -63,11 +66,10 @@ def generate_certs(
     mode_for_certs: Optional[str],
     certs_intermediate_dir: Optional[Path],
     certs_passwd: Optional[str],
+    project_path: Path,
 ) -> None:
-    project_path = get_project_root()
-
-    internal_certs_dir = Path(SCARGO_PGK_PATH, "certs")
-    projects_builds_path = get_project_root() / "build"
+    internal_certs_dir = Path(SCARGO_PKG_PATH, "certs")
+    projects_builds_path = project_path / "build"
     certs_out_dir = projects_builds_path / "certs"
     if not certs_intermediate_dir:
         certs_intermediate_dir = projects_builds_path / "certs"
@@ -104,7 +106,6 @@ def generate_certs(
     certs_out_uc_dir.mkdir(parents=True, exist_ok=True)
     certs_out_azure_dir.mkdir(parents=True, exist_ok=True)
 
-    logger = get_logger()
     try:
         copyfile(
             certs_out_dir / "certs" / "iot-device.cert.pem",
@@ -131,7 +132,6 @@ def generate_fs(config: Config) -> None:
     if target.family == "esp32":
         gen_fs_esp32(config)
     else:
-        logger = get_logger()
         logger.warning("Gen --fs command not supported for this target yet.")
 
 
@@ -140,13 +140,11 @@ def gen_single_binary(project_profile_path: Path, config: Config) -> None:
     if target.family == "esp32":
         gen_single_binary_esp32(project_profile_path, config)
     else:
-        logger = get_logger()
         logger.warning("Gen --bin command not supported for this target yet.")
 
 
 def gen_fs_esp32(config: Config) -> None:
     command = []
-    logger = get_logger()
     partition_list = config.get_esp32_config().partitions
     fs_size = 0
     for i in partition_list:
@@ -155,7 +153,7 @@ def gen_fs_esp32(config: Config) -> None:
             fs_size = int(re.sub(",", "", split_list[4]), 16)
 
     try:
-        project_path = get_project_root()
+        project_path = config.project_root
         fs_in_dir = project_path / "main/fs"
         fs_out_dir = project_path / OUT_FS_DIR
         fs_out_bin = project_path / "build/spiffs.bin"
@@ -181,7 +179,6 @@ def gen_fs_esp32(config: Config) -> None:
 
 
 def gen_single_binary_esp32(project_profile_path: Path, config: Config) -> None:
-    logger = get_logger()
     partition_list = config.get_esp32_config().partitions
     target = config.project.target
 
@@ -223,7 +220,7 @@ def gen_single_binary_esp32(project_profile_path: Path, config: Config) -> None:
 
     try:
         logger.info("Running: %s", " ".join(command))
-        subprocess.check_call(command, cwd=get_project_root())
+        subprocess.check_call(command, cwd=config.project_root)
     except subprocess.CalledProcessError:
         logger.error("Generation of single binary failed")
         sys.exit(1)

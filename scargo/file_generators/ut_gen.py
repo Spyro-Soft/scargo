@@ -7,10 +7,8 @@ from pathlib import Path
 from typing import List, Sequence
 
 from scargo.config import Config
-from scargo.global_values import SCARGO_PGK_PATH
-from scargo.jinja.base_gen import BaseGen
-from scargo.jinja.mock_utils.cmake_utils import add_subdirs_to_cmake
-from scargo.path_utils import get_project_root
+from scargo.file_generators.base_gen import create_file_from_template
+from scargo.file_generators.mock_utils.cmake_utils import add_subdirs_to_cmake
 
 HEADER_EXTENSIONS = (".h", ".hpp")
 SRC_EXTENSIONS = (".c", ".cpp")
@@ -32,13 +30,10 @@ class HeaderDescriptor:
         self.namespaces = namespaces
 
 
-class _UnitTestsGen(BaseGen):
+class _UnitTestsGen:
     def __init__(self, config: Config):
-        template_dir = Path(SCARGO_PGK_PATH, "jinja", "ut_templates")
-        BaseGen.__init__(self, template_dir)
-
         self._config = config
-        self._project_path = get_project_root()
+        self._project_path = config.project_root
         self._ut_dir = self._project_path / "tests/ut"
 
     def generate_tests(self, input_path: Path, overwrite: bool) -> None:
@@ -71,11 +66,12 @@ class _UnitTestsGen(BaseGen):
         :param bool overwrite: overwrite if exists
         """
         header_descriptor = self._parse_header_file(input_file_path)
-        self.create_file_from_template(
-            "ut.cpp.j2",
+        create_file_from_template(
+            "ut/ut.cpp.j2",
             output_file_path,
             overwrite=overwrite,
             template_params={"header": header_descriptor},
+            config=self._config,
         )
 
     def _generate_cmake(self, src_dir_path: Path, ut_dir_path: Path) -> None:
@@ -104,8 +100,8 @@ class _UnitTestsGen(BaseGen):
             if p.name != main_cpp
         ]
 
-        self.create_file_from_template(
-            "CMakeLists.txt.j2",
+        create_file_from_template(
+            "ut/CMakeLists.txt.j2",
             ut_dir_path / "CMakeLists.txt",
             overwrite=True,
             template_params={
@@ -113,6 +109,7 @@ class _UnitTestsGen(BaseGen):
                 "utest_name": ut_name,
                 "ut_files": ut_files,
             },
+            config=self._config,
         )
 
     def _get_unit_test_path(self, input_src_path: Path) -> Path:

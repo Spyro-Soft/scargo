@@ -6,11 +6,13 @@
 import subprocess
 import sys
 from pathlib import Path
+from typing import List, Union
 
 from scargo.config import Config
 from scargo.config_utils import prepare_config
 from scargo.logger import get_logger
-from scargo.path_utils import get_project_root
+
+logger = get_logger()
 
 
 def scargo_test(verbose: bool) -> None:
@@ -18,11 +20,10 @@ def scargo_test(verbose: bool) -> None:
     Run test
     :param bool verbose: if verbose
     """
-    logger = get_logger()
     config = prepare_config()
 
     test_dir_name = "tests"
-    project_dir = get_project_root()
+    project_dir = config.project_root
     tests_src_dir = project_dir / test_dir_name
     test_build_dir = project_dir / "build" / test_dir_name
 
@@ -57,7 +58,7 @@ def scargo_test(verbose: bool) -> None:
 
 def run_ut(config: Config, verbose: bool, cwd: Path) -> None:
     # Run tests.
-    cmd = ["ctest"]
+    cmd: List[Union[str, Path]] = ["ctest"]
 
     if verbose:
         cmd.append("--verbose")
@@ -67,7 +68,16 @@ def run_ut(config: Config, verbose: bool, cwd: Path) -> None:
         subprocess.run(cmd, cwd=cwd, check=False)
 
         # Run code coverage.
-        cmd = ["gcovr", "-r", "ut", ".", "--html", "ut-coverage.html"]
+        cmd = [
+            "gcovr",
+            "-r",
+            "ut",
+            ".",
+            "-f",
+            config.project_root.joinpath(config.project.target.source_dir),
+            "--html",
+            "ut-coverage.html",
+        ]
 
         gcov_executable = config.tests.gcov_executable
 
@@ -76,7 +86,6 @@ def run_ut(config: Config, verbose: bool, cwd: Path) -> None:
 
         subprocess.check_call(cmd, cwd=cwd)
     except subprocess.CalledProcessError:
-        logger = get_logger()
         logger.error("Fail to run project tests")
         sys.exit(1)
 

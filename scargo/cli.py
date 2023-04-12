@@ -6,7 +6,7 @@ import sys
 from pathlib import Path
 from typing import List, Optional
 
-from typer import Argument, Context, Option, Typer
+from typer import Argument, Option, Typer
 
 from scargo.commands.build import scargo_build
 from scargo.commands.check import scargo_check
@@ -30,7 +30,9 @@ from scargo.commands.version import scargo_version
 from scargo.config import ScargoTargets, Target
 from scargo.global_values import DESCRIPTION, SCARGO_DEFAULT_CONFIG_FILE
 from scargo.logger import get_logger
-from scargo.path_utils import get_config_file_path, get_project_root
+from scargo.path_utils import get_config_file_path
+
+logger = get_logger()
 
 ###############################################################################
 
@@ -148,18 +150,19 @@ docker = Typer(help="Manage the docker environment for the project")
 @docker.command(
     "build", context_settings={"allow_extra_args": True, "ignore_unknown_options": True}
 )
-def docker_build(ctx: Context, base_dir: Optional[Path] = BASE_DIR_OPTION) -> None:
+def docker_build(
+    docker_opts: List[str] = Argument(None), base_dir: Optional[Path] = BASE_DIR_OPTION
+) -> None:
     """Build docker layers for this project depending on the target"""
     if base_dir:
         os.chdir(base_dir)
-    scargo_docker_build(ctx.args)
+    scargo_docker_build(docker_opts)
 
 
 @docker.command(
     "run", context_settings={"allow_extra_args": True, "ignore_unknown_options": True}
 )
 def docker_run(
-    ctx: Context,
     command: str = Option(
         "bash",
         "-c",
@@ -168,21 +171,24 @@ def docker_run(
         help="Select command to be used with docker run.",
     ),
     base_dir: Optional[Path] = BASE_DIR_OPTION,
+    docker_opts: List[str] = Argument(None),
 ) -> None:
     """Run project in docker environment"""
     if base_dir:
         os.chdir(base_dir)
-    scargo_docker_run(docker_opts=ctx.args, command=command)
+    scargo_docker_run(docker_opts=docker_opts, command=command)
 
 
 @docker.command(
     "exec", context_settings={"allow_extra_args": True, "ignore_unknown_options": True}
 )
-def docker_exec(ctx: Context, base_dir: Optional[Path] = BASE_DIR_OPTION) -> None:
+def docker_exec(
+    base_dir: Optional[Path] = BASE_DIR_OPTION, docker_opts: List[str] = Argument(None)
+) -> None:
     """Attach to existing docker environment"""
     if base_dir:
         os.chdir(base_dir)
-    scargo_docker_exec(ctx.args)
+    scargo_docker_exec(docker_opts)
 
 
 cli.add_typer(docker, name="docker")
@@ -291,9 +297,7 @@ def gen(
     """Manage the auto file generator"""
     if base_dir:
         os.chdir(base_dir)
-    project_profile_path = get_project_root() / "build" / profile
     if (gen_ut is gen_mock is certs is None) and not (file_system or single_bin):
-        logger = get_logger()
         logger.warning(
             "Please add one of the following options to the command:"
             "\n--unit-test\n--mock\n--certs\n--fs\n--bin"
@@ -301,7 +305,7 @@ def gen(
         sys.exit(1)
 
     scargo_gen(
-        project_profile_path,
+        profile,
         gen_ut,
         gen_mock,
         certs,
@@ -351,7 +355,7 @@ def new(
         create_docker,
         git,
     )
-    scargo_update(Path(SCARGO_DEFAULT_CONFIG_FILE))
+    scargo_update(Path(SCARGO_DEFAULT_CONFIG_FILE).absolute())
 
 
 ###############################################################################
@@ -392,8 +396,7 @@ def run(
         os.chdir(base_dir)
     if not skip_build:
         scargo_build(profile)
-    project_profile_path = get_project_root() / "build" / profile
-    scargo_run(bin_path, project_profile_path, bin_params)
+    scargo_run(bin_path, profile, bin_params)
 
 
 ###############################################################################
@@ -429,7 +432,6 @@ def update(
     """Read .toml config file and generate `CMakeLists.txt`."""
     if base_dir:
         os.chdir(base_dir)
-    logger = get_logger()
     if config_file_path is None:
         config_file_path = get_config_file_path(SCARGO_DEFAULT_CONFIG_FILE)
         if not config_file_path:
@@ -450,8 +452,4 @@ def version() -> None:
 ###############################################################################
 
 if __name__ == "__main__":
-    try:
-        cli()
-    except Exception as e:  # pylint: disable=broad-exception-caught
-        print(f"\nA fatal error occurred: {e}")
-        sys.exit(2)
+    cli()

@@ -1,4 +1,3 @@
-from pathlib import Path
 from typing import Dict
 from unittest.mock import MagicMock
 
@@ -37,17 +36,9 @@ def mock_prepare_config(mocker: MockerFixture, config: Config) -> MagicMock:
     )
 
 
-@pytest.fixture
-def mock_get_project_root(mocker: MockerFixture) -> MagicMock:
-    return mocker.patch(
-        f"{scargo_check.__module__}.get_project_root", return_value=Path()
-    )
-
-
 def test_scargo_check_single(
     mock_checkers: Dict[str, MagicMock],
     mock_prepare_config: MagicMock,
-    mock_get_project_root: MagicMock,
     config: Config,
 ) -> None:
     scargo_check(
@@ -73,7 +64,6 @@ def test_scargo_check_single(
 def test_scargo_check_all(
     mock_checkers: Dict[str, MagicMock],
     mock_prepare_config: MagicMock,
-    mock_get_project_root: MagicMock,
 ) -> None:
     scargo_check(
         clang_format=True,
@@ -98,7 +88,6 @@ def test_scargo_check_all(
 def test_scargo_check_default(
     mock_checkers: Dict[str, MagicMock],
     mock_prepare_config: MagicMock,
-    mock_get_project_root: MagicMock,
 ) -> None:
     scargo_check(
         clang_format=False,

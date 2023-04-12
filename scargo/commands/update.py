@@ -10,29 +10,29 @@ from pathlib import Path
 
 from scargo.commands.docker import scargo_docker_build
 from scargo.config_utils import check_scargo_version, get_scargo_config_or_exit
-from scargo.global_values import SCARGO_DOCKER_ENV, SCARGO_LOCK_FILE, SCARGO_PGK_PATH
-from scargo.jinja.cicd_gen import generate_cicd
-from scargo.jinja.cmake_gen import generate_cmake
-from scargo.jinja.conan_gen import generate_conanfile
-from scargo.jinja.docker_gen import generate_docker_compose
-from scargo.jinja.env_gen import generate_env
-from scargo.jinja.readme_gen import generate_readme
-from scargo.jinja.tests_gen import generate_tests
+from scargo.file_generators.cicd_gen import generate_cicd
+from scargo.file_generators.cmake_gen import generate_cmake
+from scargo.file_generators.conan_gen import generate_conanfile
+from scargo.file_generators.docker_gen import generate_docker_compose
+from scargo.file_generators.env_gen import generate_env
+from scargo.file_generators.readme_gen import generate_readme
+from scargo.file_generators.tests_gen import generate_tests
+from scargo.global_values import SCARGO_DOCKER_ENV, SCARGO_LOCK_FILE, SCARGO_PKG_PATH
 from scargo.logger import get_logger
-from scargo.path_utils import get_project_root
+
+logger = get_logger()
 
 
-def copy_file_if_not_exists() -> None:
+def copy_file_if_not_exists(project_path: Path) -> None:
     """
     Copy file from scargo pkg
 
     :return: None
     """
-    files_to_copy = Path(SCARGO_PGK_PATH, "templates").glob("*")
-    project_abs_path = get_project_root()
+    files_to_copy = Path(SCARGO_PKG_PATH, "templates").glob("*")
     for file in files_to_copy:
-        if not Path(project_abs_path, file.name).exists():
-            shutil.copy2(file, project_abs_path)
+        if not Path(project_path, file.name).exists():
+            shutil.copy2(file, project_path)
 
 
 def scargo_update(config_file_path: Path) -> None:
@@ -42,8 +42,7 @@ def scargo_update(config_file_path: Path) -> None:
     :param config_file_path: path to .toml configuration file (e.g. scargo.toml)
     :return: None
     """
-    logger = get_logger()
-    project_path = get_project_root()
+    project_path = config_file_path.parent
     docker_path = Path(project_path, ".devcontainer")
     config = get_scargo_config_or_exit(config_file_path)
     if not config.project:
@@ -57,7 +56,7 @@ def scargo_update(config_file_path: Path) -> None:
         sys.exit(1)
 
     # Copy templates project files to repo directory
-    copy_file_if_not_exists()
+    copy_file_if_not_exists(project_path)
 
     # Copy config file and create lock file.
     shutil.copyfile(config_file_path, project_path / SCARGO_LOCK_FILE)
@@ -68,8 +67,8 @@ def scargo_update(config_file_path: Path) -> None:
     target = project_config.target
 
     # Copy docker env files to repo directory
-    generate_docker_compose(docker_path, project_config)
-    generate_env(docker_path)
+    generate_docker_compose(docker_path, config)
+    generate_env(docker_path, config)
 
     generate_cmake(config)
     generate_conanfile(config)
@@ -87,9 +86,9 @@ def scargo_update(config_file_path: Path) -> None:
                 out.write(line + "\n")
             out.write("\n")
 
-    generate_cicd(project_config=project_config)
-    generate_tests(target, config.tests)
-    generate_readme(project_config)
+    generate_cicd(config=config)
+    generate_tests(config)
+    generate_readme(config)
 
     # do not rebuild dockers in the docker
     if target.family == "stm32" and not Path("third-party/stm32-cmake").is_dir():
@@ -97,6 +96,29 @@ def scargo_update(config_file_path: Path) -> None:
 
     if project_config.build_env == SCARGO_DOCKER_ENV:
         if not Path(project_path, ".dockerenv").exists():
-            scargo_docker_build([])
+            if not pull_docker_image(docker_path):
+                scargo_docker_build([])
         else:
             logger.warning("Cannot run docker inside docker")
+
+
+def pull_docker_image(docker_path: Path) -> bool:
+    logger.info("Pulling the image from docker registry...")
+    try:
+        result = subprocess.run(
+            ["docker-compose", "pull"],
+            cwd=docker_path,
+            stderr=subprocess.PIPE,
+            check=True,
+        )
+    except subprocess.CalledProcessError as e:
+        logger.warning(e.stderr.decode())
+    else:
+        # happens for the default tag, like "myproject-dev:1.0"
+        if (
+            "Some service image(s) must be built from source"
+            not in result.stderr.decode()
+        ):
+            logger.info("Docker image pulled successfully")
+            return True
+    return False

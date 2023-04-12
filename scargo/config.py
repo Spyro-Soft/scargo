@@ -20,16 +20,21 @@ class Config(BaseModel):
     profiles: Dict[str, "ProfileConfig"] = Field(..., alias="profile")
     check: "ChecksConfig"
     doc: "DocConfig" = Field(
-        default_factory=lambda: DocConfig()
-    )  # pylint: disable=unnecessary-lambda
+        default_factory=lambda: DocConfig()  # pylint: disable=unnecessary-lambda
+    )
     tests: "TestConfig"
     dependencies: "Dependencies"
     conan: "ConanConfig"
     stm32: Optional["Stm32Config"]
     esp32: Optional["Esp32Config"]
     scargo: "ScargoConfig" = Field(
-        default_factory=lambda: ScargoConfig()
-    )  # pylint: disable=unnecessary-lambda
+        default_factory=lambda: ScargoConfig()  # pylint: disable=unnecessary-lambda
+    )
+    docker_compose: "DockerComposeConfig" = Field(
+        default_factory=lambda: DockerComposeConfig(),  # pylint: disable=unnecessary-lambda
+        alias="docker-compose",
+    )
+    project_root: Path
 
     def get_stm32_config(self) -> "Stm32Config":
         if not self.stm32:
@@ -42,9 +47,9 @@ class Config(BaseModel):
         return self.esp32
 
     @root_validator
-    def validate_special_configs(
+    def validate_special_configs(  # pylint: disable=no-self-argument
         cls, values: Dict[str, Any]
-    ) -> Dict[str, Any]:  # pylint: disable=no-self-argument
+    ) -> Dict[str, Any]:
         target_id = values["project"].target_id
         if target_id == "stm32" and not values["stm32"]:
             raise ConfigError("No [stm32] section in config")
@@ -209,6 +214,10 @@ class ScargoConfig(BaseModel):
     version: Optional[str]
 
 
+class DockerComposeConfig(BaseModel):
+    ports: List[str] = Field(default_factory=list)
+
+
 Config.update_forward_refs()
 ProjectConfig.update_forward_refs()
 ChecksConfig.update_forward_refs()
@@ -217,4 +226,6 @@ Esp32Config.update_forward_refs()
 
 
 def parse_config(config_file_path: Path) -> Config:
-    return Config.parse_obj(toml.load(config_file_path))
+    config_obj = toml.load(config_file_path)
+    config_obj["project_root"] = config_file_path.parent.absolute()
+    return Config.parse_obj(config_obj)

@@ -10,10 +10,10 @@ from typing import List, Optional, Sequence
 
 import docker
 
-from scargo.config import ProjectConfig
 from scargo.config_utils import get_scargo_config_or_exit
 from scargo.logger import get_logger
-from scargo.path_utils import get_project_root
+
+logger = get_logger()
 
 
 def scargo_docker_build(docker_opts: Sequence[str]) -> None:
@@ -23,10 +23,10 @@ def scargo_docker_build(docker_opts: Sequence[str]) -> None:
     :param docker_opts: additional docker options
     :raises CalledProcessError: if docker build fail
     """
-    logger = get_logger()
     logger.debug("Build docker environment.")
 
-    docker_path = _get_docker_path()
+    config = get_scargo_config_or_exit()
+    docker_path = _get_docker_path(config.project_root)
 
     try:
         subprocess.run(
@@ -49,11 +49,11 @@ def scargo_docker_run(
     :param command: command to run in the container
     :raises CalledProcessError: if docker did not start
     """
-    logger = get_logger()
     logger.debug("Run docker environment.")
 
-    docker_path = _get_docker_path()
-    project_config_name = _get_project_config().name
+    config = get_scargo_config_or_exit()
+    docker_path = _get_docker_path(config.project_root)
+    project_config_name = config.project.name
 
     cmd = [
         "docker-compose",
@@ -79,10 +79,10 @@ def scargo_docker_exec(docker_opts: List[str]) -> None:
     :param docker_opts: additional docker options
     :raises CalledProcessError: if docker did not start
     """
-    logger = get_logger()
     logger.debug("Exec docker environment.")
 
-    image = _get_project_config().docker_image_tag
+    config = get_scargo_config_or_exit()
+    image = config.project.docker_image_tag
 
     if not image:
         logger.error("docker-image-tag not defined in .toml under project section")
@@ -98,7 +98,7 @@ def scargo_docker_exec(docker_opts: List[str]) -> None:
         sys.exit(1)
 
     bash_command = ["bash"]
-    cmd = ["docker", "exec"] + docker_opts + [newest_container[0].id] + bash_command
+    cmd = ["docker", "exec", "-it", *docker_opts, newest_container[0].id, *bash_command]
     try:
         subprocess.run(cmd, check=True)
         logger.info("Stop exec docker environment.")
@@ -107,15 +107,9 @@ def scargo_docker_exec(docker_opts: List[str]) -> None:
         sys.exit(1)
 
 
-def _get_docker_path() -> Path:
-    project_path = get_project_root()
+def _get_docker_path(project_path: Path) -> Path:
     # do not rebuild dockers in the docker
     if Path(project_path, ".dockerenv").exists():
-        logger = get_logger()
         logger.error("Cannot used docker command inside the docker container.")
         sys.exit(1)
     return Path(project_path, ".devcontainer")
-
-
-def _get_project_config() -> ProjectConfig:
-    return get_scargo_config_or_exit().project

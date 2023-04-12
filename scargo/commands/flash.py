@@ -10,7 +10,8 @@ from typing import Optional
 from scargo.config import Config
 from scargo.config_utils import prepare_config
 from scargo.logger import get_logger
-from scargo.path_utils import get_project_root
+
+logger = get_logger()
 
 
 def scargo_flash(
@@ -18,7 +19,6 @@ def scargo_flash(
 ) -> None:
     config = prepare_config()
     target = config.project.target
-    logger = get_logger()
 
     if port and target.family != "esp32":
         logger.error("--port option is only supported for esp32 projects.")
@@ -38,7 +38,7 @@ def flash_esp32(
     flash_profile: str = "Debug",
     port: Optional[str] = None,
 ) -> None:
-    project_path = get_project_root()
+    project_path = config.project_root
     out_dir = project_path / "build" / flash_profile
     target = config.project.target
     command = []
@@ -72,14 +72,11 @@ def flash_esp32(
                 command.append(f"--port={port}")
             subprocess.check_call(command, cwd=out_dir)
     except subprocess.CalledProcessError:
-        logger = get_logger()
         logger.error("%s fail", command)
 
 
 def flash_stm32(config: Config, flash_profile: str = "Debug") -> None:
-    logger = get_logger()
-
-    project_path = get_project_root()
+    project_path = config.project_root
     bin_name = config.project.bin_name
     if not bin_name:
         logger.error("No bin_name in config!")
