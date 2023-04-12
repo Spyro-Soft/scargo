@@ -12,10 +12,11 @@ from scargo.config_utils import prepare_config
 from scargo.logger import get_logger
 
 
-def scargo_test(verbose: bool) -> None:
+def scargo_test(verbose: bool, profile: str = "Debug") -> None:
     """
     Run test
     :param bool verbose: if verbose
+    :param str profile: CMake profile to use
     """
     logger = get_logger()
     config = prepare_config()
@@ -43,8 +44,11 @@ def scargo_test(verbose: bool) -> None:
             cwd=project_dir,
         )
         subprocess.check_call(
-            ["conan", "build", tests_src_dir, "-bf", test_build_dir],
-            cwd=project_dir,
+            ["cmake", f"-DCMAKE_BUILD_TYPE={profile}", tests_src_dir],
+            cwd=test_build_dir,
+        )
+        subprocess.check_call(
+            "cmake --build . --parallel", shell=True, cwd=test_build_dir
         )
     except subprocess.CalledProcessError:
         logger.error("Failed to build tests.")

@@ -404,12 +404,13 @@ def run(
 @cli.command()
 def test(
     verbose: bool = Option(False, "--verbose", "-v", help="Verbose mode."),
+    profile: str = Option("Debug", "--profile", help="CMake profile to use"),
     base_dir: Optional[Path] = BASE_DIR_OPTION,
 ) -> None:
     """Compile and run all tests in directory `test`."""
     if base_dir:
         os.chdir(base_dir)
-    scargo_test(verbose)
+    scargo_test(verbose, profile)
 
 
 ###############################################################################
