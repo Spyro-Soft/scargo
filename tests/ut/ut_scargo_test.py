@@ -31,7 +31,8 @@ def test_scargo_test(create_new_project: None, fp: FakeProcess) -> None:
     html_coverage_file = "ut-coverage.html"
 
     fp.register(f"conan install {tests_src_dir} -if {test_build_dir}")
-    fp.register(f"conan build {tests_src_dir} -bf {test_build_dir}")
+    fp.register(f"cmake -DCMAKE_BUILD_TYPE=Debug {tests_src_dir}")
+    fp.register("cmake --build . --parallel")
     fp.register("ctest")
     fp.register(f"gcovr -r ut . --html {html_coverage_file}")
     scargo_test(False)
