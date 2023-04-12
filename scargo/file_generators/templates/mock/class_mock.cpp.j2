@@ -25,13 +25,5 @@ using namespace {{namespace.name}};
 }
 
 {% endfor %}
-{% for constructor in cls.constructors %}
-{% if not 'delete' in constructor %}
-{{cls.name}}::{{constructor|replace(";","")}}{}
-{% endif %}
-{% endfor %}
-{% if cls.destructor %}
-{{cls.name}}::{{cls.destructor}}{}
-{% endif %}
 {% endfor %}
 
