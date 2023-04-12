@@ -44,9 +44,6 @@ def generate_tests(config: Config) -> None:
             template,
             output_path,
             overwrite=False,
-            template_params={
-                "target": config.project.target,
-                "tests": config.tests,
-            },
+            template_params={},
             config=config,
         )
