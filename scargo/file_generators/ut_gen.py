@@ -80,7 +80,10 @@ class _UnitTestsGen:
         :param Path src_dir_path: Source directory for which tests are being generated
         :param Path ut_dir_path: Directory of generated unit tests
         """
-        add_subdirs_to_cmake(ut_dir_path.relative_to(self._project_path))
+        cmake_dir_path = ut_dir_path
+        while cmake_dir_path != self._ut_dir.parent:
+            add_subdirs_to_cmake(cmake_dir_path.relative_to(self._project_path))
+            cmake_dir_path = cmake_dir_path.parent
 
         ut_name = self._get_cmake_tests_name(ut_dir_path)
         ut_files = [
