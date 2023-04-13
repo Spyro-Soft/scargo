@@ -3,7 +3,7 @@ from pathlib import Path
 
 
 def create_doc() -> None:
-    project_path = Path().absolute()
+    project_path = Path.cwd()
     docs_path = Path(project_path, "docs")
     subprocess.check_call(
         "sphinx-apidoc ../scargo -o source/modules/ -f", shell=True, cwd=docs_path

@@ -52,4 +52,4 @@ def write_template(
 
 def _is_file_excluded(output_path: Path, project_path: Path, config: Config) -> bool:
     exclude_list = config.scargo.update_exclude
-    return str(output_path.absolute().relative_to(project_path)) in exclude_list
+    return str(output_path.relative_to(project_path)) in exclude_list

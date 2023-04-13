@@ -14,7 +14,7 @@ class _CppTemplateGen:
 
     def __init__(self, config: Config) -> None:
         self._config = config
-        self._src_dir = config.source_dir_path.absolute()
+        self._src_dir = config.source_dir_path
 
     def _generate_bin(self, bin_name: str) -> None:
         """Function which creates main.cpp file using jinja"""
