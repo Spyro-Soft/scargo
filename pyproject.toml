@@ -28,7 +28,7 @@ classifiers = [
 dynamic = ["version"]
 keywords = ["scargo", "Package manager", "C++"]
 dependencies = [
-    "clang==14.0",
+    "clang==16.0.1.1",
     "cmake==3.25.2",
     "coloredlogs==15.0.1",
     "conan==1.59.0",
