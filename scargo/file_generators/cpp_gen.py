@@ -1,7 +1,6 @@
 # #
 # @copyright Copyright (C) 2023 SpyroSoft Solutions S.A. All rights reserved.
 # #
-from pathlib import Path
 from typing import Any, Dict
 
 from scargo.config import Config
@@ -15,7 +14,7 @@ class _CppTemplateGen:
 
     def __init__(self, config: Config) -> None:
         self._config = config
-        self._src_dir = Path(config.project.target.source_dir).absolute()
+        self._src_dir = config.source_dir_path.absolute()
 
     def _generate_bin(self, bin_name: str) -> None:
         """Function which creates main.cpp file using jinja"""

@@ -105,7 +105,7 @@ class CheckerFixer(abc.ABC):
     def check_files(self) -> int:
         error_counter = 0
         for file_path in find_files(
-            Path(self._config.project.target.source_dir),
+            self._config.source_dir_path,
             ("*.h", "*.hpp") if self.headers_only else ("*.h", "*.hpp", "*.c", "*.cpp"),
             self.get_exclude_patterns(),
         ):
@@ -312,9 +312,7 @@ class CyclomaticChecker(CheckerFixer):
     check_name = "cyclomatic"
 
     def check_files(self) -> int:
-        source_dir = self._config.project.target.source_dir
-
-        cmd = ["lizard", source_dir, "-C", "25", "-w"]
+        cmd = ["lizard", str(self._config.source_dir_path), "-C", "25", "-w"]
 
         for exclude_pattern in self.get_exclude_patterns():
             cmd.extend(["--exclude", exclude_pattern])

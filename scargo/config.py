@@ -36,6 +36,10 @@ class Config(BaseModel):
     )
     project_root: Path
 
+    @property
+    def source_dir_path(self) -> Path:
+        return self.project_root / self.project.target.source_dir
+
     def get_stm32_config(self) -> "Stm32Config":
         if not self.stm32:
             raise ConfigError("No [stm32] section in config")
