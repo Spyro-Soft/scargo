@@ -80,8 +80,8 @@ class _UnitTestsGen:
         :param Path ut_dir_path: Directory of generated unit tests
         """
         cmake_dir_path = ut_dir_path
-        while cmake_dir_path != self._ut_dir.parent:
-            add_subdirs_to_cmake(cmake_dir_path.relative_to(self._project_path))
+        while cmake_dir_path != self._ut_dir:
+            add_ut_dir_to_parent_cmake(cmake_dir_path)
             cmake_dir_path = cmake_dir_path.parent
 
         ut_name = self._get_cmake_tests_name(ut_dir_path)
@@ -182,48 +182,25 @@ class _UnitTestsGen:
         return [child for child in workdir.iterdir() if child.suffix in extensions]
 
 
-def add_subdirs_to_cmake(mock_root: Path) -> None:
-    """This function takes as input a path to mocks and a path to root.
-    Then it creates a list of root directories where the index of "src"
-    directory is found. The "start_path" is created which is a path of
-    first "src_idx" directories. This path should be looped over to add
-    subdirectories into CMakeLists.txt."""
-
-    mock_root = mock_root.resolve()
-
-    if not mock_root.exists():
-        mock_root = mock_root.parent
-
-    while True:
-        subdirectories = [path for path in mock_root.iterdir() if path.is_dir()]
-        if subdirectories:
-            break
-        mock_root = mock_root.parent
-
-    try:
-        update_cmake_lists(mock_root, subdirectories)
-    except OSError:
-        pass
-
-
 COPYRIGHT = """# #
 # Copyright (C) 2022 Spyrosoft Solutions. All rights reserved.
 # #\n\n"""
 
 
-def update_cmake_lists(mock_root: Path, subdirectories: List[Path]) -> None:
-    # if CMakelists doesn't exist create it in mock_root
-    cmake_list_path = mock_root / "CMakeLists.txt"
+def add_ut_dir_to_parent_cmake(ut_dir_path: Path) -> None:
+    # if CMakelists doesn't exist create it in parent dir
+    parent_dir = ut_dir_path.parent
+    cmake_list_path = parent_dir / "CMakeLists.txt"
     if not cmake_list_path.exists():
         with cmake_list_path.open("w", encoding="utf-8") as file:
             file.write(COPYRIGHT)
-    # check if all subidrectories exists in CMakeLists
-    # if not add new ones
+    # check if ut_dir_path exists in CMakeLists
+    # if not add it
     with cmake_list_path.open("r+", encoding="utf-8") as file:
         cmake_text = file.read()
-        for subdir in subdirectories:
-            if str(subdir.relative_to(mock_root)) not in cmake_text:
-                file.write(f"\nadd_subdirectory({subdir})")
+        add_subdirectory_clause = f"\nadd_subdirectory({ut_dir_path.name})"
+        if add_subdirectory_clause not in cmake_text:
+            file.write(add_subdirectory_clause)
 
 
 def generate_ut(input_path: Path, config: Config, force: bool = False) -> None:
