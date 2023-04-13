@@ -80,7 +80,7 @@ class _UnitTestsGen:
         :param Path ut_dir_path: Directory of generated unit tests
         """
         cmake_dir_path = ut_dir_path
-        while cmake_dir_path != self._ut_dir.parent:
+        while cmake_dir_path != self._ut_dir:
             add_ut_dir_to_parent_cmake(cmake_dir_path)
             cmake_dir_path = cmake_dir_path.parent
 
