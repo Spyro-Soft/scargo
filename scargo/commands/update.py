@@ -100,7 +100,7 @@ def scargo_update(config_file_path: Path) -> None:
     if project_config.build_env == SCARGO_DOCKER_ENV:
         if not Path(project_path, ".dockerenv").exists():
             if not pull_docker_image(docker_path):
-                scargo_docker_build([])
+                scargo_docker_build([], config.project_root)
         else:
             logger.warning("Cannot run docker inside docker")
 
