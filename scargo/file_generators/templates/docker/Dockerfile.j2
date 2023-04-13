@@ -19,7 +19,7 @@ RUN apt update --fix-missing && \
 
 FROM base AS cpp
 
-RUN apt -y install cppcheck bzr lib32z1 \
+RUN apt update --fix-missing && apt -y install cppcheck bzr lib32z1 \
     clang clang-format clang-tidy valgrind \
     gcovr doxygen curl libcurl4-openssl-dev \
     libcmocka0 libcmocka-dev plantuml
@@ -47,7 +47,7 @@ ENV CONAN_PASSWORD=${CONAN_PASSWORD}
 WORKDIR /opt
 
 # configure ssh
-RUN apt install -y openssh-server ssh-askpass && apt install -y rsync grsync && \
+RUN apt update --fix-missing && apt install -y openssh-server ssh-askpass && apt install -y rsync grsync && \
     ssh-keygen -A && mkdir -p /run/sshd && \
     echo "Port $SSH_PORT" >> /etc/ssh/sshd_config
 
