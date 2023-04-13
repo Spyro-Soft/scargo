@@ -2,26 +2,27 @@ from typing import List
 
 from clang.cindex import Cursor, CursorKind
 
-from scargo.file_generators.mock_utils.data_classes import (
+from scargo.file_generators.clang_parser.data_classes import (
     ArgumentDescriptor,
-    MockClassDescriptor,
-    MockFunctionDescriptor,
-    MockNamespaceDescriptor,
+    ClassDescriptor,
+    FunctionDescriptor,
+    IncludeDescriptor,
+    NamespaceDescriptor,
 )
 
 
-def extract_namespaces(cursor: Cursor, filename: str) -> List[MockNamespaceDescriptor]:
+def extract_namespaces(cursor: Cursor, filename: str) -> List[NamespaceDescriptor]:
     return [
-        MockNamespaceDescriptor(descendant.spelling)
+        NamespaceDescriptor(descendant.spelling)
         for descendant in cursor.walk_preorder()
         if descendant.kind == CursorKind.NAMESPACE
         and descendant.location.file == filename
     ]
 
 
-def extract_classes(cursor: Cursor, filename: str) -> List[MockClassDescriptor]:
+def extract_classes(cursor: Cursor, filename: str) -> List[ClassDescriptor]:
     return [
-        MockClassDescriptor(
+        ClassDescriptor(
             cursor.spelling, f"Mock{cursor.spelling}", _extract_cxx_methods(cursor)
         )
         for descendant in cursor.walk_preorder()
@@ -30,18 +31,27 @@ def extract_classes(cursor: Cursor, filename: str) -> List[MockClassDescriptor]:
     ]
 
 
-def _extract_cxx_methods(cursor: Cursor) -> List[MockFunctionDescriptor]:
+def extract_includes(cursor: Cursor, filename: str) -> List[IncludeDescriptor]:
+    return [
+        IncludeDescriptor(descendant.displayname)
+        for descendant in cursor.walk_preorder()
+        if descendant.kind == CursorKind.INCLUSION_DIRECTIVE
+        and descendant.location.file == filename
+    ]
+
+
+def _extract_cxx_methods(cursor: Cursor) -> List[FunctionDescriptor]:
     return [
         _extract_method_params(descendant)
         for descendant in cursor.walk_preorder()
         if descendant.kind == CursorKind.CXX_METHOD
-        and cursor.access_specifier.name == "PUBLIC"
+        and descendant.access_specifier.name == "PUBLIC"
     ]
 
 
 def _extract_method_params(
     cursor: Cursor,
-) -> MockFunctionDescriptor:
+) -> FunctionDescriptor:
     specifiers = []
     if cursor.is_virtual_method():
         specifiers.append("override")
@@ -53,7 +63,7 @@ def _extract_method_params(
         for descendant in cursor.walk_preorder()
         if descendant.kind == CursorKind.PARM_DECL
     ]
-    return MockFunctionDescriptor(
+    return FunctionDescriptor(
         name=cursor.spelling,
         return_type=cursor.result_type.spelling,
         specifiers=specifiers,
