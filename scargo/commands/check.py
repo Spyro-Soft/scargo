@@ -190,7 +190,11 @@ class CopyrightChecker(CheckerFixer):
         super().check()
 
     def __get_copyright_lines(self) -> List[str]:
-        return ["//\n"] + [f"// {el}\n" for el in self.copyright_desc.split("\n")] + ["//\n"]
+        return (
+            ["//\n"]
+            + [f"// {el}\n" for el in self.copyright_desc.split("\n")]
+            + ["//\n"]
+        )
 
     def check_file(self, file_path: Path) -> CheckResult:
         copyright_lines = self.__get_copyright_lines()
@@ -200,27 +204,20 @@ class CopyrightChecker(CheckerFixer):
 
             for line in file_lines:
                 if line == copyright_lines[0]:
-                    if all(line_from_file == line_from_copyrights for line_from_file, line_from_copyrights in
-                           zip(file_lines[file_lines.index(line):], copyright_lines)):
+                    if all(
+                        line_from_file == line_from_copyrights
+                        for line_from_file, line_from_copyrights in zip(
+                            file_lines[file_lines.index(line) :], copyright_lines
+                        )
+                    ):
                         return CheckResult(problems_found=0)
 
-                    file_lines = file_lines[file_lines.index(line) + 1:]
+                    file_lines = file_lines[file_lines.index(line) + 1 :]
                     if len(file_lines) < len(copyright_lines):
                         break
 
         logger.info("Missing copyright in %s.", file_path)
         return CheckResult(problems_found=1)
-
-        # if all(
-        #     line_from_file == line_from_description
-        #     for line_from_file, line_from_description in zip(
-        #         file.readlines(), self.__get_copyright_lines()
-        #     )
-        # ):
-        #     return CheckResult(problems_found=0)
-
-        # logger.info("Missing copyright in %s.", file_path)
-        # return CheckResult(problems_found=1)
 
     def fix_file(self, file_path: Path) -> None:
         with open(file_path, encoding="utf-8") as file:
