@@ -7,7 +7,10 @@ from pytest_subprocess import FakeProcess
 from scargo.commands.run import scargo_run
 
 
-def test_scargo_run_bin_path(create_new_project: None, fp: FakeProcess) -> None:
+def test_scargo_run_bin_path(
+    create_new_project: None, fp: FakeProcess, tmp_path: Path
+) -> None:
+    os.chdir(tmp_path / "test_project")
     bin_path = Path("test", "bin_path")
     bin_file_name = bin_path.name
     fp_return = fp.register(f"./{bin_file_name}", returncode=0, stdout="Response")

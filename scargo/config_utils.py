@@ -56,23 +56,15 @@ def check_scargo_version(config: Config) -> None:
     :return: None
     """
     version_lock = config.scargo.version
-    if not version_lock:
-        add_version_to_scargo_lock()
-    elif __version__ != version_lock:
+    if __version__ != version_lock:
         logger.warning("Warning: scargo package is different then in lock file")
         logger.info("Run scargo update")
 
 
-def add_version_to_scargo_lock() -> None:
+def add_version_to_scargo_lock(scargo_lock: Path) -> None:
     """
     :return: project configuration as dict
     """
-    scargo_lock = get_config_file_path(SCARGO_LOCK_FILE)
-    if not scargo_lock:
-        logger.error("ERROR: File `%s` does not exist.", SCARGO_LOCK_FILE)
-        logger.info("Did you run `scargo update`?")
-        sys.exit(1)
-
     with open(scargo_lock, encoding="utf-8") as scargo_lock_file:
         config = tomlkit.load(scargo_lock_file)
 

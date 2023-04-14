@@ -16,17 +16,21 @@ from scargo.logger import get_logger
 logger = get_logger()
 
 
-def scargo_docker_build(docker_opts: Sequence[str]) -> None:
+def scargo_docker_build(
+    docker_opts: Sequence[str], project_root: Optional[Path] = None
+) -> None:
     """
     Build docker
 
     :param docker_opts: additional docker options
+    :param project_root
     :raises CalledProcessError: if docker build fail
     """
     logger.debug("Build docker environment.")
 
-    config = get_scargo_config_or_exit()
-    docker_path = _get_docker_path(config.project_root)
+    if not project_root:
+        project_root = get_scargo_config_or_exit().project_root
+    docker_path = _get_docker_path(project_root)
 
     try:
         subprocess.run(

@@ -355,7 +355,7 @@ def new(
         create_docker,
         git,
     )
-    scargo_update(Path(SCARGO_DEFAULT_CONFIG_FILE).absolute())
+    scargo_update(Path(name, SCARGO_DEFAULT_CONFIG_FILE).absolute())
 
 
 ###############################################################################

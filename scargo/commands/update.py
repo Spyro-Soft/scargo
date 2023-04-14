@@ -9,7 +9,7 @@ import sys
 from pathlib import Path
 
 from scargo.commands.docker import scargo_docker_build
-from scargo.config_utils import check_scargo_version, get_scargo_config_or_exit
+from scargo.config_utils import add_version_to_scargo_lock, get_scargo_config_or_exit
 from scargo.file_generators.cicd_gen import generate_cicd
 from scargo.file_generators.cmake_gen import generate_cmake
 from scargo.file_generators.conan_gen import generate_conanfile
@@ -59,10 +59,10 @@ def scargo_update(config_file_path: Path) -> None:
     copy_file_if_not_exists(project_path)
 
     # Copy config file and create lock file.
-    shutil.copyfile(config_file_path, project_path / SCARGO_LOCK_FILE)
+    lock_path = project_path / SCARGO_LOCK_FILE
+    shutil.copyfile(config_file_path, lock_path)
     ###########################################################################
-    config = get_scargo_config_or_exit()
-    check_scargo_version(config)
+    add_version_to_scargo_lock(lock_path)
     project_config = config.project
     target = project_config.target
 
@@ -91,13 +91,16 @@ def scargo_update(config_file_path: Path) -> None:
     generate_readme(config)
 
     # do not rebuild dockers in the docker
-    if target.family == "stm32" and not Path("third-party/stm32-cmake").is_dir():
+    if (
+        target.family == "stm32"
+        and not Path(config.project_root, "third-party/stm32-cmake").is_dir()
+    ):
         subprocess.run("conan source .", shell=True, cwd=project_path, check=True)
 
     if project_config.build_env == SCARGO_DOCKER_ENV:
         if not Path(project_path, ".dockerenv").exists():
             if not pull_docker_image(docker_path):
-                scargo_docker_build([])
+                scargo_docker_build([], config.project_root)
         else:
             logger.warning("Cannot run docker inside docker")
 
