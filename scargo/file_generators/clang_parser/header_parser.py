@@ -2,9 +2,10 @@ from pathlib import Path
 
 from clang.cindex import Index
 
-from scargo.file_generators.mock_utils.data_classes import HeaderDescriptor
-from scargo.file_generators.mock_utils.params_extractor import (
+from scargo.file_generators.clang_parser.data_classes import HeaderDescriptor
+from scargo.file_generators.clang_parser.params_extractor import (
     extract_classes,
+    extract_includes,
     extract_namespaces,
 )
 
@@ -23,4 +24,7 @@ def parse_file(file_path: Path) -> HeaderDescriptor:
 
     namespaces = extract_namespaces(translation_unit.cursor, str(file_path))
     classes = extract_classes(translation_unit.cursor, str(file_path))
-    return HeaderDescriptor(name=file_path.name, namespaces=namespaces, classes=classes)
+    includes = extract_includes(translation_unit.cursor, str(file_path))
+    return HeaderDescriptor(
+        name=file_path.name, namespaces=namespaces, classes=classes, includes=includes
+    )

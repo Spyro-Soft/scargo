@@ -12,7 +12,7 @@ class ArgumentDescriptor:
         self.data_type = data_type
 
 
-class MockFunctionDescriptor:
+class FunctionDescriptor:
     """Contains function name and types"""
 
     def __init__(
@@ -50,18 +50,21 @@ class MockFunctionDescriptor:
         return ", ".join(arg.data_type for arg in self.arguments)
 
 
-class MockClassDescriptor:
+class ClassDescriptor:
     """Contains class names and function definitions"""
 
-    def __init__(
-        self, name: str, mock_name: str, methods: List[MockFunctionDescriptor]
-    ):
+    def __init__(self, name: str, mock_name: str, methods: List[FunctionDescriptor]):
         self.name = name
         self.mock_name = mock_name
-        self.methods: List[MockFunctionDescriptor] = methods
+        self.methods: List[FunctionDescriptor] = methods
 
 
-class MockNamespaceDescriptor:
+class NamespaceDescriptor:
+    def __init__(self, name: str):
+        self.name = name
+
+
+class IncludeDescriptor:
     def __init__(self, name: str):
         self.name = name
 
@@ -72,9 +75,11 @@ class HeaderDescriptor:
     def __init__(
         self,
         name: str,
-        classes: List[MockClassDescriptor],
-        namespaces: List[MockNamespaceDescriptor],
+        classes: List[ClassDescriptor],
+        namespaces: List[NamespaceDescriptor],
+        includes: List[IncludeDescriptor],
     ):
         self.name = name
         self.classes = classes
         self.namespaces = namespaces
+        self.includes = includes

@@ -5,20 +5,20 @@
 #include <gtest/gtest.h>
 #include <memory>
 {% for inc in header.includes %}
-// #include {{inc}}
+#include "{{inc.name}}"
 {% endfor %}
 // #include "{{header.name}}"
 
 {% if header.namespaces %}
 {% for namespace in header.namespaces %}
-// using namespace {{namespace}};
+using namespace {{namespace.name}};
 {% endfor %}
 {% endif %}
 using namespace ::testing;
 
 {% if header.classes %}
 {% for cls in header.classes %}
-class {{cls}}Test : public Test
+class {{cls.name}}Test : public Test
 {
 public:
     void SetUp() override
@@ -34,7 +34,7 @@ public:
 
 {% if header.classes %}
 {% for cls in header.classes %}
-TEST_F({{cls}}Test, exampleTest)
+TEST_F({{cls.name}}Test, exampleTest)
 {
 }
 {% endfor %}

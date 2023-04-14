@@ -7,7 +7,7 @@ from pathlib import Path
 
 from scargo.config import Config
 from scargo.file_generators.base_gen import create_file_from_template
-from scargo.file_generators.mock_utils.header_parser import parse_file
+from scargo.file_generators.clang_parser.header_parser import parse_file
 
 MOCKS_DIR = "tests/mocks"
 
