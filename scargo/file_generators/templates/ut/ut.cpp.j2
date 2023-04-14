@@ -11,7 +11,7 @@
 
 {% if header.namespaces %}
 {% for namespace in header.namespaces %}
-// using namespace {{namespace.name}};
+using namespace {{namespace.name}};
 {% endfor %}
 {% endif %}
 using namespace ::testing;
