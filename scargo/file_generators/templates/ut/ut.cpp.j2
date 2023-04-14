@@ -5,7 +5,7 @@
 #include <gtest/gtest.h>
 #include <memory>
 {% for inc in header.includes %}
-// #include {{inc.name}}
+#include "{{inc.name}}"
 {% endfor %}
 // #include "{{header.name}}"
 

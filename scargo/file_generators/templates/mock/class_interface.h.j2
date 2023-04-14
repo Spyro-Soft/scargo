@@ -4,7 +4,7 @@
 #pragma once
 
 {% for include in header.includes %}
-// #include {{include.name}}
+#include "{{include.name}}"
 {% endfor %}
 
 {% for ns in header.namespaces %}
