@@ -202,19 +202,15 @@ class CopyrightChecker(CheckerFixer):
         with open(file_path, encoding="utf-8") as file:
             file_lines = file.readlines()
 
-            for line in file_lines:
+            for line_no, line in enumerate(file_lines[: -(len(copyright_lines) - 1)]):
                 if line == copyright_lines[0]:
                     if all(
                         line_from_file == line_from_copyrights
                         for line_from_file, line_from_copyrights in zip(
-                            file_lines[file_lines.index(line) :], copyright_lines
+                            file_lines[line_no:], copyright_lines
                         )
                     ):
                         return CheckResult(problems_found=0)
-
-                    file_lines = file_lines[file_lines.index(line) + 1 :]
-                    if len(file_lines) < len(copyright_lines):
-                        break
 
         logger.info("Missing copyright in %s.", file_path)
         return CheckResult(problems_found=1)
