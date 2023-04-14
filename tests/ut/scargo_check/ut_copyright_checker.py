@@ -1,3 +1,4 @@
+from typing import Any, List
 from unittest.mock import MagicMock, call
 
 import pytest
@@ -65,39 +66,39 @@ def test_check_copyright_fail(
 
 
 @pytest.mark.parametrize(
-    ["mock_file_contents"],
-    [(FILE_CONTENTS_WITHOUT_COPYRIGHT,)],
-    indirect=True,
+    "mock_file_contents,expected",
+    [
+        (
+            FILE_CONTENTS_WITHOUT_COPYRIGHT,
+            [
+                call("//\n"),
+                call("// Copyright\n"),
+                call("//\n"),
+                call("\n"),
+                call("int main(void);"),
+            ],
+        ),
+        (
+            FILE_CONTENTS_WITH_INCORRECT_COPYRIGHT,
+            [
+                call("//\n"),
+                call("// Copyright\n"),
+                call("//\n"),
+                call("\n"),
+                call("// copyright\nint main(void);"),
+            ],
+        ),
+    ],
+    indirect=["mock_file_contents"],
 )
 def test_check_copyright_fix(
-    mock_file_contents: MagicMock, config: Config, mock_find_files: MagicMock
+    mock_file_contents: MagicMock,
+    expected: List[Any],
+    config: Config,
+    mock_find_files: MagicMock,
 ) -> None:
     CopyrightChecker(config, fix_errors=True).check()
-    assert mock_file_contents().write.mock_calls == [
-        call("//\n"),
-        call("// Copyright\n"),
-        call("//\n"),
-        call("\n"),
-        call("int main(void);"),
-    ]
-
-
-@pytest.mark.parametrize(
-    ["mock_file_contents"],
-    [(FILE_CONTENTS_WITH_INCORRECT_COPYRIGHT,)],
-    indirect=True,
-)
-def test_check_copyright_fix_2(
-    mock_file_contents: MagicMock, config: Config, mock_find_files: MagicMock
-) -> None:
-    CopyrightChecker(config, fix_errors=True).check()
-    assert mock_file_contents().write.mock_calls == [
-        call("//\n"),
-        call("// Copyright\n"),
-        call("//\n"),
-        call("\n"),
-        call("// copyright\nint main(void);"),
-    ]
+    assert mock_file_contents().write.mock_calls == expected
 
 
 def test_check_copyright_no_description(
