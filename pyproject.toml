@@ -57,6 +57,7 @@ dev = [
     "pre-commit",
     "pyclean==2.2.0",
     "pyelftools",
+    "pyfakefs",
     "PyInstaller",
     "pylint",
     "pytest-bdd",
@@ -114,4 +115,8 @@ ignore_missing_imports = true
 
 [[tool.mypy.overrides]]
 module = "matplotlib.*"
+ignore_missing_imports = true
+
+[[tool.mypy.overrides]]
+module = "pyfakefs.*"
 ignore_missing_imports = true

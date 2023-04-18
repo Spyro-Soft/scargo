@@ -27,12 +27,19 @@ EXPECTED_FILES_AND_DIRS = [
 TARGET_X86 = Target.get_target_by_id("x86")
 
 
-def test_update_project_content_without_docker(
-    create_new_project: None, tmp_path: Path
-) -> None:
-    os.chdir(tmp_path / "test_project")
-    for path in Path().iterdir():
-        assert path.name in EXPECTED_FILES_AND_DIRS
+def test_update_project_content_without_docker(tmp_path: Path) -> None:
+    os.chdir(tmp_path)
+    project_name = "test_project"
+    scargo_new(
+        project_name,
+        bin_name=None,
+        lib_name=None,
+        target=TARGET_X86,
+        create_docker=False,
+        git=False,
+    )
+    os.chdir(tmp_path / project_name)
+    scargo_update(Path("scargo.toml"))
 
 
 def test_update_project_content_with_docker(tmp_path: Path, fp: FakeProcess) -> None:

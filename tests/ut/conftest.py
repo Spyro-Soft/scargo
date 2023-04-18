@@ -1,12 +1,10 @@
-import os
 from pathlib import Path
 from typing import Generator
 from unittest.mock import MagicMock, patch
 
 import pytest
+from pyfakefs.fake_filesystem import FakeFilesystem
 
-from scargo.commands.new import scargo_new
-from scargo.commands.update import scargo_update
 from scargo.config import (
     CheckConfig,
     ChecksConfig,
@@ -25,39 +23,8 @@ from scargo.config import (
 TARGET_X86 = Target.get_target_by_id("x86")
 
 
-@pytest.fixture
-def create_new_project(tmp_path: Path) -> None:
-    os.chdir(tmp_path)
-    project_name = "test_project"
-    scargo_new(
-        project_name,
-        bin_name=None,
-        lib_name=None,
-        target=TARGET_X86,
-        create_docker=False,
-        git=False,
-    )
-    os.chdir(tmp_path / project_name)
-    scargo_update(Path("scargo.toml"))
-
-
-@pytest.fixture
-def create_new_project_docker(tmp_path: Path) -> None:
-    os.chdir(tmp_path)
-    project_name = "test_project"
-    scargo_new(
-        project_name,
-        bin_name=None,
-        lib_name=None,
-        target=TARGET_X86,
-        create_docker=True,
-        git=False,
-    )
-    scargo_update(Path("scargo.toml"))
-
-
 @pytest.fixture()
-def config() -> Config:
+def config(fs: FakeFilesystem) -> Config:  # type: ignore[no-any-unimported]
     return Config(
         project=ProjectConfig(
             **{

@@ -9,6 +9,7 @@ import subprocess
 import sys
 from pathlib import Path
 
+from scargo.config import Config
 from scargo.config_utils import prepare_config
 from scargo.logger import get_logger
 
@@ -29,7 +30,7 @@ def scargo_publish(repo: str) -> None:
     version = project_config.version
 
     conan_clean_remote()
-    conan_add_remote(project_path)
+    conan_add_remote(project_path, config)
     conan_add_conancenter()
 
     # Export package
@@ -61,14 +62,14 @@ def scargo_publish(repo: str) -> None:
         sys.exit(1)
 
 
-def conan_add_remote(project_path: Path) -> None:
+def conan_add_remote(project_path: Path, config: Config) -> None:
     """
     Add conan remote repository
 
     :param Path project_path: path to project
+    :param Config config:
     :return: None
     """
-    config = prepare_config()
     conan_repo = config.conan.repo
     for repo_name, repo_url in conan_repo.items():
         try:
