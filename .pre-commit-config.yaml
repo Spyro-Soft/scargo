@@ -58,7 +58,7 @@ repos:
           python-dotenv,
           tomlkit,
           typer,
-          types-clang,
+          types-clang==0.14.3,
           types-toml,
         ]
 
