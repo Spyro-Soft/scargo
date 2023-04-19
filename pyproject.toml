@@ -46,7 +46,6 @@ dependencies = [
 
 [project.optional-dependencies]
 dev = [
-    "allure-pytest",
     "black",
     "coverage~=6.0",
     "flake8>=3.2.0",

@@ -99,8 +99,6 @@ def get_cmdline_arguments() -> argparse.Namespace:
 
 def perform_tests(test_path: str, test_postfix: str, *test_flags: str) -> str:
     out_test_doc_dir = OUT + "/test_doc"
-    allure_result = out_test_doc_dir + "/allure_result"
-    allure_report = out_test_doc_dir + "/allure_report"
 
     try:
         # needed because of relative imports
@@ -109,7 +107,6 @@ def perform_tests(test_path: str, test_postfix: str, *test_flags: str) -> str:
         command = [
             "pytest",
             test_path,
-            "--alluredir=" + allure_result + "_" + test_postfix,
             "--cov-branch",
             "--cov-report",
             "html:" + out_test_doc_dir + "/coverage" + "_" + test_postfix,
@@ -126,17 +123,6 @@ def perform_tests(test_path: str, test_postfix: str, *test_flags: str) -> str:
 
     except subprocess.CalledProcessError as e:
         return test_postfix + " tests fail: " + str(e) + "\n"
-
-    subprocess.check_call(
-        [
-            "allure",
-            "generate",
-            allure_result + "_" + test_postfix,
-            "--clean",
-            "-o",
-            allure_report + "_" + test_postfix,
-        ]
-    )
 
     return ""
 

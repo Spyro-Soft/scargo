@@ -43,11 +43,7 @@ jobs:
       - name: Apt install dependencies
         run: |
           sudo apt-get update --fix-missing
-          wget https://github.com/allure-framework/allure2/releases/download/2.13.7/allure_2.13.7-1_all.deb
           sudo apt-get install doxygen
-          sudo apt-get install -y ./allure_2.13.7-1_all.deb
-          sudo rm allure_2.13.7-1_all.deb
-          sudo chmod 777 /usr/bin/allure
           sudo apt-get clean
           sudo apt-get autoremove --yes
           sudo rm -rf /var/lib/{cache,log}
