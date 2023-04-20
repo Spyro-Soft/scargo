@@ -30,17 +30,6 @@ RUN apt-get update && apt-get -y install cppcheck bzr lib32z1 \
 
 FROM cpp AS python
 
-# Set up a reports generation tool
-RUN apt-get update --fix-missing && \
-    wget https://github.com/allure-framework/allure2/releases/download/2.13.7/allure_2.13.7-1_all.deb && \
-    apt install -y ./allure_2.13.7-1_all.deb && \
-    rm allure_2.13.7-1_all.deb && \
-    chmod 777 /usr/bin/allure && \
-    apt-get clean && \
-    apt-get autoremove --yes && \
-    rm -rf /var/lib/{cache,log} && \
-    rm -rf /var/lib/apt/lists/*
-
 # for end-to-end testing puprose
 RUN apt update --fix-missing && apt -y install cppcheck bzr lib32z1 \
     clang clang-format clang-tidy valgrind \
