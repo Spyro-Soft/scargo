@@ -44,12 +44,16 @@ commonmark==0.9.1
     # via recommonmark
 conan==1.59.0
     # via scargo (pyproject.toml)
+contourpy==1.0.7
+    # via matplotlib
 coverage[toml]==6.5.0
     # via
     #   pytest-cov
     #   scargo (pyproject.toml)
 cryptography==39.0.2
     # via esptool
+cycler==0.11.0
+    # via matplotlib
 dill==0.3.6
     # via pylint
 distlib==0.3.6
@@ -80,6 +84,8 @@ flit==3.8.0
     # via scargo (pyproject.toml)
 flit-core==3.8.0
     # via flit
+fonttools==4.39.3
+    # via matplotlib
 gcovr==6.0
     # via scargo (pyproject.toml)
 humanfriendly==10.0
@@ -92,6 +98,8 @@ imagesize==1.4.1
     # via sphinx
 importlib-metadata==6.0.0
     # via sphinx
+importlib-resources==5.12.0
+    # via matplotlib
 iniconfig==2.0.0
     # via pytest
 isort==5.11.4
@@ -104,6 +112,8 @@ jinja2==3.1.2
     #   gcovr
     #   scargo (pyproject.toml)
     #   sphinx
+kiwisolver==1.4.4
+    # via matplotlib
 lazy-object-proxy==1.9.0
     # via astroid
 libclang==16.0.0
@@ -120,6 +130,8 @@ markupsafe==2.1.2
     # via
     #   jinja2
     #   mako
+matplotlib==3.7.1
+    # via scargo (pyproject.toml)
 mccabe==0.7.0
     # via
     #   flake8
@@ -134,10 +146,15 @@ node-semver==0.6.1
     # via conan
 nodeenv==1.7.0
     # via pre-commit
+numpy==1.24.2
+    # via
+    #   contourpy
+    #   matplotlib
 packaging==23.0
     # via
     #   black
     #   docker
+    #   matplotlib
     #   pytest
     #   sphinx
 parse==1.19.0
@@ -150,6 +167,8 @@ patch-ng==1.17.4
     # via conan
 pathspec==0.11.1
     # via black
+pillow==9.5.0
+    # via matplotlib
 platformdirs==3.1.1
     # via
     #   black
@@ -186,6 +205,8 @@ pyjwt==2.6.0
     # via conan
 pylint==2.17.0
     # via scargo (pyproject.toml)
+pyparsing==3.0.9
+    # via matplotlib
 pyserial==3.5
     # via esptool
 pytest==7.2.2
@@ -204,7 +225,9 @@ pytest-mock==3.10.0
 pytest-subprocess==1.5.0
     # via scargo (pyproject.toml)
 python-dateutil==2.8.2
-    # via conan
+    # via
+    #   conan
+    #   matplotlib
 pytz==2022.7.1
     # via babel
 pyyaml==5.4.1
@@ -299,7 +322,9 @@ websocket-client==0.59.0
 wrapt==1.15.0
     # via astroid
 zipp==3.15.0
-    # via importlib-metadata
+    # via
+    #   importlib-metadata
+    #   importlib-resources
 
 # The following packages are considered to be unsafe in a requirements file:
 # setuptools

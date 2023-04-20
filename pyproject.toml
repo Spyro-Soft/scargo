@@ -52,6 +52,7 @@ dev = [
     "flit==3.8.0",
     "gcovr>=5.2",
     "isort==5.11.4",
+    "matplotlib",
     "mypy==1.0.1",
     "pre-commit",
     "pyclean==2.2.0",
@@ -109,4 +110,8 @@ ignore_missing_imports = true
 
 [[tool.mypy.overrides]]
 module = "docker"
+ignore_missing_imports = true
+
+[[tool.mypy.overrides]]
+module = "matplotlib.*"
 ignore_missing_imports = true

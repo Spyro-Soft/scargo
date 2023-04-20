@@ -51,6 +51,7 @@ repos:
         additional_dependencies: [
           click,
           jinja2,
+          matplotlib,
           pydantic,
           pytest,
           pytest_subprocess,

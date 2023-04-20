@@ -99,6 +99,10 @@ def get_cmdline_arguments() -> argparse.Namespace:
 
 def perform_tests(test_path: str, test_postfix: str, *test_flags: str) -> str:
     out_test_doc_dir = OUT + "/test_doc"
+    os.makedirs(out_test_doc_dir, exist_ok=True)
+
+    junit_xml_path = f"{out_test_doc_dir}/junit_{test_postfix}.xml"
+    cobertura_path = f"{out_test_doc_dir}/coverage_{test_postfix}.xml"
 
     try:
         # needed because of relative imports
@@ -107,9 +111,12 @@ def perform_tests(test_path: str, test_postfix: str, *test_flags: str) -> str:
         command = [
             "pytest",
             test_path,
+            f"--junitxml={junit_xml_path}",
             "--cov-branch",
             "--cov-report",
             "html:" + out_test_doc_dir + "/coverage" + "_" + test_postfix,
+            "--cov-report",
+            f"xml:{cobertura_path}",
             "--cov=scargo",
             "--gherkin-terminal-reporter",
             "-v",
@@ -123,6 +130,15 @@ def perform_tests(test_path: str, test_postfix: str, *test_flags: str) -> str:
 
     except subprocess.CalledProcessError as e:
         return test_postfix + " tests fail: " + str(e) + "\n"
+
+    command = [
+        "common_dev/scripts/test_report.py",
+        junit_xml_path,
+        cobertura_path,
+        f"{out_test_doc_dir}/report_{test_postfix}.pdf",
+        f"--type={'unit' if test_postfix == 'ut' else 'integration'}",
+    ]
+    subprocess.check_call(command)
 
     return ""
 
