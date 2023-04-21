@@ -9,20 +9,22 @@ FROM ${DOCKER_IMAGE_ROOT} as base
 ENV DEBIAN_FRONTEND noninteractive
 
 RUN apt update --fix-missing && \
-    apt -y install python3.8 python3.8-venv python3-pip \
+    apt -y install --no-install-recommends python3 python3-venv python3-pip \
     binutils git wget \
     scons build-essential pkg-config \
     unzip graphviz nano vim && \
     apt -y install sudo && \
+    rm -rf /var/lib/apt/lists/* && \
     update-alternatives --install /usr/bin/python python /usr/bin/python3 1 && \
     update-alternatives --install /usr/bin/pip pip /usr/bin/pip3 1
 
 FROM base AS cpp
 
-RUN apt update --fix-missing && apt -y install cppcheck bzr lib32z1 \
+RUN apt update --fix-missing && apt -y --no-install-recommends install cppcheck bzr lib32z1 \
     clang clang-format clang-tidy valgrind \
     gcovr doxygen curl libcurl4-openssl-dev \
-    libcmocka0 libcmocka-dev plantuml
+    libcmocka0 libcmocka-dev && \
+    rm -rf /var/lib/apt/lists/*
 
 FROM cpp AS {{ project.target.family }}
 {% include 'docker/Dockerfile-' + project.target.family + '.j2' %}
@@ -47,7 +49,8 @@ ENV CONAN_PASSWORD=${CONAN_PASSWORD}
 WORKDIR /opt
 
 # configure ssh
-RUN apt update --fix-missing && apt install -y openssh-server ssh-askpass && apt install -y rsync grsync && \
+RUN apt update --fix-missing && apt install -y --no-install-recommends openssh-server ssh-askpass rsync grsync && \
+    rm -rf /var/lib/apt/lists/* && \
     ssh-keygen -A && mkdir -p /run/sshd && \
     echo "Port $SSH_PORT" >> /etc/ssh/sshd_config
 
