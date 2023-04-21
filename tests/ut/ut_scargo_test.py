@@ -1,46 +1,71 @@
 import os
-import shutil
 from pathlib import Path
+from unittest.mock import MagicMock
 
 import pytest
+from pyfakefs.fake_filesystem import FakeFilesystem
+from pytest_mock import MockerFixture
 from pytest_subprocess import FakeProcess
 
 from scargo.commands.test import scargo_test
 from scargo.config import Config
-from scargo.path_utils import get_project_root_or_none
 
 
-def test_scargo_test_no_test_dir(create_new_project: None, tmp_path: Path) -> None:
-    os.chdir(tmp_path / "test_project")
-    shutil.rmtree("tests")
-    with pytest.raises(SystemExit):
-        scargo_test(False)
-
-
-def test_scargo_test_no_cmake_file(
-    create_new_project: None,
-    caplog: pytest.LogCaptureFixture,
-    config: Config,
-    tmp_path: Path,
+def test_scargo_test_no_test_dir(  # type: ignore[no-any-unimported]
+    fs: FakeFilesystem, caplog: pytest.LogCaptureFixture, mock_prepare_config: MagicMock
 ) -> None:
-    os.chdir(tmp_path / "test_project")
-    Path("tests/CMakeLists.txt").unlink()
-    with pytest.raises(SystemExit):
+    with pytest.raises(SystemExit) as e:
         scargo_test(False)
+        assert e.value.code == 1
+    assert "Directory `tests` does not exist." in caplog.text
 
 
-def test_scargo_test(create_new_project: None, fp: FakeProcess, tmp_path: Path) -> None:
-    os.chdir(tmp_path / "test_project")
-    project_root = get_project_root_or_none()
-    assert project_root is not None
-    src_dir = project_root / "src"
-    tests_src_dir = project_root / "tests"
-    test_build_dir = project_root / "build/tests"
-    html_coverage_file = "ut-coverage.html"
+def test_scargo_test_no_cmake_file(  # type: ignore[no-any-unimported]
+    caplog: pytest.LogCaptureFixture,
+    mock_prepare_config: MagicMock,
+    fs: FakeFilesystem,
+) -> None:
+    os.mkdir("tests")
+    with pytest.raises(SystemExit) as e:
+        scargo_test(False)
+        assert e.value.code == 1
+    assert "Directory `tests`: File `CMakeLists.txt` does not exist." in caplog.text
 
-    fp.register(f"conan install {tests_src_dir} -if {test_build_dir}")
-    fp.register(f"cmake -DCMAKE_BUILD_TYPE=Debug {tests_src_dir}")
+
+def test_scargo_test(  # type: ignore[no-any-unimported]
+    fp: FakeProcess, fs: FakeFilesystem, mock_prepare_config: MagicMock
+) -> None:
+    fp.register("conan install tests -if build/tests")
+    fp.register("cmake -DCMAKE_BUILD_TYPE=Debug tests")
     fp.register("cmake --build . --parallel")
     fp.register("ctest")
-    fp.register(f"gcovr -r ut . -f {src_dir} --html {html_coverage_file}")
+    fp.register("gcovr -r ut . -f src --html ut-coverage.html")
+    os.mkdir("tests")
+    with open("tests/CMakeLists.txt", "w"):
+        pass
     scargo_test(False)
+    assert fp.calls[0] == [
+        "conan",
+        "install",
+        Path("tests"),
+        "-if",
+        Path("build/tests"),
+    ]
+    assert fp.calls[1] == ["cmake", "-DCMAKE_BUILD_TYPE=Debug", Path("tests")]
+    assert fp.calls[2] == "cmake --build . --parallel"
+    assert fp.calls[3] == ["ctest"]
+    assert fp.calls[4] == [
+        "gcovr",
+        "-r",
+        "ut",
+        ".",
+        "-f",
+        Path("src"),
+        "--html",
+        "ut-coverage.html",
+    ]
+
+
+@pytest.fixture
+def mock_prepare_config(mocker: MockerFixture, config: Config) -> MagicMock:
+    return mocker.patch(f"{scargo_test.__module__}.prepare_config", return_value=config)
