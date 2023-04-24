@@ -8,14 +8,8 @@ FROM ${DOCKER_IMAGE_ROOT} as base
 ENV DEBIAN_FRONTEND=noninteractive
 
 RUN apt update --fix-missing && \
-    apt -y install python3.8 python3.8-venv python3-pip \
-    binutils git wget \
-    scons build-essential pkg-config \
-    unzip texlive-latex-base graphviz nano vim \
-    libgtk2.0-0 libgtk-3-0 libxss1 libasound2 plantuml && \
-    apt -y install sudo && \
-    update-alternatives --install /usr/bin/python python /usr/bin/python3 1 && \
-    update-alternatives --install /usr/bin/pip pip /usr/bin/pip3 1
+    apt -y install python3.8 python3-pip git build-essential pkg-config graphviz plantuml && \
+    update-alternatives --install /usr/bin/python python /usr/bin/python3 1
 
 ADD https://github.com/plantuml/plantuml/releases/download/v1.2022.13/plantuml-1.2022.13.jar /usr/local/share/
 ADD ./scripts/plantuml /usr/local/bin/
@@ -23,22 +17,12 @@ RUN chmod 755 /usr/local/share/plantuml-1.2022.13.jar /usr/local/bin/plantuml
 
 FROM base AS cpp
 
-RUN apt-get update && apt-get -y install cppcheck bzr lib32z1 \
-    clang clang-format clang-tidy valgrind \
-    gcovr doxygen curl libcurl4-openssl-dev \
-    libcmocka0 libcmocka-dev
-
-FROM cpp AS python
-
-# for end-to-end testing puprose
-RUN apt update --fix-missing && apt -y install cppcheck bzr lib32z1 \
-    clang clang-format clang-tidy valgrind \
-    gcovr doxygen curl libcurl4-openssl-dev \
-    libcmocka0 libcmocka-dev
+RUN apt-get update && apt-get -y install cppcheck lib32z1 \
+    clang clang-format clang-tidy gcovr doxygen libcmocka0 libcmocka-dev
 
 WORKDIR /opt
 
-FROM python AS scargo
+FROM cpp AS scargo
 
 ARG USER_NAME
 ARG USER_PASSWORD
@@ -54,7 +38,7 @@ ENV CONAN_PASS_KEY=${CONAN_PASS_KEY}
 WORKDIR /opt
 
 # configure ssh
-RUN apt install -y openssh-server ssh-askpass && apt install -y rsync grsync && \
+RUN apt install -y openssh-server && \
     ssh-keygen -A && mkdir -p /run/sshd && \
     echo "Port $SSH_PORT" >> /etc/ssh/sshd_config
 

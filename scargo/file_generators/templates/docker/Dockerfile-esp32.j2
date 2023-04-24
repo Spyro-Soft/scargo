@@ -1,4 +1,6 @@
-RUN apt update --fix-missing && apt -y --no-install-recommends install flex bison gperf python3-setuptools ninja-build ccache libffi-dev libssl-dev dfu-util libusb-1.0-0 && \
+# esp-idf dependencies, https://docs.espressif.com/projects/esp-idf/en/latest/esp32/get-started/linux-macos-setup.html
+RUN apt update --fix-missing && apt -y --no-install-recommends install git wget flex bison gperf python3 python3-venv cmake ninja-build ccache libffi-dev libssl-dev dfu-util libusb-1.0-0 \
+    curl openocd && \
     rm -rf /var/lib/apt/lists/*
 
 ARG ESPRESSIF_IDF_TAG="v4.4.3"
@@ -17,16 +19,6 @@ RUN umask 0002 && ${ESPRESSIF_IDF_PATH}/install.sh
 RUN umask 0002 && ${ESPRESSIF_IDF_PATH}/tools/idf_tools.py install xtensa-clang
 
 RUN curl -sL https://aka.ms/InstallAzureCLIDeb | sudo bash && \
-    apt-get update && \
-    apt-get install -y --no-install-recommends ca-certificates curl apt-transport-https lsb-release gnupg && \
-    curl -sL https://packages.microsoft.com/keys/microsoft.asc | \
-    gpg --dearmor | \
-    tee /etc/apt/trusted.gpg.d/microsoft.gpg > /dev/null && \
-    AZ_REPO=$(lsb_release -cs) && \
-    echo "deb [arch=amd64] https://packages.microsoft.com/repos/azure-cli/ $AZ_REPO main" | \
-    tee /etc/apt/sources.list.d/azure-cli.list && \
-    apt-get update && \
-    apt-get install azure-cli && \
     rm -rf /var/lib/apt/lists/*
 
 ENV LC_ALL=C
