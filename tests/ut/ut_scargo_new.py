@@ -58,3 +58,25 @@ def test_without_git_dir_exist(tmpdir: Path) -> None:
     os.chdir(tmpdir)
     scargo_new("test_project", None, None, TARGET_X86, False, False)
     assert not os.path.exists("test_project/.git")
+
+
+def test_wrong_project_name(tmpdir: Path, caplog: pytest.LogCaptureFixture) -> None:
+    os.chdir(tmpdir)
+    with pytest.raises(SystemExit) as pytest_wrapped:
+        scargo_new("%#$", None, None, TARGET_X86, False, False)
+    assert pytest_wrapped.type == SystemExit
+    assert pytest_wrapped.value.code == 1
+    assert (
+        "Name must consist of letters, digits, dash and undescore only, and the first character must be a letter"
+        in caplog.text
+    )
+
+
+def test_project_already_exists(tmpdir: Path, caplog: pytest.LogCaptureFixture) -> None:
+    os.chdir(tmpdir)
+    scargo_new("test_project", None, None, TARGET_X86, False, False)
+    with pytest.raises(SystemExit) as pytest_wrapped:
+        scargo_new("test_project", None, None, TARGET_X86, False, False)
+    assert pytest_wrapped.type == SystemExit
+    assert pytest_wrapped.value.code == 1
+    assert "Provided project name: test_project already exist." in caplog.text
