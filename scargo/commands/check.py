@@ -343,7 +343,7 @@ class CppcheckChecker(CheckerFixer):
     check_name = "cppcheck"
 
     def check_files(self) -> int:
-        cmd = "cppcheck --enable=all --suppress=missingIncludeSystem src/ main/"
+        cmd = "cppcheck --enable=all --suppress=missingIncludeSystem --inline-suppr src/ main/"
         try:
             subprocess.check_call(cmd, shell=True)
         except subprocess.CalledProcessError:
