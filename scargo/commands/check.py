@@ -173,7 +173,7 @@ class PragmaChecker(CheckerFixer):
             for line in file.readlines():
                 if "#pragma once" in line:
                     return CheckResult(0)
-        logger.warning("Missing 'pragma #once' in %s", file_path)
+        logger.warning("Missing '#pragma once' in %s", file_path)
         return CheckResult(1)
 
     def fix_file(self, file_path: Path) -> None:

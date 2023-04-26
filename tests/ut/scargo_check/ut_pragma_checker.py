@@ -47,7 +47,7 @@ def test_check_pragma_fail(
 ) -> None:
     result = PragmaChecker(config).check()
     assert result == 1
-    assert ("WARNING", "Missing 'pragma #once' in foo/bar.hpp") in get_log_data(
+    assert ("WARNING", "Missing '#pragma once' in foo/bar.hpp") in get_log_data(
         caplog.records
     )
 
