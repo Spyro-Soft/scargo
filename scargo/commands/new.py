@@ -3,7 +3,6 @@
 # #
 
 """Create new project"""
-import os
 import re
 import subprocess
 import sys
@@ -53,10 +52,9 @@ def scargo_new(
     if not bin_name and not lib_name:
         bin_name = name  # One item tuple.
 
+    project_dir = Path(name)
     try:
-        project_dir = Path(name)
         project_dir.mkdir()
-        os.chdir(project_dir)
     except FileExistsError:
         logger.error("Provided project name: %s already exist.", name)
         sys.exit(1)
@@ -64,8 +62,9 @@ def scargo_new(
     build_env = get_build_env(create_docker)
 
     cc, cflags, cxx, cxxflags = get_cc_config(target)
+    toml_path = project_dir / SCARGO_DEFAULT_CONFIG_FILE
     generate_toml(
-        SCARGO_DEFAULT_CONFIG_FILE,
+        toml_path,
         project_name=name,
         target=target,
         build_env=build_env,
@@ -79,16 +78,16 @@ def scargo_new(
         bin_name=bin_name,
     )
 
-    config = get_scargo_config_or_exit(Path("scargo.toml"))
+    config = get_scargo_config_or_exit(toml_path)
     generate_cpp(config)
 
-    test_dir = "tests"
+    test_dir = project_dir / "tests"
     Path(test_dir, "mocks").mkdir(parents=True)
     Path(test_dir, "ut").mkdir(parents=True)
     Path(test_dir, "it").mkdir(parents=True)
 
     if git:
-        subprocess.check_call("git init -q", shell=True)
+        subprocess.check_call("git init -q", shell=True, cwd=project_dir)
         logger.info("Initialized git repo")
 
 

@@ -42,7 +42,7 @@ def scargo_build(profile: str) -> None:
 
     conan_clean_remote()
 
-    conan_add_remote(project_dir)
+    conan_add_remote(project_dir, config)
     conan_add_conancenter()
 
     try:

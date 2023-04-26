@@ -27,7 +27,8 @@ def test_check_pragma_pass(
     config: Config,
     mock_find_files: MagicMock,
 ) -> None:
-    PragmaChecker(config).check()
+    result = PragmaChecker(config).check()
+    assert result == 0
     assert ("WARNING", "Missing pragma in foo/bar.hpp") not in get_log_data(
         caplog.records
     )
@@ -44,10 +45,11 @@ def test_check_pragma_fail(
     config: Config,
     mock_find_files: MagicMock,
 ) -> None:
-    with pytest.raises(SystemExit) as wrapped_exception:
-        PragmaChecker(config).check()
-    assert wrapped_exception.value.code == 1
-    assert ("WARNING", "Missing pragma in foo/bar.hpp") in get_log_data(caplog.records)
+    result = PragmaChecker(config).check()
+    assert result == 1
+    assert ("WARNING", "Missing '#pragma once' in foo/bar.hpp") in get_log_data(
+        caplog.records
+    )
 
 
 @pytest.mark.parametrize(
@@ -58,7 +60,8 @@ def test_check_pragma_fail(
 def test_check_pragma_fix(
     mock_file_contents: MagicMock, config: Config, mock_find_files: MagicMock
 ) -> None:
-    PragmaChecker(config, fix_errors=True).check()
+    result = PragmaChecker(config, fix_errors=True).check()
+    assert result == 1
     assert mock_file_contents().write.mock_calls == [
         call("#pragma once\n"),
         call("\n"),

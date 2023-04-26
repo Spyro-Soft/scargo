@@ -25,7 +25,7 @@ def run_scargo_again_in_docker(
     build_env = project_config.build_env
     if build_env != SCARGO_DOCKER_ENV or Path("/.dockerenv").exists():
         return
-    relative_path = Path.cwd().absolute().relative_to(project_path)
+    relative_path = Path.cwd().relative_to(project_path)
     path_in_docker = Path("/workspace", relative_path)
 
     cmd_args = sys.argv[1:]

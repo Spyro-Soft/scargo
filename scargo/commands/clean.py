@@ -17,7 +17,7 @@ def _case_insensitive_find_dir(source_dir: Path, dirname: str) -> Optional[Path]
     if source_dir and source_dir.exists():
         for child in source_dir.iterdir():
             if child.name.lower() == dirname.lower():
-                return child.absolute()
+                return child
     return None
 
 

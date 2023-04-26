@@ -76,8 +76,20 @@ def scargo_check(
             TodoChecker,
         ]
 
+    problem_counts = []
     for checker_class in checkers:
-        checker_class(config, verbose=verbose).check()
+        problem_count = checker_class(config, verbose=verbose).check()
+        problem_counts.append((checker_class, problem_count))
+    if len(checkers) > 1:
+        logger.info("Summary:")
+        if any(count > 0 for _, count in problem_counts):
+            for checker_class, problem_count in problem_counts:
+                logger.info(
+                    f"{checker_class.check_name}: {problem_count} problems found"
+                )
+            sys.exit(1)
+        else:
+            logger.info("No problems found!")
 
 
 class CheckResult(NamedTuple):
@@ -97,15 +109,16 @@ class CheckerFixer(abc.ABC):
         self._fix_errors = fix_errors
         self._verbose = verbose
 
-    def check(self) -> None:
+    def check(self) -> int:
         logger.info(f"Starting {self.check_name} check...")
         error_count = self.check_files()
         self.report(error_count)
+        return error_count
 
     def check_files(self) -> int:
         error_counter = 0
         for file_path in find_files(
-            Path(self._config.project.target.source_dir),
+            self._config.source_dir_path,
             ("*.h", "*.hpp") if self.headers_only else ("*.h", "*.hpp", "*.c", "*.cpp"),
             self.get_exclude_patterns(),
         ):
@@ -129,7 +142,6 @@ class CheckerFixer(abc.ABC):
             logger.info(f"Finished {self.check_name} check. Found {problem_count}.")
             if count > 0:
                 logger.error(f"{self.check_name} check fail!")
-                sys.exit(1)
 
     @staticmethod
     def format_problem_count(count: int) -> str:
@@ -161,7 +173,7 @@ class PragmaChecker(CheckerFixer):
             for line in file.readlines():
                 if "#pragma once" in line:
                     return CheckResult(0)
-        logger.warning("Missing pragma in %s", file_path)
+        logger.warning("Missing '#pragma once' in %s", file_path)
         return CheckResult(1)
 
     def fix_file(self, file_path: Path) -> None:
@@ -182,23 +194,38 @@ class CopyrightChecker(CheckerFixer):
         super().__init__(config, fix_errors, verbose)
         self.copyright_desc = self.get_check_config().description or ""
 
-    def check(self) -> None:
+    def check(self) -> int:
         if not self.copyright_desc:
-            logger.warning("No copyrights in defined in toml")
-            return
-        super().check()
+            logger.warning(
+                "No copyright line defined in scargo.toml at check.copyright.description"
+            )
+            return 0
+        return super().check()
+
+    def __get_copyright_lines(self) -> List[str]:
+        return (
+            ["//\n"]
+            + [f"// {el}\n" for el in self.copyright_desc.split("\n")]
+            + ["//\n"]
+        )
 
     def check_file(self, file_path: Path) -> CheckResult:
+        copyright_lines = self.__get_copyright_lines()
+
         with open(file_path, encoding="utf-8") as file:
-            for line in file.readlines():
-                if self.copyright_desc in line:
-                    return CheckResult(problems_found=0)
-                if "copyright" in line.lower():
-                    logger.warning(
-                        "Incorrect and not excluded copyright in %s", file_path
-                    )
-                    return CheckResult(problems_found=1, fix=False)
-        logger.info("Missing copyright in %s.", file_path)
+            file_lines = file.readlines()
+
+            for line_no, line in enumerate(file_lines[: -(len(copyright_lines) - 1)]):
+                if line == copyright_lines[0]:
+                    if all(
+                        line_from_file == line_from_copyrights
+                        for line_from_file, line_from_copyrights in zip(
+                            file_lines[line_no:], copyright_lines
+                        )
+                    ):
+                        return CheckResult(problems_found=0)
+
+        logger.warning("Missing copyright line in %s.", file_path)
         return CheckResult(problems_found=1)
 
     def fix_file(self, file_path: Path) -> None:
@@ -206,11 +233,8 @@ class CopyrightChecker(CheckerFixer):
             old = file.read()
 
         with open(file_path, "w", encoding="utf-8") as file:
-            file.write("//\n")
-            for line in self.copyright_desc.split("\n"):
-                if line != "":
-                    file.write(f"// {line}\n")
-            file.write("//\n")
+            for line in self.__get_copyright_lines():
+                file.write(line)
             file.write("\n")
             file.write(old)
 
@@ -312,16 +336,14 @@ class CyclomaticChecker(CheckerFixer):
     check_name = "cyclomatic"
 
     def check_files(self) -> int:
-        source_dir = self._config.project.target.source_dir
-
-        cmd = ["lizard", source_dir, "-C", "25", "-w"]
+        cmd = ["lizard", str(self._config.source_dir_path), "-C", "25", "-w"]
 
         for exclude_pattern in self.get_exclude_patterns():
             cmd.extend(["--exclude", exclude_pattern])
         try:
             subprocess.check_call(cmd)
         except subprocess.CalledProcessError:
-            logger.error(f"ERROR: Check {self.check_name} fail")
+            logger.error(f"{self.check_name} fail!")
         return 0
 
     def report(self, count: int) -> None:
@@ -335,11 +357,11 @@ class CppcheckChecker(CheckerFixer):
     check_name = "cppcheck"
 
     def check_files(self) -> int:
-        cmd = "cppcheck --enable=all --suppress=missingIncludeSystem src/ main/"
+        cmd = "cppcheck --enable=all --suppress=missingIncludeSystem --inline-suppr src/ main/"
         try:
             subprocess.check_call(cmd, shell=True)
         except subprocess.CalledProcessError:
-            logger.error(f"{self.check_name} fail")
+            logger.error(f"{self.check_name} fail!")
         return 0
 
     def report(self, count: int) -> None:

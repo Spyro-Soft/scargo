@@ -1,33 +1,15 @@
 # #
 # @copyright Copyright (C) 2023 SpyroSoft Solutions S.A. All rights reserved.
 # #
-
-import re
 from pathlib import Path
 from typing import List, Sequence
 
 from scargo.config import Config
 from scargo.file_generators.base_gen import create_file_from_template
-from scargo.file_generators.mock_utils.cmake_utils import add_subdirs_to_cmake
+from scargo.file_generators.clang_parser.header_parser import parse_file
 
 HEADER_EXTENSIONS = (".h", ".hpp")
 SRC_EXTENSIONS = (".c", ".cpp")
-
-
-class HeaderDescriptor:
-    """
-    This class is a container for names, includes, classes and namespaces
-    which are parsed from the header file. This information is then passed
-    to generate unit tests.
-    """
-
-    def __init__(
-        self, name: str, includes: List[str], classes: List[str], namespaces: List[str]
-    ) -> None:
-        self.name = name
-        self.includes = includes
-        self.classes = classes
-        self.namespaces = namespaces
 
 
 class _UnitTestsGen:
@@ -65,7 +47,7 @@ class _UnitTestsGen:
         :param Path output_file_path: Path to unit test file
         :param bool overwrite: overwrite if exists
         """
-        header_descriptor = self._parse_header_file(input_file_path)
+        header_descriptor = parse_file(input_file_path)
         create_file_from_template(
             "ut/ut.cpp.j2",
             output_file_path,
@@ -80,7 +62,10 @@ class _UnitTestsGen:
         :param Path src_dir_path: Source directory for which tests are being generated
         :param Path ut_dir_path: Directory of generated unit tests
         """
-        add_subdirs_to_cmake(ut_dir_path.relative_to(self._project_path))
+        cmake_dir_path = ut_dir_path
+        while cmake_dir_path != self._ut_dir:
+            add_ut_dir_to_parent_cmake(cmake_dir_path)
+            cmake_dir_path = cmake_dir_path.parent
 
         ut_name = self._get_cmake_tests_name(ut_dir_path)
         ut_files = [
@@ -95,7 +80,7 @@ class _UnitTestsGen:
         )
 
         src_files = [
-            p.absolute().relative_to(self._project_path.absolute())
+            p.relative_to(self._project_path)
             for p in self._get_paths_with_ext(src_dir_path, SRC_EXTENSIONS)
             if p.name != main_cpp
         ]
@@ -118,10 +103,7 @@ class _UnitTestsGen:
         :param Path input_src_path: Source path
         :return Path: output path for unit test
         """
-        input_src_path = input_src_path.absolute()
-        relative_to_src = input_src_path.relative_to(
-            self._project_path.absolute() / self._config.project.target.source_dir
-        )
+        relative_to_src = input_src_path.relative_to(self._config.source_dir_path)
         return Path(self._ut_dir, relative_to_src).with_name(
             f"ut_{input_src_path.stem}.cpp"
         )
@@ -132,53 +114,33 @@ class _UnitTestsGen:
         :param Path test_dir_path: Path to test dir
         :return str: tests name for cmake
         """
-        test_dir_path = test_dir_path.absolute()
-        relative_path = test_dir_path.relative_to(self._project_path.absolute())
+        relative_path = test_dir_path.relative_to(self._project_path)
         return "_".join(relative_path.parts)
-
-    @staticmethod
-    def _get_namespace(line: str) -> str:
-        if line.startswith("namespace"):
-            namespace = line.split(" ")[1]
-        elif line.startswith("using namespace"):
-            namespace = line.split(" ")[2]
-        else:
-            raise ValueError(f"No 'namespace' found in line: '{line}'")
-
-        last_char = namespace[-1]
-        if last_char in ("{", ";"):
-            return namespace[0:-1]
-
-        return namespace
-
-    @staticmethod
-    def _parse_header_file(header_path: Path) -> HeaderDescriptor:
-        namespaces = []
-        classes = []
-        includes = []
-
-        # open header file to parse the header name and class name
-        with open(header_path, encoding="utf-8") as header:
-            for line in header:
-                line = line.strip()
-                if line.startswith("#include"):
-                    includes.append(line.split(" ")[1])
-                elif line.startswith("namespace") or line.startswith("using namespace"):
-                    namespaces.append(_UnitTestsGen._get_namespace(line))
-                elif line.startswith("class"):
-                    class_regex = re.compile(r"^([a-z]+)(\s[a-zA-Z\d]+)")
-                    temp = class_regex.search(line)
-                    if temp:
-                        classes.append(temp.group(2).lstrip())
-                elif line.startswith('extern "C"'):
-                    class_name = "".join([w.capitalize() for w in header_path.stem])
-                    classes.append(class_name)
-
-        return HeaderDescriptor(str(header_path), namespaces, classes, includes)
 
     @staticmethod
     def _get_paths_with_ext(workdir: Path, extensions: Sequence[str]) -> List[Path]:
         return [child for child in workdir.iterdir() if child.suffix in extensions]
+
+
+COPYRIGHT = """# #
+# Copyright (C) 2022 Spyrosoft Solutions. All rights reserved.
+# #\n\n"""
+
+
+def add_ut_dir_to_parent_cmake(ut_dir_path: Path) -> None:
+    # if CMakelists doesn't exist create it in parent dir
+    parent_dir = ut_dir_path.parent
+    cmake_list_path = parent_dir / "CMakeLists.txt"
+    if not cmake_list_path.exists():
+        with cmake_list_path.open("w", encoding="utf-8") as file:
+            file.write(COPYRIGHT)
+    # check if ut_dir_path exists in CMakeLists
+    # if not add it
+    with cmake_list_path.open("r+", encoding="utf-8") as file:
+        cmake_text = file.read()
+        add_subdirectory_clause = f"\nadd_subdirectory({ut_dir_path.name})"
+        if add_subdirectory_clause not in cmake_text:
+            file.write(add_subdirectory_clause)
 
 
 def generate_ut(input_path: Path, config: Config, force: bool = False) -> None:

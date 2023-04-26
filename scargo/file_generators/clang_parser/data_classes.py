@@ -1,7 +1,7 @@
 # #
 # @copyright Copyright (C) 2023 SpyroSoft Solutions S.A. All rights reserved.
 # #
-from typing import Any, List, Sequence
+from typing import List, Sequence
 
 
 class ArgumentDescriptor:
@@ -12,7 +12,7 @@ class ArgumentDescriptor:
         self.data_type = data_type
 
 
-class MockFunctionDescriptor:
+class FunctionDescriptor:
     """Contains function name and types"""
 
     def __init__(
@@ -50,18 +50,21 @@ class MockFunctionDescriptor:
         return ", ".join(arg.data_type for arg in self.arguments)
 
 
-class MockClassDescriptor:
+class ClassDescriptor:
     """Contains class names and function definitions"""
 
-    def __init__(self, name: str, mock_name: str):
+    def __init__(self, name: str, mock_name: str, methods: List[FunctionDescriptor]):
         self.name = name
         self.mock_name = mock_name
-        self.methods: List[MockFunctionDescriptor] = []
-        self.constructors: List[str] = []  # this is never set to anything else
-        self.destructor = ""  # this is never set to anything else
+        self.methods: List[FunctionDescriptor] = methods
 
 
-class MockNamespaceDescriptor:
+class NamespaceDescriptor:
+    def __init__(self, name: str):
+        self.name = name
+
+
+class IncludeDescriptor:
     def __init__(self, name: str):
         self.name = name
 
@@ -69,11 +72,14 @@ class MockNamespaceDescriptor:
 class HeaderDescriptor:
     """Parsed header definitions"""
 
-    def __init__(self, name: str, **kwargs: Any):
+    def __init__(
+        self,
+        name: str,
+        classes: List[ClassDescriptor],
+        namespaces: List[NamespaceDescriptor],
+        includes: List[IncludeDescriptor],
+    ):
         self.name = name
-        self.directives = kwargs.get("directives", [])
-        self.includes = kwargs.get("includes", [])
-        self.classes = kwargs.get("classes", [])
-        self.one_line_classes = kwargs.get("one_line_classes", [])
-        self.namespaces = kwargs.get("namespaces", [])
-        self.c_style_header = kwargs.get("c_style_header", False)
+        self.classes = classes
+        self.namespaces = namespaces
+        self.includes = includes

@@ -63,6 +63,7 @@ def new_project_x86() -> None:
 
     # New
     result = runner.invoke(cli, ["new", NEW_TEST_PROJECT_NAME, "--target=x86"])
+    os.chdir(NEW_TEST_PROJECT_NAME)
     bin_name = get_bin_name()
     expected_bin_file_path = Path("src", f"{bin_name.lower()}.cpp")
     assert result.exit_code == 0
@@ -78,6 +79,7 @@ def new_project_esp32() -> None:
     result_new_esp32 = runner.invoke(
         cli, ["new", NEW_TEST_PROJECT_NAME, "--target=esp32"]
     )
+    os.chdir(NEW_TEST_PROJECT_NAME)
     bin_name = get_bin_name()
     expected_bin_file_path = Path("main", f"{bin_name.lower()}.cpp")
     assert result_new_esp32.exit_code == 0
@@ -93,6 +95,7 @@ def new_project_stm32() -> None:
     result_new_stm32 = runner.invoke(
         cli, ["new", NEW_TEST_PROJECT_NAME, "--target=stm32"]
     )
+    os.chdir(NEW_TEST_PROJECT_NAME)
     bin_name = get_bin_name()
     expected_bin_file_path = Path("src", f"{bin_name.lower()}.cpp")
     assert result_new_stm32.exit_code == 0

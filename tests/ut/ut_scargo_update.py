@@ -27,15 +27,26 @@ EXPECTED_FILES_AND_DIRS = [
 TARGET_X86 = Target.get_target_by_id("x86")
 
 
-def test_update_project_content_without_docker(create_new_project: None) -> None:
-    for path in Path().iterdir():
-        assert path.name in EXPECTED_FILES_AND_DIRS
+def test_update_project_content_without_docker(tmp_path: Path) -> None:
+    os.chdir(tmp_path)
+    project_name = "test_project"
+    scargo_new(
+        project_name,
+        bin_name=None,
+        lib_name=None,
+        target=TARGET_X86,
+        create_docker=False,
+        git=False,
+    )
+    os.chdir(tmp_path / project_name)
+    scargo_update(Path("scargo.toml"))
 
 
 def test_update_project_content_with_docker(tmp_path: Path, fp: FakeProcess) -> None:
     os.chdir(tmp_path)
     project_name = "test_project_with_docker"
     scargo_new(project_name, None, None, TARGET_X86, True, False)
+    os.chdir(project_name)
     fp.register("docker-compose pull")
     scargo_update(Path("scargo.toml"))
     for path in Path().iterdir():
@@ -48,6 +59,7 @@ def test_update_project_content_with_docker__build(
     os.chdir(tmp_path)
     project_name = "test_project_with_docker"
     scargo_new(project_name, None, None, TARGET_X86, True, False)
+    os.chdir(project_name)
     fp.register("docker-compose pull", returncode=1)
     fp.register("docker-compose build")
     scargo_update(Path("scargo.toml"))

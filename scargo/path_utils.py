@@ -20,7 +20,7 @@ def find_program_path(program_name: str) -> Optional[Path]:
 
 
 def get_config_file_path(config_file_name: str) -> Optional[Path]:
-    current_path = Path().absolute()
+    current_path = Path.cwd()
     directories_to_check = [current_path] + list(current_path.parents)
     for directory in directories_to_check:
         if (directory / config_file_name).exists():

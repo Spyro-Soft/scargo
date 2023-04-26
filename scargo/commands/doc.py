@@ -6,6 +6,7 @@
 import subprocess
 import sys
 from pathlib import Path
+from typing import Iterable
 
 import typer
 
@@ -20,9 +21,8 @@ logger = get_logger()
 class _ScargoGenDoc:
     EXCLUDE_LIST = ["build"]
 
-    def __init__(self, config: Config, doxygen_path: Path, doc_dir_path: Path):
+    def __init__(self, config: Config, doc_dir_path: Path):
         self._config = config
-        self._doxygen_path = doxygen_path
         self._doc_dir_path = doc_dir_path
 
     def create_default_doxyfile(self) -> None:
@@ -31,13 +31,20 @@ class _ScargoGenDoc:
 
     def update_doxyfile(self) -> None:
         """Update Doxyfile configuration according specified values"""
+        doxyfile_path = self._doc_dir_path / "Doxyfile"
+        with doxyfile_path.open(encoding="utf-8") as doxyfile:
+            doxyfile_lines = doxyfile.readlines()
+
+        with doxyfile_path.open("w", encoding="utf-8") as doxyfile:
+            doxyfile.writelines(self.adjust_doxyfile_lines(doxyfile_lines))
+
+    def adjust_doxyfile_lines(self, lines: Iterable[str]) -> Iterable[str]:
         project_name = self._config.project.name
         project_path = self._config.project_root
         exclude = " ".join(
             f"{project_path}/{dir}"
             for dir in self.EXCLUDE_LIST + self._config.doc.exclude
         )
-
         doxy_values = {
             "PROJECT_NAME": f'"{project_name}"',
             "EXTRACT_ALL": "YES",
@@ -46,17 +53,11 @@ class _ScargoGenDoc:
             "EXCLUDE_PATTERNS": exclude,
             "GENERATE_LATEX": "NO",
         }
-
-        doxyfile_path = self._doc_dir_path / "Doxyfile"
-        with doxyfile_path.open(encoding="utf-8") as doxyfile:
-            rewrite_file = doxyfile.readlines()
-            for i, line in enumerate(rewrite_file):
-                for key, value in doxy_values.items():
-                    if line.startswith(f"{key} "):
-                        rewrite_file[i] = f"{key.ljust(23)}= {value}\n"
-
-        with doxyfile_path.open("w", encoding="utf-8") as doxyfile:
-            doxyfile.writelines(rewrite_file)
+        for line in lines:
+            key = line.split(" ", 1)[0]
+            if key in doxy_values:
+                yield f"{key.ljust(23)}= {doxy_values[key]}\n"
+            yield line
 
     def generate_doxygen(self) -> None:
         """Generate doxygen according to doxyfile"""
@@ -89,15 +90,14 @@ def scargo_doc(open_doc: bool) -> None:
         _open_doc(doc_dir_path)
         sys.exit(0)
 
-    doxygen_path = find_program_path("doxygen")
-    if not doxygen_path:
+    if not find_program_path("doxygen"):
         logger.error("Doxygen not installed or not in PATH environment variable")
         sys.exit(1)
 
     doc_dir_path.mkdir(parents=True, exist_ok=True)
 
     try:
-        scargo_doc_gen = _ScargoGenDoc(config, doxygen_path, doc_dir_path)
+        scargo_doc_gen = _ScargoGenDoc(config, doc_dir_path)
         scargo_doc_gen.create_default_doxyfile()
         scargo_doc_gen.update_doxyfile()
         scargo_doc_gen.generate_doxygen()

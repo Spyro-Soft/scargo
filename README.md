@@ -38,7 +38,7 @@ Base:
 
 - python >= 3.8
 - cmake >= 3.24.2
-- cppcheck bzr lib32z1 clang clang-format clang-tidy valgrind gcovr doxygen curl libcurl4-openssl-dev libcmocka0 libcmocka-dev
+- cppcheck lib32z1 clang clang-format clang-tidy gcovr doxygen libcmocka0 libcmocka-dev
 - lizard
 
 Depending on the architecture:

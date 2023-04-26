@@ -121,7 +121,7 @@ def test_conan_add_remote_fail(
     )
 
     # ACT
-    conan_add_remote(Path("some_path"))
+    conan_add_remote(Path("some_path"), config)
 
     # ASSERT
     assert "Unable to add remote repository" in caplog.text

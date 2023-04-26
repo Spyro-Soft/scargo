@@ -28,7 +28,7 @@ classifiers = [
 dynamic = ["version"]
 keywords = ["scargo", "Package manager", "C++"]
 dependencies = [
-    "clang==14.0",
+    "clang==16.0.1.1",
     "cmake==3.25.2",
     "coloredlogs==15.0.1",
     "conan==1.59.0",
@@ -46,17 +46,18 @@ dependencies = [
 
 [project.optional-dependencies]
 dev = [
-    "allure-pytest",
     "black",
     "coverage~=6.0",
     "flake8>=3.2.0",
     "flit==3.8.0",
     "gcovr>=5.2",
     "isort==5.11.4",
+    "matplotlib",
     "mypy==1.0.1",
     "pre-commit",
     "pyclean==2.2.0",
     "pyelftools",
+    "pyfakefs",
     "PyInstaller",
     "pylint",
     "pytest-bdd",
@@ -64,7 +65,7 @@ dev = [
     "pytest-mock",
     "pytest-subprocess",
     "pytest",
-    "types-clang",
+    "types-clang==0.14.3",
     "types-toml",
     "unittest-xml-reporting",
 ]
@@ -110,4 +111,12 @@ ignore_missing_imports = true
 
 [[tool.mypy.overrides]]
 module = "docker"
+ignore_missing_imports = true
+
+[[tool.mypy.overrides]]
+module = "matplotlib.*"
+ignore_missing_imports = true
+
+[[tool.mypy.overrides]]
+module = "pyfakefs.*"
 ignore_missing_imports = true
