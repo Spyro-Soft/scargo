@@ -23,11 +23,7 @@ FILE_CONTENTS_WITH_INCORRECT_COPYRIGHT = [
     "int main(void);",
 ]
 
-MISSING_COPYRIGHT_WARNING = ("INFO", "Missing copyright in foo/bar.hpp.")
-INCORRECT_COPYRIGHT_WARNING = (
-    "WARNING",
-    "Incorrect and not excluded copyright in foo/bar.hpp",
-)
+MISSING_COPYRIGHT_WARNING = ("WARNING", "Missing copyright line in foo/bar.hpp.")
 
 
 @pytest.mark.parametrize(
@@ -41,7 +37,9 @@ def test_check_copyright_pass(
     config: Config,
     mock_find_files: MagicMock,
 ) -> None:
-    CopyrightChecker(config).check()
+    result = CopyrightChecker(config).check()
+
+    assert result == 0
     assert all(level != "WARNING" for level, msg in get_log_data(caplog.records))
 
 
@@ -56,13 +54,11 @@ def test_check_copyright_fail(
     config: Config,
     mock_find_files: MagicMock,
 ) -> None:
-    with pytest.raises(SystemExit) as wrapped_exception:
-        CopyrightChecker(config).check()
+    result = CopyrightChecker(config).check()
 
-    assert wrapped_exception.value.code == 1
+    assert result == 1
     log_data = get_log_data(caplog.records)
     assert MISSING_COPYRIGHT_WARNING in log_data
-    assert INCORRECT_COPYRIGHT_WARNING not in log_data
 
 
 @pytest.mark.parametrize(
@@ -106,8 +102,12 @@ def test_check_copyright_no_description(
 ) -> None:
     config.check.copyright.description = None
 
-    CopyrightChecker(config).check()
+    result = CopyrightChecker(config).check()
 
+    assert result == 0
     assert get_log_data(caplog.records) == [
-        ("WARNING", "No copyrights in defined in toml")
+        (
+            "WARNING",
+            "No copyright line defined in scargo.toml at check.copyright.description",
+        )
     ]

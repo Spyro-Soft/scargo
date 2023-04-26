@@ -38,7 +38,8 @@ def test_check_todo_pass(
     config: Config,
     mock_find_files: MagicMock,
 ) -> None:
-    TodoChecker(config).check()
+    result = TodoChecker(config).check()
+    assert result == 0
     assert all(
         level not in ("WARNING", "ERROR") for level, msg in get_log_data(caplog.records)
     )
@@ -55,9 +56,8 @@ def test_check_todo_fail(
     config: Config,
     mock_find_files: MagicMock,
 ) -> None:
-    with pytest.raises(SystemExit) as wrapped_exception:
-        TodoChecker(config).check()
-    assert wrapped_exception.value.code == 1
+    result = TodoChecker(config).check()
+    assert result == 1
     assert ("WARNING", "Found TODO in foo/bar.hpp at line 1") in get_log_data(
         caplog.records
     )

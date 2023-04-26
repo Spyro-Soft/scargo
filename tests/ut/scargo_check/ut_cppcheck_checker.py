@@ -20,8 +20,9 @@ def test_cppcheck_checker_pass(
 ) -> None:
     fake_process.register(CPPCHECK_COMMAND)
 
-    CppcheckChecker(config=config).check()
+    result = CppcheckChecker(config=config).check()
 
+    assert result == 0
     assert fake_process.call_count(CPPCHECK_COMMAND) == 1
     assert get_log_data(caplog.records) == [
         ("INFO", "Starting cppcheck check..."),
@@ -34,6 +35,7 @@ def test_cppcheck_checker_fail(
 ) -> None:
     fake_process.register(CPPCHECK_COMMAND, returncode=1)
 
-    CppcheckChecker(config=config).check()
+    result = CppcheckChecker(config=config).check()
 
-    assert ("ERROR", "cppcheck fail") in get_log_data(caplog.records)
+    assert result == 0
+    assert ("ERROR", "cppcheck fail!") in get_log_data(caplog.records)
