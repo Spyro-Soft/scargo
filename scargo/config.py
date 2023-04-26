@@ -76,8 +76,8 @@ class ProjectConfig(BaseModel):
     docker_image_tag: str = Field(..., alias="docker-image-tag")
     in_repo_conan_cache: bool = Field(..., alias="in-repo-conan-cache")
 
-    cc: str
-    cxx: str
+    cc: Optional[str] = None
+    cxx: Optional[str] = None
     cxxstandard: str
 
     cflags: str
@@ -91,42 +91,32 @@ class ProjectConfig(BaseModel):
     def target(self) -> "Target":
         return Target.get_target_by_id(self.target_id)
 
+    def get_compiler_warning(self) -> Optional[str]:
+        if (self.cc and not self.target.cc) or (self.cxx and not self.target.cxx):
+            return "Compiler settings are ignored for this target"
+        return None
+
 
 class Target(BaseModel):
     id: str
     family: str
     source_dir: str
-    cc: str
-    cxx: str
+    cc: Optional[str] = None
+    cxx: Optional[str] = None
 
     @classmethod
     def get_target_by_id(cls, target_id: str) -> "Target":
         return TARGETS[target_id]
 
 
-ARM_CC = "arm-none-eabi-gcc"
-ARM_CXX = "arm-none-eabi-g++"
-
 TARGETS = {
     "x86": Target(id="x86", family="x86", source_dir="src", cc="gcc", cxx="g++"),
-    "stm32": Target(
-        id="stm32", family="stm32", source_dir="src", cc=ARM_CC, cxx=ARM_CXX
-    ),
-    "esp32": Target(
-        id="esp32", family="esp32", source_dir="main", cc=ARM_CC, cxx=ARM_CXX
-    ),
-    "esp32s2": Target(
-        id="esp32s2", family="esp32", source_dir="main", cc=ARM_CC, cxx=ARM_CXX
-    ),
-    "esp32s3": Target(
-        id="esp32s3", family="esp32", source_dir="main", cc=ARM_CC, cxx=ARM_CXX
-    ),
-    "esp32c2": Target(
-        id="esp32c2", family="esp32", source_dir="main", cc=ARM_CC, cxx=ARM_CXX
-    ),
-    "esp32c3": Target(
-        id="esp32c3", family="esp32", source_dir="main", cc=ARM_CC, cxx=ARM_CXX
-    ),
+    "stm32": Target(id="stm32", family="stm32", source_dir="src"),
+    "esp32": Target(id="esp32", family="esp32", source_dir="main"),
+    "esp32s2": Target(id="esp32s2", family="esp32", source_dir="main"),
+    "esp32s3": Target(id="esp32s3", family="esp32", source_dir="main"),
+    "esp32c2": Target(id="esp32c2", family="esp32", source_dir="main"),
+    "esp32c3": Target(id="esp32c3", family="esp32", source_dir="main"),
 }
 
 

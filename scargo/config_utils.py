@@ -29,10 +29,14 @@ def get_scargo_config_or_exit(
         sys.exit(1)
 
     try:
-        return parse_config(config_file_path)
+        config = parse_config(config_file_path)
     except ConfigError as e:
         logger.error(e.args[0])
         sys.exit(1)
+
+    if compiler_warning := config.project.get_compiler_warning():
+        logger.warning(compiler_warning)
+    return config
 
 
 def prepare_config(run_in_docker: bool = True) -> Config:
