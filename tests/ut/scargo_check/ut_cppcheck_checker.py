@@ -9,6 +9,7 @@ CPPCHECK_COMMAND = [
     "cppcheck",
     "--enable=all",
     "--suppress=missingIncludeSystem",
+    "--inline-suppr",
     "src/",
     "main/",
 ]
