@@ -7,7 +7,7 @@ import re
 import subprocess
 import sys
 from pathlib import Path
-from typing import Optional, Tuple
+from typing import Optional
 
 from scargo import __version__
 from scargo.config import Target
@@ -61,17 +61,16 @@ def scargo_new(
 
     build_env = get_build_env(create_docker)
 
-    cc, cflags, cxx, cxxflags = get_cc_config(target)
     toml_path = project_dir / SCARGO_DEFAULT_CONFIG_FILE
     generate_toml(
         toml_path,
         project_name=name,
         target=target,
         build_env=build_env,
-        cc=cc,
-        cxx=cxx,
-        cflags=cflags,
-        cxxflags=cxxflags,
+        cc=target.cc,
+        cxx=target.cxx,
+        cflags="-Wall -Wextra",
+        cxxflags="-Wall -Wextra",
         version=__version__,
         docker_image_tag=f"{name.lower()}-dev:1.0",
         lib_name=lib_name,
@@ -89,21 +88,6 @@ def scargo_new(
     if git:
         subprocess.check_call("git init -q", shell=True, cwd=project_dir)
         logger.info("Initialized git repo")
-
-
-def get_cc_config(target: Target) -> Tuple[str, str, str, str]:
-    """
-    Get c configuration base on architecture
-
-    :param target: project architecture
-    :return: tuple of string
-    :raises Exception: if architecture not allowed
-    """
-    cflags = "-Wall -Wextra"
-    cxxflags = "-Wall -Wextra"
-    cc = target.cc
-    cxx = target.cxx
-    return cc, cflags, cxx, cxxflags
 
 
 def get_build_env(create_docker: bool) -> str:
