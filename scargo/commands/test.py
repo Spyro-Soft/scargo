@@ -42,15 +42,19 @@ def scargo_test(verbose: bool, profile: str = "Debug") -> None:
     try:
         # Run CMake and build tests.
         subprocess.check_call(
-            ["conan", "install", tests_src_dir, "-if", test_build_dir],
+            [
+                "conan",
+                "install",
+                tests_src_dir,
+                "-if",
+                test_build_dir,
+                f"-sbuild_type={profile}",
+            ],
             cwd=project_dir,
         )
         subprocess.check_call(
-            ["cmake", f"-DCMAKE_BUILD_TYPE={profile}", tests_src_dir],
-            cwd=test_build_dir,
-        )
-        subprocess.check_call(
-            "cmake --build . --parallel", shell=True, cwd=test_build_dir
+            ["conan", "build", tests_src_dir, "-bf", test_build_dir],
+            cwd=project_dir,
         )
     except subprocess.CalledProcessError:
         logger.error("Failed to build tests.")
