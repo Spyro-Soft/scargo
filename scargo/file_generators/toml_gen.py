@@ -16,4 +16,4 @@ def generate_toml(output_file_path: Path, **values: Any) -> None:
         output_file_path (String): path to the output .env file
         **values (Dict): dict contains all necessary values for toml
     """
-    write_template(output_file_path, "scargo.toml.j2", template_params={"data": values})
+    write_template(output_file_path, "scargo.toml.j2", template_params=values)

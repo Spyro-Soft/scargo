@@ -67,8 +67,6 @@ def scargo_new(
         project_name=name,
         target=target,
         build_env=build_env,
-        cc=target.cc,
-        cxx=target.cxx,
         cflags="-Wall -Wextra",
         cxxflags="-Wall -Wextra",
         version=__version__,

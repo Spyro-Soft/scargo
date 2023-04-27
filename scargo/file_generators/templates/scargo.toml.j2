@@ -1,30 +1,30 @@
 [project]
-name = "{{ data.project_name }}"
+name = "{{ project_name }}"
 version = "0.1.0"
 description = "Project description."
 homepage-url = "www.hello-world.com"
 
-{% if data.bin_name %}
-bin_name = "{{ data.bin_name }}"
+{% if bin_name %}
+bin_name = "{{ bin_name }}"
 {% endif %}
-{% if data.lib_name %}
-lib_name = "{{ data.lib_name }}"
+{% if lib_name %}
+lib_name = "{{ lib_name }}"
 {% endif %}
-target = "{{ data.target.id }}"
-build-env = "{{ data.build_env }}"
+target = "{{ target.id }}"
+build-env = "{{ build_env }}"
 docker-file = ".devcontainer/Dockerfile-custom"
-docker-image-tag = "{{ data.docker_image_tag }}"
+docker-image-tag = "{{ docker_image_tag }}"
 
-{% if cc %}
-cc  = "{{ data.cc }}"
+{% if target.cc %}
+cc  = "{{ target.cc }}"
 {% endif %}
-{% if cxx %}
-cxx = "{{ data.cxx }}"
+{% if target.cxx %}
+cxx = "{{ target.cxx }}"
 {% endif %}
 cxxstandard = "17"
 
-cflags   = "{{ data.cflags }}"
-cxxflags = "{{ data.cxxflags }}"
+cflags   = "{{ cflags }}"
+cxxflags = "{{ cxxflags }}"
 
 in-repo-conan-cache = false
 
@@ -91,7 +91,7 @@ test = [
 [conan.repo]
 # conancenter = "https://center.conan.io"
 
-{% if data.target.family == "esp32" %}
+{% if target.family == "esp32" %}
 [esp32]
 extra_component_dirs=[]
 partitions = [
@@ -102,7 +102,7 @@ partitions = [
     "ota_1,    app,  ota_1,   0x190000,0x180000,",
     "spiffs,   data, spiffs,  0x310000,0x6000,"
 ]
-{% elif data.target.family == "stm32" %}
+{% elif target.family == "stm32" %}
 [stm32]
 chip = "STM32L496AG"
 flash-start = 0x08000000
