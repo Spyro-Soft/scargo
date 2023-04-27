@@ -52,9 +52,6 @@ tests:
   extends: .merge_request
   allow_failure: true
   script:
-  {% if project.target.family == "esp32" %}
-    - source /opt/esp/entrypoint.sh
-  {% endif %}
     - scargo test
   artifacts:
     paths:
@@ -66,9 +63,6 @@ clang format:
   extends: .merge_request
   allow_failure: false
   script:
-  {% if project.target.family == "esp32" %}
-    - source /opt/esp/entrypoint.sh
-  {% endif %}
     - scargo check --clang-format
   artifacts:
     paths:
@@ -81,9 +75,6 @@ cpp check:
   extends: .merge_request
   allow_failure: false
   script:
-  {% if project.target.family == "esp32" %}
-    - source /opt/esp/entrypoint.sh
-  {% endif %}
     - scargo check --cppcheck
   artifacts:
     paths:
@@ -96,9 +87,6 @@ clang tidy:
    extends: .merge_request
    allow_failure: true
    script:
-  {% if project.target.family == "esp32" %}
-    - source /opt/esp/entrypoint.sh
-  {% endif %}
     - scargo check --clang-tidy
    artifacts:
      paths:
@@ -110,9 +98,6 @@ todo:
   extends: .merge_request
   allow_failure: true
   script:
-  {% if project.target.family == "esp32" %}
-    - source /opt/esp/entrypoint.sh
-  {% endif %}
     - scargo check --todo
   artifacts:
     paths:
@@ -125,9 +110,6 @@ cyclomatic:
   extends: .merge_request
   allow_failure: true
   script:
-  {% if project.target.family == "esp32" %}
-    - source /opt/esp/entrypoint.sh
-  {% endif %}
     - scargo check --cyclomatic
   artifacts:
     paths:
@@ -140,9 +122,6 @@ pragma once:
   extends: .merge_request
   allow_failure: false
   script:
-  {% if project.target.family == "esp32" %}
-    - source /opt/esp/entrypoint.sh
-  {% endif %}
     - scargo check --pragma
   artifacts:
     paths:
@@ -155,9 +134,6 @@ copy rights:
   extends: .merge_request
   allow_failure: true
   script:
-  {% if project.target.family == "esp32" %}
-    - source /opt/esp/entrypoint.sh
-  {% endif %}
     - scargo check --copyright
   artifacts:
     paths:
@@ -170,9 +146,6 @@ docu:
   extends: .merge_request
   allow_failure: true
   script:
-  {% if project.target.family == "esp32" %}
-    - source /opt/esp/entrypoint.sh
-  {% endif %}
     - scargo doc
   artifacts:
     paths:
