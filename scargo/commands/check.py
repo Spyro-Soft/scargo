@@ -270,7 +270,13 @@ class ClangFormatChecker(CheckerFixer):
     can_fix = True
 
     def check_file(self, file_path: Path) -> CheckResult:
-        cmd = ["clang-format", "--style=file", "--dry-run", "-Werror", str(file_path)]
+        cmd = [
+            "/usr/bin/clang-format",
+            "--style=file",
+            "--dry-run",
+            "-Werror",
+            str(file_path),
+        ]
         try:
             subprocess.check_output(cmd)
         except subprocess.CalledProcessError as e:
@@ -282,7 +288,9 @@ class ClangFormatChecker(CheckerFixer):
         return CheckResult(0)
 
     def fix_file(self, file_path: Path) -> None:
-        subprocess.check_call(["clang-format", "-style=file", "-i", str(file_path)])
+        subprocess.check_call(
+            ["/usr/bin/clang-format", "-style=file", "-i", str(file_path)]
+        )
 
 
 class ClangTidyChecker(CheckerFixer):
@@ -290,7 +298,7 @@ class ClangTidyChecker(CheckerFixer):
     build_path = Path("./build/")
 
     def check_file(self, file_path: Path) -> CheckResult:
-        cmd = ["clang-tidy", str(file_path)]
+        cmd = ["/usr/bin/clang-tidy", str(file_path)]
         if self._config.project.target.family == "esp32":
             cmd.extend(["-p", str(self.build_path)])
             if not Path(self.build_path, "compile_commands.json").exists():
