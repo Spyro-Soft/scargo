@@ -8,7 +8,7 @@ from scargo.commands.check import ClangTidyChecker
 from scargo.config import Config
 from tests.ut.utils import get_log_data
 
-CLANG_TIDY_COMMAND = ["/usr/bin/clang-tidy", "foo/bar.hpp"]
+CLANG_TIDY_COMMAND = ["clang-tidy", "foo/bar.hpp"]
 
 CLANG_TIDY_NORMAL_OUTPUT = "everything is tidy!"
 CLANG_TIDY_ERROR_OUTPUT = "error: something is not tidy!"

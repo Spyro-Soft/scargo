@@ -298,15 +298,14 @@ class ClangTidyChecker(CheckerFixer):
     build_path = Path("./build/")
 
     def check_file(self, file_path: Path) -> CheckResult:
-        cmd = ["/usr/bin/clang-tidy", str(file_path)]
+        cmd = ["clang-tidy", str(file_path)]
         if self._config.project.target.family == "esp32":
             cmd.extend(["-p", str(self.build_path)])
             if not Path(self.build_path, "compile_commands.json").exists():
                 # creates compilation database and runs run-clang-tidy.py on the whole project
                 # (the latter is not needed, but there's no option to suppress it)
-                cmd = ["idf.py", "clang-check"]
                 subprocess.run(
-                    cmd,
+                    ["idf.py", "clang-check"],
                     stdout=subprocess.DEVNULL,
                     stderr=subprocess.DEVNULL,
                     check=False,
