@@ -270,7 +270,13 @@ class ClangFormatChecker(CheckerFixer):
     can_fix = True
 
     def check_file(self, file_path: Path) -> CheckResult:
-        cmd = ["clang-format", "--style=file", "--dry-run", "-Werror", str(file_path)]
+        cmd = [
+            "/usr/bin/clang-format",
+            "--style=file",
+            "--dry-run",
+            "-Werror",
+            str(file_path),
+        ]
         try:
             subprocess.check_output(cmd)
         except subprocess.CalledProcessError as e:
@@ -282,7 +288,9 @@ class ClangFormatChecker(CheckerFixer):
         return CheckResult(0)
 
     def fix_file(self, file_path: Path) -> None:
-        subprocess.check_call(["clang-format", "-style=file", "-i", str(file_path)])
+        subprocess.check_call(
+            ["/usr/bin/clang-format", "-style=file", "-i", str(file_path)]
+        )
 
 
 class ClangTidyChecker(CheckerFixer):
@@ -296,9 +304,8 @@ class ClangTidyChecker(CheckerFixer):
             if not Path(self.build_path, "compile_commands.json").exists():
                 # creates compilation database and runs run-clang-tidy.py on the whole project
                 # (the latter is not needed, but there's no option to suppress it)
-                cmd = ["idf.py", "clang-check"]
                 subprocess.run(
-                    cmd,
+                    ["idf.py", "clang-check"],
                     stdout=subprocess.DEVNULL,
                     stderr=subprocess.DEVNULL,
                     check=False,
