@@ -14,7 +14,11 @@ logger = get_logger()
 
 
 def scargo_flash(
-    app: bool, fs: bool, flash_profile: str, port: Optional[str] = None
+    app: bool,
+    fs: bool,
+    flash_profile: str,
+    port: Optional[str] = None,
+    erase_memory: bool = True,
 ) -> None:
     config = prepare_config()
     target = config.project.target
@@ -22,10 +26,13 @@ def scargo_flash(
     if port and target.family != "esp32":
         logger.error("--port option is only supported for esp32 projects.")
         sys.exit(1)
+    if not erase_memory and target.family != "stm32":
+        logger.error("--no-erase option is only supported for stm32 projects.")
+        sys.exit(1)
     if target.family == "esp32":
         flash_esp32(config, app=app, fs=fs, flash_profile=flash_profile, port=port)
     elif target.family == "stm32":
-        flash_stm32(config, flash_profile)
+        flash_stm32(config, flash_profile, erase_memory)
     else:
         logger.error("Flash command not supported for this target yet.")
 
@@ -74,7 +81,9 @@ def flash_esp32(
         logger.error("%s fail", command)
 
 
-def flash_stm32(config: Config, flash_profile: str = "Debug") -> None:
+def flash_stm32(
+    config: Config, flash_profile: str = "Debug", erase_memory: bool = True
+) -> None:
     project_path = config.project_root
     bin_name = config.project.bin_name
     if not bin_name:
@@ -92,7 +101,8 @@ def flash_stm32(config: Config, flash_profile: str = "Debug") -> None:
         logger.error("Flash start address not found in lock file")
         logger.info("Define flash-start in scargo.toml under stm32 section")
     else:
-        subprocess.check_call(["st-flash", "erase"])
+        if erase_memory:
+            subprocess.check_call(["st-flash", "erase"])
         subprocess.check_call(
             ["st-flash", "--reset", "write", str(bin_path), flash_start]
         )
