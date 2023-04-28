@@ -135,9 +135,9 @@ key-value pairs of short names and conan remote urls, e.g.
 
     conancenter = "https://center.conan.io"
 
-Applicable for esp32 only
--------------------------
 [esp32]
+-------------------------
+(Applicable for esp32 only)
 
 **partitions** = (string list) (partitions e.g ["nvs,      data, nvs,     0x9000,  0x4000,",
 
@@ -151,9 +151,10 @@ Applicable for esp32 only
 
     "spiffs,   data, spiffs,  ,        0x6000,"])
 
-Applicable for stm32 only
--------------------------
 [stm32]
+-------------------------
+(Applicable for stm32 only)
+
 **chip** = (string)
 
 **flash-start** = 0x08000000
