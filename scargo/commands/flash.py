@@ -110,7 +110,11 @@ def flash_stm32(
         logger.info("Define flash-start in scargo.toml under stm32 section")
     else:
         if erase_memory:
-            subprocess.check_call(["st-flash", "erase"])
+            command = ["st-flash"]
+            if port:
+                command.append(f"--serial={port}")
+            command.append("erase")
+            subprocess.check_call(command)
 
         command = ["st-flash", "--reset"]
         if port:
