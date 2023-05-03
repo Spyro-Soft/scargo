@@ -23,8 +23,8 @@ def scargo_flash(
     config = prepare_config()
     target = config.project.target
 
-    if port and target.family != "esp32":
-        logger.error("--port option is only supported for esp32 projects.")
+    if port and (target.family != "esp32" or target.family != "stm32"):
+        logger.error("--port option is only supported for esp32 and stm32 projects.")
         sys.exit(1)
     if not erase_memory and target.family != "stm32":
         logger.error("--no-erase option is only supported for stm32 projects.")
@@ -32,7 +32,7 @@ def scargo_flash(
     if target.family == "esp32":
         flash_esp32(config, app=app, fs=fs, flash_profile=flash_profile, port=port)
     elif target.family == "stm32":
-        flash_stm32(config, flash_profile, erase_memory)
+        flash_stm32(config, flash_profile, erase_memory, port=port)
     else:
         logger.error("Flash command not supported for this target yet.")
 
@@ -87,7 +87,10 @@ def flash_esp32(
 
 
 def flash_stm32(
-    config: Config, flash_profile: str = "Debug", erase_memory: bool = True
+    config: Config,
+    flash_profile: str = "Debug",
+    erase_memory: bool = True,
+    port: Optional[str] = None,
 ) -> None:
     project_path = config.project_root
     bin_name = config.project.bin_name
@@ -108,6 +111,9 @@ def flash_stm32(
     else:
         if erase_memory:
             subprocess.check_call(["st-flash", "erase"])
-        subprocess.check_call(
-            ["st-flash", "--reset", "write", str(bin_path), flash_start]
-        )
+
+        command = ["st-flash", "--reset"]
+        if port:
+            command.append(f"--serial={port}")
+        command.extend(["write", str(bin_path), flash_start])
+        subprocess.check_call(command, cwd=project_path)
