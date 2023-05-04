@@ -4,6 +4,7 @@ from typing import Any, List, Sequence
 from unittest.mock import MagicMock
 
 import pytest
+from pyfakefs.fake_filesystem import FakeFilesystem
 
 from scargo.commands.docker import (
     scargo_docker_build,
@@ -28,10 +29,11 @@ def scargo_docker_test_setup(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) ->
     return test_project_config
 
 
-def test_docker_fails_when_inside_docker(
+def test_docker_fails_when_inside_docker(  # type: ignore[no-any-unimported]
     caplog: pytest.LogCaptureFixture,
     mock_subprocess_run: MagicMock,
     scargo_docker_test_setup: Config,
+    fs: FakeFilesystem,
 ) -> None:
     Path("/.dockerenv").mkdir()
     with pytest.raises(SystemExit):
