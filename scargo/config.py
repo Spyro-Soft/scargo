@@ -54,11 +54,12 @@ class Config(BaseModel):
     def validate_special_configs(  # pylint: disable=no-self-argument
         cls, values: Dict[str, Any]
     ) -> Dict[str, Any]:
-        target_id = values["project"].target_id
-        if target_id == "stm32" and not values["stm32"]:
-            raise ConfigError("No [stm32] section in config")
-        if target_id == "esp32" and not values["esp32"]:
-            raise ConfigError("No [esp32] section in config")
+        if "project" in values:
+            target_id = values["project"].target_id
+            if target_id == "stm32" and not values["stm32"]:
+                raise ConfigError("No [stm32] section in config")
+            if target_id == "esp32" and not values["esp32"]:
+                raise ConfigError("No [esp32] section in config")
         return values
 
 
