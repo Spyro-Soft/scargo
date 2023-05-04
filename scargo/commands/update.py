@@ -98,7 +98,7 @@ def scargo_update(config_file_path: Path) -> None:
         subprocess.run("conan source .", shell=True, cwd=project_path, check=True)
 
     if project_config.build_env == SCARGO_DOCKER_ENV:
-        if not Path(project_path, ".dockerenv").exists():
+        if not Path("/.dockerenv").exists():
             if not pull_docker_image(docker_path):
                 scargo_docker_build([], config.project_root)
         else:

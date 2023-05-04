@@ -33,7 +33,7 @@ def test_docker_fails_when_inside_docker(
     mock_subprocess_run: MagicMock,
     scargo_docker_test_setup: Config,
 ) -> None:
-    Path(".dockerenv").mkdir()
+    Path("/.dockerenv").mkdir()
     with pytest.raises(SystemExit):
         scargo_docker_build([])
     assert "Cannot used docker command inside the docker container" in caplog.text
