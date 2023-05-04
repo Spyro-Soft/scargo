@@ -23,7 +23,7 @@ def scargo_flash(
     config = prepare_config()
     target = config.project.target
 
-    if port and (target.family != "esp32" or target.family != "stm32"):
+    if port and (target.family != "esp32" and target.family != "stm32"):
         logger.error("--port option is only supported for esp32 and stm32 projects.")
         sys.exit(1)
     if not erase_memory and target.family != "stm32":
@@ -62,7 +62,7 @@ def flash_esp32(
                     f"--input={app_path}",
                 ]
             )
-            subprocess.check_call(command, cwd=project_path)
+            subprocess.check_call(command)
         elif fs:
             fs_path = config.project_root / "build" / "spiffs.bin"
             command = ["parttool.py"]
@@ -75,7 +75,7 @@ def flash_esp32(
                     f"--input={fs_path}",
                 ]
             )
-            subprocess.check_call(command, cwd=project_path)
+            subprocess.check_call(command)
         else:
             command = ["esptool.py"]
             if port:
@@ -120,4 +120,4 @@ def flash_stm32(
         if port:
             command.append(f"--serial={port}")
         command.extend(["write", str(bin_path), flash_start])
-        subprocess.check_call(command, cwd=project_path)
+        subprocess.check_call(command)
