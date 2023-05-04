@@ -54,7 +54,10 @@ def scargo_build(profile: str) -> None:
             ["cmake", f"-DCMAKE_BUILD_TYPE={profile}", project_dir],
             cwd=build_dir,
         )
-        subprocess.check_call("cmake --build . --parallel", shell=True, cwd=build_dir)
+        command = ["cmake", "--build", ".", "--parallel"]
+        if config.project.max_build_jobs is not None:
+            command.append(str(config.project.max_build_jobs))
+        subprocess.check_call(command, cwd=build_dir)
     except subprocess.CalledProcessError:
         logger.error("Unable to build exec file")
         sys.exit(1)

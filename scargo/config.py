@@ -84,6 +84,8 @@ class ProjectConfig(BaseModel):
     cflags: str
     cxxflags: str
 
+    max_build_jobs: Optional[int] = Field(None, alias="max-build-jobs")
+
     cmake_variables: Dict[str, str] = Field(
         default_factory=dict, alias="cmake-variables"
     )

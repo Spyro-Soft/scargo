@@ -38,6 +38,8 @@ This section describes possible options which can be set in the scargo.toml file
 
 **in-repo-conan-cache** = (bool) (If set to true conan cache is placed in the repo root - so it persists)
 
+**max-build-jobs** = (int) (maximum number of concurrent processes to use when building; passed to cmake as --parallel)
+
 [project.cmake-variables]
 -------------------------
 
