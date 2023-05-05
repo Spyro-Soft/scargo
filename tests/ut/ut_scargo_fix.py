@@ -11,7 +11,7 @@ def test_scargo_fix_pragma(
     mock_prepare_config: Config,
     caplog: pytest.LogCaptureFixture,
 ) -> None:
-    scargo_fix(True, True, True)
+    scargo_fix(True, False, False)
     assert "Fixed" in caplog.text
 
 
@@ -19,7 +19,7 @@ def test_scargo_fix_copyright(
     mock_prepare_config: Config,
     caplog: pytest.LogCaptureFixture,
 ) -> None:
-    scargo_fix(True, True, True)
+    scargo_fix(False, True, False)
     assert "Fixed" in caplog.text
 
 
@@ -27,7 +27,7 @@ def test_scargo_fix_clang_format(
     mock_prepare_config: Config,
     caplog: pytest.LogCaptureFixture,
 ) -> None:
-    scargo_fix(True, True, True)
+    scargo_fix(False, False, True)
     assert "Fixed" in caplog.text
 
 
