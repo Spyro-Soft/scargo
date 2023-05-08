@@ -16,7 +16,9 @@ def extract_namespaces(cursor: Cursor, filename: str) -> List[NamespaceDescripto
         NamespaceDescriptor(descendant.spelling)
         for descendant in cursor.walk_preorder()
         if descendant.kind == CursorKind.NAMESPACE
-        and descendant.location.file == filename
+        # remove type ignore after fix is relased:
+        # https://github.com/tgockel/types-clang/issues/10
+        and descendant.location.file.name == filename  # type: ignore[attr-defined]
     ]
 
 
@@ -27,7 +29,7 @@ def extract_classes(cursor: Cursor, filename: str) -> List[ClassDescriptor]:
         )
         for descendant in cursor.walk_preorder()
         if descendant.kind == CursorKind.CLASS_DECL
-        and descendant.location.file == filename
+        and descendant.location.file.name == filename  # type: ignore[attr-defined]
     ]
 
 
@@ -36,7 +38,7 @@ def extract_includes(cursor: Cursor, filename: str) -> List[IncludeDescriptor]:
         IncludeDescriptor(descendant.displayname)
         for descendant in cursor.walk_preorder()
         if descendant.kind == CursorKind.INCLUSION_DIRECTIVE
-        and descendant.location.file == filename
+        and descendant.location.file.name == filename  # type: ignore[attr-defined]
     ]
 
 
