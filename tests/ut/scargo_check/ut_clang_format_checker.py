@@ -9,14 +9,14 @@ from scargo.config import Config
 from tests.ut.utils import get_log_data
 
 CLANG_FORMAT_COMMAND = [
-    "clang-format",
+    "/usr/bin/clang-format",
     "--style=file",
     "--dry-run",
     "-Werror",
     "foo/bar.hpp",
 ]
 
-CLANG_FORMAT_FIX_COMMAND = ["clang-format", "-style=file", "-i", "foo/bar.hpp"]
+CLANG_FORMAT_FIX_COMMAND = ["/usr/bin/clang-format", "-style=file", "-i", "foo/bar.hpp"]
 
 CLANG_FORMAT_ERROR_OUTPUT = "clang-format error!"
 

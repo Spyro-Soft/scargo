@@ -224,14 +224,15 @@ def flash(
     ),
     port: Optional[str] = Option(
         None,
-        help="port where the target device of the command is connected to, e.g. /dev/ttyUSB0",
+        help="(esp32 only) port where the target device of the command is connected to, e.g. /dev/ttyUSB0",
     ),
+    no_erase: bool = Option(False, help="(stm32 only) Don't erase target memory"),
     base_dir: Optional[Path] = BASE_DIR_OPTION,
 ) -> None:
-    """Flash the target (only available for esp32 for now)."""
+    """Flash the target."""
     if base_dir:
         os.chdir(base_dir)
-    scargo_flash(app, file_system, flash_profile, port)
+    scargo_flash(app, file_system, flash_profile, port, not no_erase)
 
 
 ###############################################################################

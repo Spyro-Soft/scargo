@@ -38,6 +38,8 @@ This section describes possible options which can be set in the scargo.toml file
 
 **in-repo-conan-cache** = (bool) (If set to true conan cache is placed in the repo root - so it persists)
 
+**max-build-jobs** = (int) (maximum number of concurrent processes to use when building; passed to cmake as --parallel)
+
 [project.cmake-variables]
 -------------------------
 
@@ -135,9 +137,9 @@ key-value pairs of short names and conan remote urls, e.g.
 
     conancenter = "https://center.conan.io"
 
-Applicable for esp32 only
--------------------------
 [esp32]
+-------------------------
+(Applicable for esp32 only)
 
 **partitions** = (string list) (partitions e.g ["nvs,      data, nvs,     0x9000,  0x4000,",
 
@@ -151,9 +153,10 @@ Applicable for esp32 only
 
     "spiffs,   data, spiffs,  ,        0x6000,"])
 
-Applicable for stm32 only
--------------------------
 [stm32]
+-------------------------
+(Applicable for stm32 only)
+
 **chip** = (string)
 
 **flash-start** = 0x08000000

@@ -113,7 +113,7 @@ def scargo_docker_exec(docker_opts: List[str]) -> None:
 
 def _get_docker_path(project_path: Path) -> Path:
     # do not rebuild dockers in the docker
-    if Path(project_path, ".dockerenv").exists():
+    if Path("/.dockerenv").exists():
         logger.error("Cannot used docker command inside the docker container.")
         sys.exit(1)
     return Path(project_path, ".devcontainer")

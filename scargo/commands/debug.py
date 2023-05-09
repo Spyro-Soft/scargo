@@ -85,6 +85,8 @@ class _ScargoDebug:
 
     def _debug_stm32(self) -> None:
         chip_script = f"target/{self._chip[:7].lower()}x.cfg"
+        if not Path("/usr/share/openocd/scripts", chip_script).exists():
+            chip_script = f"target/{self._chip[:7].lower()}.cfg"
         openocd_args = [
             "-f",
             "interface/stlink-v2-1.cfg",

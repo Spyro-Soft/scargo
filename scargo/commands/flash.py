@@ -14,18 +14,25 @@ logger = get_logger()
 
 
 def scargo_flash(
-    app: bool, fs: bool, flash_profile: str, port: Optional[str] = None
+    app: bool,
+    fs: bool,
+    flash_profile: str,
+    port: Optional[str] = None,
+    erase_memory: bool = True,
 ) -> None:
     config = prepare_config()
     target = config.project.target
 
-    if port and target.family != "esp32":
-        logger.error("--port option is only supported for esp32 projects.")
+    if port and (target.family != "esp32" and target.family != "stm32"):
+        logger.error("--port option is only supported for esp32 and stm32 projects.")
+        sys.exit(1)
+    if not erase_memory and target.family != "stm32":
+        logger.error("--no-erase option is only supported for stm32 projects.")
         sys.exit(1)
     if target.family == "esp32":
         flash_esp32(config, app=app, fs=fs, flash_profile=flash_profile, port=port)
     elif target.family == "stm32":
-        flash_stm32(config, flash_profile)
+        flash_stm32(config, flash_profile, erase_memory, port=port)
     else:
         logger.error("Flash command not supported for this target yet.")
 
@@ -45,36 +52,46 @@ def flash_esp32(
         if app:
             app_name = config.project.name
             app_path = out_dir / f"{app_name}.bin"
-            command = [
-                "parttool.py",
-                "write_partition",
-                "--partition-name=ota_0",
-                f"--input={app_path}",
-            ]
+            command = ["parttool.py"]
             if port:
                 command.append(f"--port={port}")
-            subprocess.check_call(command, cwd=project_path)
+            command.extend(
+                [
+                    "write_partition",
+                    "--partition-name=ota_0",
+                    f"--input={app_path}",
+                ]
+            )
+            subprocess.check_call(command)
         elif fs:
             fs_path = config.project_root / "build" / "spiffs.bin"
-            command = [
-                "parttool.py",
-                "write_partition",
-                "--partition-name=spiffs",
-                f"--input={fs_path}",
-            ]
+            command = ["parttool.py"]
             if port:
                 command.append(f"--port={port}")
-            subprocess.check_call(command, cwd=project_path)
+            command.extend(
+                [
+                    "write_partition",
+                    "--partition-name=spiffs",
+                    f"--input={fs_path}",
+                ]
+            )
+            subprocess.check_call(command)
         else:
-            command = ["esptool.py", "--chip", target.id, "write_flash", "@flash_args"]
+            command = ["esptool.py"]
             if port:
                 command.append(f"--port={port}")
+            command.extend(["--chip", target.id, "write_flash", "@flash_args"])
             subprocess.check_call(command, cwd=out_dir)
     except subprocess.CalledProcessError:
         logger.error("%s fail", command)
 
 
-def flash_stm32(config: Config, flash_profile: str = "Debug") -> None:
+def flash_stm32(
+    config: Config,
+    flash_profile: str = "Debug",
+    erase_memory: bool = True,
+    port: Optional[str] = None,
+) -> None:
     project_path = config.project_root
     bin_name = config.project.bin_name
     if not bin_name:
@@ -92,7 +109,15 @@ def flash_stm32(config: Config, flash_profile: str = "Debug") -> None:
         logger.error("Flash start address not found in lock file")
         logger.info("Define flash-start in scargo.toml under stm32 section")
     else:
-        subprocess.check_call(["st-flash", "erase"])
-        subprocess.check_call(
-            ["st-flash", "--reset", "write", str(bin_path), flash_start]
-        )
+        if erase_memory:
+            command = ["st-flash"]
+            if port:
+                command.append(f"--serial={port}")
+            command.append("erase")
+            subprocess.check_call(command)
+
+        command = ["st-flash", "--reset"]
+        if port:
+            command.append(f"--serial={port}")
+        command.extend(["write", str(bin_path), flash_start])
+        subprocess.check_call(command)
