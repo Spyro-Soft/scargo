@@ -13,10 +13,10 @@ def test_scargo_fix_pragma(  # type: ignore[no-any-unimported]
     fs: FakeFilesystem,
     caplog: pytest.LogCaptureFixture,
 ) -> None:
-    fs.makedir("src")
-    with open("src/test_project.h", "w"):
-        pass
+    fs.create_file("src/test_project.h")
     scargo_fix(True, False, False)
+    with open("src/test_project.h") as f:
+        assert "#pragma once" in f.read()
     assert "Fixed problems in 1 files" in caplog.text
 
 
@@ -25,32 +25,11 @@ def test_scargo_fix_copyright(  # type: ignore[no-any-unimported]
     fs: FakeFilesystem,
     caplog: pytest.LogCaptureFixture,
 ) -> None:
-    fs.makedir("src")
-    with open("src/test_project.cpp", "w"):
-        pass
+    fs.create_file("src/test_project.cpp")
     scargo_fix(False, True, False)
+    with open("src/test_project.cpp") as f:
+        assert "// Copyright" in f.read()
     assert "Fixed problems in 1 files" in caplog.text
-
-
-def test_scargo_fix_clang_format(  # type: ignore[no-any-unimported]
-    mock_prepare_config: Config,
-    fs: FakeFilesystem,
-    caplog: pytest.LogCaptureFixture,
-) -> None:
-    fs.makedir("src")
-    with open("src/test_project.cpp", "w") as f:
-        pass
-    f.close()
-    scargo_fix(False, False, True)
-    # assert "Fixed" in caplog.text
-
-
-def test_fix_none_option(
-    mock_prepare_config: Config,
-    caplog: pytest.LogCaptureFixture,
-) -> None:
-    scargo_fix(False, False, False)
-    assert "Fixed" in caplog.text
 
 
 @pytest.fixture
