@@ -97,12 +97,22 @@ if [ -f "$BALTIMORE_CERT" ]; then
     echo "$BALTIMORE_CERT already exists."
 else
     wget https://cacerts.digicert.com/BaltimoreCyberTrustRoot.crt.pem -O ${OUTPUT_DIR}/baltimore.pem
+    if [ $? -ne 0 ]; then
+        echo -e "${RED} Failed to download Baltimore certificate" >&2
+        rm ${OUTPUT_DIR}/baltimore.pem
+        exit 1
+    fi
 fi
 
 if [ -f "$DIGIROOT_CERT" ]; then
     echo "$DIGIROOT_CERT already exists."
 else
     wget https://cacerts.digicert.com/DigiCertGlobalRootG2.crt.pem -O ${OUTPUT_DIR}/digiroot.pem
+    if [ $? -ne 0 ]; then
+        echo -e "${RED} Failed to download Digiroot certificate" >&2
+        rm ${OUTPUT_DIR}/digiroot.pem
+        exit 1
+    fi
 fi
 
 cat ${OUTPUT_DIR}/baltimore.pem >> ${OUTPUT_DIR}/ca_temp.pem
