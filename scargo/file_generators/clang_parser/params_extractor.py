@@ -25,7 +25,9 @@ def extract_namespaces(cursor: Cursor, filename: str) -> List[NamespaceDescripto
 def extract_classes(cursor: Cursor, filename: str) -> List[ClassDescriptor]:
     return [
         ClassDescriptor(
-            cursor.spelling, f"Mock{cursor.spelling}", _extract_cxx_methods(cursor)
+            descendant.spelling,
+            f"Mock{descendant.spelling}",
+            _extract_cxx_methods(descendant),
         )
         for descendant in cursor.walk_preorder()
         if descendant.kind == CursorKind.CLASS_DECL
