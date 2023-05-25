@@ -93,12 +93,13 @@ def flash_stm32(
     port: Optional[str] = None,
 ) -> None:
     project_path = config.project_root
-    bin_name = config.project.bin_name
-    if not bin_name:
-        logger.error("No bin_name in config!")
-        sys.exit(1)
-    bin_name = bin_name.lower()
-    bin_path = project_path / "build" / flash_profile / "bin" / f"{bin_name}.bin"
+    bin_path = (
+        project_path
+        / "build"
+        / flash_profile
+        / "bin"
+        / f"{config.project.name.lower()}.bin"
+    )
 
     flash_start = hex(config.get_stm32_config().flash_start)
 
