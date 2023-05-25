@@ -312,6 +312,8 @@ class ClangTidyChecker(CheckerFixer):
                 )
         if file_path.suffix == ".h":
             cmd.extend(["--", "-x", "c++"])
+        if "--" not in cmd and self._config.project.target.family != "esp32":
+            cmd.append("--")
         try:
             subprocess.check_output(cmd)
         except subprocess.CalledProcessError as e:
