@@ -31,6 +31,16 @@ This should run
     ctest --verbose.
 
 ::
+    --profile Arg
+
+CMake profile to use. Default: Debug
+
+::
+    --detailed-coverage
+
+Generate detailed coverage HTML files
+
+::
 
     -B, --base-dir Arg
 

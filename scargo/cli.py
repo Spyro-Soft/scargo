@@ -407,12 +407,15 @@ def run(
 def test(
     verbose: bool = Option(False, "--verbose", "-v", help="Verbose mode."),
     profile: str = Option("Debug", "--profile", help="CMake profile to use"),
+    detailed_coverage: bool = Option(
+        False, help="Generate detailed coverage HTML files"
+    ),
     base_dir: Optional[Path] = BASE_DIR_OPTION,
 ) -> None:
     """Compile and run all tests in directory `test`."""
     if base_dir:
         os.chdir(base_dir)
-    scargo_test(verbose, profile)
+    scargo_test(verbose, profile, detailed_coverage)
 
 
 ###############################################################################
