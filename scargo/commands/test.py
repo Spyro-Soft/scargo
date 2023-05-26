@@ -127,8 +127,7 @@ def run_it(config: Config, verbose: bool) -> None:
         ".",
         "--txt",
         "it-coverage.txt",
-        "--html",
-        "it-coverage.html",
+        "--html=it-coverage.html",
     ]
 
     gcov_executable = config.tests.gcov_executable
