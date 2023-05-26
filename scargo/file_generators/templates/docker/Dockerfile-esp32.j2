@@ -1,5 +1,6 @@
 # esp-idf dependencies, https://docs.espressif.com/projects/esp-idf/en/latest/esp32/get-started/linux-macos-setup.html
-RUN apt update --fix-missing && apt -y --no-install-recommends install git wget flex bison gperf python3 python3-venv cmake ninja-build ccache libffi-dev libssl-dev dfu-util libusb-1.0-0 \
+# libpython2.7 required by xtensa-esp32-elf-gdb
+RUN apt update --fix-missing && apt -y --no-install-recommends install git wget flex bison gperf python3 python3-venv cmake ninja-build ccache libffi-dev libssl-dev dfu-util libusb-1.0-0 libpython2.7 \
     curl openocd && \
     rm -rf /var/lib/apt/lists/*
 
