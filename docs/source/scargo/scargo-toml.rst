@@ -2,7 +2,7 @@
 
 scargo.toml file basis
 ======================
-.. image:: ../_static/scargo_toml_update.gif
+.. image:: ../_static/scargo_toml_update.svg
    :alt: scargo update after scargo.toml modification
    :align: center
 
