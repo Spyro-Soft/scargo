@@ -2,7 +2,7 @@
 
 Creating and working with x86 cpp project
 =========================================
-.. image:: ../_static/scargo_flow_docker.gif
+.. image:: ../_static/scargo_flow_docker.svg
    :alt: scargo x86 flow
    :align: center
 

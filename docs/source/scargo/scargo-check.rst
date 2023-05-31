@@ -2,7 +2,7 @@
 
 Check C/C++ project with static tool analyzers: check
 -----------------------------------------------------
-.. image:: ../_static/scargo_check_fix_docker.gif
+.. image:: ../_static/scargo_check_fix_docker.svg
    :alt: scargo check and fix example
    :align: center
 

@@ -2,7 +2,7 @@
 
 Build C/C++ project: build
 ---------------------------
-.. image:: ../_static/scargo_clean_build_docker.gif
+.. image:: ../_static/scargo_clean_build_docker.svg
    :alt: scargo clean and build example
    :align: center
 

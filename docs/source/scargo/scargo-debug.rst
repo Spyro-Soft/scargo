@@ -2,7 +2,7 @@
 
 Debug C/C++ project binary (x86 and stm32 supported)
 ----------------------------------------------------
-.. image:: ../_static/scargo_debug_docker.gif
+.. image:: ../_static/scargo_debug_docker.svg
    :alt: scargo debug example
    :align: center
 

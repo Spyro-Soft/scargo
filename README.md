@@ -24,7 +24,7 @@ Scargo is available on [pypi](https://pypi.org/project/scargo/), so you can inst
 
 # Working with scargo
 You can find all information on how to work with scargo on official documentation webpage: https://spyro-soft.github.io/scargo/index.html
-![Scargo flow gif](https://raw.githubusercontent.com/Spyro-Soft/scargo/develop/docs/source/_static/scargo_flow_docker.gif)
+![Scargo flow animation](https://raw.githubusercontent.com/Spyro-Soft/scargo/develop/docs/source/_static/scargo_flow_docker.svg)
 
 # Project dependencies
 ## Working with docker (recommended)
