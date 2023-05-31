@@ -15,11 +15,14 @@ from scargo.logger import get_logger
 logger = get_logger()
 
 
-def scargo_test(verbose: bool, profile: str = "Debug") -> None:
+def scargo_test(
+    verbose: bool, profile: str = "Debug", detailed_coverage: bool = False
+) -> None:
     """
     Run test
     :param bool verbose: if verbose
     :param str profile: CMake profile to use
+    :param bool detailed_coverage: Generate detailed coverage HTML files
     """
     config = prepare_config()
 
@@ -61,10 +64,10 @@ def scargo_test(verbose: bool, profile: str = "Debug") -> None:
         sys.exit(1)
 
     # run ut
-    run_ut(config, verbose, test_build_dir)
+    run_ut(config, verbose, test_build_dir, detailed_coverage)
 
 
-def run_ut(config: Config, verbose: bool, cwd: Path) -> None:
+def run_ut(config: Config, verbose: bool, cwd: Path, detailed_coverage: bool) -> None:
     # Run tests.
     cmd: List[Union[str, Path]] = ["ctest"]
 
@@ -75,6 +78,12 @@ def run_ut(config: Config, verbose: bool, cwd: Path) -> None:
         # and we do not want Python to throw exception.
         subprocess.run(cmd, cwd=cwd, check=False)
 
+        output_option = (
+            "--html-details=ut-coverage.details.html"
+            if detailed_coverage
+            else "--html=ut-coverage.html"
+        )
+
         # Run code coverage.
         cmd = [
             "gcovr",
@@ -83,9 +92,9 @@ def run_ut(config: Config, verbose: bool, cwd: Path) -> None:
             ".",
             "-f",
             config.source_dir_path,
-            "--html",
-            "ut-coverage.html",
+            output_option,
         ]
+        print(cmd)
 
         gcov_executable = config.tests.gcov_executable
 
@@ -118,8 +127,7 @@ def run_it(config: Config, verbose: bool) -> None:
         ".",
         "--txt",
         "it-coverage.txt",
-        "--html",
-        "it-coverage.html",
+        "--html=it-coverage.html",
     ]
 
     gcov_executable = config.tests.gcov_executable

@@ -38,7 +38,7 @@ def test_scargo_test(  # type: ignore[no-any-unimported]
     fp.register("conan install tests -if build/tests -sbuild_type=Debug")
     fp.register("conan build tests -bf build/tests")
     fp.register("ctest")
-    fp.register("gcovr -r ut . -f src --html ut-coverage.html")
+    fp.register("gcovr -r ut . -f src --html=ut-coverage.html")
     os.mkdir("tests")
     with open("tests/CMakeLists.txt", "w"):
         pass
@@ -60,8 +60,7 @@ def test_scargo_test(  # type: ignore[no-any-unimported]
         ".",
         "-f",
         Path("src"),
-        "--html",
-        "ut-coverage.html",
+        "--html=ut-coverage.html",
     ]
 
 
