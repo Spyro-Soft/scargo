@@ -2,7 +2,7 @@
 
 Test C/C++ project source code
 ------------------------------
-.. image:: ../_static/scargo_flow_docker.gif
+.. image:: ../_static/scargo_flow_docker.svg
    :alt: scargo x86 flow
    :align: center
 
@@ -29,6 +29,16 @@ This should run
 ::
 
     ctest --verbose.
+
+::
+    --profile Arg
+
+CMake profile to use. Default: Debug
+
+::
+    --detailed-coverage
+
+Generate detailed coverage HTML files
 
 ::
 

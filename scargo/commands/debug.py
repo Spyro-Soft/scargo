@@ -31,12 +31,7 @@ class _ScargoDebug:
             )
             sys.exit(1)
 
-        bin_name = config.project.bin_name
-        bin_path = bin_path or (self._get_bin_path(bin_name) if bin_name else None)
-        if not bin_path:
-            logger.error("No bin_name in config")
-            sys.exit(1)
-        self._bin_path = bin_path
+        self._bin_path = bin_path or self._get_bin_path(config.project.name.lower())
         if not self._bin_path.exists():
             logger.error("Binary %s does not exist", self._bin_path)
             logger.info("Did you run scargo build --profile Debug?")

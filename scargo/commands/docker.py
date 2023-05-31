@@ -72,7 +72,6 @@ def scargo_docker_run(
         subprocess.run(cmd, cwd=docker_path, check=True)
         logger.info("Stop docker environment.")
     except subprocess.CalledProcessError:
-        logger.error("Run docker fail.")
         sys.exit(1)
 
 
@@ -107,7 +106,6 @@ def scargo_docker_exec(docker_opts: List[str]) -> None:
         subprocess.run(cmd, check=True)
         logger.info("Stop exec docker environment.")
     except subprocess.CalledProcessError:
-        logger.error("Exec docker fail.")
         sys.exit(1)
 
 
