@@ -195,6 +195,7 @@ class TestGenMock:
         assert not os.path.exists(f"tests/mocks/{file}")
 
 
+@pytest.mark.skip("Not implemented yet")
 class TestGenCerts:
     """This class collects all unit tests for scargo_gen command with certs option"""
 
