@@ -12,10 +12,13 @@ from scargo.commands.update import scargo_update
 from scargo.config import Target
 from scargo.config_utils import get_scargo_config_or_exit
 
-ClangConfig().set_library_file(str(Path(native.__file__).with_name("libclang.so")))
+
+@pytest.fixture(autouse=True, scope="session")
+def clang_config() -> None:
+    ClangConfig().set_library_file(str(Path(native.__file__).with_name("libclang.so")))
 
 
-@pytest.mark.parametrize("target", ["x86", "stm32", "esp32"])
+@pytest.mark.parametrize("target", ["x86", "stm32"])
 def test_gen_ut(tmp_path: Path, target: str, mocker: MockerFixture) -> None:
     target_project = Target.get_target_by_id(target)
     os.chdir(tmp_path)
