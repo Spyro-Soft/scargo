@@ -54,8 +54,8 @@ def scargo_build(profile: str) -> None:
                 "-if",
                 build_dir,
                 "-pr",
-                f"./.conan/profiles/{config.project.target.family}"
-             ],
+                f"./.conan/profiles/{config.project.target.family}",
+            ],
             cwd=project_dir,
         )
         subprocess.check_call(

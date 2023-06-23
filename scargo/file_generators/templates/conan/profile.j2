@@ -22,11 +22,7 @@ arch=x86_64
 {% endif %}
 arch_build=x86_64
 compiler=gcc
-{% if config.project.target.family == "stm32" %}
 compiler.version=9
-{% else %}
-compiler.version=10
-{% endif %}
 compiler.libcxx=libstdc++
 build_type=Debug
 
