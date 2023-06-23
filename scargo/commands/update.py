@@ -12,7 +12,7 @@ from scargo.commands.docker import scargo_docker_build
 from scargo.config_utils import add_version_to_scargo_lock, get_scargo_config_or_exit
 from scargo.file_generators.cicd_gen import generate_cicd
 from scargo.file_generators.cmake_gen import generate_cmake
-from scargo.file_generators.conan_gen import generate_conanfile
+from scargo.file_generators.conan_gen import generate_conanfile, generate_conanprofile
 from scargo.file_generators.docker_gen import generate_docker_compose
 from scargo.file_generators.env_gen import generate_env
 from scargo.file_generators.readme_gen import generate_readme
@@ -72,6 +72,7 @@ def scargo_update(config_file_path: Path) -> None:
 
     generate_cmake(config)
     generate_conanfile(config)
+    generate_conanprofile(config)
 
     if target.family == "esp32":
         Path(config.source_dir_path, "fs").mkdir(parents=True, exist_ok=True)

@@ -1,0 +1,50 @@
+[settings]
+{% if config.project.target.family == "stm32" %}
+os=baremetal
+{% elif config.project.target.family == "esp32" %}
+{# ESP32 is untested #}
+os=baremetal
+{% elif config.project.target.family == "x86" %}
+os=Linux
+{% endif %}
+os_build=Linux
+{% if config.project.target.family == "stm32" %}
+arch=armv7
+{% elif config.project.target.family == "esp32" %}
+{# ESP32 is untested #}
+{% if config.project.target.id == "esp32" %}
+arch=xtensalx6
+{% elif config.project.target.id in ("esp32s2", "esp32s3") %}
+arch=xtensalx7
+{% endif %}
+{% elif config.project.target.family == "x86" %}
+arch=x86_64
+{% endif %}
+arch_build=x86_64
+compiler=gcc
+{% if config.project.target.family == "stm32" %}
+compiler.version=9
+{% else %}
+compiler.version=10
+{% endif %}
+compiler.libcxx=libstdc++
+build_type=Debug
+
+[conf]
+{% if config.project.cflags %}
+tools.build:cflags="{{ config.project.cflags }}"
+{% endif %}
+{% if config.project.cxxflags %}
+tools.build:cxxflags="{{ config.project.cxxflags }}"
+{% endif %}
+
+{% if config.project.target.family == "stm32" %}
+tools.build.defines:stm32_chip="STM32L496AG"
+tools.build.defines:stm32_toolchain_path="/opt/gcc-arm-none-eabi"
+tools.build.defines:stm32_target_triplet="arm-none-eabi"
+tools.build.defines:cmake_toolchain_file="/opt/stm32-cmake/cmake/stm32_gcc.cmake"
+{% endif %}
+
+[options]
+[build_requires]
+[env]

@@ -8,6 +8,7 @@ class {{ config.project.name|capitalize|replace("-", "") }}Conan(ConanFile):  # 
     description = "{{ config.project.description }}"
     url = "{{ config.project.homepage_url }}"
     generators = "cmake_find_package", "cmake"
+    exports_sources = "src/*", "CMakeLists.txt"
 
     def package(self) -> None:
         self.copy("*", src='build/Debug/bin/', dst='bin', keep_path=False)

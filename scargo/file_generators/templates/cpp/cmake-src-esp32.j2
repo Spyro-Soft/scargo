@@ -2,3 +2,10 @@
 idf_component_register(SRCS "{{config.project.bin_name|lower}}.cpp"
                     INCLUDE_DIRS "")
 {% endif %}
+{% if config.project.lib_name %}
+add_library({{ config.project.lib_name|lower }} STATIC ${CMAKE_CURRENT_SOURCE_DIR}/{{ config.project.lib_name|lower }}.cpp)
+target_include_directories({{ config.project.lib_name|lower }} PRIVATE ${CONAN_INCLUDES})
+configure_file({{ config.project.lib_name|lower }}.h ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/{{ config.project.lib_name|lower }}.h COPYONLY)
+
+target_link_libraries({{ config.project.lib_name|lower }} ${CONAN_LIBS})
+{% endif %}

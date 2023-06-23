@@ -19,3 +19,12 @@ def generate_conanfile(config: Config) -> None:
         template_params={"config": config},
         config=config,
     )
+
+
+def generate_conanprofile(config: Config) -> None:
+    create_file_from_template(
+        "conan/profile.j2",
+        f".conan/profiles/{config.project.target.family}",
+        template_params={"config": config},
+        config=config,
+    )
