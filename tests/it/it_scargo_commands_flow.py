@@ -24,16 +24,20 @@ TEST_PROJECT_NAME = "common_scargo_project"
 TEST_PROJECT_ESP32_NAME = "common_scargo_project_esp32"
 TEST_PROJECT_STM32_NAME = "common_scargo_project_stm32"
 NEW_TEST_PROJECT_NAME = "test_new_project"
-IT_PATH = Path(os.path.dirname(os.path.realpath(__file__)))
-TEST_PROJECT_PATH = Path(IT_PATH, "test_projects", TEST_PROJECT_NAME)
-TEST_PROJECT_ESP32_PATH = Path(IT_PATH, "test_projects", TEST_PROJECT_ESP32_NAME)
-TEST_PROJECT_STM32_PATH = Path(IT_PATH, "test_projects", TEST_PROJECT_STM32_NAME)
+TEST_DATA_PATH = Path(os.path.dirname(os.path.realpath(__file__))).parent.joinpath(
+    "test_data"
+)
+TEST_PROJECT_PATH = Path(TEST_DATA_PATH, "test_projects", TEST_PROJECT_NAME)
+TEST_PROJECT_ESP32_PATH = Path(TEST_DATA_PATH, "test_projects", TEST_PROJECT_ESP32_NAME)
+TEST_PROJECT_STM32_PATH = Path(TEST_DATA_PATH, "test_projects", TEST_PROJECT_STM32_NAME)
 
 
-FIX_TEST_FILES_PATH = Path(IT_PATH, "test_projects", "test_files", "fix_test_files")
+FIX_TEST_FILES_PATH = Path(
+    TEST_DATA_PATH, "test_projects", "test_files", "fix_test_files"
+)
 
 IDF_SDKCONFIG_FILE_PATH = Path(
-    IT_PATH, "test_projects", "test_files", "esp_32_idf_config", "sdkconfig"
+    TEST_DATA_PATH, "test_projects", "test_files", "esp_32_idf_config", "sdkconfig"
 )
 
 PROJECT_CREATION_x86 = [
