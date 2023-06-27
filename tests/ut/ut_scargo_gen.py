@@ -18,8 +18,10 @@ def clang_config() -> None:
     ClangConfig().set_library_file(str(Path(native.__file__).with_name("libclang.so")))
 
 
-@pytest.mark.parametrize("target", ["x86", "stm32"])
+@pytest.mark.parametrize("target", ["x86", "stm32", "esp32"])
 def test_gen_ut(tmp_path: Path, target: str, mocker: MockerFixture) -> None:
+    test_data = Path(__file__).parents[1].joinpath("test_data")
+    os.environ["IDF_PATH"] = Path(test_data, "esp32_spiff").as_posix()
     target_project = Target.get_target_by_id(target)
     os.chdir(tmp_path)
     project_name = "test_project_gen_ut"
@@ -42,7 +44,7 @@ def test_gen_ut(tmp_path: Path, target: str, mocker: MockerFixture) -> None:
         profile="Debug",
         gen_ut=h_file_path,
         fs=True,
-        single_bin=True,
+        single_bin=False,
         gen_mock=None,
         certs=None,
         certs_mode=None,
