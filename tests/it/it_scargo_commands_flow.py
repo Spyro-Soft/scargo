@@ -66,7 +66,16 @@ def new_project_x86() -> None:
     assert result.exit_code == 0
 
     # New
-    result = runner.invoke(cli, ["new", NEW_TEST_PROJECT_NAME, "--target=x86"])
+    result = runner.invoke(
+        cli,
+        [
+            "new",
+            NEW_TEST_PROJECT_NAME,
+            "--target=x86",
+            "--bin=test_new_project",
+            "--lib=test_lib",
+        ],
+    )
     os.chdir(NEW_TEST_PROJECT_NAME)
     bin_name = get_bin_name()
     expected_bin_file_path = Path("src", f"{bin_name.lower()}.cpp")
@@ -81,7 +90,14 @@ def new_project_esp32() -> None:
 
     # New
     result_new_esp32 = runner.invoke(
-        cli, ["new", NEW_TEST_PROJECT_NAME, "--target=esp32"]
+        cli,
+        [
+            "new",
+            NEW_TEST_PROJECT_NAME,
+            "--target=esp32",
+            "--bin=test_bin",
+            "--lib=test_lib",
+        ],
     )
     os.chdir(NEW_TEST_PROJECT_NAME)
     bin_name = get_bin_name()
@@ -97,7 +113,14 @@ def new_project_stm32() -> None:
 
     # New
     result_new_stm32 = runner.invoke(
-        cli, ["new", NEW_TEST_PROJECT_NAME, "--target=stm32"]
+        cli,
+        [
+            "new",
+            NEW_TEST_PROJECT_NAME,
+            "--target=stm32",
+            "--bin=test_bin",
+            "--lib=test_lib",
+        ],
     )
     os.chdir(NEW_TEST_PROJECT_NAME)
     bin_name = get_bin_name()
@@ -200,7 +223,11 @@ def test_project_x86_dev_flow(
 
     # Gen -u
     result = runner.invoke(cli, ["gen", "-u", src_dir])
+    ut_path = Path(os.getcwd(), "tests", "ut")
     assert result.exit_code == 0
+    assert "ut_test_lib.cpp" in os.listdir(
+        ut_path
+    ), f"File 'ut_test_lib.cpp' should be present in {ut_path}. Files under path: {os.listdir(ut_path)}"
 
     # Test
     result = runner.invoke(cli, ["test"])
@@ -264,6 +291,15 @@ def test_project_esp32_dev_flow(
     assert result.exit_code == 0
     assert spiffs_file_path.is_file()
 
+    # Gen -u
+    src_dir = "main"
+    result = runner.invoke(cli, ["gen", "-u", src_dir])
+    ut_path = Path(os.getcwd(), "tests", "ut")
+    assert result.exit_code == 0
+    assert "ut_test_lib.cpp" in os.listdir(
+        ut_path
+    ), f"File 'ut_test_lib.cpp' should be present in {ut_path}. Files under path: {os.listdir(ut_path)}"
+
     # Check
     result = runner.invoke(cli, ["check"])
     assert result.exit_code == 0
@@ -298,6 +334,15 @@ def test_project_stm32_dev_flow(
     result = runner.invoke(cli, ["build"])
     assert build_path.is_dir()
     assert result.exit_code == 0
+
+    # Gen -u
+    src_dir = "src"
+    result = runner.invoke(cli, ["gen", "-u", src_dir])
+    ut_path = Path(os.getcwd(), "tests", "ut")
+    assert result.exit_code == 0
+    assert "ut_test_lib.cpp" in os.listdir(
+        ut_path
+    ), f"File 'ut_test_lib.cpp' should be present in {ut_path}. Files under path: {os.listdir(ut_path)}"
 
     # Check
     result = runner.invoke(cli, ["check"])
