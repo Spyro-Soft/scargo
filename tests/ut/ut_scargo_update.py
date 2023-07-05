@@ -2,8 +2,8 @@ import os
 from pathlib import Path
 
 from pytest_subprocess import FakeProcess
-from scargo.commands.docker import get_docker_command
 
+from scargo.commands.docker import get_docker_command
 from scargo.commands.new import scargo_new
 from scargo.commands.update import scargo_update
 from scargo.config import Target

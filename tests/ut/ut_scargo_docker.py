@@ -85,14 +85,16 @@ def test_docker_run_with_command(
     service_name = f"{scargo_docker_test_setup.project.name}_dev"
     called_subprocess_cmd = get_docker_command()
 
-    called_subprocess_cmd.extend([
-        "run",
-        rm,
-        service_name,
-        "bash",
-        "-c",
-        command,
-    ])
+    called_subprocess_cmd.extend(
+        [
+            "run",
+            rm,
+            service_name,
+            "bash",
+            "-c",
+            command,
+        ]
+    )
     assert mock_subprocess_run.call_args.args[0] == called_subprocess_cmd
 
 
