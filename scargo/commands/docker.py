@@ -3,6 +3,7 @@
 # #
 
 """Handle docker for project"""
+import shutil
 import subprocess
 import sys
 from pathlib import Path
@@ -32,10 +33,11 @@ def scargo_docker_build(
         project_root = get_scargo_config_or_exit().project_root
     docker_path = _get_docker_path(project_root)
 
+    cmd = get_docker_command()
+    cmd.extend(["build", *docker_opts])
+
     try:
-        subprocess.run(
-            ["docker-compose", "build", *docker_opts], cwd=docker_path, check=True
-        )
+        subprocess.run(cmd, cwd=docker_path, check=True)
         logger.info("Initialize docker environment.")
     except subprocess.CalledProcessError:
         logger.error("Build docker fail.")
@@ -59,12 +61,14 @@ def scargo_docker_run(
     docker_path = _get_docker_path(config.project_root)
     project_config_name = config.project.name
 
-    cmd = [
-        "docker-compose",
-        "run",
-        *docker_opts,
-        f"{project_config_name}_dev",
-    ]
+    cmd = get_docker_command()
+    cmd.extend(
+        [
+            "run",
+            *docker_opts,
+            f"{project_config_name}_dev",
+        ]
+    )
     if command:
         cmd.extend(["bash", "-c", command])
 
@@ -115,3 +119,22 @@ def _get_docker_path(project_path: Path) -> Path:
         logger.error("Cannot used docker command inside the docker container.")
         sys.exit(1)
     return Path(project_path, ".devcontainer")
+
+
+def get_docker_command() -> List[str]:
+    """Get docker command
+
+    Returns:
+        List[str]: _description_
+    """
+    command = ["docker-compose"]
+    # Check if docker-compose or docker compose is available
+    if shutil.which("docker-compose"):
+        command = ["docker-compose"]
+    elif shutil.which("docker"):
+        command = ["docker", "compose"]
+    else:
+        logger.error("Neither docker-compose nor docker compose are available.")
+        sys.exit(1)
+
+    return command
