@@ -62,7 +62,7 @@ def run_command_in_docker(  # type: ignore[no-any-unimported]
     docker_tag: str,
     entrypoint: str,
     project_path: Path,
-    path_in_docker: Path,
+    path_in_docker: PurePosixPath,
 ) -> int:
     logger.info(f"Running '{' '.join(command)}' command in docker.")
     container = client.containers.run(
