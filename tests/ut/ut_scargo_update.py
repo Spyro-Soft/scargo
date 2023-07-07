@@ -3,7 +3,7 @@ from pathlib import Path
 
 from pytest_subprocess import FakeProcess
 
-from scargo.commands.docker import get_docker_command
+from scargo.commands.docker import get_docker_compose_command
 from scargo.commands.new import scargo_new
 from scargo.commands.update import scargo_update
 from scargo.config import Target
@@ -48,7 +48,7 @@ def test_update_project_content_with_docker(tmp_path: Path, fp: FakeProcess) -> 
     project_name = "test_project_with_docker"
     scargo_new(project_name, None, None, TARGET_X86, True, False)
     os.chdir(project_name)
-    called_subprocess_cmd = get_docker_command()
+    called_subprocess_cmd = get_docker_compose_command()
     called_subprocess_cmd.extend(["pull"])
     fp.register(called_subprocess_cmd)
     scargo_update(Path("scargo.toml"))
@@ -63,10 +63,10 @@ def test_update_project_content_with_docker__build(
     project_name = "test_project_with_docker"
     scargo_new(project_name, None, None, TARGET_X86, True, False)
     os.chdir(project_name)
-    cmd_pull = get_docker_command()
+    cmd_pull = get_docker_compose_command()
     cmd_pull.extend(["pull"])
     fp.register(cmd_pull, returncode=1)
-    cmd_build = get_docker_command()
+    cmd_build = get_docker_compose_command()
     cmd_build.extend(["build"])
     fp.register(cmd_build)
     scargo_update(Path("scargo.toml"))

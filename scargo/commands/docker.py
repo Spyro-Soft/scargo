@@ -33,7 +33,7 @@ def scargo_docker_build(
         project_root = get_scargo_config_or_exit().project_root
     docker_path = _get_docker_path(project_root)
 
-    cmd = get_docker_command()
+    cmd = get_docker_compose_command()
     cmd.extend(["build", *docker_opts])
 
     try:
@@ -61,7 +61,7 @@ def scargo_docker_run(
     docker_path = _get_docker_path(config.project_root)
     project_config_name = config.project.name
 
-    cmd = get_docker_command()
+    cmd = get_docker_compose_command()
     cmd.extend(
         [
             "run",
@@ -121,7 +121,7 @@ def _get_docker_path(project_path: Path) -> Path:
     return Path(project_path, ".devcontainer")
 
 
-def get_docker_command() -> List[str]:
+def get_docker_compose_command() -> List[str]:
     """Get docker command
 
     Returns:
