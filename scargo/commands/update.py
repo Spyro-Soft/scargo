@@ -8,7 +8,7 @@ import subprocess
 import sys
 from pathlib import Path
 
-from scargo.commands.docker import scargo_docker_build
+from scargo.commands.docker import get_docker_compose_command, scargo_docker_build
 from scargo.config_utils import add_version_to_scargo_lock, get_scargo_config_or_exit
 from scargo.file_generators.cicd_gen import generate_cicd
 from scargo.file_generators.cmake_gen import generate_cmake
@@ -108,8 +108,10 @@ def scargo_update(config_file_path: Path) -> None:
 def pull_docker_image(docker_path: Path) -> bool:
     logger.info("Pulling the image from docker registry...")
     try:
+        cmd = get_docker_compose_command()
+        cmd.extend(["pull"])
         result = subprocess.run(
-            ["docker-compose", "pull"],
+            cmd,
             cwd=docker_path,
             stderr=subprocess.PIPE,
             check=True,
