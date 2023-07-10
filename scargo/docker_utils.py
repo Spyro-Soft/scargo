@@ -1,5 +1,5 @@
 import sys
-from pathlib import Path
+from pathlib import Path, PurePosixPath
 from typing import List
 
 import docker as dock
@@ -25,10 +25,18 @@ def run_scargo_again_in_docker(
     build_env = project_config.build_env
     if build_env != SCARGO_DOCKER_ENV or Path("/.dockerenv").exists():
         return
+
     relative_path = Path.cwd().relative_to(project_path)
-    path_in_docker = Path("/workspace", relative_path)
+    path_in_docker = PurePosixPath("/workspace", relative_path)
 
     cmd_args = sys.argv[1:]
+    try:
+        # Correct base-dir arg for command in docker
+        for idx, val in enumerate(cmd_args):
+            if val == "-B" or val == "--base-dir":
+                cmd_args[idx + 1] = "."
+    except Exception as e:
+        logger.error(e)
 
     entrypoint = ""
     if project_config.target.family == "esp32":
@@ -36,15 +44,6 @@ def run_scargo_again_in_docker(
 
     docker_tag = project_config.docker_image_tag
     client = dock.from_env()
-
-    run_command_in_docker(
-        ["scargo", "version"],
-        client,
-        docker_tag,
-        entrypoint,
-        project_path,
-        path_in_docker,
-    )
 
     status_code = run_command_in_docker(
         ["scargo", *cmd_args],
@@ -63,7 +62,7 @@ def run_command_in_docker(  # type: ignore[no-any-unimported]
     docker_tag: str,
     entrypoint: str,
     project_path: Path,
-    path_in_docker: Path,
+    path_in_docker: PurePosixPath,
 ) -> int:
     logger.info(f"Running '{' '.join(command)}' command in docker.")
     container = client.containers.run(
