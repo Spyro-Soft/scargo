@@ -25,7 +25,12 @@ def scargo_build(profile: str) -> None:
     :param str profile: Profile
     :return: None
     """
+    print("!!!!!!!! Building 1234 etam")
     config = prepare_config()
+
+    if not config.project.lib_name:
+        print("!!!! This is bin")
+    print("!!!!")
 
     project_dir = config.project_root
     if not project_dir:
@@ -51,13 +56,15 @@ def scargo_build(profile: str) -> None:
             cwd=project_dir,
         )
         subprocess.check_call(
-            ["cmake", f"-DCMAKE_BUILD_TYPE={profile}", project_dir],
-            cwd=build_dir,
+            # ["cmake", f"-DCMAKE_BUILD_TYPE={profile}", project_dir],
+            # cwd=build_dir,
+            ["conan", "build", ".", "-bf", build_dir],
+            cwd=project_dir,
         )
-        command = ["cmake", "--build", ".", "--parallel"]
-        if config.project.max_build_jobs is not None:
-            command.append(str(config.project.max_build_jobs))
-        subprocess.check_call(command, cwd=build_dir)
+        # command = ["cmake", "--build", ".", "--parallel"]
+        # if config.project.max_build_jobs is not None:
+        #     command.append(str(config.project.max_build_jobs))
+        # subprocess.check_call(command, cwd=build_dir)
     except subprocess.CalledProcessError:
         logger.error("Unable to build exec file")
         sys.exit(1)
