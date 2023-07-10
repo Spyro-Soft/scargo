@@ -25,7 +25,11 @@ def scargo_build(profile: str) -> None:
     :param str profile: Profile
     :return: None
     """
+    print("!!!!!!!! Building 1234 etam")
     config = prepare_config()
+
+    print("!!!! This is bin")
+    print("!!!!")
 
     project_dir = config.project_root
     if not project_dir:
@@ -46,26 +50,33 @@ def scargo_build(profile: str) -> None:
     conan_add_conancenter()
 
     try:
-        subprocess.check_call(
-            [
-                "conan",
-                "install",
-                ".",
-                "-if",
-                build_dir,
+        if config.project.bin_name and config.project.lib_name:
+            logger.error("Both 'bin_name' and 'lib_name' specified. Please choose one.")
+            sys.exit(1)
+        elif config.project.bin_name:
+            print("Building exe project")
+            subprocess.check_call(
+                ["conan", "install", ".", "-if", build_dir,
                 "-pr",
-                f"./.conan/profiles/{config.project.target.family}",
-            ],
-            cwd=project_dir,
-        )
-        subprocess.check_call(
-            ["cmake", f"-DCMAKE_BUILD_TYPE={profile}", project_dir],
-            cwd=build_dir,
-        )
-        command = ["cmake", "--build", ".", "--parallel"]
-        if config.project.max_build_jobs is not None:
-            command.append(str(config.project.max_build_jobs))
-        subprocess.check_call(command, cwd=build_dir)
+                f"./.conan/profiles/{config.project.target.family}",],
+                cwd=project_dir,
+            )
+            subprocess.check_call(
+                ["conan", "build", ".", "-bf", build_dir],
+                cwd=project_dir,
+            )
+        elif config.project.lib_name:
+            print("Creating lib project")
+            subprocess.check_call(
+                ["conan", "create", ".",
+                "-pr",
+                f"./.conan/profiles/{config.project.target.family}",],
+                cwd=project_dir,
+            )
+        else:
+            logger.error("Project has no 'bin_name' or 'lib_name' specified.")
+            sys.exit(1)
+
     except subprocess.CalledProcessError:
         logger.error("Unable to build exec file")
         sys.exit(1)
