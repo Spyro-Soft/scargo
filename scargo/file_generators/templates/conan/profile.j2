@@ -1,4 +1,28 @@
+[env]
+{% if config.project.target.family == "stm32" %}
+CC=/opt/gcc-arm-none-eabi/bin/arm-none-eabi-gcc
+CXX=/opt/gcc-arm-none-eabi/bin/arm-none-eabi-g++
+{% elif config.project.target.family == "esp32" %}
+CC=/opt/esp-idf/tools/xtensa-esp32-elf/esp-2021r2-patch5-8.4.0/xtensa-esp32-elf/bin/xtensa-esp32-elf-gcc
+CXX=/opt/esp-idf/tools/xtensa-esp32-elf/esp-2021r2-patch5-8.4.0/xtensa-esp32-elf/bin/xtensa-esp32-elf-g++
+{% endif %}
+
+{% if config.project.target.family == "stm32" %}
+STM32_CHIP={{config.stm32.chip}}
+STM32_TOOLCHAIN_PATH=/opt/gcc-arm-none-eabi
+STM32_TARGET_TRIPLET=arm-none-eabi
+{% endif %}
+
+
 [settings]
+compiler=gcc
+compiler.version=9
+compiler.libcxx=libstdc++
+os_build=Linux
+arch_build=x86_64
+
+build_type={{profile}}
+
 {% if config.project.target.family == "stm32" %}
 os=baremetal
 {% elif config.project.target.family == "esp32" %}
@@ -7,7 +31,6 @@ os=baremetal
 {% elif config.project.target.family == "x86" %}
 os=Linux
 {% endif %}
-os_build=Linux
 {% if config.project.target.family == "stm32" %}
 arch=armv7
 {% elif config.project.target.family == "esp32" %}
@@ -20,11 +43,7 @@ arch=xtensalx7
 {% elif config.project.target.family == "x86" %}
 arch=x86_64
 {% endif %}
-arch_build=x86_64
-compiler=gcc
-compiler.version=9
-compiler.libcxx=libstdc++
-build_type=Debug
+build_type={{profile}}
 
 [conf]
 {% if config.project.cflags %}
@@ -35,12 +54,11 @@ tools.build:cxxflags="{{ config.project.cxxflags }}"
 {% endif %}
 
 {% if config.project.target.family == "stm32" %}
-tools.build.defines:stm32_chip="STM32L496AG"
-tools.build.defines:stm32_toolchain_path="/opt/gcc-arm-none-eabi"
-tools.build.defines:stm32_target_triplet="arm-none-eabi"
-tools.build.defines:cmake_toolchain_file="/opt/stm32-cmake/cmake/stm32_gcc.cmake"
+tools.cmake.cmaketoolchain:user_toolchain=["/workspace/third-party/stm32-cmake/cmake/stm32_gcc.cmake"]
+{% elif config.project.target.family == "esp32" %}
+tools.cmake.cmaketoolchain:user_toolchain=["/opt/esp-idf/tools/cmake/toolchain-esp32.cmake"]
 {% endif %}
+tools.build:jobs={config.project.jobs}
 
 [options]
 [build_requires]
-[env]

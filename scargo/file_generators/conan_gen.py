@@ -22,9 +22,11 @@ def generate_conanfile(config: Config) -> None:
 
 
 def generate_conanprofile(config: Config) -> None:
-    create_file_from_template(
-        "conan/profile.j2",
-        f".conan/profiles/{config.project.target.family}",
-        template_params={"config": config},
-        config=config,
-    )
+    profiles = list(config.profiles.keys())
+    for profile in profiles:
+        create_file_from_template(
+            "conan/profile.j2",
+            f".conan/profiles/{config.project.target.family}_{profile}",
+            template_params={"config": config, "profile": profile},
+            config=config,
+        )
