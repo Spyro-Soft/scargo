@@ -59,15 +59,10 @@ def scargo_build(profile: str) -> None:
             cwd=project_dir,
         )
         subprocess.check_call(
-            [
-                "conan",
-                "build",
-                ".",
-                "-bf",
-                build_dir],
+            ["conan", "build", ".", "-bf", build_dir],
             cwd=project_dir,
         )
-        
+
     except subprocess.CalledProcessError:
         logger.error("Unable to build exec file")
         sys.exit(1)
