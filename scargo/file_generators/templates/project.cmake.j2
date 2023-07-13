@@ -11,7 +11,5 @@ project( {{ config.project.name }}
     LANGUAGES C CXX ASM
 )
 
-if(EXISTS ${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
-    include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
-    conan_basic_setup()
-endif()
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)

@@ -3,8 +3,8 @@
 CC=/opt/gcc-arm-none-eabi/bin/arm-none-eabi-gcc
 CXX=/opt/gcc-arm-none-eabi/bin/arm-none-eabi-g++
 {% elif config.project.target.family == "esp32" %}
-CC=/opt/esp-idf/tools/xtensa-esp32-elf/esp-2021r2-patch5-8.4.0/xtensa-esp32-elf/bin/xtensa-esp32-elf-gcc
-CXX=/opt/esp-idf/tools/xtensa-esp32-elf/esp-2021r2-patch5-8.4.0/xtensa-esp32-elf/bin/xtensa-esp32-elf-g++
+CC=$ENV{IDF_PATH}/tools/xtensa-esp32-elf/esp-2021r2-patch5-8.4.0/xtensa-esp32-elf/bin/xtensa-esp32-elf-gcc
+CXX=$ENV{IDF_PATH}/tools/xtensa-esp32-elf/esp-2021r2-patch5-8.4.0/xtensa-esp32-elf/bin/xtensa-esp32-elf-g++
 {% endif %}
 
 {% if config.project.target.family == "stm32" %}
@@ -46,19 +46,18 @@ arch=x86_64
 build_type={{profile}}
 
 [conf]
-{% if config.project.cflags %}
-tools.build:cflags="{{ config.project.cflags }}"
-{% endif %}
+tools.build:cflags=["{{ config.project.cflags if config.project.cflags}} {{config.profiles.get(profile).cflags if config.profiles.get(profile).cflags}}"]
 {% if config.project.cxxflags %}
-tools.build:cxxflags="{{ config.project.cxxflags }}"
+tools.build:cxxflags=["{{ config.project.cxxflags if config.project.cxxflags }} {{ config.profiles.get(profile).cxxflags if config.profiles.get(profile).cxxflags }}"]
 {% endif %}
-
 {% if config.project.target.family == "stm32" %}
 tools.cmake.cmaketoolchain:user_toolchain=["/workspace/third-party/stm32-cmake/cmake/stm32_gcc.cmake"]
 {% elif config.project.target.family == "esp32" %}
 tools.cmake.cmaketoolchain:user_toolchain=["/opt/esp-idf/tools/cmake/toolchain-esp32.cmake"]
 {% endif %}
-tools.build:jobs={config.project.jobs}
+{% if config.project.max_build_jobs != None %}
+tools.build:jobs={{config.project.max_build_jobs}}
+{% endif %}
 
 [options]
 [build_requires]

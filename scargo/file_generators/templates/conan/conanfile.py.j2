@@ -1,5 +1,6 @@
-from conans import CMake, ConanFile, tools  # type: ignore[misc, no-any-unimported]
-
+from conan import ConanFile
+from conan.tools.cmake import CMakeToolchain, CMake
+from conans import tools  # type: ignore[misc, no-any-unimported]
 
 class {{ config.project.name|capitalize|replace("-", "") }}Conan(ConanFile):  # type: ignore[misc, no-any-unimported]
     name = "{{ config.project.name }}"
@@ -7,8 +8,12 @@ class {{ config.project.name|capitalize|replace("-", "") }}Conan(ConanFile):  # 
     settings = "os", "compiler", "build_type", "arch"
     description = "{{ config.project.description }}"
     url = "{{ config.project.homepage_url }}"
-    generators = "cmake_find_package", "cmake"
+    generators = "CMakeDeps"
     exports_sources = "src/*", "CMakeLists.txt"
+
+    def generate(self):
+        tc = CMakeToolchain(self)
+        tc.generate()
 
     def package(self) -> None:
         self.copy("*", src='build/Debug/bin/', dst='bin', keep_path=False)
