@@ -53,7 +53,8 @@ tools.build:cxxflags=["{{ config.project.cxxflags if config.project.cxxflags }} 
 {% if config.project.target.family == "stm32" %}
 tools.cmake.cmaketoolchain:user_toolchain=["/workspace/third-party/stm32-cmake/cmake/stm32_gcc.cmake"]
 {% elif config.project.target.family == "esp32" %}
-tools.cmake.cmaketoolchain:user_toolchain=["/opt/esp-idf/tools/cmake/toolchain-esp32.cmake"]
+tools.cmake.cmaketoolchain:toolchain_file=/opt/esp-idf/tools/cmake/toolchain-esp32.cmake
+tools.cmake.cmaketoolchain:generator=Ninja
 {% endif %}
 {% if config.project.max_build_jobs != None %}
 tools.build:jobs={{config.project.max_build_jobs}}
