@@ -50,7 +50,7 @@ class Config(BaseModel):
             raise ConfigError("No [esp32] section in config")
         return self.esp32
 
-    @root_validator
+    @root_validator  # type: ignore
     def validate_special_configs(  # pylint: disable=no-self-argument
         cls, values: Dict[str, Any]
     ) -> Dict[str, Any]:
@@ -225,4 +225,5 @@ Esp32Config.update_forward_refs()
 def parse_config(config_file_path: Path) -> Config:
     config_obj = toml.load(config_file_path)
     config_obj["project_root"] = config_file_path.parent.absolute()
-    return Config.parse_obj(config_obj)
+    config: Config = Config.parse_obj(config_obj)
+    return config

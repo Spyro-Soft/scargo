@@ -149,7 +149,7 @@ def coppy_test_project_stm32(tmpdir_factory: TempdirFactory) -> Path:
     return project_path
 
 
-@pytest.fixture()
+@pytest.fixture(scope="session")
 def new_project_x86(tmpdir_factory: TempdirFactory) -> Optional[Path]:
     tmp_path = tmpdir_factory.mktemp("new_test_project_x86")
     os.chdir(tmp_path)
@@ -170,7 +170,7 @@ def new_project_x86(tmpdir_factory: TempdirFactory) -> Optional[Path]:
     return get_project_root_or_none()
 
 
-@pytest.fixture()
+@pytest.fixture(scope="session")
 def new_project_esp32(tmpdir_factory: TempdirFactory) -> Optional[Path]:
     tmp_path = tmpdir_factory.mktemp("new_test_project_esp32")
     os.chdir(tmp_path)
@@ -191,7 +191,7 @@ def new_project_esp32(tmpdir_factory: TempdirFactory) -> Optional[Path]:
     return get_project_root_or_none()
 
 
-@pytest.fixture()
+@pytest.fixture(scope="session")
 def new_project_stm32(tmpdir_factory: TempdirFactory) -> Optional[Path]:
     tmp_path = tmpdir_factory.mktemp("new_test_project_stm32")
     os.chdir(tmp_path)

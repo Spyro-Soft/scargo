@@ -68,6 +68,8 @@ dev = [
     "types-clang==0.14.3",
     "types-toml",
     "unittest-xml-reporting",
+    "pyopenssl",
+    "types-openssl-python"
 ]
 doc = [
     "recommonmark",

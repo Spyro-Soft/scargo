@@ -1,10 +1,12 @@
 import os
+import shutil
 from pathlib import Path
 from typing import Dict
 
 import pytest
 from clang import native  # type: ignore[attr-defined]
 from clang.cindex import Config as cindexConfig
+from OpenSSL import crypto
 from pytest_mock import MockerFixture
 
 from scargo.commands.gen import scargo_gen
@@ -16,6 +18,13 @@ NAME_OF_TEST_NO_EXTENSION_FILE = "test_dummy_no_ext_file"
 NESTED_LIB_FILE_LOCATION = "libs/test_lib/"
 
 TEST_DEVICE_ID = "com.example.my.solution:gw-01:da:device:ZWave:CA0D6357%2F4"
+TEST_DEVICE_ID_2 = "com.example.my.solution:gw-01:da:device:ZWave:AAAA1111%1A1"
+TEST_DEVICE_ID_3 = "com.example.my.solution:gw-01:da:device:ZWave:BBBB2222%2B2"
+
+CERTS_DIR = "build/certs"
+FS_DIR = "build/fs"
+
+CUSTOM_CERTS_DIR = "custom_certs"
 
 cindexConfig().set_library_file(str(Path(native.__file__).with_name("libclang.so")))
 
@@ -41,7 +50,12 @@ def project_add_extra_test_files(project_src_path: Path) -> None:
 @pytest.mark.parametrize(
     "test_project_data",
     [
-        {"proj_path": "coppy_test_project", "src_files_dir": "src"},
+        pytest.param(
+            {"proj_path": "coppy_test_project", "src_files_dir": "src"},
+            marks=pytest.mark.xfail(
+                reason="Test project do not contain any .h nor .hpp file"
+            ),
+        ),
         {"proj_path": "coppy_test_project_esp32", "src_files_dir": "main"},
         {"proj_path": "coppy_test_project_stm32", "src_files_dir": "src"},
         {"proj_path": "new_project_x86", "src_files_dir": "src"},
@@ -209,16 +223,378 @@ def test_gen_mock_for_unexpected_extension_file(
     assert not os.path.exists(f"tests/mocks/{file}")
 
 
-@pytest.mark.skip("Not implemented yet")
+@pytest.mark.parametrize(
+    "test_project_data",
+    [
+        {"proj_path": "coppy_test_project", "src_files_dir": "src"},
+        {"proj_path": "coppy_test_project_esp32", "src_files_dir": "main"},
+        {"proj_path": "coppy_test_project_stm32", "src_files_dir": "src"},
+        {"proj_path": "new_project_x86", "src_files_dir": "src"},
+        {"proj_path": "new_project_esp32", "src_files_dir": "main"},
+        {"proj_path": "new_project_stm32", "src_files_dir": "src"},
+    ],
+    ids=[
+        "copied_proj",
+        "copied_esp32_proj",
+        "copied_stm32_proj",
+        "new_project_x86",
+        "new_project_esp32",
+        "new_project_stm32",
+    ],
+    scope="class",
+)
 class TestGenCerts:
     """This class collects all unit tests for scargo_gen command with certs option"""
 
-    def test_en_certs_simple(
+    def test_gen_certs_simple(
         self,
         request: pytest.FixtureRequest,
-        coppy_test_project_stm32: Path,
+        test_project_data: Dict[str, str],
         mocker: MockerFixture,
-        file: str,
     ) -> None:
         """This test simply check if command gen certs create certs files"""
-        pass
+        proj_path = request.getfixturevalue(test_project_data["proj_path"])
+        os.chdir(proj_path)
+
+        # remove directory with certs if already present
+        if os.path.exists(CERTS_DIR):
+            shutil.rmtree(CERTS_DIR)
+        if os.path.exists(FS_DIR):
+            shutil.rmtree(FS_DIR)
+
+        assert not os.path.exists(CERTS_DIR)
+        assert not os.path.exists(FS_DIR)
+
+        mocker.patch(
+            f"{scargo_gen.__module__}.prepare_config",
+            return_value=get_scargo_config_or_exit(),
+        )
+        scargo_gen(
+            profile="Debug",
+            gen_ut=None,
+            gen_mock=None,
+            certs=TEST_DEVICE_ID,
+            certs_mode=None,
+            certs_input=None,
+            certs_passwd=None,
+            fs=False,
+            single_bin=False,
+        )
+        # test if expected cert files was generated
+        assert os.path.exists(FS_DIR)
+        assert os.path.exists(CERTS_DIR)
+
+        assert os.path.exists(f"{FS_DIR}/ca.pem")
+        assert os.path.exists(f"{FS_DIR}/device_cert.pem")
+        assert os.path.exists(f"{FS_DIR}/device_priv_key.pem")
+
+        assert os.path.exists(f"{CERTS_DIR}/azure")
+        assert os.path.exists(f"{CERTS_DIR}/azure/{TEST_DEVICE_ID}-root-ca.pem")
+
+        # other files in certs dir
+        assert os.path.exists(f"{CERTS_DIR}/baltimore.pem")
+        assert os.path.exists(f"{CERTS_DIR}/ca.pem")
+        assert os.path.exists(f"{CERTS_DIR}/digiroot.pem")
+        assert os.path.exists(f"{CERTS_DIR}/index.txt")
+        assert os.path.exists(f"{CERTS_DIR}/index.txt.attr")
+        assert os.path.exists(f"{CERTS_DIR}/index.txt.attr.old")
+        assert os.path.exists(f"{CERTS_DIR}/index.txt.old")
+        assert os.path.exists(f"{CERTS_DIR}/serial")
+        assert os.path.exists(f"{CERTS_DIR}/serial.old")
+        #
+        assert os.path.exists(f"{CERTS_DIR}/certs")
+        assert os.path.exists(
+            f"{CERTS_DIR}/certs/azure-iot-test-only.chain.ca.cert.pem"
+        )
+        assert os.path.exists(
+            f"{CERTS_DIR}/certs/azure-iot-test-only.intermediate.cert.pem"
+        )
+        assert os.path.exists(f"{CERTS_DIR}/certs/azure-iot-test-only.root.ca.cert.pem")
+        assert os.path.exists(f"{CERTS_DIR}/certs/iot-device.cert.pem")
+        assert os.path.exists(f"{CERTS_DIR}/certs/iot-device.cert.pfx")
+
+        assert os.path.exists(f"{CERTS_DIR}/csr")
+        assert os.path.exists(
+            f"{CERTS_DIR}/csr/azure-iot-test-only.intermediate.csr.pem"
+        )
+        assert os.path.exists(f"{CERTS_DIR}/csr/iot-device.csr.pem")
+
+        assert os.path.exists(f"{CERTS_DIR}/intermediateCerts")
+
+        assert os.path.exists(f"{CERTS_DIR}/newcerts")
+        assert os.path.exists(f"{CERTS_DIR}/newcerts/01.pem")
+        assert os.path.exists(f"{CERTS_DIR}/newcerts/02.pem")
+
+        assert os.path.exists(f"{CERTS_DIR}/private")
+        assert os.path.exists(
+            f"{CERTS_DIR}/private/azure-iot-test-only.intermediate.key.pem"
+        )
+        assert os.path.exists(
+            f"{CERTS_DIR}/private/azure-iot-test-only.root.ca.key.pem"
+        )
+        assert os.path.exists(f"{CERTS_DIR}/private/iot-device.key.pem")
+
+    def test_gen_certs_mode_device(
+        self,
+        request: pytest.FixtureRequest,
+        test_project_data: Dict[str, str],
+        mocker: MockerFixture,
+    ) -> None:
+        """This test check if command gen certs with certs_mode='device' will generate device certs files for
+        new device id"""
+        proj_path = request.getfixturevalue(test_project_data["proj_path"])
+        os.chdir(proj_path)
+
+        # some files need to be present before we regenerate certs for device
+        if not os.path.exists(f"{CERTS_DIR}/index.txt"):
+            pytest.fail(
+                "Preconditions not meet, please generate all certificates as precondition"
+            )
+
+        # removing files which should be regenerated
+        # from build/certs dir
+        if os.path.exists(f"{CERTS_DIR}/ca.pem"):
+            os.remove(f"{CERTS_DIR}/ca.pem")
+        if os.path.exists(f"{CERTS_DIR}/certs/iot-device.cert.pem"):
+            os.remove(f"{CERTS_DIR}/certs/iot-device.cert.pem")
+        if os.path.exists(f"{CERTS_DIR}/private/iot-device.key.pem"):
+            os.remove(f"{CERTS_DIR}/private/iot-device.key.pem")
+        # from build/fs dir
+        if os.path.exists(f"{FS_DIR}/ca.pem"):
+            os.remove(f"{FS_DIR}/ca.pem")
+        if os.path.exists(f"{FS_DIR}/device_cert.pem"):
+            os.remove(f"{FS_DIR}/device_cert.pem")
+        if os.path.exists(f"{FS_DIR}/device_priv_key.pem"):
+            os.remove(f"{FS_DIR}/device_priv_key.pem")
+
+        mocker.patch(
+            f"{scargo_gen.__module__}.prepare_config",
+            return_value=get_scargo_config_or_exit(),
+        )
+        # generate keys for new device
+        scargo_gen(
+            profile="Debug",
+            gen_ut=None,
+            gen_mock=None,
+            certs=TEST_DEVICE_ID_2,
+            certs_mode="device",
+            certs_input=None,
+            certs_passwd=None,
+            fs=False,
+            single_bin=False,
+        )
+
+        assert os.path.exists(f"{CERTS_DIR}/ca.pem")
+        assert os.path.exists(f"{CERTS_DIR}/certs/iot-device.cert.pem")
+        assert os.path.exists(f"{CERTS_DIR}/private/iot-device.key.pem")
+        assert os.path.exists(f"{CERTS_DIR}/certs/azure-iot-test-only.root.ca.cert.pem")
+
+        assert os.path.exists(f"{CERTS_DIR}/azure/{TEST_DEVICE_ID_2}-root-ca.pem")
+        assert os.path.exists(f"{CERTS_DIR}/azure/{TEST_DEVICE_ID}-root-ca.pem")
+
+        assert os.path.exists(f"{FS_DIR}/ca.pem")
+        assert os.path.exists(f"{FS_DIR}/device_cert.pem")
+        assert os.path.exists(f"{FS_DIR}/device_priv_key.pem")
+
+    @pytest.mark.skip("Not ready yet")
+    def test_gen_certs_mode_device_custom_input_certs_dir(
+        self,
+        request: pytest.FixtureRequest,
+        test_project_data: Dict[str, str],
+        mocker: MockerFixture,
+    ) -> None:
+        """This test check if command gen certs with certs_mode='device' will generate device certs files for
+        new device id based on custom intermediate certs dir"""
+        proj_path = request.getfixturevalue(test_project_data["proj_path"])
+        os.chdir(proj_path)
+
+        # some files need to be present before we regenerate certs for device
+        if not os.path.exists(f"{CERTS_DIR}/index.txt"):
+            pytest.fail(
+                "Preconditions not meet, please generate all certificates as precondition"
+            )
+
+        # move generated intermediate certs to custom location
+        # os.mkdir(CUSTOM_CERTS_DIR)
+        # shutil.move(CERTS_DIR, CUSTOM_CERTS_DIR)
+        shutil.copytree(CERTS_DIR, CUSTOM_CERTS_DIR)
+        if os.path.exists(f"{CERTS_DIR}/certs"):
+            shutil.rmtree(f"{CERTS_DIR}/certs")
+
+        # removing files which should be regenerated build/fs dir
+        if os.path.exists(f"{FS_DIR}/ca.pem"):
+            os.remove(f"{FS_DIR}/ca.pem")
+        if os.path.exists(f"{FS_DIR}/device_cert.pem"):
+            os.remove(f"{FS_DIR}/device_cert.pem")
+        if os.path.exists(f"{FS_DIR}/device_priv_key.pem"):
+            os.remove(f"{FS_DIR}/device_priv_key.pem")
+
+        mocker.patch(
+            f"{scargo_gen.__module__}.prepare_config",
+            return_value=get_scargo_config_or_exit(),
+        )
+        # generate keys for new device
+        scargo_gen(
+            profile="Debug",
+            gen_ut=None,
+            gen_mock=None,
+            certs=TEST_DEVICE_ID_3,
+            certs_mode="device",
+            certs_input=Path(CUSTOM_CERTS_DIR).absolute() / "certs",
+            certs_passwd=None,
+            fs=False,
+            single_bin=False,
+        )
+
+        assert os.path.exists(f"{CERTS_DIR}/ca.pem")
+        assert os.path.exists(f"{CERTS_DIR}/certs/iot-device.cert.pem")
+        assert os.path.exists(f"{CERTS_DIR}/private/iot-device.key.pem")
+        assert os.path.exists(f"{CERTS_DIR}/certs/azure-iot-test-only.root.ca.cert.pem")
+
+        assert os.path.exists(f"{CERTS_DIR}/azure/{TEST_DEVICE_ID_3}-root-ca.pem")
+
+        assert os.path.exists(f"{FS_DIR}/ca.pem")
+        assert os.path.exists(f"{FS_DIR}/device_cert.pem")
+        assert os.path.exists(f"{FS_DIR}/device_priv_key.pem")
+
+    def test_gen_certs_default_password(
+        self,
+        request: pytest.FixtureRequest,
+        test_project_data: Dict[str, str],
+        mocker: MockerFixture,
+    ) -> None:
+        """This test check if command gen certs with provided certs_passwd parameter set expected password for
+        regenerated certs files"""
+        proj_path = request.getfixturevalue(test_project_data["proj_path"])
+        os.chdir(proj_path)
+
+        # remove directory with certs if already present
+        if os.path.exists(CERTS_DIR):
+            shutil.rmtree(CERTS_DIR)
+        if os.path.exists(FS_DIR):
+            shutil.rmtree(FS_DIR)
+
+        assert not os.path.exists(CERTS_DIR)
+        assert not os.path.exists(FS_DIR)
+
+        mocker.patch(
+            f"{scargo_gen.__module__}.prepare_config",
+            return_value=get_scargo_config_or_exit(),
+        )
+        default_passwd = "1234"
+        incorrect_passwd = "1111"
+        # generate certs protected by custom password
+        scargo_gen(
+            profile="Debug",
+            gen_ut=None,
+            gen_mock=None,
+            certs=TEST_DEVICE_ID,
+            certs_mode=None,
+            certs_input=None,
+            certs_passwd=None,
+            fs=False,
+            single_bin=False,
+        )
+
+        # password protected files
+        pwd_protected_files = [
+            f"{CERTS_DIR}/private/azure-iot-test-only.root.ca.key.pem",
+            f"{CERTS_DIR}/private/azure-iot-test-only.intermediate.key.pem",
+        ]
+        # test if all password-protected files are encrypted with expected password
+        for file in pwd_protected_files:
+            with open(file) as fp:
+                file_content = fp.read()
+                assert (
+                    "ENCRYPTED" in file_content
+                ), f"File {file} seems to be not encrypted"
+                # positive test encryption with correct password
+                passwd_bytes = bytes(default_passwd, "utf-8")
+                assert crypto.load_privatekey(
+                    type=crypto.FILETYPE_PEM,
+                    buffer=file_content,
+                    passphrase=passwd_bytes,
+                )
+                # negative test encryption with incorrect password
+                incorrect_passwd_bytes = bytes(incorrect_passwd, "utf-8")
+                with pytest.raises(crypto.Error) as decryption_error:
+                    crypto.load_privatekey(
+                        type=crypto.FILETYPE_PEM,
+                        buffer=file_content,
+                        passphrase=incorrect_passwd_bytes,
+                    )
+                assert (
+                    str(decryption_error.value)
+                    == "[('Provider routines', '', 'bad decrypt'), ('PEM routines', '', 'bad decrypt')]"
+                ), f"Unexpected error value when incorrect password was used: {str(decryption_error.value)}"
+
+    def test_gen_certs_custom_password(
+        self,
+        request: pytest.FixtureRequest,
+        test_project_data: Dict[str, str],
+        mocker: MockerFixture,
+    ) -> None:
+        """This test check if command gen certs with provided certs_passwd parameter set expected password for
+        regenerated certs files"""
+        proj_path = request.getfixturevalue(test_project_data["proj_path"])
+        os.chdir(proj_path)
+
+        # remove directory with certs if already present
+        if os.path.exists(CERTS_DIR):
+            shutil.rmtree(CERTS_DIR)
+        if os.path.exists(FS_DIR):
+            shutil.rmtree(FS_DIR)
+
+        assert not os.path.exists(CERTS_DIR)
+        assert not os.path.exists(FS_DIR)
+
+        mocker.patch(
+            f"{scargo_gen.__module__}.prepare_config",
+            return_value=get_scargo_config_or_exit(),
+        )
+        custom_passwd = "TEST_PASSWD"
+        incorrect_passwd = "INCORECT_PW"
+        # generate certs protected by custom password
+        scargo_gen(
+            profile="Debug",
+            gen_ut=None,
+            gen_mock=None,
+            certs=TEST_DEVICE_ID,
+            certs_mode=None,
+            certs_input=None,
+            certs_passwd=custom_passwd,
+            fs=False,
+            single_bin=False,
+        )
+
+        # password protected files
+        pwd_protected_files = [
+            f"{CERTS_DIR}/private/azure-iot-test-only.root.ca.key.pem",
+            f"{CERTS_DIR}/private/azure-iot-test-only.intermediate.key.pem",
+        ]
+        # test if all password-protected files are encrypted with expected password
+        for file in pwd_protected_files:
+            with open(file) as fp:
+                file_content = fp.read()
+                assert (
+                    "ENCRYPTED" in file_content
+                ), f"File {file} seems to be not encrypted"
+                # positive test encryption with correct password
+                passwd_bytes = bytes(custom_passwd, "utf-8")
+                assert crypto.load_privatekey(
+                    type=crypto.FILETYPE_PEM,
+                    buffer=file_content,
+                    passphrase=passwd_bytes,
+                )
+                # negative test encryption with incorrect password
+                incorrect_passwd_bytes = bytes(incorrect_passwd, "utf-8")
+                with pytest.raises(crypto.Error) as decryption_error:
+                    crypto.load_privatekey(
+                        type=crypto.FILETYPE_PEM,
+                        buffer=file_content,
+                        passphrase=incorrect_passwd_bytes,
+                    )
+                assert (
+                    str(decryption_error.value)
+                    == "[('Provider routines', '', 'bad decrypt'), ('PEM routines', '', 'bad decrypt')]"
+                ), f"Unexpected error value when incorrect password was used: {str(decryption_error.value)}"
