@@ -23,6 +23,7 @@ EXPECTED_FILES_AND_DIRS = [
     "scargo.toml",
     "src",
     "tests",
+    ".conan",
 ]
 
 TARGET_X86 = Target.get_target_by_id("x86")

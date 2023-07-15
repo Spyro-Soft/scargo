@@ -47,17 +47,24 @@ def scargo_build(profile: str) -> None:
 
     try:
         subprocess.check_call(
-            ["conan", "install", ".", "-if", build_dir],
+            [
+                "conan",
+                "install",
+                ".",
+                "-if",
+                build_dir,
+                "-pr:b",
+                "default",
+                "-pr:h",
+                f"./.conan/profiles/{config.project.target.family}_{profile}",
+            ],
             cwd=project_dir,
         )
         subprocess.check_call(
-            ["cmake", f"-DCMAKE_BUILD_TYPE={profile}", project_dir],
-            cwd=build_dir,
+            ["conan", "build", ".", "-if", build_dir, "-bf", build_dir],
+            cwd=project_dir,
         )
-        command = ["cmake", "--build", ".", "--parallel"]
-        if config.project.max_build_jobs is not None:
-            command.append(str(config.project.max_build_jobs))
-        subprocess.check_call(command, cwd=build_dir)
+
     except subprocess.CalledProcessError:
         logger.error("Unable to build exec file")
         sys.exit(1)

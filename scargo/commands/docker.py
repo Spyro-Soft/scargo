@@ -28,10 +28,11 @@ def scargo_docker_build(
     :raises CalledProcessError: if docker build fail
     """
     logger.debug("Build docker environment.")
-
+    print(docker_opts)
     if not project_root:
         project_root = get_scargo_config_or_exit().project_root
     docker_path = _get_docker_path(project_root)
+    print(docker_path)
 
     cmd = get_docker_compose_command()
     cmd.extend(["build", *docker_opts])

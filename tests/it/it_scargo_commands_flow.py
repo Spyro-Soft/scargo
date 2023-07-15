@@ -13,7 +13,7 @@ from scargo.path_utils import get_project_root_or_none
 from tests.it.utils import (
     ScargoTestRunner,
     add_profile_to_toml,
-    assert_str_in_CMakeLists,
+    assert_regex_in_file,
     assert_str_in_file,
     get_bin_name,
     get_copyright_text,
@@ -150,6 +150,9 @@ def test_project_x86_dev_flow(
     # New Help, New or copy existing project for regression tests
     request.getfixturevalue(project_creation)
 
+    # Update to generate profiles etc.
+    result = runner.invoke(cli, ["update"])
+
     # Docker Run
     result = runner.invoke(cli, ["docker", "run"])
     assert result.exit_code == 0
@@ -189,10 +192,10 @@ def test_project_x86_dev_flow(
     )
     result = runner.invoke(cli, ["update"])
     assert result.exit_code == 0
-    assert assert_str_in_CMakeLists('set(CMAKE_C_FLAGS_NEW   "cflags for new profile")')
-    assert assert_str_in_CMakeLists(
-        'set(CMAKE_CXX_FLAGS_NEW "cxxflags for new profile")'
-    )
+    c_flags_re = r"tools\.build:cflags=\[\"(.+?) cflags for new profile\"\]"
+    cxx_flags_re = r"tools\.build:cxxflags=\[\"(.+?) cxxflags for new profile\"\]"
+    assert assert_regex_in_file(Path(".conan/profiles/x86_new"), c_flags_re)
+    assert assert_regex_in_file(Path(".conan/profiles/x86_new"), cxx_flags_re)
 
     # Gen -u
     result = runner.invoke(cli, ["gen", "-u", src_dir])

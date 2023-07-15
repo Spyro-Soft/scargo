@@ -1,3 +1,4 @@
+import re
 import sys
 from pathlib import Path
 from typing import IO, Any, Mapping, Optional, Sequence, Union
@@ -84,6 +85,15 @@ def assert_str_in_file(file_path: Path, str_to_check: str) -> bool:
         if str_to_check in file.read():
             return True
 
+    return False
+
+
+def assert_regex_in_file(file_path: Path, regex: str) -> bool:
+    with open(file_path) as file:
+        contents = file.read()
+        matches = re.findall(regex, contents)
+        if bool(matches):
+            return True
     return False
 
 
