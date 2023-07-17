@@ -20,9 +20,8 @@ add_executable(${PROJECT_NAME}
      {{ config.project.bin_name|lower }}.cpp
 )
 {% elif config.project.lib_name%}
-add_library(${PROJECT_NAME}
-     {{ config.project.lib_name|lower }}.cpp
-     {{ config.project.lib_name|lower }}.h
+target_sources({{ config.project.lib_name }} PUBLIC
+     ${CMAKE_CURRENT_SOURCE_DIR}/{{ config.project.lib_name|lower }}.cpp
 )
 {% endif %}
 

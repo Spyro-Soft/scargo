@@ -5,6 +5,9 @@ CXX=/opt/gcc-arm-none-eabi/bin/arm-none-eabi-g++
 {% elif config.project.target.family == "esp32" %}
 CC=$ENV{IDF_PATH}/tools/xtensa-esp32-elf/esp-2021r2-patch5-8.4.0/xtensa-esp32-elf/bin/xtensa-esp32-elf-gcc
 CXX=$ENV{IDF_PATH}/tools/xtensa-esp32-elf/esp-2021r2-patch5-8.4.0/xtensa-esp32-elf/bin/xtensa-esp32-elf-g++
+{% else %}
+CC=gcc
+CC=g++
 {% endif %}
 
 {% if config.project.target.family == "stm32" %}

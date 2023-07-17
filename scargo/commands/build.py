@@ -57,6 +57,8 @@ def scargo_build(profile: str) -> None:
                 "default",
                 "-pr:h",
                 f"./.conan/profiles/{config.project.target.family}_{profile}",
+                "-b",
+                "missing",
             ],
             cwd=project_dir,
         )

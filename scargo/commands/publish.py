@@ -36,12 +36,22 @@ def scargo_publish(repo: str) -> None:
     # Export package
     try:
         subprocess.check_call(
-            "conan export-pkg . -f",
+            [
+                "conan",
+                "create",
+                ".",
+                "-pr:b",
+                "default",
+                "-pr:h",
+                f"./.conan/profiles/{config.project.target.family}_Release",
+                "-b",
+                "missing",
+            ],
             cwd=project_path,
-            shell=True,
         )
     except subprocess.CalledProcessError:
         logger.error("Unable to create package")
+        sys.exit(1)
 
     # Upload package to artifactory
     conan_repo = ["-r", repo] if repo else []
@@ -50,7 +60,7 @@ def scargo_publish(repo: str) -> None:
             [
                 "conan",
                 "upload",
-                f"{project_name}/{version}",
+                f"{project_name}",
                 *conan_repo,
                 "--all",
                 "--confirm",

@@ -30,3 +30,26 @@ def generate_conanprofile(config: Config) -> None:
             template_params={"config": config, "profile": profile},
             config=config,
         )
+
+
+def generate_test_package(config: Config) -> None:
+    create_file_from_template(
+        "conan/test_package/CMakeLists.txt.j2",
+        "test_package/CMakeLists.txt",
+        template_params={"config": config},
+        config=config,
+    )
+
+    create_file_from_template(
+        "conan/test_package/conanfile.py.j2",
+        "test_package/conanfile.py",
+        template_params={"config": config},
+        config=config,
+    )
+
+    create_file_from_template(
+        "conan/test_package/example.cpp.j2",
+        "test_package/src/example.cpp",
+        template_params={"config": config},
+        config=config,
+    )

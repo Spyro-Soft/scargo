@@ -19,11 +19,9 @@ cmake_minimum_required(VERSION 3.16)
 {% endif %}
 
 set(CMAKE_CXX_STANDARD {{ config.project.cxxstandard }})
-
 {% for key, value in config.project.cmake_variables.items() %}
 set({{ key }} "{{ value }}")
 {% endfor %}
-
 {% for profile_name, profile in config.profiles.items() %}
     {% if profile.extras %}
 # {{ profile_name }}
@@ -33,11 +31,29 @@ IF("${CMAKE_BUILD_TYPE}" STREQUAL "{{ profile_name }}")
         {% endfor %}
 ENDIF()
     {% endif %}
-
 {% endfor %}
 
+{% if config.project.lib_name %}
+add_library({{ config.project.lib_name }} STATIC
+    ${CMAKE_CURRENT_SOURCE_DIR}/include/{{ config.project.lib_name|lower }}.h
+)
+add_library(spyro::{{ config.project.lib_name }} ALIAS {{ config.project.lib_name }})
+
+target_include_directories({{ config.project.lib_name }}
+    PUBLIC
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>/include
+    PRIVATE
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>/src
+)
+
+{% endif %}
 {% if config.project.target.family == "esp32" %}
 {% include 'esp32.cmake.j2' %}
 {% else %}
 add_subdirectory(src)
+{% endif %}
+
+{% if config.project.lib_name %}
+install(TARGETS {{ config.project.lib_name }} DESTINATION lib)
+install(DIRECTORY include/ DESTINATION include)
 {% endif %}
