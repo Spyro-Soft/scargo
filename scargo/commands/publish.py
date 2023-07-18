@@ -16,7 +16,7 @@ from scargo.logger import get_logger
 logger = get_logger()
 
 
-def scargo_publish(repo: str) -> None:
+def scargo_publish(repo: str, profile: str) -> None:
     """
     Publish conan package
 
@@ -43,7 +43,7 @@ def scargo_publish(repo: str) -> None:
                 "-pr:b",
                 "default",
                 "-pr:h",
-                f"./.conan/profiles/{config.project.target.family}_Release",
+                f"./.conan/profiles/{config.project.target.family}_{profile}",
                 "-b",
                 "missing",
             ],

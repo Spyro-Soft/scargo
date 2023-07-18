@@ -4,7 +4,7 @@ target_sources({{ config.project.bin_name|lower }} PRIVATE ${CMAKE_CURRENT_SOURC
 
 {% endif %}
 {% if config.project.lib_name %}
-target_sources({{ config.project.lib_name }} PUBLIC
+target_sources(${PROJECT_NAME} PUBLIC
      ${CMAKE_CURRENT_SOURCE_DIR}/{{ config.project.lib_name|lower }}.cpp
 )
 

@@ -16,6 +16,8 @@ cmake_minimum_required(VERSION 3.16)
 {% include 'stm32.cmake.j2' %}
 {% elif config.project.target.family == 'x86' %}
 {% include 'x86.cmake.j2' %}
+{% elif config.project.target.family == "esp32" %}
+{% include 'esp32.cmake.j2' %}
 {% endif %}
 
 set(CMAKE_CXX_STANDARD {{ config.project.cxxstandard }})
@@ -34,26 +36,23 @@ ENDIF()
 {% endfor %}
 
 {% if config.project.lib_name %}
-add_library({{ config.project.lib_name }} STATIC
-    ${CMAKE_CURRENT_SOURCE_DIR}/include/{{ config.project.lib_name|lower }}.h
+add_library(${PROJECT_NAME} STATIC
+    ${CMAKE_CURRENT_SOURCE_DIR}/{{ config.include_dir_path.relative_to(config.project_root) }}/{{ config.project.lib_name|lower }}.h
 )
-add_library(spyro::{{ config.project.lib_name }} ALIAS {{ config.project.lib_name }})
 
-target_include_directories({{ config.project.lib_name }}
+target_include_directories(${PROJECT_NAME}
     PUBLIC
-        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>/include
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>/{{ config.include_dir_path.relative_to(config.project_root) }}
     PRIVATE
-        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>/src
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>/{{ config.source_dir_path.relative_to(config.project_root) }}
 )
 
 {% endif %}
-{% if config.project.target.family == "esp32" %}
-{% include 'esp32.cmake.j2' %}
-{% else %}
-add_subdirectory(src)
+{% if config.project.target.family != "esp32" %}
+add_subdirectory({{ config.source_dir_path.relative_to(config.project_root) }})
 {% endif %}
 
 {% if config.project.lib_name %}
-install(TARGETS {{ config.project.lib_name }} DESTINATION lib)
-install(DIRECTORY include/ DESTINATION include)
+install(TARGETS ${PROJECT_NAME} DESTINATION lib)
+install(DIRECTORY {{ config.include_dir_path.relative_to(config.project_root) }}/ DESTINATION {{ config.include_dir_path.relative_to(config.project_root) }})
 {% endif %}

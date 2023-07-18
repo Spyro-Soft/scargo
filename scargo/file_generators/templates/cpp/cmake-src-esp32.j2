@@ -2,8 +2,3 @@
 idf_component_register(SRCS "{{config.project.bin_name|lower}}.cpp"
                     INCLUDE_DIRS "")
 {% endif %}
-
-{% elif config.project.lib_name %}
-target_sources({{ config.project.lib_name }} PUBLIC
-     ${CMAKE_CURRENT_SOURCE_DIR}/{{ config.project.lib_name|lower }}.cpp)
-{% endif%}

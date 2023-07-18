@@ -54,7 +54,7 @@ tools.build:cflags=["{{ config.project.cflags if config.project.cflags}} {{confi
 tools.build:cxxflags=["{{ config.project.cxxflags if config.project.cxxflags }} {{ config.profiles.get(profile).cxxflags if config.profiles.get(profile).cxxflags }}"]
 {% endif %}
 {% if config.project.target.family == "stm32" %}
-tools.cmake.cmaketoolchain:user_toolchain=["/workspace/third-party/stm32-cmake/cmake/stm32_gcc.cmake"]
+tools.cmake.cmaketoolchain:user_toolchain=["/workspace/.conan/profiles/stm32_gcc_toolchain_wrapper.cmake"]
 {% elif config.project.target.family == "esp32" %}
 tools.cmake.cmaketoolchain:toolchain_file=/opt/esp-idf/tools/cmake/toolchain-esp32.cmake
 tools.cmake.cmaketoolchain:generator=Ninja
