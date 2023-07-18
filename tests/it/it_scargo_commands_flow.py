@@ -181,6 +181,10 @@ def test_project_x86_dev_flow(
     result = runner.invoke(cli, ["docker", "run"])
     assert result.exit_code == 0
 
+    # Update
+    result = runner.invoke(cli, ["update"])
+    assert result.exit_code == 0
+
     # Build
     result = runner.invoke(cli, ["build"])
     assert result.exit_code == 0
