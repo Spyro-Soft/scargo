@@ -16,7 +16,7 @@ from scargo.logger import get_logger
 logger = get_logger()
 
 
-def scargo_publish(repo: str, profile: str) -> None:
+def scargo_publish(repo: str, profile: str = "Release") -> None:
     """
     Publish conan package
 
