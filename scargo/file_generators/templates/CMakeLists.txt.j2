@@ -12,10 +12,6 @@ cmake_minimum_required(VERSION 3.14)
 cmake_minimum_required(VERSION 3.16)
 {% endif %}
 
-{% if config.project.target.family != 'x86' %}
-set(CONAN_DISABLE_CHECK_COMPILER ON)
-{% endif %}
-
 {% if config.project.target.family == 'stm32' %}
 {% include 'stm32.cmake.j2' %}
 {% elif config.project.target.family == 'x86' %}
@@ -24,28 +20,17 @@ set(CONAN_DISABLE_CHECK_COMPILER ON)
 
 set(CMAKE_CXX_STANDARD {{ config.project.cxxstandard }})
 
-{% if config.project.cflags %}
-set(CMAKE_C_FLAGS   "{{ config.project.cflags }}")
-{% endif %}
-{% if config.project.cxxflags %}
-set(CMAKE_CXX_FLAGS "{{ config.project.cxxflags }}")
-{% endif %}
 {% for key, value in config.project.cmake_variables.items() %}
 set({{ key }} "{{ value }}")
 {% endfor %}
+
 {% for profile_name, profile in config.profiles.items() %}
-# {{ profile_name }}
-    {% if profile.cflags  %}
-set(CMAKE_C_FLAGS_{{ profile_name.upper() }}   "{{ profile.cflags }}")
-    {% endif %}
-    {% if profile.cxxflags  %}
-set(CMAKE_CXX_FLAGS_{{ profile_name.upper() }} "{{ profile.cxxflags }}")
-	{% endif %}
     {% if profile.extras %}
+# {{ profile_name }}
 IF("${CMAKE_BUILD_TYPE}" STREQUAL "{{ profile_name }}")
-    {% for key, value in profile.extras.items() %}
+        {% for key, value in profile.extras.items() %}
     SET({{ key }} {{ value }})
-    {% endfor %}
+        {% endfor %}
 ENDIF()
     {% endif %}
 

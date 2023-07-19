@@ -1,0 +1,64 @@
+[env]
+{% if config.project.target.family == "stm32" %}
+CC=/opt/gcc-arm-none-eabi/bin/arm-none-eabi-gcc
+CXX=/opt/gcc-arm-none-eabi/bin/arm-none-eabi-g++
+{% elif config.project.target.family == "esp32" %}
+CC=$ENV{IDF_PATH}/tools/xtensa-esp32-elf/esp-2021r2-patch5-8.4.0/xtensa-esp32-elf/bin/xtensa-esp32-elf-gcc
+CXX=$ENV{IDF_PATH}/tools/xtensa-esp32-elf/esp-2021r2-patch5-8.4.0/xtensa-esp32-elf/bin/xtensa-esp32-elf-g++
+{% endif %}
+
+{% if config.project.target.family == "stm32" %}
+STM32_CHIP={{config.stm32.chip}}
+STM32_TOOLCHAIN_PATH=/opt/gcc-arm-none-eabi
+STM32_TARGET_TRIPLET=arm-none-eabi
+{% endif %}
+
+
+[settings]
+compiler=gcc
+compiler.version=9
+compiler.libcxx=libstdc++
+os_build=Linux
+arch_build=x86_64
+
+build_type={{profile}}
+
+{% if config.project.target.family == "stm32" %}
+os=baremetal
+{% elif config.project.target.family == "esp32" %}
+{# ESP32 is untested #}
+os=baremetal
+{% elif config.project.target.family == "x86" %}
+os=Linux
+{% endif %}
+{% if config.project.target.family == "stm32" %}
+arch=armv7
+{% elif config.project.target.family == "esp32" %}
+{# ESP32 is untested #}
+{% if config.project.target.id == "esp32" %}
+arch=xtensalx6
+{% elif config.project.target.id in ("esp32s2", "esp32s3") %}
+arch=xtensalx7
+{% endif %}
+{% elif config.project.target.family == "x86" %}
+arch=x86_64
+{% endif %}
+build_type={{profile}}
+
+[conf]
+tools.build:cflags=["{{ config.project.cflags if config.project.cflags}} {{config.profiles.get(profile).cflags if config.profiles.get(profile).cflags}}"]
+{% if config.project.cxxflags %}
+tools.build:cxxflags=["{{ config.project.cxxflags if config.project.cxxflags }} {{ config.profiles.get(profile).cxxflags if config.profiles.get(profile).cxxflags }}"]
+{% endif %}
+{% if config.project.target.family == "stm32" %}
+tools.cmake.cmaketoolchain:user_toolchain=["/workspace/third-party/stm32-cmake/cmake/stm32_gcc.cmake"]
+{% elif config.project.target.family == "esp32" %}
+tools.cmake.cmaketoolchain:toolchain_file=/opt/esp-idf/tools/cmake/toolchain-esp32.cmake
+tools.cmake.cmaketoolchain:generator=Ninja
+{% endif %}
+{% if config.project.max_build_jobs != None %}
+tools.build:jobs={{config.project.max_build_jobs}}
+{% endif %}
+
+[options]
+[build_requires]

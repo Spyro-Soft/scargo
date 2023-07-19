@@ -7,6 +7,7 @@ import pytest
 from pyfakefs.fake_filesystem import FakeFilesystem
 
 from scargo.commands.docker import (
+    get_docker_compose_command,
     scargo_docker_build,
     scargo_docker_exec,
     scargo_docker_run,
@@ -51,8 +52,8 @@ def test_docker_build(
     scargo_docker_test_setup: Config,
 ) -> None:
     scargo_docker_build(command_args)
-
-    called_subprocess_cmd = ["docker-compose", "build", *command_args]
+    called_subprocess_cmd = get_docker_compose_command()
+    called_subprocess_cmd.extend(["build", *command_args])
     assert mock_subprocess_run.call_args.args[0] == called_subprocess_cmd
 
 
@@ -68,7 +69,8 @@ def test_docker_run(
     scargo_docker_run(command_args)
 
     service_name = f"{scargo_docker_test_setup.project.name}_dev"
-    called_subprocess_cmd = ["docker-compose", "run", *command_args, service_name]
+    called_subprocess_cmd = get_docker_compose_command()
+    called_subprocess_cmd.extend(["run", *command_args, service_name])
     assert mock_subprocess_run.call_args.args[0] == called_subprocess_cmd
 
 
@@ -81,15 +83,18 @@ def test_docker_run_with_command(
     scargo_docker_run(docker_opts=[rm], command=command)
 
     service_name = f"{scargo_docker_test_setup.project.name}_dev"
-    called_subprocess_cmd = [
-        "docker-compose",
-        "run",
-        rm,
-        service_name,
-        "bash",
-        "-c",
-        command,
-    ]
+    called_subprocess_cmd = get_docker_compose_command()
+
+    called_subprocess_cmd.extend(
+        [
+            "run",
+            rm,
+            service_name,
+            "bash",
+            "-c",
+            command,
+        ]
+    )
     assert mock_subprocess_run.call_args.args[0] == called_subprocess_cmd
 
 
