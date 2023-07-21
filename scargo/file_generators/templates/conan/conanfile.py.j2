@@ -14,7 +14,7 @@ class {{ config.project.name|capitalize|replace("-", "") }}Conan(ConanFile):  # 
     description = "{{ config.project.description }}"
     url = "{{ config.project.homepage_url }}"
     generators = "CMakeDeps"
-    exports_sources = ["src/*", "CMakeLists.txt", "include/*"]
+    exports_sources = ["{{ config.source_dir_path.relative_to(config.project_root) }}/*", "CMakeLists.txt", "include/*"]
 
     def generate(self):
         tc = CMakeToolchain(self)
