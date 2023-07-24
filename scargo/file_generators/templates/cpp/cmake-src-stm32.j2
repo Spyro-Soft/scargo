@@ -20,8 +20,15 @@ add_executable(${PROJECT_NAME}
      {{ config.project.bin_name|lower }}.cpp
 )
 {% elif config.project.lib_name%}
-target_sources(${PROJECT_NAME} PUBLIC
-     ${CMAKE_CURRENT_SOURCE_DIR}/{{ config.project.lib_name|lower }}.cpp
+add_library(${PROJECT_NAME} STATIC
+    ${CMAKE_CURRENT_SOURCE_DIR}/{{ config.include_dir_path.relative_to(config.project_root) }}/{{ config.project.lib_name|lower }}.h
+)
+
+target_include_directories(${PROJECT_NAME}
+    PUBLIC
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>/{{ config.include_dir_path.relative_to(config.project_root) }}
+    PRIVATE
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>/{{ config.source_dir_path.relative_to(config.project_root) }}
 )
 {% endif %}
 
@@ -65,4 +72,8 @@ add_custom_command(
     BYPRODUCTS ${PROJECT_NAME}.hex
     COMMENT "Generating hex file ${CMAKE_PROJECT_NAME}.hex"
 )
+{% endif %}
+{% if config.project.lib_name %}
+install(TARGETS ${PROJECT_NAME} DESTINATION lib)
+install(DIRECTORY {{ config.include_dir_path.relative_to(config.project_root) }}/ DESTINATION {{ config.include_dir_path.relative_to(config.project_root) }})
 {% endif %}

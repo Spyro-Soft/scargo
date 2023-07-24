@@ -63,8 +63,12 @@ def scargo_build(profile: str) -> None:
             cwd=project_dir,
         )
         subprocess.check_call(
-            ["conan", "build", ".", "-if", build_dir, "-bf", build_dir],
-            cwd=project_dir,
+            [
+                "conan",
+                "build",
+                f"{project_dir}",
+            ],
+            cwd=build_dir,
         )
 
     except subprocess.CalledProcessError:
