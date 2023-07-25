@@ -21,6 +21,7 @@ STM32_TARGET_TRIPLET=arm-none-eabi
 compiler=gcc
 compiler.version=9
 compiler.libcxx=libstdc++
+compiler.cppstd={{ config.project.cxxstandard }}
 os_build=Linux
 arch_build=x86_64
 

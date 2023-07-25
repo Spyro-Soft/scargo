@@ -5,7 +5,7 @@
 
 from conan import ConanFile
 from conan.tools.cmake import CMakeToolchain, CMake, cmake_layout
-from conans import tools
+from conans import tools  # type: ignore[misc, no-any-unimported]
 
 class {{ config.project.name|capitalize|replace("-", "") }}Conan(ConanFile):  # type: ignore[misc, no-any-unimported]
     name = "{{ config.project.name }}"

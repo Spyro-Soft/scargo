@@ -12,6 +12,12 @@ cmake_minimum_required(VERSION 3.14)
 cmake_minimum_required(VERSION 3.16)
 {% endif %}
 
+list(APPEND CMAKE_PREFIX_PATH "${CMAKE_BINARY_DIR}/generators/")
+{% if config.project.target.family == 'stm32' %}
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
+{% endif %}
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+
 {% if config.project.target.family == 'stm32' %}
 {% include 'stm32.cmake.j2' %}
 {% elif config.project.target.family == 'x86' %}
@@ -20,7 +26,6 @@ cmake_minimum_required(VERSION 3.16)
 {% include 'esp32.cmake.j2' %}
 {% endif %}
 
-set(CMAKE_CXX_STANDARD {{ config.project.cxxstandard }})
 {% for key, value in config.project.cmake_variables.items() %}
 set({{ key }} "{{ value }}")
 {% endfor %}
