@@ -90,7 +90,7 @@ mkdir -p ${OUTPUT_DIR}
 DIGIROOT_CERT=${OUTPUT_DIR}/digiroot.pem
 CA_PEM=${OUTPUT_DIR}/ca.pem
 
-rm -f ${OUTPUT_DIR}/ca.pem
+rm -f ${CA_PEM}
 
 if [ -f "$DIGIROOT_CERT" ]; then
     echo "$DIGIROOT_CERT already exists."
@@ -103,7 +103,7 @@ else
     fi
 fi
 
-cp ${OUTPUT_DIR}/digiroot.pem ${OUTPUT_DIR}/ca.pem
+cp ${DIGIROOT_CERT} ${CA_PEM}
 
 if [ ${MODE} == "Device-certificate" ]; then
     #Generate only device cert
