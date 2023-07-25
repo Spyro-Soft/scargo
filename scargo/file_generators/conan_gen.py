@@ -2,6 +2,8 @@
 # @copyright Copyright (C) 2023 SpyroSoft Solutions S.A. All rights reserved.
 # #
 
+from typing import List
+
 from scargo.config import Config
 from scargo.file_generators.base_gen import create_file_from_template
 
@@ -22,19 +24,26 @@ def generate_conanfile(config: Config) -> None:
 
 
 def generate_conanprofile(config: Config) -> None:
-    profiles = list(config.profiles.keys())
+    profiles = config.profiles.keys()
+    standard_profiles: List[str] = ["Debug", "Release", "RelWithDebInfo", "MinSizeRel"]
+
     if config.project.target.family == "stm32":
         create_file_from_template(
             "conan/stm32_gcc_toolchain_wrapper.cmake.j2",
-            f".conan/profiles/stm32_gcc_toolchain_wrapper.cmake",
+            ".conan/profiles/stm32_gcc_toolchain_wrapper.cmake",
             template_params={},
             config=config,
         )
+
     for profile in profiles:
         create_file_from_template(
             "conan/profile.j2",
             f".conan/profiles/{config.project.target.family}_{profile}",
-            template_params={"config": config, "profile": profile},
+            template_params={
+                "config": config,
+                "profile": profile,
+                "standard_profiles": standard_profiles,
+            },
             config=config,
         )
 

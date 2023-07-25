@@ -41,7 +41,6 @@ def config(monkeypatch: pytest.MonkeyPatch) -> Config:
 def test_publish(config: Config, fp: FakeProcess) -> None:
     # ARRANGE
     project_name = config.project.name
-    version = config.project.version
     conan_clean_cmd = "conan remote clean"
     conan_add_remote_1_cmd = ["conan", "remote", "add", REMOTE_REPO_NAME_1, EXAMPLE_URL]
     conan_add_remote_2_cmd = ["conan", "remote", "add", REMOTE_REPO_NAME_2, EXAMPLE_URL]
@@ -168,7 +167,6 @@ def test_create_package_fail(
 ) -> None:
     # ARRANGE
     project_name = config.project.name
-    version = config.project.version
     fp.register("conan remote clean")
     fp.register(["conan", "remote", "add", REMOTE_REPO_NAME_1, EXAMPLE_URL])
     fp.register(["conan", "remote", "add", REMOTE_REPO_NAME_2, EXAMPLE_URL])
@@ -216,7 +214,6 @@ def test_upload_package_fail(
 ) -> None:
     # ARRANGE
     project_name = config.project.name
-    version = config.project.version
     fp.register("conan remote clean")
     fp.register(["conan", "remote", "add", REMOTE_REPO_NAME_1, EXAMPLE_URL])
     fp.register(["conan", "remote", "add", REMOTE_REPO_NAME_2, EXAMPLE_URL])
