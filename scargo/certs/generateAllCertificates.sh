@@ -103,7 +103,7 @@ else
     fi
 fi
 
-cat ${OUTPUT_DIR}/digiroot.pem >> ${OUTPUT_DIR}/ca.pem
+cp ${OUTPUT_DIR}/digiroot.pem ${OUTPUT_DIR}/ca.pem
 
 if [ ${MODE} == "Device-certificate" ]; then
     #Generate only device cert
