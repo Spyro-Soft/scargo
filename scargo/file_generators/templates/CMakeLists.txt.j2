@@ -13,7 +13,7 @@ cmake_minimum_required(VERSION 3.16)
 {% endif %}
 
 list(APPEND CMAKE_PREFIX_PATH "${CMAKE_BINARY_DIR}/generators/")
-{% if config.project.target.family == 'stm32' %}
+{% if config.project.target.family != 'esp32' %}
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 {% endif %}
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
