@@ -1,6 +1,33 @@
 {
-  "name": "{{ project.name }}_dev",
-  "dockerComposeFile": "docker-compose.yaml",
-  "service": "{{ project.name }}_dev",
-  "workspaceFolder": "/workspace"
+	"name": "{{ project.name }}-dev",
+	"dockerComposeFile": "docker-compose.yaml",
+	"service": "{{ project.name }}-dev",
+	"workspaceFolder": "/workspace",
+	"customizations": {
+		"vscode": {
+			"settings": {
+				"files.insertFinalNewline": true,
+				"editor.formatOnSave": true,
+				"C_Cpp.default.includePath": [
+					"${workspaceFolder}/**"
+				],
+				"cSpell.words": [
+					"spyro",
+					"spyrosoft",
+					"cppcheck",
+					"lvgl",
+					"gpio",
+					"scargo",
+					"devcontainer",
+					"usbip"
+				]
+			},
+			"extensions": [
+				"xaver.clang-format",
+				"ms-vscode.cpptools-extension-pack",
+				"streetsidesoftware.code-spell-checker",
+				"ciarant.vscode-structurizr"
+			]
+		}
+	}
 }
