@@ -95,10 +95,10 @@ rm -f ${CA_PEM}
 if [ -f "$DIGIROOT_CERT" ]; then
     echo "$DIGIROOT_CERT already exists."
 else
-    wget https://cacerts.digicert.com/DigiCertGlobalRootG2.crt.pem -O ${OUTPUT_DIR}/digiroot.pem
+    wget https://cacerts.digicert.com/DigiCertGlobalRootG2.crt.pem -O ${DIGIROOT_CERT}
     if [ $? -ne 0 ]; then
         echo -e "${RED} Failed to download Digiroot certificate" >&2
-        rm ${OUTPUT_DIR}/digiroot.pem
+        rm ${DIGIROOT_CERT}
         exit 1
     fi
 fi
