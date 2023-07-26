@@ -18,7 +18,7 @@ RUN apt update --fix-missing && \
 FROM base AS cpp
 
 RUN apt update --fix-missing && apt -y --no-install-recommends install cppcheck lib32z1 \
-    make cmake clang clang-format clang-tidy gcovr doxygen libcmocka0 libcmocka-dev gdb && \
+    make cmake clang clang-format clang-tidy gcovr doxygen libcmocka0 libcmocka-dev gdb screen && \
     rm -rf /var/lib/apt/lists/*
 
 FROM cpp AS {{ project.target.family }}
@@ -35,9 +35,9 @@ ARG USER_PASSWORD=user
 ARG UID_NUMBER=1000
 ARG GID_NUMBER=1000
 ARG SSH_PORT=2000
+ARG CONAN_LOGIN_USERNAME=""
+ARG CONAN_PASSWORD=""
 
-ARG CONAN_LOGIN_USERNAME
-ARG CONAN_PASSWORD
 ENV CONAN_LOGIN_USERNAME=${CONAN_LOGIN_USERNAME}
 ENV CONAN_PASSWORD=${CONAN_PASSWORD}
 
