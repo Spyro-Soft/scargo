@@ -5,6 +5,9 @@ CXX=/opt/gcc-arm-none-eabi/bin/arm-none-eabi-g++
 {% elif config.project.target.family == "esp32" %}
 CC=$ENV{IDF_PATH}/tools/xtensa-esp32-elf/esp-2021r2-patch5-8.4.0/xtensa-esp32-elf/bin/xtensa-esp32-elf-gcc
 CXX=$ENV{IDF_PATH}/tools/xtensa-esp32-elf/esp-2021r2-patch5-8.4.0/xtensa-esp32-elf/bin/xtensa-esp32-elf-g++
+{% else %}
+CC=gcc
+CC=g++
 {% endif %}
 
 {% if config.project.target.family == "stm32" %}
@@ -18,6 +21,7 @@ STM32_TARGET_TRIPLET=arm-none-eabi
 compiler=gcc
 compiler.version=9
 compiler.libcxx=libstdc++
+compiler.cppstd={{ config.project.cxxstandard }}
 os_build=Linux
 arch_build=x86_64
 
@@ -51,7 +55,7 @@ tools.build:cflags=["{{ config.project.cflags if config.project.cflags}} {{confi
 tools.build:cxxflags=["{{ config.project.cxxflags if config.project.cxxflags }} {{ config.profiles.get(profile).cxxflags if config.profiles.get(profile).cxxflags }}"]
 {% endif %}
 {% if config.project.target.family == "stm32" %}
-tools.cmake.cmaketoolchain:user_toolchain=["/workspace/third-party/stm32-cmake/cmake/stm32_gcc.cmake"]
+tools.cmake.cmaketoolchain:user_toolchain=["/workspace/.conan/profiles/stm32_gcc_toolchain_wrapper.cmake"]
 {% elif config.project.target.family == "esp32" %}
 tools.cmake.cmaketoolchain:toolchain_file=/opt/esp-idf/tools/cmake/toolchain-esp32.cmake
 tools.cmake.cmaketoolchain:generator=Ninja

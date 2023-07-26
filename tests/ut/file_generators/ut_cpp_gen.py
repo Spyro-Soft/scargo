@@ -50,7 +50,7 @@ def test_generate_cpp__lib_only(
         ),
         call(
             "cpp/lib.h.j2",
-            Path("src/test_lib.h"),
+            Path("include/test_lib.h"),
             template_params={"class_name": "TestLib"},
             config=config,
         ),
@@ -80,7 +80,7 @@ def test_generate_cpp__bin_and_lib(
         ),
         call(
             "cpp/lib.h.j2",
-            Path("src/test_lib.h"),
+            Path("include/test_lib.h"),
             template_params={"class_name": "TestLib"},
             config=config,
         ),

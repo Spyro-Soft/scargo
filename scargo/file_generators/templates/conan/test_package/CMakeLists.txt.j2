@@ -1,0 +1,11 @@
+cmake_minimum_required(VERSION 3.15)
+project(PackageTest CXX)
+
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+
+list(APPEND CMAKE_PREFIX_PATH "${CMAKE_BINARY_DIR}/generators/")
+find_package({{ config.project.name }} REQUIRED)
+
+add_executable(example src/example.cpp)
+
+target_link_libraries(example {{ config.project.name }}::{{ config.project.name }})

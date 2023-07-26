@@ -12,6 +12,7 @@ from typing import Optional
 from scargo import __version__
 from scargo.config import Target
 from scargo.config_utils import get_scargo_config_or_exit
+from scargo.file_generators.conan_gen import generate_test_package
 from scargo.file_generators.cpp_gen import generate_cpp
 from scargo.file_generators.toml_gen import generate_toml
 from scargo.global_values import SCARGO_DEFAULT_CONFIG_FILE, SCARGO_DOCKER_ENV
@@ -77,6 +78,8 @@ def scargo_new(
 
     config = get_scargo_config_or_exit(toml_path)
     generate_cpp(config)
+    if lib_name and not bin_name:
+        generate_test_package(config)
 
     test_dir = project_dir / "tests"
     Path(test_dir, "mocks").mkdir(parents=True)
