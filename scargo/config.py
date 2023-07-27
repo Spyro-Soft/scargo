@@ -156,6 +156,9 @@ ScargoTargets = Enum(  # type: ignore[misc]
 class ProfileConfig(BaseModel, extra=Extra.allow):
     cflags: Optional[str]
     cxxflags: Optional[str]
+    cc: Optional[str] = None
+    cxx: Optional[str] = None
+    cmake_build_type: Optional[str] = Field("Debug", alias="cmake-build-type")
 
     @property
     def extras(self) -> Dict[str, Any]:

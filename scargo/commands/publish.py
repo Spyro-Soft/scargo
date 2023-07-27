@@ -27,7 +27,6 @@ def scargo_publish(repo: str, profile: str = "Release") -> None:
     project_path = config.project_root
     project_config = config.project
     project_name = project_config.name
-    version = project_config.version
 
     conan_clean_remote()
     conan_add_remote(project_path, config)
