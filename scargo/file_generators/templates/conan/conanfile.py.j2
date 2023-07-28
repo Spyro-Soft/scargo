@@ -5,53 +5,20 @@
 
 from conan import ConanFile
 from conan.tools.cmake import CMakeToolchain, CMake, cmake_layout
-from conans import tools  # type: ignore[misc, no-any-unimported]
+
+{% if config.project.target.family == "stm32" %}
+from conans import tools
+{% endif %}
 
 class {{ config.project.name|capitalize|replace("-", "") }}Conan(ConanFile):  # type: ignore[misc, no-any-unimported]
     name = "{{ config.project.name }}"
     version = "{{ config.project.version }}"
-    settings = "os", "compiler", "build_type", "arch"
+    license = "MIT"
     description = "{{ config.project.description }}"
+    settings = "os", "compiler", "build_type", "arch"
     url = "{{ config.project.homepage_url }}"
     generators = "CMakeDeps"
-    exports_sources = ["{{ config.source_dir_path.relative_to(config.project_root) }}/*", "CMakeLists.txt", "include/*"]
-
-    def layout(self):
-        cmake_layout(self)
-
-    def generate(self):
-        tc = CMakeToolchain(self)
-        tc.generate()
-
-    def package(self) -> None:
-        {% if config.project.lib_name %}
-        cmake = CMake(self)
-        cmake.install()
-        {% endif %}
-        {% if config.project.bin_name %}
-        self.copy("*", src='build/Debug/bin/', dst='bin', keep_path=False)
-        self.copy("*", src='build/Debug/lib/', dst='lib', keep_path=False)
-        {% endif %}
-
-    def package_info(self) -> None:
-        {% if config.project.lib_name %}
-        self.cpp_info.libs = ["{{ config.project.name }}"]
-        {% elif config.project.bin_name %}
-        self.cpp_info.libs = [tools.collect_libs(self)]
-        {% endif %}
-
-    def build(self) -> None:
-        cmake = CMake(self)
-        cmake.configure()
-        cmake.build()
-
-    def source(self) -> None:
-        {% if config.project.target.family == "stm32" %}
-        git = tools.Git(folder="third-party/stm32-cmake")
-        git.clone("https://github.com/ObKo/stm32-cmake.git", "master")
-        {% else %}
-        pass
-        {% endif %}
+    exports_sources = ["{{ config.source_dir_path.relative_to(config.project_root) }}/*", "CMakeLists.txt", "include/*", "config/*"]
 
     {% if config.dependencies.build or config.dependencies.tool %}
     def build_requirements(self) -> None:
@@ -69,3 +36,40 @@ class {{ config.project.name|capitalize|replace("-", "") }}Conan(ConanFile):  # 
         self.requires("{{ dep }}")
         {% endfor %}
     {% endif %}
+
+    {% if config.project.target.family == "stm32" %}
+    def source(self) -> None:
+        git = tools.Git(folder="third-party/stm32-cmake")
+        git.clone("https://github.com/ObKo/stm32-cmake.git", "master")
+    {% endif %}
+
+    def layout(self):
+        cmake_layout(self)
+
+    def generate(self):
+        tc = CMakeToolchain(self)
+        tc.generate()
+
+    def build(self) -> None:
+        cmake = CMake(self)
+        cmake.configure()
+        cmake.build()
+
+    def package(self) -> None:
+        {% if config.project.lib_name %}
+        cmake = CMake(self)
+        cmake.install()
+        {% endif %}
+        {% if config.project.bin_name %}
+        self.copy("*.bin")
+        self.copy("*.elf")
+        {% endif %}
+
+    {% if config.project.lib_name %}
+    def package_info(self) -> None:
+        self.cpp_info.libs = ["{{ config.project.name }}"]
+    {% endif %}
+
+  
+
+
