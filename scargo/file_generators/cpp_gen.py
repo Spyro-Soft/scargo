@@ -36,7 +36,7 @@ class _CppTemplateGen:
 
         create_file_from_template(
             "cpp/lib.cpp.j2",
-            self._src_dir / f"{lib_name}.cpp",
+            self._src_dir / f"{self._config.project.target.source_dir}/{lib_name}.cpp",
             template_params={"class_name": class_name, "lib_name": lib_name},
             config=self._config,
         )

@@ -163,6 +163,8 @@ def new_project_x86(tmpdir_factory: TempdirFactory) -> Optional[Path]:
         git=False,
     )
     os.chdir(project_name)
+    # h file for gen tests added
+    Path("src/test_lib.h").touch()
     scargo_update(Path(os.getcwd(), "scargo.toml"))
     bin_name = get_bin_name()
     expected_bin_file_path = Path("src", f"{bin_name.lower()}.cpp")
@@ -184,6 +186,8 @@ def new_project_esp32(tmpdir_factory: TempdirFactory) -> Optional[Path]:
         git=False,
     )
     os.chdir(project_name)
+    # h file for gen tests added
+    Path("main/test_lib.h").touch()
     scargo_update(Path(os.getcwd(), "scargo.toml"))
     bin_name = get_bin_name()
     expected_bin_file_path = Path("main", f"{bin_name.lower()}.cpp")
@@ -205,6 +209,8 @@ def new_project_stm32(tmpdir_factory: TempdirFactory) -> Optional[Path]:
         git=False,
     )
     os.chdir(project_name)
+    # h file for gen tests added
+    Path("src/test_lib.h").touch()
     scargo_update(Path(os.getcwd(), "scargo.toml"))
     bin_name = get_bin_name()
     expected_bin_file_path = Path("src", f"{bin_name.lower()}.cpp")

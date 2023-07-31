@@ -1,6 +1,6 @@
 import sys
 from pathlib import Path, PurePosixPath
-from typing import List
+from typing import Any, Dict, List
 
 import docker as dock
 from docker import DockerClient
@@ -10,6 +10,26 @@ from scargo.global_values import SCARGO_DOCKER_ENV
 from scargo.logger import get_logger
 
 logger = get_logger()
+
+
+def prepare_docker(project_config: ProjectConfig, project_path: Path) -> Dict[str, Any]:
+    relative_path = Path.cwd().relative_to(project_path)
+    path_in_docker = PurePosixPath("/workspace", relative_path)
+
+    entrypoint = ""
+    if project_config.target.family == "esp32":
+        entrypoint = "/opt/esp/entrypoint.sh"
+
+    docker_tag = project_config.docker_image_tag
+    client = dock.from_env()
+
+    return {
+        "project_path": project_path,
+        "client": client,
+        "path_in_docker": path_in_docker,
+        "entrypoint": entrypoint,
+        "docker_tag": docker_tag,
+    }
 
 
 def run_scargo_again_in_docker(
@@ -22,12 +42,10 @@ def run_scargo_again_in_docker(
     :param Path project_path: path to project root
     :return: None
     """
+
     build_env = project_config.build_env
     if build_env != SCARGO_DOCKER_ENV or Path("/.dockerenv").exists():
         return
-
-    relative_path = Path.cwd().relative_to(project_path)
-    path_in_docker = PurePosixPath("/workspace", relative_path)
 
     cmd_args = sys.argv[1:]
     try:
@@ -38,22 +56,10 @@ def run_scargo_again_in_docker(
     except Exception as e:
         logger.error(e)
 
-    entrypoint = ""
-    if project_config.target.family == "esp32":
-        entrypoint = "/opt/esp/entrypoint.sh"
-
-    docker_tag = project_config.docker_image_tag
-    client = dock.from_env()
-
-    status_code = run_command_in_docker(
-        ["scargo", *cmd_args],
-        client,
-        docker_tag,
-        entrypoint,
-        project_path,
-        path_in_docker,
+    result = run_command_in_docker(
+        command=["scargo", *cmd_args], **prepare_docker(project_config, project_path)
     )
-    sys.exit(status_code)
+    sys.exit(result["StatusCode"])
 
 
 def run_command_in_docker(  # type: ignore[no-any-unimported]
@@ -63,7 +69,7 @@ def run_command_in_docker(  # type: ignore[no-any-unimported]
     entrypoint: str,
     project_path: Path,
     path_in_docker: PurePosixPath,
-) -> int:
+) -> Dict[str, Any]:
     logger.info(f"Running '{' '.join(command)}' command in docker.")
     container = client.containers.run(
         docker_tag,
@@ -75,8 +81,10 @@ def run_command_in_docker(  # type: ignore[no-any-unimported]
         working_dir=str(path_in_docker),
     )
     output = container.attach(stdout=True, stream=True, logs=True, stderr=True)
+    output_str = ""
     for line in output:
         print(line.decode(), end="")
+        output_str += line.decode()
     result = container.wait()
     container.remove()
-    return result["StatusCode"]  # type: ignore[no-any-return]
+    return {"StatusCode": result["StatusCode"], "output": output_str}

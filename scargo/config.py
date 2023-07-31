@@ -42,7 +42,7 @@ class Config(BaseModel):
 
     @property
     def include_dir_path(self) -> Path:
-        return self.project_root / self.project.target.include_dir
+        return self.source_dir_path / self.project.target.include_dir
 
     def get_stm32_config(self) -> "Stm32Config":
         if not self.stm32:
