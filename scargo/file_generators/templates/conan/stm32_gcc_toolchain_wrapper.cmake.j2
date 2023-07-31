@@ -1,0 +1,7 @@
+include(/workspace/third-party/stm32-cmake/cmake/stm32_gcc.cmake)
+
+stm32_get_chip_info($ENV{STM32_CHIP} FAMILY STM32_FAMILY DEVICE STM32_DEVICE TYPE STM32_TYPE)
+
+add_compile_options(--specs=nosys.specs)
+add_link_options(--specs=nosys.specs)
+link_libraries(STM32::${STM32_FAMILY})

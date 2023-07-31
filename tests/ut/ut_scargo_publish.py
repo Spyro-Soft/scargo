@@ -41,17 +41,26 @@ def config(monkeypatch: pytest.MonkeyPatch) -> Config:
 def test_publish(config: Config, fp: FakeProcess) -> None:
     # ARRANGE
     project_name = config.project.name
-    version = config.project.version
     conan_clean_cmd = "conan remote clean"
     conan_add_remote_1_cmd = ["conan", "remote", "add", REMOTE_REPO_NAME_1, EXAMPLE_URL]
     conan_add_remote_2_cmd = ["conan", "remote", "add", REMOTE_REPO_NAME_2, EXAMPLE_URL]
     conan_user_cmd = "conan user"
     conan_add_conacenter_cmd = "conan remote add conancenter https://center.conan.io"
-    conan_export_cmd = "conan export-pkg . -f"
+    conan_export_cmd = [
+        "conan",
+        "create",
+        ".",
+        "-pr:b",
+        "default",
+        "-pr:h",
+        f"./.conan/profiles/{config.project.target.family}_Release",
+        "-b",
+        "missing",
+    ]
     conan_upload_cmd = [
         "conan",
         "upload",
-        f"{project_name}/{version}",
+        f"{project_name}",
         "-r",
         REPO_NAME,
         "--all",
@@ -158,18 +167,30 @@ def test_create_package_fail(
 ) -> None:
     # ARRANGE
     project_name = config.project.name
-    version = config.project.version
     fp.register("conan remote clean")
     fp.register(["conan", "remote", "add", REMOTE_REPO_NAME_1, EXAMPLE_URL])
     fp.register(["conan", "remote", "add", REMOTE_REPO_NAME_2, EXAMPLE_URL])
     fp.register("conan user", occurrences=2)
     fp.register("conan remote add conancenter https://center.conan.io")
-    fp.register("conan export-pkg . -f", returncode=1)
+    fp.register(
+        [
+            "conan",
+            "create",
+            ".",
+            "-pr:b",
+            "default",
+            "-pr:h",
+            f"./.conan/profiles/{config.project.target.family}_Release",
+            "-b",
+            "missing",
+        ],
+        returncode=1,
+    )
     fp.register(
         [
             "conan",
             "upload",
-            f"{project_name}/{version}",
+            f"{project_name}",
             "-r",
             REPO_NAME,
             "--all",
@@ -178,10 +199,12 @@ def test_create_package_fail(
     )
 
     # ACT
-    scargo_publish(REPO_NAME)
+    with pytest.raises(SystemExit) as error:
+        scargo_publish(REPO_NAME)
 
     # ASSERT
     assert "Unable to create package" in caplog.text
+    assert error.value.code == 1
 
 
 def test_upload_package_fail(
@@ -191,18 +214,29 @@ def test_upload_package_fail(
 ) -> None:
     # ARRANGE
     project_name = config.project.name
-    version = config.project.version
     fp.register("conan remote clean")
     fp.register(["conan", "remote", "add", REMOTE_REPO_NAME_1, EXAMPLE_URL])
     fp.register(["conan", "remote", "add", REMOTE_REPO_NAME_2, EXAMPLE_URL])
     fp.register("conan user", occurrences=2)
     fp.register("conan remote add conancenter https://center.conan.io")
-    fp.register("conan export-pkg . -f")
+    fp.register(
+        [
+            "conan",
+            "create",
+            ".",
+            "-pr:b",
+            "default",
+            "-pr:h",
+            f"./.conan/profiles/{config.project.target.family}_Release",
+            "-b",
+            "missing",
+        ],
+    )
     fp.register(
         [
             "conan",
             "upload",
-            f"{project_name}/{version}",
+            f"{project_name}",
             "-r",
             REPO_NAME,
             "--all",

@@ -16,7 +16,7 @@ from scargo.logger import get_logger
 logger = get_logger()
 
 
-def scargo_publish(repo: str) -> None:
+def scargo_publish(repo: str, profile: str = "Release") -> None:
     """
     Publish conan package
 
@@ -27,7 +27,6 @@ def scargo_publish(repo: str) -> None:
     project_path = config.project_root
     project_config = config.project
     project_name = project_config.name
-    version = project_config.version
 
     conan_clean_remote()
     conan_add_remote(project_path, config)
@@ -36,12 +35,22 @@ def scargo_publish(repo: str) -> None:
     # Export package
     try:
         subprocess.check_call(
-            "conan export-pkg . -f",
+            [
+                "conan",
+                "create",
+                ".",
+                "-pr:b",
+                "default",
+                "-pr:h",
+                f"./.conan/profiles/{config.project.target.family}_{profile}",
+                "-b",
+                "missing",
+            ],
             cwd=project_path,
-            shell=True,
         )
     except subprocess.CalledProcessError:
         logger.error("Unable to create package")
+        sys.exit(1)
 
     # Upload package to artifactory
     conan_repo = ["-r", repo] if repo else []
@@ -50,7 +59,7 @@ def scargo_publish(repo: str) -> None:
             [
                 "conan",
                 "upload",
-                f"{project_name}/{version}",
+                f"{project_name}",
                 *conan_repo,
                 "--all",
                 "--confirm",

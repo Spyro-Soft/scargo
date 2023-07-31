@@ -15,6 +15,7 @@ class _CppTemplateGen:
     def __init__(self, config: Config) -> None:
         self._config = config
         self._src_dir = config.source_dir_path
+        self._inc_dir = config.include_dir_path
 
     def _generate_bin(self, bin_name: str) -> None:
         """Function which creates main.cpp file using jinja"""
@@ -33,15 +34,17 @@ class _CppTemplateGen:
         lib_name = lib_name.lower()
         class_name = "".join(lib_name.replace("_", " ").title().split())
 
-        self._create_file_from_template(
+        create_file_from_template(
             "cpp/lib.cpp.j2",
-            f"{lib_name}.cpp",
+            self._src_dir / f"{lib_name}.cpp",
             template_params={"class_name": class_name, "lib_name": lib_name},
+            config=self._config,
         )
-        self._create_file_from_template(
+        create_file_from_template(
             "cpp/lib.h.j2",
-            f"{lib_name}.h",
+            self._inc_dir / f"{lib_name}.h",
             template_params={"class_name": class_name},
+            config=self._config,
         )
 
     def _generate_cmake(self) -> None:

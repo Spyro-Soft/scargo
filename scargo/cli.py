@@ -365,12 +365,13 @@ def new(
 @cli.command()
 def publish(
     repo: str = Option("", "--repo", "-r", help="Repo name"),
+    profile: str = Option("Release", "--profile", "-p"),
     base_dir: Optional[Path] = BASE_DIR_OPTION,
 ) -> None:
     """Upload conan pkg to repo"""
     if base_dir:
         os.chdir(base_dir)
-    scargo_publish(repo)
+    scargo_publish(repo, profile)
 
 
 ###############################################################################
