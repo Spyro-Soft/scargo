@@ -55,10 +55,18 @@ jobs:
           pip install -r ci/requirements.txt
 
       - name: Unit tests
-        run: ./run.py -u
+        run: |
+          # Clean docker before test (github like to go out of memory)
+          # Also there is need for repeatable results with docker (cache is faster but it can give some false positives and false negatives while testing)
+          docker system prune -af --volumes
+          ./run.py -u
 
       - name: Integration tests
-        run: ./run.py -t
+        run: |
+           # Clean docker before test (github like to go out of memory)
+           # Also there is need for repeatable results with docker (cache is faster but it can give some false positives and false negatives while testing)
+           docker system prune -af --volumes
+           ./run.py -t
 
       - name: Archive unit-integration-tests results
         uses: actions/upload-artifact@v3
