@@ -64,6 +64,22 @@ class Config(BaseModel):
                 raise ConfigError("No [stm32] section in config")
             if target_id == "esp32" and not values["esp32"]:
                 raise ConfigError("No [esp32] section in config")
+
+        # Set default value of cmake_build_type - Debug for non-stanard profiles,
+        # If profile is on standard_profiles list, use it's name instead
+        standard_profiles: List[str] = [
+            "Debug",
+            "Release",
+            "RelWithDebInfo",
+            "MinSizeRel",
+        ]
+        if "profiles" in values:
+            for name, profile in values["profiles"].items():
+                if profile.cmake_build_type is None:
+                    if name in standard_profiles:
+                        profile.cmake_build_type = name
+                    else:
+                        profile.cmake_build_type = "Debug"
         return values
 
 
@@ -158,7 +174,7 @@ class ProfileConfig(BaseModel, extra=Extra.allow):
     cxxflags: Optional[str]
     cc: Optional[str] = None
     cxx: Optional[str] = None
-    cmake_build_type: Optional[str] = Field("Debug", alias="cmake-build-type")
+    cmake_build_type: Optional[str] = Field(None, alias="cmake-build-type")
 
     @property
     def extras(self) -> Dict[str, Any]:

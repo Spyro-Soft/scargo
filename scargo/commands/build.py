@@ -53,6 +53,8 @@ def scargo_build(profile: str) -> None:
                 ".",
                 "-if",
                 build_dir,
+                "-of",
+                build_dir,
                 "-pr:b",
                 "default",
                 "-pr:h",
@@ -67,9 +69,21 @@ def scargo_build(profile: str) -> None:
                 "conan",
                 "build",
                 f"{project_dir}",
+                "-bf",
+                build_dir,
             ],
             cwd=build_dir,
         )
+
+        get_logger().info("Copying artifacts...")
+        # This is a workaround so that different profiles can work together with conan
+        # Conan always calls CMake with '
+        subprocess.check_call(
+            f"cp -r -l -f {build_dir}/build/{config.profiles[profile].cmake_build_type}/* .",
+            cwd=build_dir,
+            shell=True,
+        )
+        get_logger().info("Artifacts copied")
 
     except subprocess.CalledProcessError:
         logger.error("Unable to build exec file")
