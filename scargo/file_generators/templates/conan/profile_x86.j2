@@ -23,17 +23,12 @@ arch=x86_64
 os_build=Linux
 arch_build=x86_64
 
-{# TODO: [kta] Here there is a code smell due to satisfy backwards-compatibility. Change in scargo 2.0 to: #}
-{# cmake_build_type = {{ config.profiles[profile].cmake_build_type }} #}
-{# This will enforce definition of cmake_build_type in scargo.toml [profile.X] section #}
-build_type={{ profile if (profile in standard_profiles) else config.profiles[profile].cmake_build_type }}
+build_type={{ config.profiles[profile].cmake_build_type }}
 
 
 [conf]
 tools.build:cflags=["{{ config.project.cflags if config.project.cflags}} {{config.profiles.get(profile).cflags if config.profiles.get(profile).cflags}}"]
 tools.build:cxxflags=["{{ config.project.cxxflags if config.project.cxxflags }} {{ config.profiles.get(profile).cxxflags if config.profiles.get(profile).cxxflags }}"]
-
-
 {% if config.project.max_build_jobs != None %}
 tools.build:jobs={{config.project.max_build_jobs}}
 {% endif %}
