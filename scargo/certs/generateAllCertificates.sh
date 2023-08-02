@@ -98,7 +98,7 @@ else
     wget https://cacerts.digicert.com/DigiCertGlobalRootG2.crt.pem -O ${DIGIROOT_CERT}
     if [ $? -ne 0 ]; then
         echo -e "${RED} Failed to download Digiroot certificate" >&2
-        rm ${DIGIROOT_CERT}
+        rm -f ${DIGIROOT_CERT}
         exit 1
     fi
 fi
