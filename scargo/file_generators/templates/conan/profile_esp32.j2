@@ -1,6 +1,6 @@
 [buildenv]
 WORKAROUND_FOR_ESP32_C_FLAGS="{{ config.project.cflags if config.project.cflags}} {{config.profiles.get(profile).cflags if config.profiles.get(profile).cflags}}"
-WORKAROUND_FOR_ESP32_IDF_CXX_FLAGS="{{ config.project.cxxflags if config.project.cxxflags }} {{ config.profiles.get(profile).cxxflags if config.profiles.get(profile).cxxflags }}"
+WORKAROUND_FOR_ESP32_CXX_FLAGS="{{ config.project.cxxflags if config.project.cxxflags }} {{ config.profiles.get(profile).cxxflags if config.profiles.get(profile).cxxflags }}"
 
 [settings]
 compiler=gcc
