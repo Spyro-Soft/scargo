@@ -76,20 +76,26 @@ cxxflags = "-Wall -Wextra -Og --coverage -fkeep-inline-functions -fkeep-static-c
 
 gcov-executable = "" # Empty string -> use default gcov executable
 
-# conan dependencies "lib_name/version"
+# Underhood scargo use conan. All string valid for conan tool are valid here. eg "gtest/1.13.0"
 [dependencies]
+#general -> public conan dependencies of project they will be added to package info (eg. bianry dynamic linkage libary) they will be added also to scargo test. 
 general = [
 ]
+#build -> private conan dependencies usedn only during build process(eg. private static linkage library)
 build = [
 ]
+#tool -> special conan "not library" dependencies like cmake/3.22.
 tool = [
 ]
+#test-> conan dependencies used only for testing targets
 test = [
     "gtest/1.13.0"
 ]
 
 [conan.repo]
-# conancenter = "https://center.conan.io"
+#Passing conancenter here is not nessary as scargo adds it by default
+#Below example of private binary artifacts repository 
+#gitlab = "https://git.my_extra_gitlab_server.com"
 
 {% if target.family == "esp32" %}
 [esp32]
