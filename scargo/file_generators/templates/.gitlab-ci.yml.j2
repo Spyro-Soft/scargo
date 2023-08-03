@@ -39,7 +39,9 @@ debug:
   {% if project.target.family == "esp32" %}
     - source /opt/esp/entrypoint.sh
   {% endif %}
-    - scargo build
+    - CONAN_LOGIN_USERNAME=ci_user
+    - CONAN_PASSWORD=${CI_JOB_TOKEN}
+    - scargo build --profile Debug
   artifacts:
     paths:
       - build/Debug/bin
@@ -52,6 +54,8 @@ tests:
   extends: .merge_request
   allow_failure: true
   script:
+    - CONAN_LOGIN_USERNAME=ci_user
+    - CONAN_PASSWORD=${CI_JOB_TOKEN}
     - scargo test
   artifacts:
     paths:
