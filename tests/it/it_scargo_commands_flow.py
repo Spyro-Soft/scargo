@@ -132,6 +132,7 @@ def copy_project_stm32() -> None:
     generate_env(docker_path, config)
 
 
+@pytest.mark.xdist_group(name="group2")
 @pytest.mark.parametrize("project_creation", PROJECT_CREATION_x86)
 def test_project_x86_dev_flow(
     project_creation: str,
@@ -307,6 +308,7 @@ def test_project_stm32_dev_flow(
     assert result.exit_code == 0
 
 
+@pytest.mark.xdist_group(name="group1")
 def test_project_x86_scargo_from_pypi() -> None:
     # Test new and update work with pypi scargo version
     runner = ScargoTestRunner()

@@ -133,6 +133,9 @@ def perform_tests(
             "--cov=scargo",
             "--gherkin-terminal-reporter",
             "-v",
+            "-x",
+            "--count=100",
+            "--dist=loadgroup",
             test_path,
         ]
 
@@ -327,7 +330,7 @@ def main() -> None:
 
     if args.target:
         # -k could be replaced with -m as markers will be introduced in integration tests in the future
-        result = perform_tests(IT_DIR, "it", ["-n 4", f"-k {args.target[0]}"])
+        result = perform_tests(IT_DIR, "it", ["-x", "-n 3", f"-k {args.target[0]}"])
         if result:
             sys.exit(1)
 
