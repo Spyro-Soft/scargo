@@ -98,14 +98,6 @@ jobs:
           pip install --upgrade pip
           pip install -r ci/requirements.txt
 
-      - name: Build docker image for tests purpose
-        # Clean docker before test (github like to go out of memory)
-        # Also there is need for repeatable results with docker (cache is faster but it can give some false positives and false negatives while testing)
-        run: |
-          docker system prune -af --volumes
-          ./run.py -p "new proj_${{ matrix.target }} --target ${{ matrix.target }}"
-          rm -rf proj_${{ matrix.target }}
-
       - name: Integration tests
         run: |
           ./run.py -c "${{ matrix.target }}"
