@@ -1,6 +1,4 @@
 import os
-import re
-import subprocess
 from pathlib import Path
 from shutil import copy, copytree
 from unittest.mock import patch
@@ -11,7 +9,6 @@ from scargo.cli import cli
 from scargo.config import parse_config
 from scargo.file_generators.docker_gen import _DockerComposeTemplate
 from scargo.file_generators.env_gen import generate_env
-from scargo.global_values import SCARGO_PKG_PATH
 from scargo.path_utils import get_project_root_or_none
 from tests.it.utils import (
     ScargoTestRunner,
@@ -53,32 +50,6 @@ PROJECT_CREATION_stm32 = [
     "new_project_stm32",
     "copy_project_stm32",
 ]
-
-
-@pytest.fixture(autouse=True)
-def create_tmp_directory(tmp_path: Path) -> None:
-    os.chdir(tmp_path)
-
-
-def use_local_scargo() -> None:
-    # This is necessary, so we can test latest changes in docker
-    # Might be worth to rework with devpi later on
-    scargo_repo_root = SCARGO_PKG_PATH.parent
-    if "CI" in os.environ and "SCARGO_DOCKER_INSTALL_LOCAL" in os.environ:
-        return
-
-    os.environ["SCARGO_DOCKER_INSTALL_LOCAL"] = ""
-    result = subprocess.run(
-        ["flit", "build"],
-        cwd=scargo_repo_root,
-        check=True,
-        stdout=subprocess.PIPE,
-        stderr=subprocess.STDOUT,
-        text=True,
-    )
-    match = re.search(r"Built\swheel:\s*(dist/scargo.*.whl)", result.stdout)
-    assert match
-    os.environ["SCARGO_DOCKER_INSTALL_LOCAL"] = match.group(1)
 
 
 @pytest.fixture()
@@ -166,9 +137,8 @@ def copy_project_stm32() -> None:
 def test_project_x86_dev_flow(
     project_creation: str,
     request: pytest.FixtureRequest,
+    use_local_scargo: None,
 ) -> None:
-    use_local_scargo()
-
     # Arrange
     build_dir_path = Path("build")
     src_dir = "src"
@@ -263,10 +233,11 @@ def test_project_x86_dev_flow(
 def test_project_esp32_dev_flow(
     project_creation: str,
     request: pytest.FixtureRequest,
+    use_local_scargo: None,
 ) -> None:
     # ARRANGE
     runner = ScargoTestRunner()
-    use_local_scargo()
+
     # New or copy existing project for regression tests
     request.getfixturevalue(project_creation)
 
@@ -306,10 +277,11 @@ def test_project_esp32_dev_flow(
 def test_project_stm32_dev_flow(
     project_creation: str,
     request: pytest.FixtureRequest,
+    use_local_scargo: None,
 ) -> None:
     # Arrange
     runner = ScargoTestRunner()
-    use_local_scargo()
+
     # New or copy existing project for regression tests
     request.getfixturevalue(project_creation)
 
