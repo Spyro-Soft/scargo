@@ -14,6 +14,7 @@ def create_tmp_directory(tmp_path: Path) -> None:
 
 
 @pytest.fixture(scope="session")
+@pytest.mark.flaky(retries=1, delay=1)
 def use_local_scargo() -> None:
     # This is necessary, so we can test latest changes in docker
     # Might be worth to rework with devpi later on
