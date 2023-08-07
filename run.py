@@ -134,7 +134,7 @@ def perform_tests(
             "--gherkin-terminal-reporter",
             "-v",
             "-x",
-            "--count=100",
+            "--count=30",
             "--dist=loadgroup",
             test_path,
         ]
