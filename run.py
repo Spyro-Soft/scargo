@@ -7,6 +7,7 @@ import argparse
 import os
 import subprocess
 import sys
+from typing import List, Optional
 
 from common_dev.scripts.documentation import create_doc
 from scargo.cli import cli as scargo_cli
@@ -42,6 +43,16 @@ def get_cmdline_arguments() -> argparse.Namespace:
         default=False,
         dest="unit_test",
         help="Run all unit test only",
+    )
+
+    parser.add_argument(
+        "-c",
+        "--ci_tests",
+        nargs=1,
+        action="extend",
+        default=[],
+        dest="target",
+        help="Run integration on CI with usage of xdist and for specified target",
     )
 
     parser.add_argument(
@@ -91,13 +102,15 @@ def get_cmdline_arguments() -> argparse.Namespace:
         dest="doc",
         help="Create documentation for project using Sphinx",
     )
-
     args = parser.parse_args()
-
     return args
 
 
-def perform_tests(test_path: str, test_postfix: str, *test_flags: str) -> str:
+def perform_tests(
+    test_path: str,
+    test_postfix: str,
+    test_flags: Optional[List[str]] = None,
+) -> str:
     out_test_doc_dir = OUT + "/test_doc"
     os.makedirs(out_test_doc_dir, exist_ok=True)
 
@@ -306,12 +319,17 @@ def run_mypy() -> None:
 
 def main() -> None:
     args = get_cmdline_arguments()
-
     if not len(sys.argv) > 1:
         args.run_all = True
 
     if args.run_all:
         run_all_code_checkers()
+
+    if args.target:
+        # -k could be replaced with -m as markers will be introduced in integration tests in the future
+        result = perform_tests(IT_DIR, "it", [f"-k {args.target[0]}"])
+        if result:
+            sys.exit(1)
 
     if args.tests:
         result = perform_tests(IT_DIR, "it")

@@ -32,7 +32,7 @@ jobs:
         run: ./common_dev/scripts/pylintchecker.py -c scargo/ -s 9.95 --exclude=tests/
       - name: Check typing with mypy
         run: mypy --explicit-package-bases scargo tests common_dev run.py clean.py
-  tests:
+  unit_tests:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -61,18 +61,55 @@ jobs:
           docker system prune -af --volumes
           ./run.py -u
 
-      - name: Integration tests
-        run: |
-           # Clean docker before test (github like to go out of memory)
-           # Also there is need for repeatable results with docker (cache is faster but it can give some false positives and false negatives while testing)
-           docker system prune -af --volumes
-           ./run.py -t
-
-      - name: Archive unit-integration-tests results
+      - name: Archive unit-tests results
         uses: actions/upload-artifact@v3
         if: always()
         with:
-          name: unit-integration-test-report
+          name: unit-test-report
+          path: build/test_doc
+  integration_tests:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        target:
+          - esp32
+          - x86
+          - stm32
+          # optional target, should be added for new tests in case of introducing markers
+          # - not esp32 and not x86 and not stm32
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          submodules: recursive
+
+      - name: Apt install dependencies
+        run: |
+          sudo apt-get update --fix-missing
+          sudo apt-get install doxygen
+          sudo apt-get clean
+          sudo apt-get autoremove --yes
+          sudo rm -rf /var/lib/{cache,log}
+          sudo rm -rf /var/lib/apt/lists/*
+
+      - name: Pip install dependencies
+        run: |
+          pip install --upgrade pip
+          pip install -r ci/requirements.txt
+
+        # Clean docker before test (github like to go out of memory)
+        # Also there is need for repeatable results with docker (cache is faster but it can give some false positives and false negatives while testing)
+      - name: Integration tests
+        run: |
+          docker system prune -af --volumes
+          ./run.py -c "${{ matrix.target }}"
+
+      - name: Archive integration-tests results
+        uses: actions/upload-artifact@v3
+        if: always()
+        with:
+          name: integration-${{ matrix.target }}-test-report
           path: build/test_doc
 
   documentation:

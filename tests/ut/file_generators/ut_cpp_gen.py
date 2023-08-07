@@ -44,13 +44,13 @@ def test_generate_cpp__lib_only(
     assert mock_create_file_from_template.mock_calls == [
         call(
             "cpp/lib.cpp.j2",
-            Path("src/test_lib.cpp"),
+            Path("src/src/test_lib.cpp"),
             template_params={"class_name": "TestLib", "lib_name": "test_lib"},
             config=config,
         ),
         call(
             "cpp/lib.h.j2",
-            Path("include/test_lib.h"),
+            Path("src/include/test_lib.h"),
             template_params={"class_name": "TestLib"},
             config=config,
         ),
@@ -74,13 +74,13 @@ def test_generate_cpp__bin_and_lib(
     assert mock_create_file_from_template.mock_calls == [
         call(
             "cpp/lib.cpp.j2",
-            Path("src/test_lib.cpp"),
+            Path("src/src/test_lib.cpp"),
             template_params={"class_name": "TestLib", "lib_name": "test_lib"},
             config=config,
         ),
         call(
             "cpp/lib.h.j2",
-            Path("include/test_lib.h"),
+            Path("src/include/test_lib.h"),
             template_params={"class_name": "TestLib"},
             config=config,
         ),
