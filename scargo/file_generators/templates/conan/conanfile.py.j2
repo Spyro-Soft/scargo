@@ -8,6 +8,7 @@ from conan.tools.cmake import CMakeToolchain, CMake, cmake_layout
 
 {% if config.project.target.family == "stm32" %}
 from conans import tools
+import os
 {% endif %}
 
 class {{ config.project.name|capitalize|replace("-", "") }}Conan(ConanFile):  # type: ignore[misc, no-any-unimported]
@@ -39,7 +40,8 @@ class {{ config.project.name|capitalize|replace("-", "") }}Conan(ConanFile):  # 
     {% if config.project.target.family == "stm32" %}
     def source(self) -> None:
         git = tools.Git(folder="third-party/stm32-cmake")
-        git.clone("https://github.com/ObKo/stm32-cmake.git", "master")
+        if not os.listdir(git.folder):
+            git.clone("https://github.com/ObKo/stm32-cmake.git", "master")
     {% endif %}
 
     def layout(self) -> None:
