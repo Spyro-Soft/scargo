@@ -1,17 +1,14 @@
 [env]
-
 {% if config.profiles[profile].cc %}
 CC={{ config.profiles[profile].cc }}
 {% else %}
 CC=gcc
 {% endif %}
-
 {% if config.profiles[profile].cxx %}
 CXX={{ config.profiles[profile].cxx }}
 {% else %}
 CXX=g++
 {% endif %}
-
 
 [settings]
 compiler=gcc
