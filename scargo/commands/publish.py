@@ -31,7 +31,7 @@ def scargo_publish(repo: str, profile: str = "Release") -> None:
     conan_clean_remote()
     conan_add_remote(project_path, config)
     conan_add_conancenter()
-
+    conan_source(project_path)
     # Export package
     try:
         subprocess.check_call(
@@ -138,3 +138,17 @@ def conan_add_user(remote: str) -> None:
             )
         except subprocess.CalledProcessError:
             logger.error("Unable to add user")
+
+
+def conan_source(project_dir: Path) -> None:
+    try:
+        subprocess.check_call(
+            [
+                "conan",
+                "source",
+                ".",
+            ],
+            cwd=project_dir,
+        )
+    except subprocess.CalledProcessError:
+        logger.error("Unable to source")
