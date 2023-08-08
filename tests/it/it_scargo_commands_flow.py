@@ -225,8 +225,8 @@ def test_project_x86_dev_flow(
     assert result.exit_code == 0
     c_flags_re = r"tools\.build:cflags=\[\"(.+?) cflags for new profile\"\]"
     cxx_flags_re = r"tools\.build:cxxflags=\[\"(.+?) cxxflags for new profile\"\]"
-    assert assert_regex_in_file(Path(".conan/profiles/x86_new"), c_flags_re)
-    assert assert_regex_in_file(Path(".conan/profiles/x86_new"), cxx_flags_re)
+    assert assert_regex_in_file(Path("config/conan/profiles/x86_new"), c_flags_re)
+    assert assert_regex_in_file(Path("config/conan/profiles/x86_new"), cxx_flags_re)
 
     # Gen -u
     result = runner.invoke(cli, ["gen", "-u", src_dir])
