@@ -42,7 +42,7 @@ def scargo_publish(repo: str, profile: str = "Release") -> None:
                 "-pr:b",
                 "default",
                 "-pr:h",
-                f"./.conan/profiles/{config.project.target.family}_{profile}",
+                f"./config/conan/profiles/{config.project.target.family}_{profile}",
                 "-b",
                 "missing",
             ],

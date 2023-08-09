@@ -19,7 +19,6 @@ class {{ config.project.name|capitalize|replace("-", "") }}Conan(ConanFile):  # 
     url = "{{ config.project.homepage_url }}"
     generators = "CMakeDeps"
     exports_sources = ["{{ config.source_dir_path.relative_to(config.project_root) }}/*", "CMakeLists.txt", "include/*", "config/*"]
-
     {% if config.dependencies.build or config.dependencies.tool %}
     def build_requirements(self) -> None:
         {% for dep in config.dependencies.build %}
@@ -68,7 +67,3 @@ class {{ config.project.name|capitalize|replace("-", "") }}Conan(ConanFile):  # 
     def package_info(self) -> None:
         self.cpp_info.libs = ["{{ config.project.name }}"]
     {% endif %}
-
-  
-
-
