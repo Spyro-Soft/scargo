@@ -64,7 +64,6 @@ dev = [
     "pytest-cov",
     "pytest-mock",
     "pytest-subprocess",
-    "pytest-assume",
     "pytest",
     "types-clang==0.14.3",
     "types-toml",

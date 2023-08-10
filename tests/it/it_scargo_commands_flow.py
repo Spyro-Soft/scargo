@@ -215,7 +215,8 @@ def get_expected_files_list_new_proj_bin(src_dir_name: str, bin_name: str) -> Li
     ],
     scope="session",
 )
-class TestNewBinProjectFlow:
+@pytest.mark.xdist_group(name="TestBinProjectFlow")
+class TestBinProjectFlow:
     def test_cli_help(
         self,
         test_state: TestState,
