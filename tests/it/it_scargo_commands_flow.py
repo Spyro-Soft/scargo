@@ -53,15 +53,15 @@ TEST_DEVICE_ID = "DUMMY:DEVICE:ID:12345"
 TEST_DUMMY_FS_FILE = "dummy_fs_file.txt"
 
 
-class TestTargetIds(Enum):
+class TargetIds(Enum):
     x86 = "x86"
     stm32 = "stm32"
     esp32 = "esp32"
 
 
 @dataclass
-class TestState:
-    target_id: TestTargetIds
+class StateOfTest:
+    target_id: TargetIds
     proj_name: str
     proj_to_coppy_path: Optional[Path] = None
     proj_dir: Optional[Path] = None
@@ -73,15 +73,15 @@ class TestState:
             self.bin_name = self.proj_name
         else:
             self.bin_name = self._get_bin_name_fom_cmake()
-        if self.target_id == TestTargetIds.x86:
+        if self.target_id == TargetIds.x86:
             self.obj_dump_path = Path("objdump")
             self.expected_bin_file_format = "elf64-x86-64"
-        elif self.target_id == TestTargetIds.stm32:
+        elif self.target_id == TargetIds.stm32:
             self.obj_dump_path = Path(
                 "/opt/gcc-arm-none-eabi/bin/arm-none-eabi-objdump"
             )
             self.expected_bin_file_format = "elf32-littlearm"
-        elif self.target_id == TestTargetIds.esp32:
+        elif self.target_id == TargetIds.esp32:
             self.obj_dump_path = Path(
                 "/opt/esp-idf/tools/xtensa-esp32-elf/esp-2021r2-patch5-8.4.0/"
                 "xtensa-esp32-elf/bin/xtensa-esp32-elf-objdump"
@@ -117,11 +117,11 @@ class TestState:
 
     def get_bin_file_path(self, profile: Optional[str] = "Debug") -> Path:
         path_to_profile = self._get_path_to_build_profile(profile)
-        if self.target_id == TestTargetIds.x86:
+        if self.target_id == TargetIds.x86:
             bin_file_path = Path(f"{path_to_profile}/bin/{self.bin_name}")
-        elif self.target_id == TestTargetIds.stm32:
+        elif self.target_id == TargetIds.stm32:
             bin_file_path = Path(f"{path_to_profile}/bin/{self.bin_name}.elf")
-        elif self.target_id == TestTargetIds.esp32:
+        elif self.target_id == TargetIds.esp32:
             bin_file_path = Path(f"{path_to_profile}/{self.bin_name}.elf")
         else:
             raise ValueError(
@@ -134,17 +134,17 @@ class TestState:
     ) -> List[Path]:
         bin_result_files_path = [self.get_bin_file_path(profile)]
         path_to_profile = self._get_path_to_build_profile(profile)
-        if self.target_id == TestTargetIds.stm32:
+        if self.target_id == TargetIds.stm32:
             bin_result_files_path.append(
                 Path(f"{path_to_profile}/bin/{self.bin_name}.elf")
             )
             bin_result_files_path.append(
                 Path(f"{path_to_profile}/bin/{self.bin_name}.hex")
             )
-        elif self.target_id == TestTargetIds.esp32:
+        elif self.target_id == TargetIds.esp32:
             bin_result_files_path.append(Path(f"{path_to_profile}/{self.bin_name}.elf"))
             bin_result_files_path.append(Path(f"{path_to_profile}/{self.bin_name}.map"))
-        elif self.target_id != TestTargetIds.x86:
+        elif self.target_id != TargetIds.x86:
             raise ValueError(
                 f"Bin path not defined for target id {self.target_id.value}"
             )
@@ -174,33 +174,33 @@ def get_expected_files_list_new_proj_bin(src_dir_name: str, bin_name: str) -> Li
 @pytest.mark.parametrize(
     "test_state",
     [
-        TestState(
-            target_id=TestTargetIds.x86,
+        StateOfTest(
+            target_id=TargetIds.x86,
             proj_name="new_bin_project_x86",
             bin_name=TEST_BIN_NAME,
         ),
-        TestState(
-            target_id=TestTargetIds.stm32,
+        StateOfTest(
+            target_id=TargetIds.stm32,
             proj_name="new_bin_project_stm32",
             bin_name=TEST_BIN_NAME,
         ),
-        TestState(
-            target_id=TestTargetIds.esp32,
+        StateOfTest(
+            target_id=TargetIds.esp32,
             proj_name="new_bin_project_esp32",
             bin_name=TEST_BIN_NAME,
         ),
-        TestState(
-            target_id=TestTargetIds.x86,
+        StateOfTest(
+            target_id=TargetIds.x86,
             proj_name=TEST_PROJECT_x86_NAME,
             proj_to_coppy_path=TEST_PROJECT_x86_PATH,
         ),
-        TestState(
-            target_id=TestTargetIds.stm32,
+        StateOfTest(
+            target_id=TargetIds.stm32,
             proj_name=TEST_PROJECT_STM32_NAME,
             proj_to_coppy_path=TEST_PROJECT_STM32_PATH,
         ),
-        TestState(
-            target_id=TestTargetIds.esp32,
+        StateOfTest(
+            target_id=TargetIds.esp32,
             proj_name=TEST_PROJECT_ESP32_NAME,
             proj_to_coppy_path=TEST_PROJECT_ESP32_PATH,
         ),
@@ -219,13 +219,16 @@ def get_expected_files_list_new_proj_bin(src_dir_name: str, bin_name: str) -> Li
 class TestBinProjectFlow:
     def test_cli_help(
         self,
-        test_state: TestState,
+        test_state: StateOfTest,
         tmpdir_factory: TempdirFactory,
+        request,
         use_local_scargo: None,
     ) -> None:
         """Simple test which checks if scargo new -h command can be invoked and do not return any error"""
         # create temporary dir for new project
-        test_state.proj_dir = tmpdir_factory.mktemp(test_state.proj_name)
+        worker_input = getattr(request.config, "workerinput", {"workerid": "None"})
+        worker_id = worker_input["workerid"]
+        test_state.proj_dir = tmpdir_factory.mktemp(f"test_state.proj_name_{worker_id}")
         os.chdir(test_state.proj_dir)
 
         # New Help
@@ -234,7 +237,8 @@ class TestBinProjectFlow:
             result.exit_code == 0
         ), f"Command 'new -h' end with non zero exit code: {result.exit_code}"
 
-    def test_cli_new(self, test_state: TestState) -> None:
+    @pytest.mark.order(after="test_cli_help")
+    def test_cli_new(self, test_state: StateOfTest) -> None:
         """This test invoking scargo new command with binary file and checking if command was executed without error
         and expected project structure and files were generated without checking correctness of those generated files
         content"""
@@ -266,7 +270,8 @@ class TestBinProjectFlow:
                 file
             ).is_file(), f"File: {file} was expected after new command, but not exist"
 
-    def test_coppy_project(self, test_state: TestState) -> None:
+    @pytest.mark.order(after="test_cli_new")
+    def test_coppy_project(self, test_state: StateOfTest) -> None:
         if test_state.proj_to_coppy_path is None:
             pytest.skip("Test of new project - no copying needed")
 
@@ -281,7 +286,8 @@ class TestBinProjectFlow:
         config = parse_config(project_path / "scargo.lock")
         generate_env(docker_path, config)
 
-    def test_cli_docker_run(self, test_state: TestState) -> None:
+    @pytest.mark.order(after="test_coppy_project")
+    def test_cli_docker_run(self, test_state: StateOfTest) -> None:
         """This test check if call of scargo docker run command will finish without error"""
         # Docker Run
         os.chdir(f"{test_state.proj_dir}/{test_state.proj_name}")
@@ -290,7 +296,8 @@ class TestBinProjectFlow:
             result.exit_code == 0
         ), f"Command 'docker run' end with non zero exit code: {result.exit_code}"
 
-    def test_cli_update(self, test_state: TestState) -> None:
+    @pytest.mark.order(after="test_cli_docker_run")
+    def test_cli_update(self, test_state: StateOfTest) -> None:
         """This test check if call of scargo update command will finish without error"""
         # Update command
         os.chdir(f"{test_state.proj_dir}/{test_state.proj_name}")
@@ -299,7 +306,8 @@ class TestBinProjectFlow:
             result.exit_code == 0
         ), f"Command 'update' end with non zero exit code: {result.exit_code}"
 
-    def test_cli_build(self, test_state: TestState) -> None:
+    @pytest.mark.order(after="test_cli_update")
+    def test_cli_build(self, test_state: StateOfTest) -> None:
         """This test check if call of scargo build command will finish without error and if under default profile in
         build folder bin file is present"""
         # Build
@@ -311,7 +319,8 @@ class TestBinProjectFlow:
         for file in test_state.get_build_result_files_paths():
             assert file.is_file(), f"Expected file: {file} not exist"
 
-    def test_cli_clean(self, test_state: TestState) -> None:
+    @pytest.mark.order(after="test_cli_build")
+    def test_cli_clean(self, test_state: StateOfTest) -> None:
         """This test check if call of scargo clean command will finish without error and
         if build folder will be removed"""
         # Clean
@@ -324,7 +333,8 @@ class TestBinProjectFlow:
             "build"
         ).is_dir(), "Dictionary 'build' still exist when 'clean' should remove it"
 
-    def test_cli_build_profile_debug(self, test_state: TestState) -> None:
+    @pytest.mark.order(after="test_cli_clean")
+    def test_cli_build_profile_debug(self, test_state: StateOfTest) -> None:
         """This test check if call of scargo build --profile=Debug command will finish without error and if under Debug
         profile in build folder bin file is present"""
         # Build
@@ -336,8 +346,9 @@ class TestBinProjectFlow:
         for file in test_state.get_build_result_files_paths(profile="Debug"):
             assert file.is_file(), f"Expected file: {file} not exist"
 
+    @pytest.mark.order(after="test_cli_build_profile_debug")
     def test_debug_bin_file_format_by_objdump_results(
-        self, test_state: TestState
+        self, test_state: StateOfTest
     ) -> None:
         """This test checks if bin file has expected file format by running objdump on this file"""
         # objdump
@@ -354,7 +365,8 @@ class TestBinProjectFlow:
             output
         ), f"Objdump results: {output} did not contain expected bin file format: {test_state.expected_bin_file_format}"
 
-    def test_cli_clean_after_build_profile_debug(self, test_state: TestState) -> None:
+    @pytest.mark.order(after="test_debug_bin_file_format_by_objdump_results")
+    def test_cli_clean_after_build_profile_debug(self, test_state: StateOfTest) -> None:
         """This test check if call of scargo clean command will finish without error and
         if build folder will be removed"""
         # Clean
@@ -367,7 +379,8 @@ class TestBinProjectFlow:
             "build"
         ).is_dir(), "Dictionary 'build' still exist when 'clean' should remove it"
 
-    def test_cli_build_profile_release(self, test_state: TestState) -> None:
+    @pytest.mark.order(after="test_cli_clean_after_build_profile_debug")
+    def test_cli_build_profile_release(self, test_state: StateOfTest) -> None:
         """This test check if call of scargo build --profile=Release command will finish without error and if under
         Release profile in build folder bin file is present"""
         # Build
@@ -379,8 +392,9 @@ class TestBinProjectFlow:
         for file in test_state.get_build_result_files_paths(profile="Release"):
             assert file.is_file(), f"Expected file: {file} not exist"
 
+    @pytest.mark.order(after="test_cli_build_profile_release")
     def test_release_bin_file_format_by_objdump_results(
-        self, test_state: TestState
+        self, test_state: StateOfTest
     ) -> None:
         """This test checks if bin file has expected file format by running objdump on this file"""
         # objdump
@@ -397,7 +411,10 @@ class TestBinProjectFlow:
             output
         ), f"Objdump results: {output} did not contain expected bin file format: {test_state.expected_bin_file_format}"
 
-    def test_cli_clean_after_build_profile_release(self, test_state: TestState) -> None:
+    @pytest.mark.order(after="test_release_bin_file_format_by_objdump_results")
+    def test_cli_clean_after_build_profile_release(
+        self, test_state: StateOfTest
+    ) -> None:
         """This test check if call of scargo clean command will finish without error and
         if build folder will be removed"""
         # Clean
@@ -410,7 +427,8 @@ class TestBinProjectFlow:
             "build"
         ).is_dir(), "Dictionary 'build' still exist when 'clean' should remove it"
 
-    def test_cli_fix(self, test_state: TestState) -> None:
+    @pytest.mark.order(after="test_cli_clean_after_build_profile_release")
+    def test_cli_fix(self, test_state: StateOfTest) -> None:
         """This test check if call of scargo fix command will finish without error and if no problems to fix
         will be found for newly created project"""
         # Fix
@@ -430,7 +448,8 @@ class TestBinProjectFlow:
                     expected_string in result.output
                 ), f"'{expected_string}' not found in output: {result.output}"
 
-    def test_cli_check(self, test_state: TestState) -> None:
+    @pytest.mark.order(after="test_cli_fix")
+    def test_cli_check(self, test_state: StateOfTest) -> None:
         """This test check if call of scargo check command will finish without error and if no problems will be found
         for newly created project"""
         os.chdir(f"{test_state.proj_dir}/{test_state.proj_name}")
@@ -442,7 +461,8 @@ class TestBinProjectFlow:
             "No problems found!" in result.output
         ), f"String 'No problems found!' not found in check command output {result.output}"
 
-    def test_cli_test(self, test_state: TestState) -> None:
+    @pytest.mark.order(after="test_cli_check")
+    def test_cli_test(self, test_state: StateOfTest) -> None:
         """This test check if call of scargo test command will finish without error and if no tests were found
         for newly created project"""
         os.chdir(f"{test_state.proj_dir}/{test_state.proj_name}")
@@ -454,7 +474,8 @@ class TestBinProjectFlow:
             "No tests were found!!!" in result.output
         ), f"String 'No tests were found!!!' not found in test command output {result.output}"
 
-    def test_precondition_add_new_profile(self, test_state: TestState) -> None:
+    @pytest.mark.order(after="test_cli_test")
+    def test_precondition_add_new_profile(self, test_state: StateOfTest) -> None:
         """This test can be treated as a precondition it's just adding new profile settings to scargo.toml file"""
         # add new profile
         os.chdir(f"{test_state.proj_dir}/{test_state.proj_name}")
@@ -466,7 +487,8 @@ class TestBinProjectFlow:
             NEW_PROFILE_CXXFLAGS,
         )
 
-    def test_cli_update_after_adding_new_profile(self, test_state: TestState) -> None:
+    @pytest.mark.order(after="test_precondition_add_new_profile")
+    def test_cli_update_after_adding_new_profile(self, test_state: StateOfTest) -> None:
         """This test check if call of scargo update command invoked after new adding profile settings to scargo.toml
         file will finish without error"""
         # Update command
@@ -475,7 +497,7 @@ class TestBinProjectFlow:
         assert (
             result.exit_code == 0
         ), f"Command 'update' end with non zero exit code: {result.exit_code}"
-        if test_state.target_id == TestTargetIds.esp32:
+        if test_state.target_id == TargetIds.esp32:
             c_flags_re = (
                 r"WORKAROUND_FOR_ESP32_C_FLAGS=\"(.+?) " + NEW_PROFILE_CFLAGS + r"\""
             )
@@ -510,7 +532,8 @@ class TestBinProjectFlow:
             f"not found in file: config/conan/profiles/{test_state.target_id.value}_{NEW_PROFILE_NAME}"
         )
 
-    def test_cli_build_profile_new(self, test_state: TestState) -> None:
+    @pytest.mark.order(after="test_cli_update_after_adding_new_profile")
+    def test_cli_build_profile_new(self, test_state: StateOfTest) -> None:
         """This test check if call of scargo build command for newly added profile will finish without error and
         if under this new profile in build folder bin file is present"""
         # Build
@@ -522,7 +545,8 @@ class TestBinProjectFlow:
         for file in test_state.get_build_result_files_paths(profile=NEW_PROFILE_NAME):
             assert file.is_file(), f"Expected file: {file} not exist"
 
-    def test_flags_stored_in_commands_file(self, test_state: TestState) -> None:
+    @pytest.mark.order(after="test_cli_build_profile_new")
+    def test_flags_stored_in_commands_file(self, test_state: StateOfTest) -> None:
         """This test check if created under new profile in build folder compile_commands.json file contains project
         flags and flags added with newly created profile, also check if c++ standard is set according to definition
         in scargo.toml file"""
@@ -561,7 +585,8 @@ class TestBinProjectFlow:
                     f"compile command: compile_command"
                 )
 
-    def test_cli_gen_u_option_nothing_to_gen(self, test_state: TestState) -> None:
+    @pytest.mark.order(after="test_flags_stored_in_commands_file")
+    def test_cli_gen_u_option_nothing_to_gen(self, test_state: StateOfTest) -> None:
         """This test check if call of scargo gen -u  "path_to_source_dir" command will finish without error and
         if unit test for added dummy .h file with prefix 'ut_' was created under tests/ut path
         """
@@ -579,8 +604,9 @@ class TestBinProjectFlow:
             "CMakeLists.txt"
         ], f"Only CMakeLists.txt file should be present in {ut_path}. Files under path: {os.listdir(ut_path)}"
 
+    @pytest.mark.order(after="test_cli_gen_u_option_nothing_to_gen")
     def test_precondition_create_and_fix_dummy_test_lib_h_file(
-        self, test_state: TestState
+        self, test_state: StateOfTest
     ) -> None:
         """This test adding dummy .h file to source project dir fit it by scargo fix command and check if file was
         fixed by scargo check command"""
@@ -595,7 +621,8 @@ class TestBinProjectFlow:
             result.exit_code == 0
         ), f"Command 'check' end with non zero exit code: {result.exit_code}"
 
-    def test_cli_gen_u_option(self, test_state: TestState) -> None:
+    @pytest.mark.order(after="test_precondition_create_and_fix_dummy_test_lib_h_file")
+    def test_cli_gen_u_option(self, test_state: StateOfTest) -> None:
         """This test check if call of scargo gen -u  "path_to_source_dir" command will finish without error and
         if unit test for added dummy .h file with prefix 'ut_' was created under tests/ut path
         """
@@ -612,7 +639,8 @@ class TestBinProjectFlow:
             ut_path, expected_ut_name
         ).is_file(), f"File {expected_ut_name} should be present in {ut_path}. Files under path: {os.listdir(ut_path)}"
 
-    def test_cli_test_some_tests_to_run(self, test_state: TestState) -> None:
+    @pytest.mark.order(after="test_cli_gen_u_option")
+    def test_cli_test_some_tests_to_run(self, test_state: StateOfTest) -> None:
         """This test check if call of scargo test command will finish without error and if one generated dummy unit
         test was found end executed without error"""
         os.chdir(f"{test_state.proj_dir}/{test_state.proj_name}")
@@ -622,7 +650,8 @@ class TestBinProjectFlow:
         ), f"Command 'test' end with non zero exit code: {result.exit_code}"
         assert "100% tests passed, 0 tests failed out of 1" in result.output
 
-    def test_cli_gen_m_option(self, test_state: TestState) -> None:
+    @pytest.mark.order(after="test_cli_test_some_tests_to_run")
+    def test_cli_gen_m_option(self, test_state: StateOfTest) -> None:
         """This test check if call of scargo gen -m "path_to_added_test_h_file" command will finish without error and
         if expected files under tests/mocks were created"""
         # Gen -m
@@ -640,7 +669,8 @@ class TestBinProjectFlow:
         for file_path in expected_mock_files_path:
             assert file_path.is_file(), f"File '{file_path}' not exist"
 
-    def test_cli_gen_c_option(self, test_state: TestState) -> None:
+    @pytest.mark.order(after="test_cli_gen_m_option")
+    def test_cli_gen_c_option(self, test_state: StateOfTest) -> None:
         """This test check if call of scargo gen -c "device_id" command will finish without error and
         if expected cert files under build/fs and build/cert directories were created"""
         # Gen -c
@@ -658,7 +688,8 @@ class TestBinProjectFlow:
         for file_path in expected_files_paths_in_fs_dir:
             assert file_path.is_file(), f"File '{file_path}' not exist"
 
-    def test_cli_gen_fs_option(self, test_state: TestState) -> None:
+    @pytest.mark.order(after="test_cli_gen_c_option")
+    def test_cli_gen_fs_option(self, test_state: StateOfTest) -> None:
         """This test check if call of scargo gen -f command will finish without error and if for esp32 project
         spiffs.bin file will be created under build folder while for other targets information that command is not
         supported yet should be returned Additionally check if dummy file from ..main/fs will be copied to build/fs
@@ -666,7 +697,7 @@ class TestBinProjectFlow:
         """
         # Gen --fs
         os.chdir(f"{test_state.proj_dir}/{test_state.proj_name}")
-        if test_state.target_id == TestTargetIds.esp32:
+        if test_state.target_id == TargetIds.esp32:
             Path(test_state.target.source_dir, "fs", TEST_DUMMY_FS_FILE).touch()
         result = test_state.runner.invoke(cli, ["gen", "-f"])
         assert (
@@ -680,7 +711,7 @@ class TestBinProjectFlow:
             Path(f"build/certs/azure/{TEST_DEVICE_ID}-root-ca.pem"),
             Path("build/spiffs.bin"),
         ]
-        if test_state.target_id == TestTargetIds.esp32:
+        if test_state.target_id == TargetIds.esp32:
             for file_path in expected_files_paths_in_fs_dir:
                 assert file_path.is_file(), f"File '{file_path}' not exist"
         else:
@@ -688,12 +719,14 @@ class TestBinProjectFlow:
                 "Gen --fs command not supported for this target yet." in result.output
             ), f"String 'Gen --fs command not supported for this target yet.' not found in output: {result.output}"
 
-    def test_cli_gen_b_option(self, test_state: TestState) -> None:
+    @pytest.mark.order(after="test_cli_gen_fs_option")
+    def test_cli_gen_b_option(self, test_state: StateOfTest) -> None:
         """This test check if call of scargo gen -b command will finish without error and
         if expected files were created"""
         pytest.skip("Test not implemented yet")
 
-    def test_cli_check_after_gen(self, test_state: TestState) -> None:
+    @pytest.mark.order(after="test_cli_gen_b_option")
+    def test_cli_check_after_gen(self, test_state: StateOfTest) -> None:
         """This test check if after all generations made by scargo gen command call of scargo check command will finish
         without error and if no problems will be found"""
         os.chdir(f"{test_state.proj_dir}/{test_state.proj_name}")
@@ -705,13 +738,14 @@ class TestBinProjectFlow:
             "No problems found!" in result.output
         ), f"String 'No problems found!' not found in output: {result.output}"
 
-    def test_cli_run_new_proj(self, test_state: TestState) -> None:
+    @pytest.mark.order(after="test_cli_check_after_gen")
+    def test_cli_run_new_proj(self, test_state: StateOfTest) -> None:
         """This test check if call of scargo run command will finish without error and with output 'Hello World!'
         for x86 target, for other targets error should be returned with output "Run project on x86 architecture is
         not implemented for {test_state.target_id.value} yet"""
         os.chdir(f"{test_state.proj_dir}/{test_state.proj_name}")
         result = test_state.runner.invoke(cli, ["run"])
-        if test_state.target_id == TestTargetIds.x86:
+        if test_state.target_id == TargetIds.x86:
             assert (
                 result.exit_code == 0
             ), f"Command 'run' end with non zero exit code: {result.exit_code}"
@@ -730,7 +764,8 @@ class TestBinProjectFlow:
                 f"{test_state.target_id.value} yet not in output: {result.output}"
             )
 
-    def test_cli_check_fail_for_copied_fix_files(self, test_state: TestState) -> None:
+    @pytest.mark.order(after="test_cli_run_new_proj")
+    def test_cli_check_fail_for_copied_fix_files(self, test_state: StateOfTest) -> None:
         """This test copy files with some format issues from tests/test_data/test_projects/test_files/fix_test_files
         check if for copied files which contains some static code issues call of scargo check command will finish with
         error and if expected errors were mentioned in output"""
@@ -755,7 +790,8 @@ class TestBinProjectFlow:
                 expected_str in result.output
             ), f"String: '{expected_str}' not in output: {result.output}"
 
-    def test_cli_fix_copied_fix_files(self, test_state: TestState) -> None:
+    @pytest.mark.order(after="test_cli_check_fail_for_copied_fix_files")
+    def test_cli_fix_copied_fix_files(self, test_state: StateOfTest) -> None:
         """This check if for copied in previous test files which contains some static code issues call of scargo fix
         command will finish without error, after that check if in output information about fixed problems is visible and
         finally if files contain expected fixes (only if clang-format issues were fixed is not verified)
@@ -783,7 +819,8 @@ class TestBinProjectFlow:
             Path(test_state.target.source_dir, "fix_test_lib.h"), "#pragma once"
         ), "Expected test: '#pragma once' not found in file: fix_test_lib.h"
 
-    def test_cli_check_pass_after_fix(self, test_state: TestState) -> None:
+    @pytest.mark.order(after="test_cli_fix_copied_fix_files")
+    def test_cli_check_pass_after_fix(self, test_state: StateOfTest) -> None:
         """This test check if call of scargo check command will finish without error and if no problems will be found
         after applying scargo fix command in previous step"""
         # Check
@@ -796,7 +833,8 @@ class TestBinProjectFlow:
             "No problems found!" in result.output
         ), f"String: 'No problems found!' not found in output: {result.output}"
 
-    def test_cli_doc(self, test_state: TestState) -> None:
+    @pytest.mark.order(after="test_cli_check_pass_after_fix")
+    def test_cli_doc(self, test_state: StateOfTest) -> None:
         """This test check if call of scargo doc command will finish without error and if documentation was generated
         unfortunately without checking correctness of documentation"""
         # doc
