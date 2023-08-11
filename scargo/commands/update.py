@@ -92,12 +92,6 @@ def scargo_update(config_file_path: Path) -> None:
     generate_readme(config)
 
     # do not rebuild dockers in the docker
-    if (
-        target.family == "stm32"
-        and not Path(config.project_root, "third-party/stm32-cmake").is_dir()
-    ):
-        subprocess.run("conan source .", shell=True, cwd=project_path, check=True)
-
     if project_config.build_env == SCARGO_DOCKER_ENV:
         if not Path("/.dockerenv").exists():
             if not pull_docker_image(docker_path):

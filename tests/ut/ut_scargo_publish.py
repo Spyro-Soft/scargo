@@ -46,7 +46,12 @@ def test_publish(config: Config, fp: FakeProcess) -> None:
     conan_add_remote_2_cmd = ["conan", "remote", "add", REMOTE_REPO_NAME_2, EXAMPLE_URL]
     conan_user_cmd = "conan user"
     conan_add_conacenter_cmd = "conan remote add conancenter https://center.conan.io"
-    conan_export_cmd = [
+    conan_source_cmd = [
+        "conan",
+        "source",
+        ".",
+    ]
+    conan_create_cmd = [
         "conan",
         "create",
         ".",
@@ -72,7 +77,8 @@ def test_publish(config: Config, fp: FakeProcess) -> None:
     fp.register(conan_add_remote_2_cmd)
     fp.register(conan_user_cmd, occurrences=2)
     fp.register(conan_add_conacenter_cmd)
-    fp.register(conan_export_cmd)
+    fp.register(conan_source_cmd)
+    fp.register(conan_create_cmd)
     fp.register(conan_upload_cmd)
 
     # ACT
@@ -85,9 +91,10 @@ def test_publish(config: Config, fp: FakeProcess) -> None:
     assert fp.calls[3] == conan_add_remote_2_cmd
     assert fp.calls[4] == conan_user_cmd
     assert fp.calls[5] == conan_add_conacenter_cmd
-    assert fp.calls[6] == conan_export_cmd
-    assert fp.calls[7] == conan_upload_cmd
-    assert len(fp.calls) == 8
+    assert fp.calls[6] == conan_source_cmd
+    assert fp.calls[7] == conan_create_cmd
+    assert fp.calls[8] == conan_upload_cmd
+    assert len(fp.calls) == 9
 
 
 def test_conan_add_user(fp: FakeProcess) -> None:
@@ -175,6 +182,13 @@ def test_create_package_fail(
     fp.register(
         [
             "conan",
+            "source",
+            ".",
+        ]
+    )
+    fp.register(
+        [
+            "conan",
             "create",
             ".",
             "-pr:b",
@@ -219,6 +233,13 @@ def test_upload_package_fail(
     fp.register(["conan", "remote", "add", REMOTE_REPO_NAME_2, EXAMPLE_URL])
     fp.register("conan user", occurrences=2)
     fp.register("conan remote add conancenter https://center.conan.io")
+    fp.register(
+        [
+            "conan",
+            "source",
+            ".",
+        ]
+    )
     fp.register(
         [
             "conan",

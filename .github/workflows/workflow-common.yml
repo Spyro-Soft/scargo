@@ -98,11 +98,21 @@ jobs:
           pip install --upgrade pip
           pip install -r ci/requirements.txt
 
-        # Clean docker before test (github like to go out of memory)
-        # Also there is need for repeatable results with docker (cache is faster but it can give some false positives and false negatives while testing)
-      - name: Integration tests
+        # Clean docker before test (GitHub like to go out of memory)
+        # Also there is need for repeatable results with docker
+        # (cache is faster, but it can give some false positives and false negatives while testing)
+      - name: Clean docker images
         run: |
           docker system prune -af --volumes
+
+      - name: Build wheel to use inside docker
+        run: |
+          rm -rf dist
+          flit build
+          echo "SCARGO_DOCKER_INSTALL_LOCAL=$(find dist -name "*.whl")" >> $GITHUB_ENV
+
+      - name: Integration tests
+        run: |
           ./run.py -c "${{ matrix.target }}"
 
       - name: Archive integration-tests results
