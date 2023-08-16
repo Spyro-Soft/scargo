@@ -55,6 +55,24 @@ def test_generate_cpp__lib_only(
             config=config,
         ),
         call(
+            "conan/test_package/CMakeLists.txt.j2",
+            "test_package/CMakeLists.txt",
+            template_params={"config": config},
+            config=config,
+        ),
+        call(
+            "conan/test_package/conanfile.py.j2",
+            "test_package/conanfile.py",
+            template_params={"config": config},
+            config=config,
+        ),
+        call(
+            "conan/test_package/example.cpp.j2",
+            "test_package/src/example.cpp",
+            template_params={"config": config, "class_name": "TestLib"},
+            config=config,
+        ),
+        call(
             "cpp/cmake-src-x86.j2",
             Path("src/CMakeLists.txt"),
             template_params={"config": config},
@@ -82,6 +100,24 @@ def test_generate_cpp__bin_and_lib(
             "cpp/lib.h.j2",
             Path("src/include/test_lib.h"),
             template_params={"class_name": "TestLib"},
+            config=config,
+        ),
+        call(
+            "conan/test_package/CMakeLists.txt.j2",
+            "test_package/CMakeLists.txt",
+            template_params={"config": config},
+            config=config,
+        ),
+        call(
+            "conan/test_package/conanfile.py.j2",
+            "test_package/conanfile.py",
+            template_params={"config": config},
+            config=config,
+        ),
+        call(
+            "conan/test_package/example.cpp.j2",
+            "test_package/src/example.cpp",
+            template_params={"config": config, "class_name": "TestLib"},
             config=config,
         ),
         call(
