@@ -28,6 +28,28 @@ class _CppTemplateGen:
             },
         )
 
+    def _generate_test_package(self, class_name: str) -> None:
+        create_file_from_template(
+            "conan/test_package/CMakeLists.txt.j2",
+            "test_package/CMakeLists.txt",
+            template_params={"config": self._config},
+            config=self._config,
+        )
+
+        create_file_from_template(
+            "conan/test_package/conanfile.py.j2",
+            "test_package/conanfile.py",
+            template_params={"config": self._config},
+            config=self._config,
+        )
+
+        create_file_from_template(
+            "conan/test_package/example.cpp.j2",
+            "test_package/src/example.cpp",
+            template_params={"config": self._config, "class_name": class_name},
+            config=self._config,
+        )
+
     def _generate_lib(self, lib_name: str) -> None:
         """Function which creates a lib files using jinja"""
 
@@ -46,6 +68,8 @@ class _CppTemplateGen:
             template_params={"class_name": class_name},
             config=self._config,
         )
+
+        self._generate_test_package(class_name)
 
     def _generate_cmake(self) -> None:
         self._create_file_from_template(
