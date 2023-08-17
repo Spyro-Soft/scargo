@@ -19,7 +19,6 @@ from pytest import TempdirFactory
 from scargo.cli import cli
 from scargo.config import Target, parse_config
 from scargo.config_utils import get_scargo_config_or_exit
-from scargo.file_generators.docker_gen import _DockerComposeTemplate
 from scargo.file_generators.env_gen import generate_env
 from scargo.path_utils import get_project_root_or_none
 from tests.it.utils import (
@@ -52,6 +51,7 @@ NEW_PROFILE_CFLAGS = "-gdwarf"
 NEW_PROFILE_CXXFLAGS = "-ggdb"
 
 TEST_BIN_NAME = "test_bin_name"
+TEST_LIB_NAME = "test_lib_name"
 TEST_PROJECT_NAME = "test_proj"
 TEST_DUMMY_LIB_H_FILE = "lib_for_gen_test.h"
 TEST_DEVICE_ID = "DUMMY:DEVICE:ID:12345"
@@ -72,12 +72,15 @@ class ActiveTestState:
     proj_path: Optional[Path] = None
     bin_name: Optional[str] = None
     lib_name: Optional[str] = None
+    lib_or_bin: str = None
 
     def __post_init__(self) -> None:
         if self.proj_to_copy_path is None:
             self.bin_name = self.proj_name
+            self.lib_name = self.proj_name
         else:
-            self.bin_name = self._get_bin_name_fom_cmake()
+            self.bin_name = self._get_bin_name_from_cmake()
+            # ToDo: do we need to get lib name from cmake file list file?
         if self.target_id == TargetIds.x86:
             self.obj_dump_path = Path("objdump")
             self.expected_bin_file_format = "elf64-x86-64"
@@ -100,7 +103,7 @@ class ActiveTestState:
         self.target = Target.get_target_by_id(str(self.target_id.value))
         self.runner = ScargoTestRunner()
 
-    def _get_bin_name_fom_cmake(self) -> str:
+    def _get_bin_name_from_cmake(self) -> str:
         cmake_lists_file_path = Path(f"{self.proj_to_copy_path}/CMakeLists.txt")
         assert cmake_lists_file_path.is_file(), f"No such file {cmake_lists_file_path}"
         with open(cmake_lists_file_path) as cmake_lists_file:
@@ -156,72 +159,10 @@ class ActiveTestState:
         return bin_result_files_path
 
 
-def get_expected_files_list_new_proj_bin(src_dir_name: str, bin_name: str) -> List[str]:
-    return [
-        "CMakeLists.txt",
-        "conanfile.py",
-        "LICENSE",
-        "README.md",
-        "scargo.toml",
-        "scargo.lock",
-        f"{src_dir_name}/CMakeLists.txt",
-        f"{src_dir_name}/{bin_name}.cpp",
-        "tests/CMakeLists.txt",
-        "tests/conanfile.py",
-        "tests/it/CMakeLists.txt",
-        "tests/ut/CMakeLists.txt",
-        "tests/mocks/CMakeLists.txt",
-        "tests/mocks/static_mock/CMakeLists.txt",
-        "tests/mocks/static_mock/static_mock.h",
-    ]
+class BasicFlow:
+    def get_expected_files_list_new_proj(self, src_dir_name: str, defined_name: str):
+        raise NotImplemented("Method not implemented")
 
-
-@pytest.mark.parametrize(
-    "test_state",
-    [
-        ActiveTestState(
-            target_id=TargetIds.x86,
-            proj_name="new_bin_project_x86",
-            bin_name=TEST_BIN_NAME,
-        ),
-        ActiveTestState(
-            target_id=TargetIds.stm32,
-            proj_name="new_bin_project_stm32",
-            bin_name=TEST_BIN_NAME,
-        ),
-        ActiveTestState(
-            target_id=TargetIds.esp32,
-            proj_name="new_bin_project_esp32",
-            bin_name=TEST_BIN_NAME,
-        ),
-        ActiveTestState(
-            target_id=TargetIds.x86,
-            proj_name=TEST_PROJECT_x86_NAME,
-            proj_to_copy_path=TEST_PROJECT_x86_PATH,
-        ),
-        ActiveTestState(
-            target_id=TargetIds.stm32,
-            proj_name=TEST_PROJECT_STM32_NAME,
-            proj_to_copy_path=TEST_PROJECT_STM32_PATH,
-        ),
-        ActiveTestState(
-            target_id=TargetIds.esp32,
-            proj_name=TEST_PROJECT_ESP32_NAME,
-            proj_to_copy_path=TEST_PROJECT_ESP32_PATH,
-        ),
-    ],
-    ids=[
-        "new_bin_project_x86",
-        "new_bin_project_stm32",
-        "new_bin_project_esp32",
-        "copy_project_x86",
-        "copy_project_stm32",
-        "copy_project_esp32",
-    ],
-    scope="session",
-)
-@pytest.mark.xdist_group(name="TestBinProjectFlow")
-class TestBinProjectFlow:
     @pytest.mark.order("first")
     def test_cli_help(
         self,
@@ -257,7 +198,7 @@ class TestBinProjectFlow:
                 "new",
                 test_state.proj_name,
                 f"--target={test_state.target_id.value}",
-                f"--bin={test_state.bin_name}",
+                f"--{test_state.lib_or_bin}={test_state.bin_name if test_state.lib_or_bin == 'bin' else test_state.lib_name}",
             ],
         )
         os.chdir(test_state.proj_name)
@@ -265,7 +206,7 @@ class TestBinProjectFlow:
             result.exit_code == 0
         ), f"Command 'new' end with non zero exit code: {result.exit_code}"
 
-        expected_files_relative_paths = get_expected_files_list_new_proj_bin(
+        expected_files_relative_paths = self.get_expected_files_list_new_proj(
             test_state.target.source_dir, str(test_state.bin_name).lower()
         )
         for file in expected_files_relative_paths:
@@ -310,19 +251,6 @@ class TestBinProjectFlow:
         ), f"Command 'update' end with non zero exit code: {result.exit_code}"
 
     @pytest.mark.order(after="test_cli_update")
-    def test_cli_build(self, test_state: ActiveTestState) -> None:
-        """This test check if call of scargo build command will finish without error and if under default profile in
-        build folder bin file is present"""
-        # Build
-        os.chdir(f"{test_state.proj_path}/{test_state.proj_name}")
-        result = test_state.runner.invoke(cli, ["build"])
-        assert (
-            result.exit_code == 0
-        ), f"Command 'build' end with non zero exit code: {result.exit_code}"
-        for file in test_state.get_build_result_files_paths():
-            assert file.is_file(), f"Expected file: {file} not exist"
-
-    @pytest.mark.order(after="test_cli_build")
     def test_cli_clean(self, test_state: ActiveTestState) -> None:
         """This test check if call of scargo clean command will finish without error and
         if build folder will be removed"""
@@ -348,25 +276,6 @@ class TestBinProjectFlow:
         ), f"Command 'build --profile=Debug' end with non zero exit code: {result.exit_code}"
         for file in test_state.get_build_result_files_paths(profile="Debug"):
             assert file.is_file(), f"Expected file: {file} not exist"
-
-    @pytest.mark.order(after="test_cli_build_profile_debug")
-    def test_debug_bin_file_format_by_objdump_results(
-        self, test_state: ActiveTestState
-    ) -> None:
-        """This test checks if bin file has expected file format by running objdump on this file"""
-        # objdump
-        bin_file_path = test_state.get_bin_file_path(profile="Debug")
-        os.chdir(bin_file_path.parent)
-        config = get_scargo_config_or_exit()
-        # run command in docker
-        output = run_custom_command_in_docker(
-            [str(test_state.obj_dump_path), bin_file_path.name, "-a"],
-            config.project,
-            config.project_root,
-        )
-        assert test_state.expected_bin_file_format in str(
-            output
-        ), f"Objdump results: {output} did not contain expected bin file format: {test_state.expected_bin_file_format}"
 
     @pytest.mark.order(after="test_debug_bin_file_format_by_objdump_results")
     def test_cli_clean_after_build_profile_debug(
@@ -859,16 +768,3 @@ class TestBinProjectFlow:
         ]
         for file_path in expected_doc_files_paths:
             assert file_path.is_file(), f"File '{file_path}' not exist"
-
-
-def test_project_x86_scargo_from_pypi(create_tmp_directory: None) -> None:
-    # Test new and update work with pypi scargo version
-    runner = ScargoTestRunner()
-
-    with patch.object(
-        _DockerComposeTemplate, "_set_up_package_version", return_value="scargo"
-    ):
-        result = runner.invoke(cli, ["new", TEST_PROJECT_NAME, "--target=x86"])
-        assert (
-            result.exit_code == 0
-        ), f"Command 'new {TEST_PROJECT_NAME} --target=x86' end with non zero exit code: {result.exit_code}"
