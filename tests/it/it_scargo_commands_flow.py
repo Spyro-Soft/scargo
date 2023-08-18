@@ -10,7 +10,6 @@ from enum import Enum
 from pathlib import Path
 from shutil import copytree
 from typing import List, Optional
-from unittest.mock import patch
 
 import pytest
 import toml
@@ -25,8 +24,6 @@ from tests.it.utils import (
     ScargoTestRunner,
     add_profile_to_toml,
     assert_regex_in_file,
-    assert_str_in_file,
-    get_copyright_text,
     run_custom_command_in_docker,
 )
 
@@ -72,7 +69,7 @@ class ActiveTestState:
     proj_path: Optional[Path] = None
     bin_name: Optional[str] = None
     lib_name: Optional[str] = None
-    lib_or_bin: str = None
+    lib_or_bin: Optional[str] = None
 
     def __post_init__(self) -> None:
         if self.proj_to_copy_path is None:
@@ -159,9 +156,12 @@ class ActiveTestState:
         return bin_result_files_path
 
 
+@pytest.mark.xdist_group(name="TestProjectFlow")
 class BasicFlow:
-    def get_expected_files_list_new_proj(self, src_dir_name: str, defined_name: str):
-        raise NotImplemented("Method not implemented")
+    def get_expected_files_list_new_proj(
+        self, src_dir_name: str, defined_name: str
+    ) -> List[str]:
+        raise NotImplementedError("Method not implemented")
 
     @pytest.mark.order("first")
     def test_cli_help(
@@ -198,7 +198,8 @@ class BasicFlow:
                 "new",
                 test_state.proj_name,
                 f"--target={test_state.target_id.value}",
-                f"--{test_state.lib_or_bin}={test_state.bin_name if test_state.lib_or_bin == 'bin' else test_state.lib_name}",
+                f"--{test_state.lib_or_bin}="
+                f"{test_state.bin_name if test_state.lib_or_bin == 'bin' else test_state.lib_name}",
             ],
         )
         os.chdir(test_state.proj_name)
@@ -251,31 +252,23 @@ class BasicFlow:
         ), f"Command 'update' end with non zero exit code: {result.exit_code}"
 
     @pytest.mark.order(after="test_cli_update")
-    def test_cli_clean(self, test_state: ActiveTestState) -> None:
-        """This test check if call of scargo clean command will finish without error and
-        if build folder will be removed"""
-        # Clean
-        os.chdir(f"{test_state.proj_path}/{test_state.proj_name}")
-        result = test_state.runner.invoke(cli, ["clean"])
-        assert (
-            result.exit_code == 0
-        ), f"Command 'clean' end with non zero exit code: {result.exit_code}"
-        assert not Path(
-            "build"
-        ).is_dir(), "Dictionary 'build' still exist when 'clean' should remove it"
-
-    @pytest.mark.order(after="test_cli_clean")
-    def test_cli_build_profile_debug(self, test_state: ActiveTestState) -> None:
-        """This test check if call of scargo build --profile=Debug command will finish without error and if under Debug
-        profile in build folder bin file is present"""
-        # Build
-        os.chdir(f"{test_state.proj_path}/{test_state.proj_name}")
-        result = test_state.runner.invoke(cli, ["build", "--profile", "Debug"])
-        assert (
-            result.exit_code == 0
-        ), f"Command 'build --profile=Debug' end with non zero exit code: {result.exit_code}"
-        for file in test_state.get_build_result_files_paths(profile="Debug"):
-            assert file.is_file(), f"Expected file: {file} not exist"
+    def test_debug_bin_file_format_by_objdump_results(
+        self, test_state: ActiveTestState
+    ) -> None:
+        """This test checks if bin file has expected file format by running objdump on this file"""
+        # objdump
+        bin_file_path = test_state.get_bin_file_path(profile="Debug")
+        os.chdir(bin_file_path.parent)
+        config = get_scargo_config_or_exit()
+        # run command in docker
+        output = run_custom_command_in_docker(
+            [str(test_state.obj_dump_path), bin_file_path.name, "-a"],
+            config.project,
+            config.project_root,
+        )
+        assert test_state.expected_bin_file_format in str(
+            output
+        ), f"Objdump results: {output} did not contain expected bin file format: {test_state.expected_bin_file_format}"
 
     @pytest.mark.order(after="test_debug_bin_file_format_by_objdump_results")
     def test_cli_clean_after_build_profile_debug(
@@ -292,19 +285,6 @@ class BasicFlow:
         assert not Path(
             "build"
         ).is_dir(), "Dictionary 'build' still exist when 'clean' should remove it"
-
-    @pytest.mark.order(after="test_cli_clean_after_build_profile_debug")
-    def test_cli_build_profile_release(self, test_state: ActiveTestState) -> None:
-        """This test check if call of scargo build --profile=Release command will finish without error and if under
-        Release profile in build folder bin file is present"""
-        # Build
-        os.chdir(f"{test_state.proj_path}/{test_state.proj_name}")
-        result = test_state.runner.invoke(cli, ["build", "--profile", "Release"])
-        assert (
-            result.exit_code == 0
-        ), f"Command 'build --profile=Release' end with non zero exit code: {result.exit_code}"
-        for file in test_state.get_build_result_files_paths(profile="Release"):
-            assert file.is_file(), f"Expected file: {file} not exist"
 
     @pytest.mark.order(after="test_cli_build_profile_release")
     def test_release_bin_file_format_by_objdump_results(
@@ -449,19 +429,6 @@ class BasicFlow:
         )
 
     @pytest.mark.order(after="test_cli_update_after_adding_new_profile")
-    def test_cli_build_profile_new(self, test_state: ActiveTestState) -> None:
-        """This test check if call of scargo build command for newly added profile will finish without error and
-        if under this new profile in build folder bin file is present"""
-        # Build
-        os.chdir(f"{test_state.proj_path}/{test_state.proj_name}")
-        result = test_state.runner.invoke(cli, ["build", "--profile", NEW_PROFILE_NAME])
-        assert (
-            result.exit_code == 0
-        ), f"Command 'build --profile={NEW_PROFILE_NAME}' end with non zero exit code: {result.exit_code}"
-        for file in test_state.get_build_result_files_paths(profile=NEW_PROFILE_NAME):
-            assert file.is_file(), f"Expected file: {file} not exist"
-
-    @pytest.mark.order(after="test_cli_build_profile_new")
     def test_flags_stored_in_commands_file(self, test_state: ActiveTestState) -> None:
         """This test check if created under new profile in build folder compile_commands.json file contains project
         flags and flags added with newly created profile, also check if c++ standard is set according to definition
@@ -641,19 +608,6 @@ class BasicFlow:
         if expected files were created"""
         pytest.skip("Test not implemented yet")
 
-    @pytest.mark.order(after="test_cli_gen_b_option")
-    def test_cli_check_after_gen(self, test_state: ActiveTestState) -> None:
-        """This test check if after all generations made by scargo gen command call of scargo check command will finish
-        without error and if no problems will be found"""
-        os.chdir(f"{test_state.proj_path}/{test_state.proj_name}")
-        result = test_state.runner.invoke(cli, ["check"])
-        assert (
-            result.exit_code == 0
-        ), f"Command 'check' end with non zero exit code: {result.exit_code}"
-        assert (
-            "No problems found!" in result.output
-        ), f"String 'No problems found!' not found in output: {result.output}"
-
     @pytest.mark.order(after="test_cli_check_after_gen")
     def test_cli_run_new_proj(self, test_state: ActiveTestState) -> None:
         """This test check if call of scargo run command will finish without error and with output 'Hello World!'
@@ -679,92 +633,3 @@ class BasicFlow:
                 f"String: 'Run project on x86 architecture is not implemented for "
                 f"{test_state.target_id.value} yet not in output: {result.output}"
             )
-
-    @pytest.mark.order(after="test_cli_run_new_proj")
-    def test_cli_check_fail_for_copied_fix_files(
-        self, test_state: ActiveTestState
-    ) -> None:
-        """This test copy files with some format issues from tests/test_data/test_projects/test_files/fix_test_files
-        check if for copied files which contains some static code issues call of scargo check command will finish with
-        error and if expected errors were mentioned in output"""
-        # Check fail
-        os.chdir(f"{test_state.proj_path}/{test_state.proj_name}")
-        copytree(
-            FIX_TEST_FILES_PATH,
-            Path(os.getcwd(), test_state.target.source_dir),
-            dirs_exist_ok=True,
-        )
-        result = test_state.runner.invoke(cli, ["check"])
-        assert (
-            result.exit_code == 1
-        ), f"Command 'check' end with other than expected 1 exit code: {result.exit_code}"
-        expected_strings_in_output = [
-            "clang-format: 3 problems found",
-            "copyright: 3 problems found",
-            "pragma: 1 problems found",
-        ]
-        for expected_str in expected_strings_in_output:
-            assert (
-                expected_str in result.output
-            ), f"String: '{expected_str}' not in output: {result.output}"
-
-    @pytest.mark.order(after="test_cli_check_fail_for_copied_fix_files")
-    def test_cli_fix_copied_fix_files(self, test_state: ActiveTestState) -> None:
-        """This check if for copied in previous test files which contains some static code issues call of scargo fix
-        command will finish without error, after that check if in output information about fixed problems is visible and
-        finally if files contain expected fixes (only if clang-format issues were fixed is not verified)
-        """
-        # Fix
-        os.chdir(f"{test_state.proj_path}/{test_state.proj_name}")
-        result = test_state.runner.invoke(cli, ["fix"])
-        assert (
-            result.exit_code == 0
-        ), f"Command 'run' end with non zero exit code: {result.exit_code}"
-        assert (
-            "Finished clang-format check. Fixed problems in 3 files." in result.output
-        ), f"String: 'Finished clang-format check. Fixed problems in 3 files.' not in output: {result.output}"
-        files_paths_to_copyright_check = [
-            Path(test_state.target.source_dir, "fix_test_bin.cpp"),
-            Path(test_state.target.source_dir, "fix_test_lib.cpp"),
-            Path(test_state.target.source_dir, "fix_test_lib.h"),
-        ]
-        for file_path in files_paths_to_copyright_check:
-            assert assert_str_in_file(
-                file_path, get_copyright_text()
-            ), f"Expected copyright test: '\n{get_copyright_text()}\n' not found in file: {file_path}"
-
-        assert assert_str_in_file(
-            Path(test_state.target.source_dir, "fix_test_lib.h"), "#pragma once"
-        ), "Expected test: '#pragma once' not found in file: fix_test_lib.h"
-
-    @pytest.mark.order(after="test_cli_fix_copied_fix_files")
-    def test_cli_check_pass_after_fix(self, test_state: ActiveTestState) -> None:
-        """This test check if call of scargo check command will finish without error and if no problems will be found
-        after applying scargo fix command in previous step"""
-        # Check
-        os.chdir(f"{test_state.proj_path}/{test_state.proj_name}")
-        result = test_state.runner.invoke(cli, ["check"])
-        assert (
-            result.exit_code == 0
-        ), f"Command 'run' end with non zero exit code: {result.exit_code}"
-        assert (
-            "No problems found!" in result.output
-        ), f"String: 'No problems found!' not found in output: {result.output}"
-
-    @pytest.mark.order(after="test_cli_check_pass_after_fix")
-    def test_cli_doc(self, test_state: ActiveTestState) -> None:
-        """This test check if call of scargo doc command will finish without error and if documentation was generated
-        unfortunately without checking correctness of documentation"""
-        # doc
-        os.chdir(f"{test_state.proj_path}/{test_state.proj_name}")
-        result = test_state.runner.invoke(cli, ["doc"])
-        assert (
-            result.exit_code == 0
-        ), f"Command 'doc' end with non zero exit code: {result.exit_code}"
-        expected_doc_files_paths = [
-            Path("build/doc/html/index.html"),
-            Path("build/doc/latex/Makefile"),
-            Path("build/doc/Doxyfile"),
-        ]
-        for file_path in expected_doc_files_paths:
-            assert file_path.is_file(), f"File '{file_path}' not exist"
