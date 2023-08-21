@@ -131,7 +131,6 @@ def perform_tests(
             "--cov-report",
             f"xml:{cobertura_path}",
             "--cov=scargo",
-            "--gherkin-terminal-reporter",
             "-v",
             test_path,
         ]

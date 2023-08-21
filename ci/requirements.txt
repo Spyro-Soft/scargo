@@ -130,7 +130,6 @@ lxml==4.9.2
     #   gcovr
     #   unittest-xml-reporting
 mako==1.2.4
-    # via pytest-bdd
 markupsafe==2.1.2
     # via
     #   jinja2
@@ -165,9 +164,7 @@ packaging==23.0
 parse==1.19.0
     # via
     #   parse-type
-    #   pytest-bdd
 parse-type==0.6.0
-    # via pytest-bdd
 patch-ng==1.17.4
     # via conan
 pathspec==0.11.1
@@ -218,12 +215,10 @@ pyserial==3.5
     # via esptool
 pytest==7.2.2
     # via
-    #   pytest-bdd
     #   pytest-cov
     #   pytest-mock
     #   pytest-subprocess
     #   scargo (pyproject.toml)
-pytest-bdd==6.1.1
     # via scargo (pyproject.toml)
 pytest-cov==4.0.0
     # via scargo (pyproject.toml)
@@ -315,7 +310,6 @@ typing-extensions==4.5.0
     #   mypy
     #   pydantic
     #   pylint
-    #   pytest-bdd
 unittest-xml-reporting==3.2.0
     # via scargo (pyproject.toml)
 virtualenv==20.21.0
