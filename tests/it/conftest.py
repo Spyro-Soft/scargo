@@ -8,7 +8,7 @@ import pytest
 from scargo.global_values import SCARGO_PKG_PATH
 
 
-@pytest.fixture(autouse=True)
+@pytest.fixture()
 def create_tmp_directory(tmp_path: Path) -> None:
     os.chdir(tmp_path)
 

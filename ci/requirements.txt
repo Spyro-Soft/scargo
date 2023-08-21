@@ -4,6 +4,11 @@
 #
 #    pip-compile --all-extras --output-file=ci/requirements.txt --resolver=backtracking pyproject.toml
 #
+urllib3==1.26.15
+    # via
+    #   conan
+    #   docker
+    #   requests
 alabaster==0.7.13
     # via sphinx
 altgraph==0.17.3
@@ -313,11 +318,6 @@ typing-extensions==4.5.0
     #   pytest-bdd
 unittest-xml-reporting==3.2.0
     # via scargo (pyproject.toml)
-urllib3==1.26.15
-    # via
-    #   conan
-    #   docker
-    #   requests
 virtualenv==20.21.0
     # via pre-commit
 websocket-client==0.59.0

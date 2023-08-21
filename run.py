@@ -328,7 +328,9 @@ def main() -> None:
     if args.target:
         # -k could be replaced with -m as markers will be introduced in integration tests in the future
         # GitHub runner for linux is 2 processor machine, so -n is equal 2
-        result = perform_tests(IT_DIR, "it", ["-n 2", f"-k {args.target[0]}"])
+        result = perform_tests(
+            IT_DIR, "it", ["-n 2", f"-k {args.target[0]}", "--dist=loadgroup"]
+        )
         if result:
             sys.exit(1)
 
