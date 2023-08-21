@@ -60,7 +60,6 @@ dev = [
     "pyfakefs",
     "PyInstaller",
     "pylint",
-    "pytest-bdd",
     "pytest-cov",
     "pytest-mock",
     "pytest-subprocess",
