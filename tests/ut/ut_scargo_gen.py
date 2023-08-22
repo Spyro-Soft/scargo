@@ -54,14 +54,9 @@ def project_add_extra_test_files(project_src_path: Path) -> None:
 @pytest.mark.parametrize(
     "test_project_data",
     [
-        pytest.param(
-            {"proj_path": "coppy_test_project", "src_files_dir": "src"},
-            marks=pytest.mark.xfail(
-                reason="Test project do not contain any .h nor .hpp file"
-            ),
-        ),
-        {"proj_path": "coppy_test_project_esp32", "src_files_dir": "main"},
-        {"proj_path": "coppy_test_project_stm32", "src_files_dir": "src"},
+        {"proj_path": "copy_test_project", "src_files_dir": "src"},
+        {"proj_path": "copy_test_project_esp32", "src_files_dir": "main"},
+        {"proj_path": "copy_test_project_stm32", "src_files_dir": "src"},
         {"proj_path": "new_project_x86", "src_files_dir": "src"},
         {"proj_path": "new_project_esp32", "src_files_dir": "main"},
         {"proj_path": "new_project_stm32", "src_files_dir": "src"},
@@ -190,7 +185,7 @@ class TestGenMockPositive:
     ids=["cpp file", "txt file", "file_with_no_extension"],
 )
 def test_gen_mock_for_unexpected_extension_file(
-    coppy_test_project_stm32: Path,
+    copy_test_project_stm32: Path,
     mocker: MockerFixture,
     file: str,
 ) -> None:
@@ -198,8 +193,8 @@ def test_gen_mock_for_unexpected_extension_file(
     This test check if for .h located in src dictionary mock files will be created under tests/mocks dictionary
     as a result of scargo gen command.
     """
-    os.chdir(coppy_test_project_stm32)
-    project_add_extra_test_files(coppy_test_project_stm32 / "src")
+    os.chdir(copy_test_project_stm32)
+    project_add_extra_test_files(copy_test_project_stm32 / "src")
     path_to_file = Path(os.getcwd(), "src", file)
     # make sure that files which needs to be generated do not exist - precondition
     assert not os.path.exists(f"tests/mocks/{file}")
@@ -230,9 +225,9 @@ def test_gen_mock_for_unexpected_extension_file(
 @pytest.mark.parametrize(
     "test_project_data",
     [
-        {"proj_path": "coppy_test_project", "src_files_dir": "src"},
-        {"proj_path": "coppy_test_project_esp32", "src_files_dir": "main"},
-        {"proj_path": "coppy_test_project_stm32", "src_files_dir": "src"},
+        {"proj_path": "copy_test_project", "src_files_dir": "src"},
+        {"proj_path": "copy_test_project_esp32", "src_files_dir": "main"},
+        {"proj_path": "copy_test_project_stm32", "src_files_dir": "src"},
         {"proj_path": "new_project_x86", "src_files_dir": "src"},
         {"proj_path": "new_project_esp32", "src_files_dir": "main"},
         {"proj_path": "new_project_stm32", "src_files_dir": "src"},
@@ -285,57 +280,63 @@ class TestGenCerts:
             single_bin=False,
         )
         # test if expected cert files was generated
-        assert os.path.exists(FS_DIR)
-        assert os.path.exists(CERTS_DIR)
+        pytest.assume(os.path.exists(FS_DIR))  # type: ignore
+        pytest.assume(os.path.exists(CERTS_DIR))  # type: ignore
 
-        assert os.path.exists(f"{FS_DIR}/ca.pem")
-        assert os.path.exists(f"{FS_DIR}/device_cert.pem")
-        assert os.path.exists(f"{FS_DIR}/device_priv_key.pem")
+        pytest.assume(os.path.exists(f"{FS_DIR}/ca.pem"))  # type: ignore
+        pytest.assume(os.path.exists(f"{FS_DIR}/device_cert.pem"))  # type: ignore
+        pytest.assume(os.path.exists(f"{FS_DIR}/device_priv_key.pem"))  # type: ignore
 
-        assert os.path.exists(f"{CERTS_DIR}/azure")
-        assert os.path.exists(f"{CERTS_DIR}/azure/{TEST_DEVICE_ID}-root-ca.pem")
+        pytest.assume(os.path.exists(f"{CERTS_DIR}/azure"))  # type: ignore
+        pytest.assume(os.path.exists(f"{CERTS_DIR}/azure/{TEST_DEVICE_ID}-root-ca.pem"))  # type: ignore
 
         # other files in certs dir
-        assert os.path.exists(f"{CERTS_DIR}/ca.pem")
-        assert os.path.exists(f"{CERTS_DIR}/digiroot.pem")
-        assert os.path.exists(f"{CERTS_DIR}/index.txt")
-        assert os.path.exists(f"{CERTS_DIR}/index.txt.attr")
-        assert os.path.exists(f"{CERTS_DIR}/index.txt.attr.old")
-        assert os.path.exists(f"{CERTS_DIR}/index.txt.old")
-        assert os.path.exists(f"{CERTS_DIR}/serial")
-        assert os.path.exists(f"{CERTS_DIR}/serial.old")
+        pytest.assume(os.path.exists(f"{CERTS_DIR}/ca.pem"))  # type: ignore
+        pytest.assume(os.path.exists(f"{CERTS_DIR}/digiroot.pem"))  # type: ignore
+        pytest.assume(os.path.exists(f"{CERTS_DIR}/index.txt"))  # type: ignore
+        pytest.assume(os.path.exists(f"{CERTS_DIR}/index.txt.attr"))  # type: ignore
+        pytest.assume(os.path.exists(f"{CERTS_DIR}/index.txt.attr.old"))  # type: ignore
+        pytest.assume(os.path.exists(f"{CERTS_DIR}/index.txt.old"))  # type: ignore
+        pytest.assume(os.path.exists(f"{CERTS_DIR}/serial"))  # type: ignore
+        pytest.assume(os.path.exists(f"{CERTS_DIR}/serial.old"))  # type: ignore
         #
-        assert os.path.exists(f"{CERTS_DIR}/certs")
-        assert os.path.exists(
-            f"{CERTS_DIR}/certs/azure-iot-test-only.chain.ca.cert.pem"
-        )
-        assert os.path.exists(
-            f"{CERTS_DIR}/certs/azure-iot-test-only.intermediate.cert.pem"
-        )
-        assert os.path.exists(f"{CERTS_DIR}/certs/azure-iot-test-only.root.ca.cert.pem")
-        assert os.path.exists(f"{CERTS_DIR}/certs/iot-device.cert.pem")
-        assert os.path.exists(f"{CERTS_DIR}/certs/iot-device.cert.pfx")
+        pytest.assume(os.path.exists(f"{CERTS_DIR}/certs"))  # type: ignore
+        pytest.assume(
+            os.path.exists(f"{CERTS_DIR}/certs/azure-iot-test-only.chain.ca.cert.pem")
+        )  # type: ignore
+        pytest.assume(
+            os.path.exists(
+                f"{CERTS_DIR}/certs/azure-iot-test-only.intermediate.cert.pem"
+            )
+        )  # type: ignore
+        pytest.assume(
+            os.path.exists(f"{CERTS_DIR}/certs/azure-iot-test-only.root.ca.cert.pem")
+        )  # type: ignore
+        pytest.assume(os.path.exists(f"{CERTS_DIR}/certs/iot-device.cert.pem"))  # type: ignore
+        pytest.assume(os.path.exists(f"{CERTS_DIR}/certs/iot-device.cert.pfx"))  # type: ignore
 
-        assert os.path.exists(f"{CERTS_DIR}/csr")
-        assert os.path.exists(
-            f"{CERTS_DIR}/csr/azure-iot-test-only.intermediate.csr.pem"
-        )
-        assert os.path.exists(f"{CERTS_DIR}/csr/iot-device.csr.pem")
+        pytest.assume(os.path.exists(f"{CERTS_DIR}/csr"))  # type: ignore
+        pytest.assume(
+            os.path.exists(f"{CERTS_DIR}/csr/azure-iot-test-only.intermediate.csr.pem")
+        )  # type: ignore
+        pytest.assume(os.path.exists(f"{CERTS_DIR}/csr/iot-device.csr.pem"))  # type: ignore
 
-        assert os.path.exists(f"{CERTS_DIR}/intermediateCerts")
+        pytest.assume(os.path.exists(f"{CERTS_DIR}/intermediateCerts"))  # type: ignore
 
-        assert os.path.exists(f"{CERTS_DIR}/newcerts")
-        assert os.path.exists(f"{CERTS_DIR}/newcerts/01.pem")
-        assert os.path.exists(f"{CERTS_DIR}/newcerts/02.pem")
+        pytest.assume(os.path.exists(f"{CERTS_DIR}/newcerts"))  # type: ignore
+        pytest.assume(os.path.exists(f"{CERTS_DIR}/newcerts/01.pem"))  # type: ignore
+        pytest.assume(os.path.exists(f"{CERTS_DIR}/newcerts/02.pem"))  # type: ignore
 
-        assert os.path.exists(f"{CERTS_DIR}/private")
-        assert os.path.exists(
-            f"{CERTS_DIR}/private/azure-iot-test-only.intermediate.key.pem"
-        )
-        assert os.path.exists(
-            f"{CERTS_DIR}/private/azure-iot-test-only.root.ca.key.pem"
-        )
-        assert os.path.exists(f"{CERTS_DIR}/private/iot-device.key.pem")
+        pytest.assume(os.path.exists(f"{CERTS_DIR}/private"))  # type: ignore
+        pytest.assume(
+            os.path.exists(
+                f"{CERTS_DIR}/private/azure-iot-test-only.intermediate.key.pem"
+            )
+        )  # type: ignore
+        pytest.assume(
+            os.path.exists(f"{CERTS_DIR}/private/azure-iot-test-only.root.ca.key.pem")
+        )  # type: ignore
+        pytest.assume(os.path.exists(f"{CERTS_DIR}/private/iot-device.key.pem"))  # type: ignore
 
     def test_gen_certs_mode_device(
         self,
@@ -526,9 +527,8 @@ class TestGenCerts:
                         buffer=file_content,
                         passphrase=incorrect_passwd_bytes,
                     )
-                assert (
-                    str(decryption_error.value)
-                    == "[('Provider routines', '', 'bad decrypt'), ('PEM routines', '', 'bad decrypt')]"
+                assert "('Provider routines', '', 'bad decrypt')" in str(
+                    decryption_error.value
                 ), f"Unexpected error value when incorrect password was used: {str(decryption_error.value)}"
 
     def test_gen_certs_custom_password(
@@ -597,9 +597,8 @@ class TestGenCerts:
                         buffer=file_content,
                         passphrase=incorrect_passwd_bytes,
                     )
-                assert (
-                    str(decryption_error.value)
-                    == "[('Provider routines', '', 'bad decrypt'), ('PEM routines', '', 'bad decrypt')]"
+                assert "('Provider routines', '', 'bad decrypt')" in str(
+                    decryption_error.value
                 ), f"Unexpected error value when incorrect password was used: {str(decryption_error.value)}"
 
 
@@ -655,8 +654,8 @@ def test_gen_ut_new_project(
 @pytest.mark.parametrize(
     "test_project_data",
     [
-        "coppy_test_project_esp32",
-        "coppy_test_project_stm32",
+        "copy_test_project_esp32",
+        "copy_test_project_stm32",
     ],
 )
 def test_gen_ut_copy_old_project(

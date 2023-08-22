@@ -65,13 +65,15 @@ dev = [
     "pytest-mock",
     "pytest-subprocess",
     "pytest",
+    "pytest-assume==2.4.3",
     "pytest-xdist==3.3.1",
     "pytest-order==1.1.0",
     "types-clang==0.14.3",
     "types-toml",
     "unittest-xml-reporting",
-    "pyopenssl",
-    "types-openssl-python"
+    "pyopenssl==23.2.0",
+    "types-pyOpenSSL==23.2.0"
+
 ]
 doc = [
     "recommonmark",

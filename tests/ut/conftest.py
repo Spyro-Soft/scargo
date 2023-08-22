@@ -117,9 +117,9 @@ def mock_subprocess_run() -> Generator[MagicMock, None, None]:
 
 
 @pytest.fixture(scope="session")
-def coppy_test_project(tmpdir_factory: TempdirFactory) -> Path:
+def copy_test_project(tmpdir_factory: TempdirFactory) -> Path:
     """This fixture just copying test project to test backward compatibility"""
-    tmp_dir = tmpdir_factory.mktemp("coppy_test_project")
+    tmp_dir = tmpdir_factory.mktemp("copy_test_project")
     os.chdir(tmp_dir)
     copytree(TEST_PROJECT_PATH, os.getcwd(), dirs_exist_ok=True)
     project_path = get_project_root_or_none()
@@ -128,9 +128,9 @@ def coppy_test_project(tmpdir_factory: TempdirFactory) -> Path:
 
 
 @pytest.fixture(scope="session")
-def coppy_test_project_esp32(tmpdir_factory: TempdirFactory) -> Path:
+def copy_test_project_esp32(tmpdir_factory: TempdirFactory) -> Path:
     """This fixture just copying esp32 test project to test backward compatibility"""
-    tmp_dir = tmpdir_factory.mktemp("coppy_test_project_esp32")
+    tmp_dir = tmpdir_factory.mktemp("copy_test_project_esp32")
     os.chdir(tmp_dir)
     copytree(TEST_PROJECT_ESP32_PATH, os.getcwd(), dirs_exist_ok=True)
     project_path = get_project_root_or_none()
@@ -139,9 +139,9 @@ def coppy_test_project_esp32(tmpdir_factory: TempdirFactory) -> Path:
 
 
 @pytest.fixture(scope="session")
-def coppy_test_project_stm32(tmpdir_factory: TempdirFactory) -> Path:
+def copy_test_project_stm32(tmpdir_factory: TempdirFactory) -> Path:
     """This fixture just copying stm32 test project to test backward compatibility"""
-    tmp_dir = tmpdir_factory.mktemp("coppy_test_project_stm32")
+    tmp_dir = tmpdir_factory.mktemp("copy_test_project_stm32")
     os.chdir(tmp_dir)
     copytree(TEST_PROJECT_STM32_PATH, os.getcwd(), dirs_exist_ok=True)
     project_path = get_project_root_or_none()
