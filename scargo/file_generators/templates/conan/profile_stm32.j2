@@ -1,0 +1,28 @@
+[env]
+STM32_CHIP={{config.stm32.chip}}
+STM32_TOOLCHAIN_PATH=/opt/gcc-arm-none-eabi
+STM32_TARGET_TRIPLET=arm-none-eabi
+
+[settings]
+compiler=gcc
+compiler.version=9
+compiler.libcxx=libstdc++
+compiler.cppstd={{ config.project.cxxstandard }}
+os=baremetal
+arch=armv7
+os_build=Linux
+arch_build=x86_64
+
+build_type={{ config.profiles[profile].cmake_build_type }}
+
+[conf]
+tools.build:cflags=["{{ config.project.cflags if config.project.cflags}} {{config.profiles.get(profile).cflags if config.profiles.get(profile).cflags}}"]
+tools.build:cxxflags=["{{ config.project.cxxflags if config.project.cxxflags }} {{ config.profiles.get(profile).cxxflags if config.profiles.get(profile).cxxflags }}"]
+
+tools.cmake.cmaketoolchain:user_toolchain=["/workspace/config/conan/profiles/stm32_gcc_toolchain_wrapper.cmake"]
+{% if config.project.max_build_jobs != None %}
+tools.build:jobs={{config.project.max_build_jobs}}
+{% endif %}
+
+[options]
+[build_requires]

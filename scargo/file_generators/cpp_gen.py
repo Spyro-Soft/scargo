@@ -15,6 +15,7 @@ class _CppTemplateGen:
     def __init__(self, config: Config) -> None:
         self._config = config
         self._src_dir = config.source_dir_path
+        self._inc_dir = config.include_dir_path
 
     def _generate_bin(self, bin_name: str) -> None:
         """Function which creates main.cpp file using jinja"""
@@ -27,22 +28,48 @@ class _CppTemplateGen:
             },
         )
 
+    def _generate_test_package(self, class_name: str) -> None:
+        create_file_from_template(
+            "conan/test_package/CMakeLists.txt.j2",
+            "test_package/CMakeLists.txt",
+            template_params={"config": self._config},
+            config=self._config,
+        )
+
+        create_file_from_template(
+            "conan/test_package/conanfile.py.j2",
+            "test_package/conanfile.py",
+            template_params={"config": self._config},
+            config=self._config,
+        )
+
+        create_file_from_template(
+            "conan/test_package/example.cpp.j2",
+            "test_package/src/example.cpp",
+            template_params={"config": self._config, "class_name": class_name},
+            config=self._config,
+        )
+
     def _generate_lib(self, lib_name: str) -> None:
         """Function which creates a lib files using jinja"""
 
         lib_name = lib_name.lower()
         class_name = "".join(lib_name.replace("_", " ").title().split())
 
-        self._create_file_from_template(
+        create_file_from_template(
             "cpp/lib.cpp.j2",
-            f"{lib_name}.cpp",
+            self._src_dir / f"{self._config.project.target.source_dir}/{lib_name}.cpp",
             template_params={"class_name": class_name, "lib_name": lib_name},
+            config=self._config,
         )
-        self._create_file_from_template(
+        create_file_from_template(
             "cpp/lib.h.j2",
-            f"{lib_name}.h",
+            self._inc_dir / f"{lib_name}.h",
             template_params={"class_name": class_name},
+            config=self._config,
         )
+
+        self._generate_test_package(class_name)
 
     def _generate_cmake(self) -> None:
         self._create_file_from_template(

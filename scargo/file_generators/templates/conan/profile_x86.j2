@@ -1,0 +1,34 @@
+[env]
+{% if config.profiles[profile].cc %}
+CC={{ config.profiles[profile].cc }}
+{% else %}
+CC=gcc
+{% endif %}
+{% if config.profiles[profile].cxx %}
+CXX={{ config.profiles[profile].cxx }}
+{% else %}
+CXX=g++
+{% endif %}
+
+[settings]
+compiler=gcc
+compiler.version=9
+compiler.libcxx=libstdc++
+compiler.cppstd={{ config.project.cxxstandard }}
+os=Linux
+arch=x86_64
+os_build=Linux
+arch_build=x86_64
+
+build_type={{ config.profiles[profile].cmake_build_type }}
+
+
+[conf]
+tools.build:cflags=["{{ config.project.cflags if config.project.cflags}} {{config.profiles.get(profile).cflags if config.profiles.get(profile).cflags}}"]
+tools.build:cxxflags=["{{ config.project.cxxflags if config.project.cxxflags }} {{ config.profiles.get(profile).cxxflags if config.profiles.get(profile).cxxflags }}"]
+{% if config.project.max_build_jobs != None %}
+tools.build:jobs={{config.project.max_build_jobs}}
+{% endif %}
+
+[options]
+[build_requires]

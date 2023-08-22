@@ -4,23 +4,21 @@
 ###
 version: '3.9'
 
-x-project_config: &project_config
-  USER_NAME: ${USER_NAME}
-  USER_PASSWORD: ${USER_PASSWORD}
-  GID_NUMBER: ${GID_NUMBER}
-  UID_NUMBER: ${UID_NUMBER}
-  DOCKER_IMAGE_ROOT: ${DOCKER_IMAGE_ROOT}
-  CONAN_LOGIN_USERNAME: ${CONAN_LOGIN_USERNAME}
-  CONAN_PASSWORD: ${CONAN_PASSWORD}
-
 services:
   {{ config.project.name }}_dev:
     image: {{ config.project.docker_image_tag }}
     platform: linux/amd64
     build:
       context: .
+      # in case of missing .env file (eg. CI/CD) system will use default values
       args:
-        <<: *project_config
+        USER_NAME: ${USER_NAME:-user}
+        USER_PASSWORD: ${USER_PASSWORD:-user}
+        GID_NUMBER: ${GID_NUMBER:-1000}
+        UID_NUMBER: ${UID_NUMBER:-1000}
+        DOCKER_IMAGE_ROOT: ${DOCKER_IMAGE_ROOT:-ubuntu:20.04}
+        CONAN_LOGIN_USERNAME: ${CONAN_LOGIN_USERNAME:-""}
+        CONAN_PASSWORD: ${CONAN_PASSWORD:-""}
     privileged: true
     volumes:
       - ..:/workspace

@@ -10,8 +10,3 @@ project( {{ config.project.name }}
     {% endif %}
     LANGUAGES C CXX ASM
 )
-
-if(EXISTS ${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
-    include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
-    conan_basic_setup()
-endif()

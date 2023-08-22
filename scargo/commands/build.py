@@ -11,6 +11,7 @@ from scargo.commands.publish import (
     conan_add_conancenter,
     conan_add_remote,
     conan_clean_remote,
+    conan_source,
 )
 from scargo.config_utils import prepare_config
 from scargo.logger import get_logger
@@ -44,20 +45,48 @@ def scargo_build(profile: str) -> None:
 
     conan_add_remote(project_dir, config)
     conan_add_conancenter()
+    conan_source(project_dir)
 
     try:
         subprocess.check_call(
-            ["conan", "install", ".", "-if", build_dir],
+            [
+                "conan",
+                "install",
+                ".",
+                "-if",
+                build_dir,
+                "-of",
+                build_dir,
+                "-pr:b",
+                "default",
+                "-pr:h",
+                f"./config/conan/profiles/{config.project.target.family}_{profile}",
+                "-b",
+                "missing",
+            ],
             cwd=project_dir,
         )
         subprocess.check_call(
-            ["cmake", f"-DCMAKE_BUILD_TYPE={profile}", project_dir],
+            [
+                "conan",
+                "build",
+                f"{project_dir}",
+                "-bf",
+                build_dir,
+            ],
             cwd=build_dir,
         )
-        command = ["cmake", "--build", ".", "--parallel"]
-        if config.project.max_build_jobs is not None:
-            command.append(str(config.project.max_build_jobs))
-        subprocess.check_call(command, cwd=build_dir)
+
+        get_logger().info("Copying artifacts...")
+        # This is a workaround so that different profiles can work together with conan
+        # Conan always calls CMake with '
+        subprocess.check_call(
+            f"cp -r -l -f {build_dir}/build/{config.profiles[profile].cmake_build_type}/* .",
+            cwd=build_dir,
+            shell=True,
+        )
+        get_logger().info("Artifacts copied")
+
     except subprocess.CalledProcessError:
         logger.error("Unable to build exec file")
         sys.exit(1)

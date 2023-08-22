@@ -87,38 +87,23 @@ if [ -z "$DEVICE_NAME" ]
 mkdir -p ${OUTPUT_DIR}
 
 #Download CA certificate for IoT Hub
-BALTIMORE_CERT=${OUTPUT_DIR}/baltimore.pem
 DIGIROOT_CERT=${OUTPUT_DIR}/digiroot.pem
 CA_PEM=${OUTPUT_DIR}/ca.pem
 
-rm -f ${OUTPUT_DIR}/ca.pem
-
-if [ -f "$BALTIMORE_CERT" ]; then
-    echo "$BALTIMORE_CERT already exists."
-else
-    wget https://cacerts.digicert.com/BaltimoreCyberTrustRoot.crt.pem -O ${OUTPUT_DIR}/baltimore.pem
-    if [ $? -ne 0 ]; then
-        echo -e "${RED} Failed to download Baltimore certificate" >&2
-        rm ${OUTPUT_DIR}/baltimore.pem
-        exit 1
-    fi
-fi
+rm -f ${CA_PEM}
 
 if [ -f "$DIGIROOT_CERT" ]; then
     echo "$DIGIROOT_CERT already exists."
 else
-    wget https://cacerts.digicert.com/DigiCertGlobalRootG2.crt.pem -O ${OUTPUT_DIR}/digiroot.pem
+    wget https://cacerts.digicert.com/DigiCertGlobalRootG2.crt.pem -O ${DIGIROOT_CERT}
     if [ $? -ne 0 ]; then
         echo -e "${RED} Failed to download Digiroot certificate" >&2
-        rm ${OUTPUT_DIR}/digiroot.pem
+        rm -f ${DIGIROOT_CERT}
         exit 1
     fi
 fi
 
-cat ${OUTPUT_DIR}/baltimore.pem >> ${OUTPUT_DIR}/ca_temp.pem
-cat ${OUTPUT_DIR}/digiroot.pem >> ${OUTPUT_DIR}/ca_temp.pem
-grep . ${OUTPUT_DIR}/ca_temp.pem > ${OUTPUT_DIR}/ca.pem
-rm -f ${OUTPUT_DIR}/ca_temp.pem
+cp ${DIGIROOT_CERT} ${CA_PEM}
 
 if [ ${MODE} == "Device-certificate" ]; then
     #Generate only device cert

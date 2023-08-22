@@ -5,11 +5,12 @@ from typing import Dict
 
 import pytest
 from clang import native  # type: ignore[attr-defined]
-from clang.cindex import Config as cindexConfig
+from clang.cindex import Config as ClangConfig
 from OpenSSL import crypto
 from pytest_mock import MockerFixture
 
 from scargo.commands.gen import scargo_gen
+from scargo.commands.update import scargo_update
 from scargo.config_utils import get_scargo_config_or_exit
 
 NAME_OF_LIB_HPP_FILE = "lib_hpp.hpp"
@@ -26,7 +27,10 @@ FS_DIR = "build/fs"
 
 CUSTOM_CERTS_DIR = "custom_certs"
 
-cindexConfig().set_library_file(str(Path(native.__file__).with_name("libclang.so")))
+
+@pytest.fixture(autouse=True, scope="session")
+def clang_config() -> None:
+    ClangConfig().set_library_file(str(Path(native.__file__).with_name("libclang.so")))
 
 
 def project_add_nested_hpp_test_file(project_src_path: Path) -> None:
@@ -292,7 +296,6 @@ class TestGenCerts:
         assert os.path.exists(f"{CERTS_DIR}/azure/{TEST_DEVICE_ID}-root-ca.pem")
 
         # other files in certs dir
-        assert os.path.exists(f"{CERTS_DIR}/baltimore.pem")
         assert os.path.exists(f"{CERTS_DIR}/ca.pem")
         assert os.path.exists(f"{CERTS_DIR}/digiroot.pem")
         assert os.path.exists(f"{CERTS_DIR}/index.txt")
@@ -598,3 +601,90 @@ class TestGenCerts:
                     str(decryption_error.value)
                     == "[('Provider routines', '', 'bad decrypt'), ('PEM routines', '', 'bad decrypt')]"
                 ), f"Unexpected error value when incorrect password was used: {str(decryption_error.value)}"
+
+
+@pytest.mark.parametrize(
+    "test_project_data",
+    [
+        "new_project_x86",
+        "new_project_esp32",
+        "new_project_stm32",
+    ],
+    ids=[
+        "new_project_x86",
+        "new_project_esp32",
+        "new_project_stm32",
+    ],
+    scope="class",
+)
+def test_gen_ut_new_project(
+    request: pytest.FixtureRequest, test_project_data: str, mocker: MockerFixture
+) -> None:
+    proj_path = request.getfixturevalue(test_project_data)
+    os.chdir(proj_path)
+
+    if test_project_data == "new_project_esp32":
+        test_data = Path(__file__).parents[1].joinpath("test_data")
+        os.environ["IDF_PATH"] = Path(test_data, "esp32_spiff").as_posix()
+        h_file_path = Path(os.getcwd(), "main")
+    else:
+        h_file_path = Path(os.getcwd(), "src")
+
+    scargo_update(Path(os.getcwd(), "scargo.toml"))
+    mocker.patch(
+        f"{scargo_gen.__module__}.prepare_config",
+        return_value=get_scargo_config_or_exit(),
+    )
+    scargo_gen(
+        profile="Debug",
+        gen_ut=h_file_path,
+        fs=True,
+        single_bin=False,
+        gen_mock=None,
+        certs=None,
+        certs_mode=None,
+        certs_input=None,
+        certs_passwd=None,
+    )
+    ut_path = Path(os.getcwd(), "tests", "ut")
+    assert "ut_test_lib.cpp" in os.listdir(
+        ut_path
+    ), f"File 'ut_test_lib.cpp' should be present in {ut_path}. Files under path: {os.listdir(ut_path)}"
+
+
+@pytest.mark.parametrize(
+    "test_project_data",
+    [
+        "coppy_test_project_esp32",
+        "coppy_test_project_stm32",
+    ],
+)
+def test_gen_ut_copy_old_project(
+    request: pytest.FixtureRequest,
+    test_project_data: str,
+    mocker: MockerFixture,
+) -> None:
+    test_data = Path(__file__).parents[1].joinpath("test_data")
+    os.environ["IDF_PATH"] = Path(test_data, "esp32_spiff").as_posix()
+    proj_path = request.getfixturevalue(test_project_data)
+    os.chdir(proj_path)
+    h_file_path = Path(os.getcwd(), "main" if "esp32" in test_project_data else "src")
+    mocker.patch(
+        f"{scargo_gen.__module__}.prepare_config",
+        return_value=get_scargo_config_or_exit(),
+    )
+    scargo_gen(
+        profile="Debug",
+        gen_ut=h_file_path,
+        fs=True,
+        single_bin=False,
+        gen_mock=None,
+        certs=None,
+        certs_mode=None,
+        certs_input=None,
+        certs_passwd=None,
+    )
+    ut_path = Path(os.getcwd(), "tests", "ut")
+    assert "ut_test_lib.cpp" in os.listdir(
+        ut_path
+    ), f"File 'ut_test_lib.cpp' should be present in {ut_path}. Files under path: {os.listdir(ut_path)}"

@@ -19,3 +19,26 @@ def generate_conanfile(config: Config) -> None:
         template_params={"config": config},
         config=config,
     )
+
+
+def generate_conanprofile(config: Config) -> None:
+    profiles = config.profiles.keys()
+
+    if config.project.target.family == "stm32":
+        create_file_from_template(
+            "conan/stm32_gcc_toolchain_wrapper.cmake.j2",
+            "config/conan/profiles/stm32_gcc_toolchain_wrapper.cmake",
+            template_params={},
+            config=config,
+        )
+
+    for profile in profiles:
+        create_file_from_template(
+            "conan/profile.j2",
+            f"config/conan/profiles/{config.project.target.family}_{profile}",
+            template_params={
+                "config": config,
+                "profile": profile,
+            },
+            config=config,
+        )

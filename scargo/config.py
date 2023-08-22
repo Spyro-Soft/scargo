@@ -40,6 +40,10 @@ class Config(BaseModel):
     def source_dir_path(self) -> Path:
         return self.project_root / self.project.target.source_dir
 
+    @property
+    def include_dir_path(self) -> Path:
+        return self.source_dir_path / self.project.target.include_dir
+
     def get_stm32_config(self) -> "Stm32Config":
         if not self.stm32:
             raise ConfigError("No [stm32] section in config")
@@ -60,6 +64,22 @@ class Config(BaseModel):
                 raise ConfigError("No [stm32] section in config")
             if target_id == "esp32" and not values["esp32"]:
                 raise ConfigError("No [esp32] section in config")
+
+        # Set default value of cmake_build_type - Debug for non-stanard profiles,
+        # If profile is on standard_profiles list, use it's name instead
+        standard_profiles: List[str] = [
+            "Debug",
+            "Release",
+            "RelWithDebInfo",
+            "MinSizeRel",
+        ]
+        if "profiles" in values:
+            for name, profile in values["profiles"].items():
+                if profile.cmake_build_type is None:
+                    if name in standard_profiles:
+                        profile.cmake_build_type = name
+                    else:
+                        profile.cmake_build_type = "Debug"
         return values
 
 
@@ -104,6 +124,7 @@ class Target(BaseModel):
     id: str
     family: str
     source_dir: str
+    include_dir: str
     cc: Optional[str] = None
     cxx: Optional[str] = None
 
@@ -113,13 +134,32 @@ class Target(BaseModel):
 
 
 TARGETS = {
-    "x86": Target(id="x86", family="x86", source_dir="src", cc="gcc", cxx="g++"),
-    "stm32": Target(id="stm32", family="stm32", source_dir="src"),
-    "esp32": Target(id="esp32", family="esp32", source_dir="main"),
-    "esp32s2": Target(id="esp32s2", family="esp32", source_dir="main"),
-    "esp32s3": Target(id="esp32s3", family="esp32", source_dir="main"),
-    "esp32c2": Target(id="esp32c2", family="esp32", source_dir="main"),
-    "esp32c3": Target(id="esp32c3", family="esp32", source_dir="main"),
+    "x86": Target(
+        id="x86",
+        family="x86",
+        source_dir="src",
+        include_dir="include",
+        cc="gcc",
+        cxx="g++",
+    ),
+    "stm32": Target(
+        id="stm32", family="stm32", source_dir="src", include_dir="include"
+    ),
+    "esp32": Target(
+        id="esp32", family="esp32", source_dir="main", include_dir="include"
+    ),
+    "esp32s2": Target(
+        id="esp32s2", family="esp32", source_dir="main", include_dir="include"
+    ),
+    "esp32s3": Target(
+        id="esp32s3", family="esp32", source_dir="main", include_dir="include"
+    ),
+    "esp32c2": Target(
+        id="esp32c2", family="esp32", source_dir="main", include_dir="include"
+    ),
+    "esp32c3": Target(
+        id="esp32c3", family="esp32", source_dir="main", include_dir="include"
+    ),
 }
 
 
@@ -132,6 +172,9 @@ ScargoTargets = Enum(  # type: ignore[misc]
 class ProfileConfig(BaseModel, extra=Extra.allow):
     cflags: Optional[str]
     cxxflags: Optional[str]
+    cc: Optional[str] = None
+    cxx: Optional[str] = None
+    cmake_build_type: Optional[str] = Field(None, alias="cmake-build-type")
 
     @property
     def extras(self) -> Dict[str, Any]:

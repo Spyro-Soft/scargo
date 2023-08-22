@@ -8,11 +8,11 @@ import subprocess
 import sys
 from pathlib import Path
 
-from scargo.commands.docker import scargo_docker_build
+from scargo.commands.docker import get_docker_compose_command, scargo_docker_build
 from scargo.config_utils import add_version_to_scargo_lock, get_scargo_config_or_exit
 from scargo.file_generators.cicd_gen import generate_cicd
 from scargo.file_generators.cmake_gen import generate_cmake
-from scargo.file_generators.conan_gen import generate_conanfile
+from scargo.file_generators.conan_gen import generate_conanfile, generate_conanprofile
 from scargo.file_generators.docker_gen import generate_docker_compose
 from scargo.file_generators.env_gen import generate_env
 from scargo.file_generators.readme_gen import generate_readme
@@ -72,6 +72,7 @@ def scargo_update(config_file_path: Path) -> None:
 
     generate_cmake(config)
     generate_conanfile(config)
+    generate_conanprofile(config)
 
     if target.family == "esp32":
         Path(config.source_dir_path, "fs").mkdir(parents=True, exist_ok=True)
@@ -91,12 +92,6 @@ def scargo_update(config_file_path: Path) -> None:
     generate_readme(config)
 
     # do not rebuild dockers in the docker
-    if (
-        target.family == "stm32"
-        and not Path(config.project_root, "third-party/stm32-cmake").is_dir()
-    ):
-        subprocess.run("conan source .", shell=True, cwd=project_path, check=True)
-
     if project_config.build_env == SCARGO_DOCKER_ENV:
         if not Path("/.dockerenv").exists():
             if not pull_docker_image(docker_path):
@@ -108,8 +103,10 @@ def scargo_update(config_file_path: Path) -> None:
 def pull_docker_image(docker_path: Path) -> bool:
     logger.info("Pulling the image from docker registry...")
     try:
+        cmd = get_docker_compose_command()
+        cmd.extend(["pull"])
         result = subprocess.run(
-            ["docker-compose", "pull"],
+            cmd,
             cwd=docker_path,
             stderr=subprocess.PIPE,
             check=True,

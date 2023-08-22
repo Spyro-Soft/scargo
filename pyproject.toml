@@ -65,6 +65,8 @@ dev = [
     "pytest-mock",
     "pytest-subprocess",
     "pytest",
+    "pytest-xdist==3.3.1",
+    "pytest-order==1.1.0",
     "types-clang==0.14.3",
     "types-toml",
     "unittest-xml-reporting",

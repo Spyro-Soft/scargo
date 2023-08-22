@@ -1,11 +1,19 @@
+import re
 import sys
 from pathlib import Path
-from typing import IO, Any, Mapping, Optional, Sequence, Union
+from typing import IO, Any, List, Mapping, Optional, Sequence, Union
 
 import toml
 from click.testing import Result
 from typer import Typer
 from typer.testing import CliRunner
+
+from scargo.config import ProjectConfig
+from scargo.docker_utils import prepare_docker
+from scargo.global_values import SCARGO_DOCKER_ENV
+from scargo.logger import get_logger
+
+logger = get_logger()
 
 
 class ScargoTestRunner(CliRunner):
@@ -87,6 +95,15 @@ def assert_str_in_file(file_path: Path, str_to_check: str) -> bool:
     return False
 
 
+def assert_regex_in_file(file_path: Path, regex: str) -> bool:
+    with open(file_path) as file:
+        contents = file.read()
+        matches = re.findall(regex, contents)
+        if bool(matches):
+            return True
+    return False
+
+
 def get_bin_name(file_path: Path = Path("scargo.toml")) -> str:
     data = toml.load(file_path)
     bin_name = data["project"]["bin_name"]
@@ -119,3 +136,34 @@ def assert_str_in_CMakeLists(
             return True
 
     return False
+
+
+def run_custom_command_in_docker(
+    command: List[str], project_config: ProjectConfig, project_path: Path
+) -> Union[str, None]:
+    """
+    Run command in docker
+
+    :param List[str] command: command to execute
+    :param dict project_config: project configuration
+    :param Path project_path: path to project root
+    :return: None
+    """
+    build_env = project_config.build_env
+    if build_env != SCARGO_DOCKER_ENV or Path("/.dockerenv").exists():
+        return None
+
+    docker_settings = prepare_docker(project_config, project_path)
+
+    client = docker_settings["client"]
+    logger.info(f"Running '{' '.join(command)}' command in docker.")
+    output = client.containers.run(
+        docker_settings["docker_tag"],
+        command,
+        volumes=[f"{project_path}:/workspace/", "/dev/:/dev/"],
+        entrypoint=docker_settings["entrypoint"],
+        privileged=True,
+        remove=True,
+        working_dir=str(docker_settings["path_in_docker"]),
+    )
+    return output.decode()  # type: ignore[no-any-return]

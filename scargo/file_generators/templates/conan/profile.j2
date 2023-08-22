@@ -1,0 +1,7 @@
+{% if config.project.target.family == 'stm32' %}
+    {% include 'conan/profile_stm32.j2' %}
+{% elif config.project.target.family == 'x86' %}
+    {% include 'conan/profile_x86.j2' %}
+{% elif config.project.target.family == "esp32" %}
+    {% include 'conan/profile_esp32.j2' %}
+{% endif %}
