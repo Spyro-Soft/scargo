@@ -330,6 +330,7 @@ def main() -> None:
         result = perform_tests(
             IT_DIR, "it", ["-n 2", f"-k {args.target[0]}", "--dist=loadgroup"]
         )
+
         if result:
             sys.exit(1)
 
