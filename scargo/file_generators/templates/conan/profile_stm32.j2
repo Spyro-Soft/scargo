@@ -1,16 +1,4 @@
 [env]
-{% if config.profiles[profile].cc %}
-CC={{ config.profiles[profile].cc }}
-{% else %}
-CC=/opt/gcc-arm-none-eabi/bin/arm-none-eabi-gcc
-{% endif %}
-
-{% if config.profiles[profile].cxx %}
-CXX={{ config.profiles[profile].cxx }}
-{% else %}
-CXX=/opt/gcc-arm-none-eabi/bin/arm-none-eabi-g++
-{% endif %}
-
 STM32_CHIP={{config.stm32.chip}}
 STM32_TOOLCHAIN_PATH=/opt/gcc-arm-none-eabi
 STM32_TARGET_TRIPLET=arm-none-eabi
@@ -31,7 +19,7 @@ build_type={{ config.profiles[profile].cmake_build_type }}
 tools.build:cflags=["{{ config.project.cflags if config.project.cflags}} {{config.profiles.get(profile).cflags if config.profiles.get(profile).cflags}}"]
 tools.build:cxxflags=["{{ config.project.cxxflags if config.project.cxxflags }} {{ config.profiles.get(profile).cxxflags if config.profiles.get(profile).cxxflags }}"]
 
-tools.cmake.cmaketoolchain:user_toolchain=["/workspace/.conan/profiles/stm32_gcc_toolchain_wrapper.cmake"]
+tools.cmake.cmaketoolchain:user_toolchain=["/workspace/config/conan/profiles/stm32_gcc_toolchain_wrapper.cmake"]
 {% if config.project.max_build_jobs != None %}
 tools.build:jobs={{config.project.max_build_jobs}}
 {% endif %}

@@ -2,6 +2,7 @@
 # @copyright Copyright (C) 2022 Spyrosoft Solutions. All rights reserved.
 # THIS FILE WAS GENERATED AUTOMATICALLY. DO NOT CHANGE IT.
 ###
+urllib3==1.26.15
 lizard~=1.7.9
 gitpython==3.1.30
 Jinja2==3.0.2

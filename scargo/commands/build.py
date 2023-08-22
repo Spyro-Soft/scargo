@@ -11,6 +11,7 @@ from scargo.commands.publish import (
     conan_add_conancenter,
     conan_add_remote,
     conan_clean_remote,
+    conan_source,
 )
 from scargo.config_utils import prepare_config
 from scargo.logger import get_logger
@@ -44,6 +45,7 @@ def scargo_build(profile: str) -> None:
 
     conan_add_remote(project_dir, config)
     conan_add_conancenter()
+    conan_source(project_dir)
 
     try:
         subprocess.check_call(
@@ -58,7 +60,7 @@ def scargo_build(profile: str) -> None:
                 "-pr:b",
                 "default",
                 "-pr:h",
-                f"./.conan/profiles/{config.project.target.family}_{profile}",
+                f"./config/conan/profiles/{config.project.target.family}_{profile}",
                 "-b",
                 "missing",
             ],
