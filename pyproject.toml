@@ -42,6 +42,7 @@ dependencies = [
     "toml==0.10.2",
     "tomlkit==0.11.6",
     "typer==0.7.0",
+    "typing-extensions==4.6.0"
 ]
 
 [project.optional-dependencies]
