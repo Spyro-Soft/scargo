@@ -417,22 +417,6 @@ class TestBinProjectFlow:
         ), f"Objdump results: {output} did not contain expected bin file format: {test_state.expected_bin_file_format}"
 
     @pytest.mark.order(after="test_release_bin_file_format_by_objdump_results")
-    def test_cli_clean_after_build_profile_release(
-        self, test_state: ActiveTestState
-    ) -> None:
-        """This test check if call of scargo clean command will finish without error and
-        if build folder will be removed"""
-        # Clean
-        os.chdir(f"{test_state.proj_path}/{test_state.proj_name}")
-        result = test_state.runner.invoke(cli, ["clean"])
-        assert (
-            result.exit_code == 0
-        ), f"Command 'clean' end with non zero exit code: {result.exit_code}"
-        assert not Path(
-            "build"
-        ).is_dir(), "Dictionary 'build' still exist when 'clean' should remove it"
-
-    @pytest.mark.order(after="test_cli_clean_after_build_profile_release")
     def test_cli_fix(self, test_state: ActiveTestState) -> None:
         """This test check if call of scargo fix command will finish without error and if no problems to fix
         will be found for newly created project"""
@@ -465,6 +449,22 @@ class TestBinProjectFlow:
         assert (
             "No problems found!" in result.output
         ), f"String 'No problems found!' not found in check command output {result.output}"
+
+    @pytest.mark.order(after="test_cli_check")
+    def test_cli_clean_after_build_profile_release(
+        self, test_state: ActiveTestState
+    ) -> None:
+        """This test check if call of scargo clean command will finish without error and
+        if build folder will be removed"""
+        # Clean
+        os.chdir(f"{test_state.proj_path}/{test_state.proj_name}")
+        result = test_state.runner.invoke(cli, ["clean"])
+        assert (
+            result.exit_code == 0
+        ), f"Command 'clean' end with non zero exit code: {result.exit_code}"
+        assert not Path(
+            "build"
+        ).is_dir(), "Dictionary 'build' still exist when 'clean' should remove it"
 
     @pytest.mark.order(after="test_cli_check")
     def test_cli_test(self, test_state: ActiveTestState) -> None:
