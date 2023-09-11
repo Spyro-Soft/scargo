@@ -9,29 +9,38 @@ on:
 jobs:
   check:
     runs-on: ubuntu-latest
-    container:
-      image: spyrosoftsa/scargo-dev:1.4
-      options: --user root
     steps:
-      - name: Checkout
-        uses: actions/checkout@v3
-      - name: Check copyright
-        continue-on-error: true
-        run: ./common_dev/scripts/copyrights.py -C scargo/
-      - name: Check TODO
-        continue-on-error: true
-        run: ./common_dev/scripts/todo_check.py -C scargo -C tests
-      - name: Check with Black
-        run: black --check --diff scargo tests common_dev run.py clean.py
-      - name: Check isort
-        run: isort --profile=black --check --diff scargo tests common_dev run.py clean.py
-      - name: Check Cyclomatic
-        continue-on-error: true
-        run: ./common_dev/scripts/cyclomatic.py
-      - name: Run pylint
-        run: ./common_dev/scripts/pylintchecker.py -c scargo/ -s 9.95 --exclude=tests/
-      - name: Check typing with mypy
-        run: mypy --explicit-package-bases scargo tests common_dev run.py clean.py
+        - name: Checkout
+          uses: actions/checkout@v3
+        - name: Apt install dependencies
+          run: |
+            sudo apt-get update --fix-missing
+            sudo apt-get install doxygen
+            sudo apt-get clean
+            sudo apt-get autoremove --yes
+            sudo rm -rf /var/lib/{cache,log}
+            sudo rm -rf /var/lib/apt/lists/*
+        - name: Pip install dependencies
+          run: |
+            pip install --upgrade pip
+            pip install -r ci/requirements.txt
+        - name: Check copyright
+          continue-on-error: true
+          run: ./common_dev/scripts/copyrights.py -C scargo/
+        - name: Check TODO
+          continue-on-error: true
+          run: ./common_dev/scripts/todo_check.py -C scargo -C tests
+        - name: Check with Black
+          run: black --check --diff scargo tests common_dev run.py clean.py
+        - name: Check isort
+          run: isort --profile=black --check --diff scargo tests common_dev run.py clean.py
+        - name: Check Cyclomatic
+          continue-on-error: true
+          run: ./common_dev/scripts/cyclomatic.py
+        - name: Run pylint
+          run: ./common_dev/scripts/pylintchecker.py -c scargo/ -s 9.95 --exclude=tests/
+        - name: Check typing with mypy
+          run: mypy --explicit-package-bases scargo tests common_dev run.py clean.py
   unit_tests:
     runs-on: ubuntu-latest
     steps:
