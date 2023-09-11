@@ -61,6 +61,7 @@ repos:
           typer,
           types-clang==0.14.3,
           types-toml,
+          types-openssl-python,
         ]
 
 # sets up .pre-commit-ci.yaml to ensure pre-commit dependencies stay up to date
