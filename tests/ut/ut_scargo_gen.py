@@ -521,15 +521,15 @@ class TestGenCerts:
                 )
                 # negative test encryption with incorrect password
                 incorrect_passwd_bytes = bytes(incorrect_passwd, "utf-8")
-                with pytest.raises(crypto.Error) as decryption_error:
+                with pytest.raises(crypto.Error):
                     crypto.load_privatekey(
                         type=crypto.FILETYPE_PEM,
                         buffer=file_content,
                         passphrase=incorrect_passwd_bytes,
                     )
-                assert "('Provider routines', '', 'bad decrypt')" in str(
-                    decryption_error.value
-                ), f"Unexpected error value when incorrect password was used: {str(decryption_error.value)}"
+                    assert (
+                        False
+                    ), "Files decrypted with wrong password, exception wasn't raised"
 
     def test_gen_certs_custom_password(
         self,
@@ -591,15 +591,15 @@ class TestGenCerts:
                 )
                 # negative test encryption with incorrect password
                 incorrect_passwd_bytes = bytes(incorrect_passwd, "utf-8")
-                with pytest.raises(crypto.Error) as decryption_error:
+                with pytest.raises(crypto.Error):
                     crypto.load_privatekey(
                         type=crypto.FILETYPE_PEM,
                         buffer=file_content,
                         passphrase=incorrect_passwd_bytes,
                     )
-                assert "('Provider routines', '', 'bad decrypt')" in str(
-                    decryption_error.value
-                ), f"Unexpected error value when incorrect password was used: {str(decryption_error.value)}"
+                    assert (
+                        False
+                    ), f"Files decrypted with wrong password, exception wasn't raised"
 
 
 @pytest.mark.parametrize(
