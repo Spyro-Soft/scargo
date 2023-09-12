@@ -10,7 +10,7 @@ import subprocess
 import sys
 from itertools import chain
 from pathlib import Path
-from typing import Iterable, List, NamedTuple, Sequence, Type
+from typing import Iterable, List, NamedTuple, Optional, Sequence, Type
 
 from scargo.clang_utils import get_comment_lines
 from scargo.config import CheckConfig, Config, TodoCheckConfig
@@ -80,7 +80,7 @@ def scargo_check(
     for checker_class in checkers:
         problem_count = checker_class(config, verbose=verbose).check()
         problem_counts.append((checker_class, problem_count))
-    if len(checkers) > 1:
+    if len(checkers) > 0:
         logger.info("Summary:")
         if any(count > 0 for _, count in problem_counts):
             for checker_class, problem_count in problem_counts:
@@ -295,25 +295,42 @@ class ClangFormatChecker(CheckerFixer):
 
 class ClangTidyChecker(CheckerFixer):
     check_name = "clang-tidy"
-    build_path = Path("./build/")
+    build_path: Optional[Path] = None
 
     def check_file(self, file_path: Path) -> CheckResult:
-        cmd = ["clang-tidy", str(file_path)]
+        try:
+            bf_list = os.listdir(Path(self._config.project_root, "build"))
+        except FileNotFoundError:
+            logger.error("Build folder does not exist.")
+            logger.info("Did you run `scargo build`?")
+            sys.exit(1)
+
+        for bf in bf_list:
+            if bf in self._config.profiles.keys():
+                self.build_path = Path(self._config.project_root, "build", bf)
+                break
+
+        if not self.build_path:
+            logger.error(
+                "Build folder for any of supported build types does not exist."
+            )
+            logger.info("Did you run `scargo build`?")
+            sys.exit(1)
+
+        cmd: List[str]
+        # Check if compilation database exists:
+        if not Path(self.build_path, "compile_commands.json").exists():
+            logger.error("Compilation database does not exist.")
+            logger.info("Did you run `scargo build`?")
+            sys.exit(1)
+
         if self._config.project.target.family == "esp32":
-            cmd.extend(["-p", str(self.build_path)])
-            if not Path(self.build_path, "compile_commands.json").exists():
-                # creates compilation database and runs run-clang-tidy.py on the whole project
-                # (the latter is not needed, but there's no option to suppress it)
-                subprocess.run(
-                    ["idf.py", "clang-check"],
-                    stdout=subprocess.DEVNULL,
-                    stderr=subprocess.DEVNULL,
-                    check=False,
-                )
-        if file_path.suffix == ".h":
-            cmd.extend(["--", "-x", "c++"])
-        if "--" not in cmd and self._config.project.target.family != "esp32":
-            cmd.append("--")
+            cmd = self.__get_cmd_esp32(file_path)
+        elif self._config.project.target.family == "stm32":
+            cmd = self.__get_cmd_stm32(file_path)
+        elif self._config.project.target.family == "x86":
+            cmd = self.__get_cmd_x86(file_path)
+
         try:
             subprocess.check_output(cmd)
         except subprocess.CalledProcessError as e:
@@ -323,6 +340,55 @@ class ClangTidyChecker(CheckerFixer):
                 logger.warning("clang-tidy found error in file %s", file_path)
             return CheckResult(1)
         return CheckResult(0)
+
+    def __get_cmd_esp32(self, file_path: Path) -> List[str]:
+        # These flags are added by esp-idf, however they are not recognized by clang-tidy:
+        strings_to_substitute = [
+            "-mlongcalls",
+            "-fno-tree-switch-conversion",
+            "-fstrict-volatile-bitfields",
+        ]
+
+        with open(str(self.build_path) + "/compile_commands.json") as fin:
+            file_contents = fin.read()
+
+        for string in strings_to_substitute:
+            file_contents = file_contents.replace(string, "")
+
+        db_path_for_check = (
+            str(self.build_path)
+            + "/compilation_db_for_check"
+            + "/compile_commands.json"
+        )
+
+        os.makedirs(os.path.dirname(db_path_for_check), exist_ok=True)
+        with open(db_path_for_check, "w") as fout:
+            fout.write(file_contents)
+
+        return [
+            "run-clang-tidy.py",
+            "-p",
+            str(os.path.dirname(db_path_for_check)),
+            str(file_path),
+        ]
+
+    def __get_cmd_x86(self, file_path: Path) -> List[str]:
+        return ["clang-tidy", str(file_path), "-p", str(self.build_path)]
+
+    def __get_cmd_stm32(self, file_path: Path) -> List[str]:
+        cmd = self.__get_cmd_x86(file_path)
+        arm_none_eabi_includes = "/opt/gcc-arm-none-eabi/arm-none-eabi/include"
+
+        # Add includes to standard library from toolchain:
+        path = Path(arm_none_eabi_includes)
+        cmd.extend(["--extra-arg", f"-I{path}"])
+        cpp_ver = os.listdir(Path(path, "c++"))[-1]
+        path = Path(path, "c++", cpp_ver)
+        cmd.extend(["--extra-arg", f"-I{path}"])
+        path = Path(path, "arm-none-eabi")
+        cmd.extend(["--extra-arg", f"-I{path}"])
+
+        return cmd
 
 
 def find_files(

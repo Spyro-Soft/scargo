@@ -1,5 +1,7 @@
 name: Common workflow steps
 on:
+  schedule:
+    - cron: '0 3 * * *'
   workflow_call:
     inputs:
       config-path:
@@ -7,38 +9,77 @@ on:
         type: string
 
 jobs:
+  prepare_matrix:
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.set-matrix.outputs.matrix }}
+    steps:
+      - id: set-matrix
+        run: |
+          if [ ${{ github.event_name }} == "schedule" ]; then
+            envs="["
+            envs+="\"develop\", "
+            envs+="\"main\", "
+            envs+="]"
+          else
+             envs="[\"${{ github.ref }}\"]"
+          fi
+          echo "matrix=$envs" >> $GITHUB_OUTPUT
+
   check:
     runs-on: ubuntu-latest
-    container:
-      image: spyrosoftsa/scargo-dev:1.4
-      options: --user root
+    needs: prepare_matrix
+    strategy:
+      matrix:
+        branch: ${{fromJson(needs.prepare_matrix.outputs.matrix)}}
     steps:
-      - name: Checkout
-        uses: actions/checkout@v3
-      - name: Check copyright
-        continue-on-error: true
-        run: ./common_dev/scripts/copyrights.py -C scargo/
-      - name: Check TODO
-        continue-on-error: true
-        run: ./common_dev/scripts/todo_check.py -C scargo -C tests
-      - name: Check with Black
-        run: black --check --diff scargo tests common_dev run.py clean.py
-      - name: Check isort
-        run: isort --profile=black --check --diff scargo tests common_dev run.py clean.py
-      - name: Check Cyclomatic
-        continue-on-error: true
-        run: ./common_dev/scripts/cyclomatic.py
-      - name: Run pylint
-        run: ./common_dev/scripts/pylintchecker.py -c scargo/ -s 9.95 --exclude=tests/
-      - name: Check typing with mypy
-        run: mypy --explicit-package-bases scargo tests common_dev run.py clean.py
+        - name: Checkout
+          uses: actions/checkout@v3
+          with:
+            ref: "${{ matrix.branch }}"
+        - name: Apt install dependencies
+          run: |
+            sudo apt-get update --fix-missing
+            sudo apt-get install doxygen
+            sudo apt-get clean
+            sudo apt-get autoremove --yes
+            sudo rm -rf /var/lib/{cache,log}
+            sudo rm -rf /var/lib/apt/lists/*
+        - name: Pip install dependencies
+          run: |
+            pip install --upgrade pip
+            pip install -r ci/requirements.txt
+        - name: Check copyright
+          continue-on-error: true
+          run: ./common_dev/scripts/copyrights.py -C scargo/
+        - name: Check TODO
+          continue-on-error: true
+          run: ./common_dev/scripts/todo_check.py -C scargo -C tests
+        - name: Check with Black
+          run: black --check --diff scargo tests common_dev run.py clean.py
+        - name: Check isort
+          run: isort --profile=black --check --diff scargo tests common_dev run.py clean.py
+        - name: Check Cyclomatic
+          continue-on-error: true
+          run: ./common_dev/scripts/cyclomatic.py
+        - name: Run pylint
+          run: ./common_dev/scripts/pylintchecker.py -c scargo/ -s 9.95 --exclude=tests/
+        - name: Check typing with mypy
+          run: mypy --explicit-package-bases scargo tests common_dev run.py clean.py
   unit_tests:
     runs-on: ubuntu-latest
+    needs: prepare_matrix
+    strategy:
+      matrix:
+        branch: ${{fromJson(needs.prepare_matrix.outputs.matrix)}}
     steps:
       - name: Checkout
         uses: actions/checkout@v3
+
         with:
           submodules: recursive
+          ref: "${{ matrix.branch }}"
+
 
       - name: Apt install dependencies
         run: |
@@ -69,9 +110,11 @@ jobs:
           path: build/test_doc
   integration_tests:
     runs-on: ubuntu-latest
+    needs: prepare_matrix
     strategy:
       fail-fast: false
       matrix:
+        branch: ${{fromJson(needs.prepare_matrix.outputs.matrix)}}
         target:
           - esp32
           - x86
@@ -83,6 +126,7 @@ jobs:
         uses: actions/checkout@v3
         with:
           submodules: recursive
+          ref: "${{ matrix.branch }}"
 
       - name: Apt install dependencies
         run: |
@@ -121,13 +165,29 @@ jobs:
         with:
           name: integration-${{ matrix.target }}-test-report
           path: build/test_doc
-
   documentation:
     runs-on: ubuntu-latest
-    container:
-      image: spyrosoftsa/scargo-dev:1.4
-      options: --user root
+    needs: prepare_matrix
+    strategy:
+      matrix:
+        branch: ${{fromJson(needs.prepare_matrix.outputs.matrix)}}
     steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          ref: "${{ matrix.branch }}"
+      - name: Apt install dependencies
+        run: |
+          sudo apt-get update --fix-missing
+          sudo apt-get install doxygen
+          sudo apt-get clean
+          sudo apt-get autoremove --yes
+          sudo rm -rf /var/lib/{cache,log}
+          sudo rm -rf /var/lib/apt/lists/*
+      - name: Pip install dependencies
+        run: |
+          pip install --upgrade pip
+          pip install -r ci/requirements.txt
       - name: Checkout
         uses: actions/checkout@v3
       - name: Generate HTML documentation
