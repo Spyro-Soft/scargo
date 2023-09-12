@@ -80,7 +80,7 @@ def scargo_check(
     for checker_class in checkers:
         problem_count = checker_class(config, verbose=verbose).check()
         problem_counts.append((checker_class, problem_count))
-    if len(checkers) > 1:
+    if len(checkers) > 0:
         logger.info("Summary:")
         if any(count > 0 for _, count in problem_counts):
             for checker_class, problem_count in problem_counts:
