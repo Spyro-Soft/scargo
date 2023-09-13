@@ -28,28 +28,56 @@ def scargo_publish(repo: str, profile: str = "Release") -> None:
     project_config = config.project
     project_name = project_config.name
 
+    build_dir = Path(project_path, "build", profile)
+
+    if not build_dir.exists():
+        logger.error("Build folder for specified build type does not exist")
+        logger.info(f"Did you run 'scargo build --profile {profile}'?")
+        sys.exit(1)
+
     conan_clean_remote()
     conan_add_remote(project_path, config)
     conan_add_conancenter()
     conan_source(project_path)
+
     # Export package
     try:
         subprocess.check_call(
             [
                 "conan",
-                "create",
+                "export-pkg",
                 ".",
+                "-if",
+                str(build_dir),
                 "-pr:b",
                 "default",
                 "-pr:h",
                 f"./config/conan/profiles/{config.project.target.family}_{profile}",
-                "-b",
-                "missing",
+                "-f",
             ],
             cwd=project_path,
         )
     except subprocess.CalledProcessError:
-        logger.error("Unable to create package")
+        logger.error("Unable to export package")
+        sys.exit(1)
+
+    # Test if package has been exported successfully
+    try:
+        subprocess.check_call(
+            [
+                "conan",
+                "test",
+                "test_package",
+                f"{project_name}/{config.project.version}",
+                "-pr:b",
+                "default",
+                "-pr:h",
+                f"./config/conan/profiles/{config.project.target.family}_{profile}",
+            ],
+            cwd=project_path,
+        )
+    except subprocess.CalledProcessError:
+        logger.error("Package test failed")
         sys.exit(1)
 
     # Upload package to artifactory
