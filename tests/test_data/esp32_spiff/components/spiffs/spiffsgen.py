@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 #
 # spiffsgen is a tool used to generate a spiffs image from a directory
 #
