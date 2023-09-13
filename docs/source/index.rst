@@ -51,6 +51,19 @@ System Properties -> Environment Variables, double click on "Path" and add entry
 
     C:\Users\username\AppData\Roaming\Python\Python38\Scripts
 
+For Ubuntu
+-----------
+1) Install scargo (``pip install scargo``)
+2) If system does not find 'scargo' command add the installation directory to your env paths. You can find installation directory by running:
+    ::
+
+        $ find / -name "scargo"
+
+    Then add it to the path, e.g.:
+    ::
+
+        $ export PATH=~/.local/bin:${PATH}
+
 More Information
 ----------------
 
