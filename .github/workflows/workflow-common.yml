@@ -1,7 +1,5 @@
 name: Common workflow steps
 on:
-  schedule:
-    - cron: '0 3 * * *'
   workflow_call:
     inputs:
       config-path:
@@ -102,12 +100,21 @@ jobs:
           docker system prune -af --volumes
           ./run.py -u
 
+      - name: Define artifacts file name
+        run: |
+          if [ "$branch" == develop ] || [ "$branch" == main ]; then
+            echo "report_file_name=unit-${{ matrix.branch }}-test-report" >> $GITHUB_ENV
+          else
+            echo "report_file_name=unit-test-report" >> $GITHUB_ENV
+          fi
+
       - name: Archive unit-tests results
         uses: actions/upload-artifact@v3
         if: always()
         with:
-          name: unit-test-report
+          name: $report_file_name
           path: build/test_doc
+
   integration_tests:
     runs-on: ubuntu-latest
     needs: prepare_matrix
@@ -159,11 +166,19 @@ jobs:
         run: |
           ./run.py -c "${{ matrix.target }}"
 
+      - name: Define artifacts file name
+        run: |
+          if [ "$branch" == develop ] || [ "$branch" == main ]; then
+            echo "report_file_name=integration-${{ matrix.target }}-${{ matrix.branch }}-test-report" >> $GITHUB_ENV
+          else
+            echo "report_file_name=integration-${{ matrix.target }}-test-report" >> $GITHUB_ENV
+          fi
+
       - name: Archive integration-tests results
         uses: actions/upload-artifact@v3
         if: always()
         with:
-          name: integration-${{ matrix.target }}-test-report
+          name: $report_file_name
           path: build/test_doc
   documentation:
     runs-on: ubuntu-latest
