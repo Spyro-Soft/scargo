@@ -15,6 +15,7 @@ from unittest.mock import patch
 import pytest
 import toml
 from pytest import TempdirFactory
+from pytest_subprocess import FakeProcess
 
 from scargo.cli import cli
 from scargo.config import Target, parse_config
@@ -52,10 +53,14 @@ NEW_PROFILE_CFLAGS = "-gdwarf"
 NEW_PROFILE_CXXFLAGS = "-ggdb"
 
 TEST_BIN_NAME = "test_bin_name"
+TEST_LIB_NAME = "test_lib_name"
 TEST_PROJECT_NAME = "test_proj"
 TEST_DUMMY_LIB_H_FILE = "lib_for_gen_test.h"
 TEST_DEVICE_ID = "DUMMY:DEVICE:ID:12345"
 TEST_DUMMY_FS_FILE = "dummy_fs_file.txt"
+
+"""CONAN_UPLOAD_COMMAND = ["conan",  "upload"]"""
+
 
 
 class TargetIds(Enum):
@@ -134,6 +139,10 @@ class ActiveTestState:
             )
         return bin_file_path
 
+    def get_lib_file_path(self, profile: Optional[str] = "Debug") -> Path:
+        path_to_profile = self._get_path_to_build_profile(profile)
+        return Path(f"{path_to_profile}/src/lib{self.proj_name}.a")
+
     def get_build_result_files_paths(
         self, profile: Optional[str] = "Debug"
     ) -> List[Path]:
@@ -155,6 +164,12 @@ class ActiveTestState:
             )
         return bin_result_files_path
 
+    def get_lib_build_result_files_paths(
+        self, profile: Optional[str] = "Debug"
+    ) -> List[Path]:
+        lib_result_files_path = [self.get_lib_file_path(profile)]
+
+        return lib_result_files_path
 
 def get_expected_files_list_new_proj_bin(src_dir_name: str, bin_name: str) -> List[str]:
     return [
@@ -175,6 +190,28 @@ def get_expected_files_list_new_proj_bin(src_dir_name: str, bin_name: str) -> Li
         "tests/mocks/static_mock/static_mock.h",
     ]
 
+def get_expected_files_list_new_proj_lib(src_dir_name: str, lib_name: str) -> List[str]:
+    return[
+        "CMakeLists.txt",
+        "conanfile.py",
+        "LICENSE",
+        "README.md",
+        "scargo.lock",
+        "scargo.toml",
+        f"{src_dir_name}/CMakeLists.txt",
+        f"{src_dir_name}/include/{lib_name}.h",
+        f"{src_dir_name}/{src_dir_name}/{lib_name}.cpp",
+        "tests/CMakeLists.txt",
+        "tests/conanfile.py",
+        "tests/it/CMakeLists.txt",
+        "tests/ut/CMakeLists.txt",
+        "tests/mocks/CMakeLists.txt",
+        "tests/mocks/static_mock/CMakeLists.txt",
+        "tests/mocks/static_mock/static_mock.h",
+        "test_package/CMakeLists.txt",
+        "test_package/conanfile.py",
+        f"test_package/src/example.cpp"
+    ]
 
 @pytest.mark.parametrize(
     "test_state",
@@ -859,6 +896,168 @@ class TestBinProjectFlow:
         ]
         for file_path in expected_doc_files_paths:
             assert file_path.is_file(), f"File '{file_path}' not exist"
+
+@pytest.mark.parametrize(
+    "test_state",
+    [
+        ActiveTestState(
+            target_id=TargetIds.x86,
+            proj_name="new_lib_project_x86",
+            lib_name=TEST_LIB_NAME,
+        ),
+        ActiveTestState(
+            target_id=TargetIds.stm32,
+            proj_name="new_lib_project_stm32",
+            bin_name=TEST_BIN_NAME,
+            lib_name=TEST_LIB_NAME,
+        ),
+        ActiveTestState(
+            target_id=TargetIds.esp32,
+            proj_name="new_lib_project_esp32",
+            lib_name=TEST_LIB_NAME,
+        ),
+        ActiveTestState(
+            target_id=TargetIds.x86,
+            proj_name=TEST_PROJECT_x86_NAME,
+            proj_to_copy_path=TEST_PROJECT_x86_PATH,
+        ),
+        ActiveTestState(
+            target_id=TargetIds.stm32,
+            proj_name=TEST_PROJECT_STM32_NAME,
+            proj_to_copy_path=TEST_PROJECT_STM32_PATH,
+        ),
+        ActiveTestState(
+            target_id=TargetIds.esp32,
+            proj_name=TEST_PROJECT_ESP32_NAME,
+            proj_to_copy_path=TEST_PROJECT_ESP32_PATH,
+        ),
+    ],
+    ids=[
+        "new_lib_project_x86",
+        "new_lib_project_stm32",
+        "new_lib_project_esp32",
+        "copy_project_x86",
+        "copy_project_stm32",
+        "copy_project_esp32",
+    ],
+    scope="session",
+)
+@pytest.mark.xdist_group(name="TestLibProjectFlow")
+class TestLibProjectFlow:
+    @pytest.mark.order("first")
+    def test_cli_help(
+            self,
+            test_state: ActiveTestState,
+            tmpdir_factory: TempdirFactory,
+            use_local_scargo: None,
+    ) -> None:
+        """Simple test which checks if scargo new -h command can be invoked and do not return any error"""
+        # create temporary dir for new project
+        if(test_state.target_id == TargetIds.esp32):
+            pytest.skip("Lib is not yet supported for esp32")
+        test_state.proj_path = tmpdir_factory.mktemp(test_state.proj_name)
+        os.chdir(test_state.proj_path)
+
+        # New Help
+        result = test_state.runner.invoke(cli, ["new", "-h"])
+        assert (
+                result.exit_code == 0
+        ), f"Command 'new -h' end with non zero exit code: {result.exit_code}"
+
+    @pytest.mark.order(after="test_cli_help")
+    def test_cli_new(self, test_state: ActiveTestState) -> None:
+        """This test invoking scargo new command with binary file and checking if command was executed without error
+        and expected project structure and files were generated without checking correctness of those generated files
+        content"""
+        if test_state.proj_to_copy_path is not None:
+            pytest.skip(
+                "Test of copied project to check backward compatibility, no need to create new project"
+            )
+        os.chdir(str(test_state.proj_path))
+        # New
+        result = test_state.runner.invoke(
+            cli,
+            [
+                "new",
+                test_state.proj_name,
+                f"--target={test_state.target_id.value}",
+                f"--lib={test_state.lib_name}",
+            ],
+        )
+        os.chdir(test_state.proj_name)
+        assert (
+                result.exit_code == 0
+        ), f"Command 'new' end with non zero exit code: {result.exit_code}"
+
+        expected_files_relative_paths = get_expected_files_list_new_proj_lib(
+            test_state.target.source_dir, str(test_state.lib_name).lower()
+        )
+        for file in expected_files_relative_paths:
+            assert Path(
+                file
+            ).is_file(), f"File: {file} was expected after new command, but not exist"
+
+    @pytest.mark.order(after="test_cli_new")
+    def test_copy_project(self, test_state: ActiveTestState) -> None:
+        if test_state.proj_to_copy_path is None:
+            pytest.skip("Test of new project - no copying needed")
+
+        os.mkdir(f"{test_state.proj_path}/{test_state.proj_name}")
+        os.chdir(f"{test_state.proj_path}/{test_state.proj_name}")
+        copytree(test_state.proj_to_copy_path, os.getcwd(), dirs_exist_ok=True)
+        project_path = get_project_root_or_none()
+        assert (
+                project_path is not None
+        ), f"Project not copied under expected location: {project_path}"
+        docker_path = Path(project_path, ".devcontainer")
+        config = parse_config(project_path / "scargo.lock")
+        generate_env(docker_path, config)
+
+    @pytest.mark.order(after="test_copy_project")
+    def test_cli_docker_run(self, test_state: ActiveTestState) -> None:
+        """This test check if call of scargo docker run command will finish without error"""
+        # Docker Run
+        os.chdir(f"{test_state.proj_path}/{test_state.proj_name}")
+        result = test_state.runner.invoke(cli, ["docker", "run"])
+        assert (
+            result.exit_code == 0
+        ), f"Command 'docker run' end with non zero exit code: {result.exit_code}"
+
+    @pytest.mark.order(after="test_cli_docker_run")
+    def test_cli_update(self, test_state: ActiveTestState) -> None:
+        """This test check if call of scargo update command will finish without error"""
+        # Update command
+        os.chdir(f"{test_state.proj_path}/{test_state.proj_name}")
+        result = test_state.runner.invoke(cli, ["update"])
+        assert (
+            result.exit_code == 0
+        ), f"Command 'update' end with non zero exit code: {result.exit_code}"
+
+    @pytest.mark.order(after="test_cli_update")
+    def test_cli_build(self, test_state: ActiveTestState) -> None:
+        """"This test check if call of scargo build command will finish without error and if under default profile in
+        build folder bin file is present"""
+        # Build
+        os.chdir(f"{test_state.proj_path}/{test_state.proj_name}")
+        result = test_state.runner.invoke(cli, ["build"])
+        assert (
+            result.exit_code == 0
+        ), f"Command 'build' end with non zero exit code: {result.exit_code}"
+        for file in test_state.get_lib_build_result_files_paths():
+            assert file.is_file(), f"Expected file: {file} not exist"
+    @pytest.mark.order(after="test_cli_update")
+    def test_cli_publish(self, test_state: ActiveTestState, fake_process: FakeProcess) -> None:
+        """This test check if call of scargo publish command will finish without error"""
+        # Publish command
+        os.chdir(f"{test_state.proj_path}/{test_state.proj_name}")
+        CONAN_UPLOAD_COMMAND = ["conan", "upload", test_state.proj_name, "-r", "GitLab", "--all",
+                                "--confirm"]
+        fake_process.register(CONAN_UPLOAD_COMMAND)
+        result = test_state.runner.invoke(cli, ["publish"])
+
+        assert (
+            result.exit_code == 0
+        ), f"Command 'publish' end with non zero exit code: {result.exit_code}"
 
 
 def test_project_x86_scargo_from_pypi(create_tmp_directory: None) -> None:
