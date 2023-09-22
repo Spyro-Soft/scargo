@@ -5,24 +5,19 @@ https://github.com/Spyro-Soft/scargo/issues/290
 
 import json
 import os
-import subprocess
 from dataclasses import dataclass
 from enum import Enum
 from pathlib import Path
 from shutil import copytree
 from typing import List, Optional
-from unittest.mock import patch
-from unittest.mock import MagicMock
+from pytest_subprocess import FakeProcess
 
 import pytest
 import toml
 from pytest import TempdirFactory
-from pytest_mock import MockerFixture
-from pytest_subprocess import FakeProcess
 
-from scargo.cli import cli, publish
-from scargo.commands.publish import scargo_publish
-from scargo.config import Target, parse_config
+from scargo.cli import cli
+from scargo.config import Target, parse_config, Config
 from scargo.config_utils import get_scargo_config_or_exit
 from scargo.file_generators.docker_gen import _DockerComposeTemplate
 from scargo.file_generators.env_gen import generate_env
@@ -1058,8 +1053,6 @@ class TestLibProjectFlow:
 
         os.chdir(f"{test_state.proj_path}/{test_state.proj_name}")
 
-        """mock_check_call.return_value = 0"""
-
         result = test_state.runner.invoke(cli, ["publish", "--profile", "Debug"])
 
         assert (
@@ -1165,6 +1158,54 @@ class TestLibProjectFlow:
         ), f"Objdump results: {output} did not contain expected bin file format: {test_state.expected_bin_file_format}"
 
     @pytest.mark.order(after="test_release_bin_file_format_by_objdump_results")
+    def test_cli_fix(self, test_state: ActiveTestState) -> None:
+        """This test check if call of scargo fix command will finish without error and if no problems to fix
+        will be found for newly created project"""
+        # Fix
+        os.chdir(f"{test_state.proj_path}/{test_state.proj_name}")
+        result = test_state.runner.invoke(cli, ["fix"])
+        assert (
+            result.exit_code == 0
+        ), f"Command 'fix' end with non zero exit code: {result.exit_code}"
+        expected_strings_in_output = [
+            "Finished pragma check. Fixed problems in 0 files.",
+            "Finished copyright check. Fixed problems in 0 files.",
+            "Finished clang-format check. Fixed problems in 0 files.",
+        ]
+        if test_state.proj_to_copy_path is None:
+            for expected_string in expected_strings_in_output:
+                assert (
+                    expected_string in result.output
+                ), f"'{expected_string}' not found in output: {result.output}"
+
+    @pytest.mark.order(after="test_cli_fix")
+    def test_cli_check(self, test_state: ActiveTestState) -> None:
+        """This test check if call of scargo check command will finish without error and if no problems will be found
+        for newly created project"""
+        os.chdir(f"{test_state.proj_path}/{test_state.proj_name}")
+        result = test_state.runner.invoke(cli, ["check"])
+        assert (
+            result.exit_code == 0
+        ), f"Command 'check' end with non zero exit code: {result.exit_code}"
+        assert (
+            "No problems found!" in result.output
+        ), f"String 'No problems found!' not found in check command output {result.output}"
+
+    @pytest.mark.order(after="test_cli_check")
+    def test_cli_test(self, test_state: ActiveTestState) -> None:
+        """This test check if call of scargo test command will finish without error and if no tests were found
+        for newly created project"""
+        os.chdir(f"{test_state.proj_path}/{test_state.proj_name}")
+        result = test_state.runner.invoke(cli, ["test"])
+        assert (
+            result.exit_code == 0
+        ), f"Command 'test' end with non zero exit code: {result.exit_code}"
+        assert (
+            "No tests were found!!!" in result.output
+        ), f"String 'No tests were found!!!' not found in test command output {result.output}"
+
+
+    @pytest.mark.order(after="test_cli_test")
     def test_cli_clean_after_build_profile_release(self, test_state: ActiveTestState) -> None:
         """This test check if call of scargo clean command will finish without error and
                 if build folder will be removed"""
