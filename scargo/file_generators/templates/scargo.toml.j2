@@ -78,7 +78,7 @@ gcov-executable = "" # Empty string -> use default gcov executable
 
 # Underhood scargo use conan. All string valid for conan tool are valid here. eg "gtest/1.13.0"
 [dependencies]
-#general -> public conan dependencies of project they will be added to package info (eg. bianry dynamic linkage libary) they will be added also to scargo test. 
+#general -> public conan dependencies of project they will be added to package info (eg. bianry dynamic linkage libary) they will be added also to scargo test.
 general = [
 ]
 #build -> private conan dependencies usedn only during build process(eg. private static linkage library)
@@ -94,7 +94,7 @@ test = [
 
 [conan.repo]
 #Passing conancenter here is not nessary as scargo adds it by default
-#Below example of private binary artifacts repository 
+#Below example of private binary artifacts repository
 #gitlab = "https://git.my_extra_gitlab_server.com"
 
 {% if target.family == "esp32" %}
@@ -110,8 +110,11 @@ partitions = [
 ]
 {% elif target.family == "stm32" %}
 [stm32]
-chip = "STM32L496AG"
+chip = "{{ chip_label }}"
 flash-start = 0x08000000
+{% elif target.family == "atsam" %}
+[atsam]
+chip = "{{ chip_label }}"
 {% endif %}
 
 [scargo]

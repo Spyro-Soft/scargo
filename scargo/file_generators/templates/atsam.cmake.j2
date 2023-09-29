@@ -1,0 +1,13 @@
+{# Make compiler check pass #}
+set(CMAKE_TRY_COMPILE_TARGET_TYPE "STATIC_LIBRARY")
+
+{% include 'project.cmake.j2' %}
+
+add_compile_options(--specs=nosys.specs)
+add_link_options(--specs=nosys.specs)
+
+set(F_CPU 16000000UL)
+# set(ARM_CPU cortex-m23) # See if necessary
+set(ATMEL_ARCH {{ config.atsam.chip_series }})
+set(SAM_MCU {{ config.atsam.chip[2:]|lower }})
+add_definitions(-D__{{ config.atsam.chip[2:]|upper }}__)

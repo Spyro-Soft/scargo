@@ -20,6 +20,12 @@ from scargo.logger import get_logger
 logger = get_logger()
 
 
+CHIP_DEFAULTS = {
+    "atsam": "ATSAML10E16A",
+    "stm32": "STM32L496AG",
+}
+
+
 def scargo_new(
     name: str,
     bin_name: Optional[str],
@@ -27,6 +33,7 @@ def scargo_new(
     target: Target,
     create_docker: bool,
     git: bool,
+    chip: Optional[str],
 ) -> None:
     """
     Create new project
@@ -73,6 +80,7 @@ def scargo_new(
         docker_image_tag=f"{name.lower()}-dev:1.0",
         lib_name=lib_name,
         bin_name=bin_name,
+        chip_label=chip or CHIP_DEFAULTS.get(target.family),
     )
 
     config = get_scargo_config_or_exit(toml_path)
