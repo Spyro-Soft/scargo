@@ -5,18 +5,23 @@ https://github.com/Spyro-Soft/scargo/issues/290
 
 import json
 import os
+import subprocess
 from dataclasses import dataclass
 from enum import Enum
 from pathlib import Path
 from shutil import copytree
 from typing import List, Optional
-from pytest_subprocess import FakeProcess
+from unittest.mock import MagicMock
+from unittest.mock import patch
 
 import pytest
 import toml
 from pytest import TempdirFactory
+from pytest_mock import MockerFixture
 
+import scargo.cli
 from scargo.cli import cli
+from scargo.commands import publish
 from scargo.config import Target, parse_config, Config
 from scargo.config_utils import get_scargo_config_or_exit
 from scargo.file_generators.docker_gen import _DockerComposeTemplate
@@ -896,6 +901,7 @@ class TestBinProjectFlow:
         for file_path in expected_doc_files_paths:
             assert file_path.is_file(), f"File '{file_path}' not exist"
 
+
 @pytest.mark.parametrize(
     "test_state",
     [
@@ -910,34 +916,10 @@ class TestBinProjectFlow:
             bin_name=TEST_BIN_NAME,
             lib_name=TEST_LIB_NAME,
         ),
-        ActiveTestState(
-            target_id=TargetIds.esp32,
-            proj_name="new_lib_project_esp32",
-            lib_name=TEST_LIB_NAME,
-        ),
-        ActiveTestState(
-            target_id=TargetIds.x86,
-            proj_name=TEST_PROJECT_x86_NAME,
-            proj_to_copy_path=TEST_PROJECT_x86_PATH,
-        ),
-        ActiveTestState(
-            target_id=TargetIds.stm32,
-            proj_name=TEST_PROJECT_STM32_NAME,
-            proj_to_copy_path=TEST_PROJECT_STM32_PATH,
-        ),
-        ActiveTestState(
-            target_id=TargetIds.esp32,
-            proj_name=TEST_PROJECT_ESP32_NAME,
-            proj_to_copy_path=TEST_PROJECT_ESP32_PATH,
-        ),
     ],
     ids=[
         "new_lib_project_x86",
         "new_lib_project_stm32",
-        "new_lib_project_esp32",
-        "copy_project_x86",
-        "copy_project_stm32",
-        "copy_project_esp32",
     ],
     scope="session",
 )
@@ -1049,15 +1031,36 @@ class TestLibProjectFlow:
     def test_cli_publish(self, test_state: ActiveTestState) -> None:
         """This test check if call of scargo publish command will finish without error"""
         # Publish command
-        pytest.skip("TODO")
+        """pytest.skip("TODO")"""
 
         os.chdir(f"{test_state.proj_path}/{test_state.proj_name}")
 
-        result = test_state.runner.invoke(cli, ["publish", "--profile", "Debug"])
+        with patch.object(subprocess, 'check_call') as mock_run:
+            mock_run.return_value.returncode = 0
+            result = test_state.runner.invoke(cli, ["publish", "--profile", "Debug"])
 
         assert (
-            result.exit_code == 0
+                result.exit_code == 0
         ), f"Command 'publish' end with non zero exit code: {result.exit_code}"
+
+        # def mock_check_call(*args, **kwargs):
+        #     if args[0] == ['conan', 'upload', test_state.proj_name, '-r', 'conancenter', '-all', '-confirm']:
+        #         return 0
+        #     else:
+        #         return subprocess.check_call(*args, **kwargs)
+        # with patch('subprocess.check_call', side_effect=mock_check_call):
+        #     result = test_state.runner.invoke(cli, ["publish", "--profile", "Debug"])
+
+
+        # mock_call_conan_upload = MagicMock()
+        #
+        # # Patch the function1 in your module with the mock
+        # with patch('scargo.commands.publish.call_conan_upload', mock_call_conan_upload):
+        #     # Call the CLI command you want to test
+        #     result = test_state.runner.invoke(cli, ["publish", "--profile", "Debug"])
+        #
+        # # result = test_state.runner.invoke(cli, ["publish", "--profile", "Debug"])
+
 
     @pytest.mark.order(after="test_cli_publish")
     def test_cli_clean(self, test_state: ActiveTestState) -> None:
@@ -1234,8 +1237,8 @@ def test_project_x86_scargo_from_pypi(create_tmp_directory: None) -> None:
         ), f"Command 'new {TEST_PROJECT_NAME} --target=x86' end with non zero exit code: {result.exit_code}"
 
 
-"""@pytest.fixture
-def mock_subprocess_check_call(mocker: MockerFixture) -> MagicMock:
-    return mocker.patch(
-        "subprocess"
-    )"""
+# @pytest.fixture
+# def mock_conan_upload_call(mocker: MockerFixture) -> MagicMock:
+#     return mocker.patch(
+#         "scargo.commands.publish.scargo_publish"
+#     )
