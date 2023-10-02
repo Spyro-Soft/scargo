@@ -14,8 +14,8 @@ arch_build=x86_64
 build_type={{ config.profiles[profile].cmake_build_type }}
 
 [env]
-CONAN_CMAKE_FIND_ROOT_PATH=/usr/lib/arm-none-eabi/
-PATH=[/usr/lib/arm-none-eabi/bin/,/usr/bin]
+CONAN_CMAKE_FIND_ROOT_PATH=/opt/gcc-arm-none-eabi/lib/
+PATH=[/usr/local/bin,/usr/bin]
 CC=$target_host-$cc_compiler
 CXX=$target_host-$cxx_compiler
 
