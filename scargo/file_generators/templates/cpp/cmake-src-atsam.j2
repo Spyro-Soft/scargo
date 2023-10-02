@@ -1,18 +1,34 @@
+find_file(
+  STARTUP_SRC
+  NAMES startup_${SAM_MCU}.c startup_${ATMEL_ARCH_LOWER}.c
+  PATHS ${CMAKE_SOURCE_DIR}/${ATMEL_ARCH}_DFP/gcc
+        ${CMAKE_SOURCE_DIR}/${ATMEL_ARCH}_DFP/gcc/gcc
+  NO_DEFAULT_PATH)
+
+find_file(
+  SYSTEM_SRC
+  NAMES system_${SAM_MCU}.c system_${ATMEL_ARCH_LOWER}.c
+  PATHS ${CMAKE_SOURCE_DIR}/${ATMEL_ARCH}_DFP/gcc
+        ${CMAKE_SOURCE_DIR}/${ATMEL_ARCH}_DFP/gcc/gcc
+  NO_DEFAULT_PATH)
+
 
 {% if  config.project.bin_name %}
 add_executable(${PROJECT_NAME}
-     {{ config.project.bin_name|lower }}.cpp
+  {{ config.project.bin_name|lower }}.cpp
+  ${STARTUP_SRC}
+  ${SYSTEM_SRC}
 )
 {% elif config.project.lib_name%}
 add_library(${PROJECT_NAME} STATIC
-    ${CMAKE_CURRENT_SOURCE_DIR}/{{ config.project.target.source_dir }}/{{ config.project.lib_name|lower }}.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/{{ config.project.target.source_dir }}/{{ config.project.lib_name|lower }}.cpp
 )
 
 target_include_directories(${PROJECT_NAME}
-    PUBLIC
-        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>/{{ config.project.target.include_dir }}
-    PRIVATE
-        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>/{{ config.project.target.source_dir }}
+  PUBLIC
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>/{{ config.project.target.include_dir }}
+  PRIVATE
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>/{{ config.project.target.source_dir }}
 )
 {% endif %}
 
@@ -22,9 +38,17 @@ include_directories(${CMAKE_SOURCE_DIR}/${ATMEL_ARCH}_DFP/include
 link_directories(${CMAKE_SOURCE_DIR}/${ATMEL_ARCH}_DFP/gcc
                  ${CMAKE_SOURCE_DIR}/${ATMEL_ARCH}_DFP/gcc/gcc)
 
+
+find_file(
+  LINKER_SCRIPT
+  NAMES ${SAM_MCU}_flash.ld
+  PATHS ${CMAKE_SOURCE_DIR}/${ATMEL_ARCH}_DFP/gcc
+        ${CMAKE_SOURCE_DIR}/${ATMEL_ARCH}_DFP/gcc/gcc
+  NO_DEFAULT_PATH)
+
 target_link_options(
   ${PROJECT_NAME}
-  INTERFACE
+  PRIVATE
   -mthumb
   --specs=nano.specs
   -Wl,--start-group
@@ -32,7 +56,7 @@ target_link_options(
   -Wl,--end-group
   -Wl,--gc-sections
   -mcpu=${ARM_CPU}
-  -T${SAM_MCU}_flash.ld)
+  -T${LINKER_SCRIPT})
 
 add_custom_command(
   TARGET ${PROJECT_NAME}
