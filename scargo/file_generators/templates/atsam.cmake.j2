@@ -6,8 +6,7 @@ set(CMAKE_TRY_COMPILE_TARGET_TYPE "STATIC_LIBRARY")
 add_compile_options(--specs=nosys.specs)
 add_link_options(--specs=nosys.specs)
 
-set(F_CPU 16000000UL)
-set(ARM_CPU cortex-m0plus) # Generate from somewhere
+set(ARM_CPU {{ config.atsam.cpu }})
 set(ATMEL_ARCH {{ config.atsam.chip_series }})
 set(ATMEL_ARCH_LOWER {{ config.atsam.chip_series|lower }})
 set(SAM_MCU {{ config.atsam.chip[2:]|lower }})

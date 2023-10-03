@@ -34,6 +34,7 @@ def scargo_new(
     create_docker: bool,
     git: bool,
     chip: Optional[str],
+    cpu: Optional[str],
 ) -> None:
     """
     Create new project
@@ -81,6 +82,7 @@ def scargo_new(
         lib_name=lib_name,
         bin_name=bin_name,
         chip_label=chip or CHIP_DEFAULTS.get(target.family),
+        cpu=cpu or "cortex-m23",
     )
 
     config = get_scargo_config_or_exit(toml_path)

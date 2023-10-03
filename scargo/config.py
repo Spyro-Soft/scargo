@@ -250,6 +250,7 @@ class Stm32Config(BaseModel):
 
 class ATSAMConfig(BaseModel):
     chip: str
+    cpu: str
 
     @property
     def chip_series(self) -> str:
