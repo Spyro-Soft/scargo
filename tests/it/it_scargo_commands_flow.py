@@ -1031,36 +1031,28 @@ class TestLibProjectFlow:
     def test_cli_publish(self, test_state: ActiveTestState) -> None:
         """This test check if call of scargo publish command will finish without error"""
         # Publish command
-        """pytest.skip("TODO")"""
+        pytest.skip("TODO")
 
         os.chdir(f"{test_state.proj_path}/{test_state.proj_name}")
 
-        with patch.object(subprocess, 'check_call') as mock_run:
-            mock_run.return_value.returncode = 0
-            result = test_state.runner.invoke(cli, ["publish", "--profile", "Debug"])
+        def call_cli(*args, **kwargs):
+            print("here")
+            return subprocess.check_call(*args, **kwargs)
+
+        with patch('subprocess.check_call') as mock_check_call:
+            mock_check_call.side_effect = call_cli
+            result = test_state.runner.invoke(
+                cli,
+                [
+                    "publish",
+                    "--profile",
+                    "Debug"
+                ],
+            )
 
         assert (
                 result.exit_code == 0
         ), f"Command 'publish' end with non zero exit code: {result.exit_code}"
-
-        # def mock_check_call(*args, **kwargs):
-        #     if args[0] == ['conan', 'upload', test_state.proj_name, '-r', 'conancenter', '-all', '-confirm']:
-        #         return 0
-        #     else:
-        #         return subprocess.check_call(*args, **kwargs)
-        # with patch('subprocess.check_call', side_effect=mock_check_call):
-        #     result = test_state.runner.invoke(cli, ["publish", "--profile", "Debug"])
-
-
-        # mock_call_conan_upload = MagicMock()
-        #
-        # # Patch the function1 in your module with the mock
-        # with patch('scargo.commands.publish.call_conan_upload', mock_call_conan_upload):
-        #     # Call the CLI command you want to test
-        #     result = test_state.runner.invoke(cli, ["publish", "--profile", "Debug"])
-        #
-        # # result = test_state.runner.invoke(cli, ["publish", "--profile", "Debug"])
-
 
     @pytest.mark.order(after="test_cli_publish")
     def test_cli_clean(self, test_state: ActiveTestState) -> None:
@@ -1223,6 +1215,273 @@ class TestLibProjectFlow:
             "build"
         ).is_dir(), "Dictionary 'build' still exist when 'clean' should remove it"
 
+    @pytest.mark.order(after="test_cli_clean_after_build_profile_release")
+    def test_precondition_add_new_profile(self, test_state: ActiveTestState) -> None:
+        """This test can be treated as a precondition it's just adding new profile settings to scargo.toml file"""
+        # add new profile
+        os.chdir(f"{test_state.proj_path}/{test_state.proj_name}")
+        add_profile_to_toml(
+            NEW_PROFILE_NAME,
+            "cflags",
+            "cxxflags",
+            NEW_PROFILE_CFLAGS,
+            NEW_PROFILE_CXXFLAGS,
+        )
+
+    @pytest.mark.order(after="test_precondition_add_new_profile")
+    def test_cli_update_after_adding_new_profile(
+            self, test_state: ActiveTestState
+    ) -> None:
+        """This test check if call of scargo update command invoked after new adding profile settings to scargo.toml
+        file will finish without error"""
+        # Update command
+        os.chdir(f"{test_state.proj_path}/{test_state.proj_name}")
+        result = test_state.runner.invoke(cli, ["update"])
+        assert (
+                result.exit_code == 0
+        ), f"Command 'update' end with non zero exit code: {result.exit_code}"
+        if test_state.target_id == TargetIds.esp32:
+            c_flags_re = (
+                    r"WORKAROUND_FOR_ESP32_C_FLAGS=\"(.+?) " + NEW_PROFILE_CFLAGS + r"\""
+            )
+            cxx_flags_re = (
+                    r"WORKAROUND_FOR_ESP32_CXX_FLAGS=\"(.+?) "
+                    + NEW_PROFILE_CXXFLAGS
+                    + r"\""
+            )
+        else:
+            c_flags_re = (
+                    r"tools\.build:cflags=\[\"(.+?) " + NEW_PROFILE_CFLAGS + r"\"\]"
+            )
+            cxx_flags_re = (
+                    r"tools\.build:cxxflags=\[\"(.+?) " + NEW_PROFILE_CXXFLAGS + r"\"\]"
+            )
+        assert assert_regex_in_file(
+            Path(
+                f"config/conan/profiles/{test_state.target_id.value}_{NEW_PROFILE_NAME}"
+            ),
+            c_flags_re,
+        ), (
+            f"cflags: {NEW_PROFILE_CFLAGS} not found in "
+            f"file: config/conan/profiles/{test_state.target_id.value}_{NEW_PROFILE_NAME}"
+        )
+        assert assert_regex_in_file(
+            Path(
+                f"config/conan/profiles/{test_state.target_id.value}_{NEW_PROFILE_NAME}"
+            ),
+            cxx_flags_re,
+        ), (
+            f"cxxflags: {NEW_PROFILE_CXXFLAGS} "
+            f"not found in file: config/conan/profiles/{test_state.target_id.value}_{NEW_PROFILE_NAME}"
+        )
+
+    @pytest.mark.order(after="test_cli_update_after_adding_new_profile")
+    def test_cli_build_profile_new(self, test_state: ActiveTestState) -> None:
+        """This test check if call of scargo build command for newly added profile will finish without error and
+        if under this new profile in build folder bin file is present"""
+        # Build
+        os.chdir(f"{test_state.proj_path}/{test_state.proj_name}")
+        result = test_state.runner.invoke(cli, ["build", "--profile", NEW_PROFILE_NAME])
+        assert (
+                result.exit_code == 0
+        ), f"Command 'build --profile={NEW_PROFILE_NAME}' end with non zero exit code: {result.exit_code}"
+        for file in test_state.get_lib_build_result_files_paths(profile=NEW_PROFILE_NAME):
+            assert file.is_file(), f"Expected file: {file} not exist"
+
+    @pytest.mark.order(after="test_cli_build_profile_new")
+    def test_cli_publish_profile_new(self, test_state: ActiveTestState) -> None:
+        pytest.skip("TODO")
+
+    @pytest.mark.order(after="test_cli_publish_profile_new")
+    def test_flags_stored_in_commands_file(self, test_state: ActiveTestState) -> None:
+        """This test check if created under new profile in build folder compile_commands.json file contains project
+        flags and flags added with newly created profile, also check if c++ standard is set according to definition
+        in scargo.toml file"""
+        os.chdir(f"{test_state.proj_path}/{test_state.proj_name}")
+        # get expected c++ standard from scargo.toml file
+        with open("scargo.toml") as f:
+            toml_data = toml.load(f)
+        cpp_toml_std = toml_data["project"]["cxxstandard"]
+        default_toml_c_flags = toml_data["project"]["cflags"]
+        default_toml_cxx_flags = toml_data["project"]["cxxflags"]
+        with open(f"build/{NEW_PROFILE_NAME}/compile_commands.json") as f:
+            compile_commands = json.load(f)
+        for compile_command in compile_commands:
+            if compile_command["file"].split(".")[-1] == "c":
+                assert (
+                        NEW_PROFILE_CFLAGS in compile_command["command"]
+                ), f"cflags {NEW_PROFILE_CFLAGS} from new profile not found in compile command: {compile_command}"
+                assert (
+                        default_toml_c_flags in compile_command["command"]
+                ), f"default project cflags {default_toml_c_flags} not found in compile command: {compile_command}"
+            elif compile_command["file"].split(".")[-1] == "cpp":
+                assert (
+                        NEW_PROFILE_CXXFLAGS in compile_command["command"]
+                ), f"cxxflags {NEW_PROFILE_CXXFLAGS} from new profile not found in compile command: {compile_command}"
+                assert (
+                        default_toml_cxx_flags in compile_command["command"]
+                ), f"default project cxxflags {default_toml_cxx_flags} not found in compile command: {compile_command}"
+                assert any(
+                    cpp_std in compile_command["command"]
+                    for cpp_std in [
+                        f"-std=c++{cpp_toml_std}",
+                        f"-std=gnu++{cpp_toml_std}",
+                    ]
+                ), (
+                    f"Any of expected C++ standards -std=c++{cpp_toml_std} or -std=gnu++{cpp_toml_std} not found in "
+                    f"compile command: compile_command"
+                )
+
+    @pytest.mark.order(after="test_flags_stored_in_commands_file")
+    def test_cli_gen_u_option_nothing_to_gen(self, test_state: ActiveTestState) -> None:
+        """This test check if call of scargo gen -u  "path_to_source_dir" command will finish without error and
+        if unit test for added dummy .h file with prefix 'ut_' was created under tests/ut path
+        """
+        if test_state.proj_to_copy_path is not None:
+            pytest.skip("This test is only for new project")
+        os.chdir(f"{test_state.proj_path}/{test_state.proj_name}")
+        result = test_state.runner.invoke(
+            cli, ["gen", "-u", test_state.target.source_dir]
+        )
+        ut_path = Path(os.getcwd(), "tests", "ut")
+        assert (
+                result.exit_code == 0
+        ), f"Command 'gen -u {test_state.target.source_dir}' end with non zero exit code: {result.exit_code}"
+        assert os.listdir(ut_path) == [
+            "CMakeLists.txt"
+        ], f"Only CMakeLists.txt file should be present in {ut_path}. Files under path: {os.listdir(ut_path)}"
+
+    @pytest.mark.order(after="test_cli_gen_u_option_nothing_to_gen")
+    def test_precondition_create_and_fix_dummy_test_lib_h_file(
+            self, test_state: ActiveTestState
+    ) -> None:
+        """This test adding dummy .h file to source project dir fit it by scargo fix command and check if file was
+        fixed by scargo check command"""
+        os.chdir(f"{test_state.proj_path}/{test_state.proj_name}")
+        Path(test_state.target.source_dir, TEST_DUMMY_LIB_H_FILE).touch()
+        result = test_state.runner.invoke(cli, ["fix"])
+        assert (
+                result.exit_code == 0
+        ), f"Command 'fix' end with non zero exit code: {result.exit_code}"
+        result = test_state.runner.invoke(cli, ["check"])
+        assert (
+                result.exit_code == 0
+        ), f"Command 'check' end with non zero exit code: {result.exit_code}"
+
+    @pytest.mark.order(after="test_precondition_create_and_fix_dummy_test_lib_h_file")
+    def test_cli_gen_u_option(self, test_state: ActiveTestState) -> None:
+        """This test check if call of scargo gen -u  "path_to_source_dir" command will finish without error and
+        if unit test for added dummy .h file with prefix 'ut_' was created under tests/ut path
+        """
+        os.chdir(f"{test_state.proj_path}/{test_state.proj_name}")
+        result = test_state.runner.invoke(
+            cli, ["gen", "-u", test_state.target.source_dir]
+        )
+        ut_path = Path(os.getcwd(), "tests", "ut")
+        assert (
+                result.exit_code == 0
+        ), f"Command 'gen -u {test_state.target.source_dir}' end with non zero exit code: {result.exit_code}"
+        expected_ut_name = "ut_" + TEST_DUMMY_LIB_H_FILE.replace(".h", ".cpp")
+        assert Path(
+            ut_path, expected_ut_name
+        ).is_file(), f"File {expected_ut_name} should be present in {ut_path}. Files under path: {os.listdir(ut_path)}"
+
+    @pytest.mark.order(after="test_cli_gen_u_option")
+    def test_cli_test_some_tests_to_run(self, test_state: ActiveTestState) -> None:
+        """This test check if call of scargo test command will finish without error and if one generated dummy unit
+        test was found end executed without error"""
+        os.chdir(f"{test_state.proj_path}/{test_state.proj_name}")
+        result = test_state.runner.invoke(cli, ["test"])
+        assert (
+                result.exit_code == 0
+        ), f"Command 'test' end with non zero exit code: {result.exit_code}"
+        assert "100% tests passed, 0 tests failed out of 1" in result.output
+
+    @pytest.mark.order(after="test_cli_test_some_tests_to_run")
+    def test_cli_gen_m_option(self, test_state: ActiveTestState) -> None:
+        """This test check if call of scargo gen -m "path_to_added_test_h_file" command will finish without error and
+        if expected files under tests/mocks were created"""
+        # Gen -m
+        os.chdir(f"{test_state.proj_path}/{test_state.proj_name}")
+        path_to_h_file = Path(test_state.target.source_dir, TEST_DUMMY_LIB_H_FILE)
+        result = test_state.runner.invoke(cli, ["gen", "-m", str(path_to_h_file)])
+        assert (
+                result.exit_code == 0
+        ), f"Command 'gen -m {path_to_h_file}' end with non zero exit code: {result.exit_code}"
+        expected_mock_files_path = [
+            Path(f"tests/mocks/{TEST_DUMMY_LIB_H_FILE}"),
+            Path(f"tests/mocks/mock_{TEST_DUMMY_LIB_H_FILE}"),
+            Path(f"tests/mocks/mock_{TEST_DUMMY_LIB_H_FILE.replace('.h', '.cpp')}"),
+        ]
+        for file_path in expected_mock_files_path:
+            assert file_path.is_file(), f"File '{file_path}' not exist"
+
+    @pytest.mark.order(after="test_cli_gen_m_option")
+    def test_cli_gen_c_option(self, test_state: ActiveTestState) -> None:
+        """This test check if call of scargo gen -c "device_id" command will finish without error and
+        if expected cert files under build/fs and build/cert directories were created"""
+        # Gen -c
+        os.chdir(f"{test_state.proj_path}/{test_state.proj_name}")
+        result = test_state.runner.invoke(cli, ["gen", "-c", TEST_DEVICE_ID])
+        assert (
+                result.exit_code == 0
+        ), f"Command 'gen -c {TEST_DEVICE_ID}' end with non zero exit code: {result.exit_code}"
+        expected_files_paths_in_fs_dir = [
+            Path("build/fs/ca.pem"),
+            Path("build/fs/device_cert.pem"),
+            Path("build/fs/device_priv_key.pem"),
+            Path(f"build/certs/azure/{TEST_DEVICE_ID}-root-ca.pem"),
+        ]
+        for file_path in expected_files_paths_in_fs_dir:
+            assert file_path.is_file(), f"File '{file_path}' not exist"
+
+    @pytest.mark.order(after="test_cli_gen_c_option")
+    def test_cli_gen_b_option(self, test_state: ActiveTestState) -> None:
+        """This test check if call of scargo gen -b command will finish without error and
+        if expected files were created"""
+        pytest.skip("Test not implemented yet")
+
+    @pytest.mark.order(after="test_cli_gen_b_option")
+    def test_cli_check_after_gen(self, test_state: ActiveTestState) -> None:
+        """This test check if after all generations made by scargo gen command call of scargo check command will finish
+        without error and if no problems will be found"""
+        os.chdir(f"{test_state.proj_path}/{test_state.proj_name}")
+        result = test_state.runner.invoke(cli, ["check"])
+        assert (
+                result.exit_code == 0
+        ), f"Command 'check' end with non zero exit code: {result.exit_code}"
+        assert (
+                "No problems found!" in result.output
+        ), f"String 'No problems found!' not found in output: {result.output}"
+
+    @pytest.mark.order(after="test_cli_check_after_gen")
+    def test_cli_run_new_proj(self, test_state: ActiveTestState) -> None:
+        """This test check if call of scargo run command will finish without error and with output 'Hello World!'
+        for x86 target, for other targets error should be returned with output "Run project on x86 architecture is
+        not implemented for {test_state.target_id.value} yet"""
+        pytest.skip("No binary file?")
+
+        os.chdir(f"{test_state.proj_path}/{test_state.proj_name}")
+        result = test_state.runner.invoke(cli, ["run"])
+        if test_state.target_id == TargetIds.x86:
+            assert (
+                    result.exit_code == 0
+            ), f"Command 'run' end with non zero exit code: {result.exit_code}"
+            assert (
+                    "Hello World!" in result.output
+            ), f"String 'Hello World!' not found in output: {result.output}"
+        else:
+            assert (
+                    result.exit_code == 1
+            ), f"Command 'run' end with other than expected 1 exit code: {result.exit_code}"
+            assert (
+                    f"Run project on x86 architecture is not implemented for {test_state.target_id.value} yet"
+                    in result.output
+            ), (
+                f"String: 'Run project on x86 architecture is not implemented for "
+                f"{test_state.target_id.value} yet not in output: {result.output}"
+            )
+
 
 def test_project_x86_scargo_from_pypi(create_tmp_directory: None) -> None:
     # Test new and update work with pypi scargo version
@@ -1242,3 +1501,27 @@ def test_project_x86_scargo_from_pypi(create_tmp_directory: None) -> None:
 #     return mocker.patch(
 #         "scargo.commands.publish.scargo_publish"
 #     )
+
+
+        # def mock_check_call(*args, **kwargs):
+        #     if args[0] == ['conan', 'upload', test_state.proj_name, '-r', 'conancenter', '-all', '-confirm']:
+        #         return 0
+        #     else:
+        #         return subprocess.check_call(*args, **kwargs)
+        # with patch('subprocess.check_call', side_effect=mock_check_call):
+        #     result = test_state.runner.invoke(cli, ["publish", "--profile", "Debug"])
+
+
+        # mock_call_conan_upload = MagicMock()
+        #
+        # # Patch the function1 in your module with the mock
+        # with patch('scargo.commands.publish.call_conan_upload', mock_call_conan_upload):
+        #     # Call the CLI command you want to test
+        #     result = test_state.runner.invoke(cli, ["publish", "--profile", "Debug"])
+        #
+        # # result = test_state.runner.invoke(cli, ["publish", "--profile", "Debug"])
+
+        #
+        # with patch.object(subprocess, 'check_call') as mock_run:
+        #     mock_run.return_value.returncode = 0
+        #     result = test_state.runner.invoke(cli, ["publish", "--profile", "Debug"])
