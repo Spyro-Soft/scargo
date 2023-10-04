@@ -16,6 +16,7 @@ from scargo.file_generators.cpp_gen import generate_cpp
 from scargo.file_generators.toml_gen import generate_toml
 from scargo.global_values import SCARGO_DEFAULT_CONFIG_FILE, SCARGO_DOCKER_ENV
 from scargo.logger import get_logger
+from scargo.target_helpers.atsam_helper import get_atsam_cpu
 
 logger = get_logger()
 
@@ -34,7 +35,6 @@ def scargo_new(
     create_docker: bool,
     git: bool,
     chip: Optional[str],
-    cpu: Optional[str],
 ) -> None:
     """
     Create new project
@@ -82,7 +82,7 @@ def scargo_new(
         lib_name=lib_name,
         bin_name=bin_name,
         chip_label=chip or CHIP_DEFAULTS.get(target.family),
-        cpu=cpu or "cortex-m23",
+        cpu=get_atsam_cpu(chip) if chip else None,
     )
 
     config = get_scargo_config_or_exit(toml_path)

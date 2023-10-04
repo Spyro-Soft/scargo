@@ -39,6 +39,7 @@ def test_update_project_content_without_docker(tmp_path: Path) -> None:
         target=TARGET_X86,
         create_docker=False,
         git=False,
+        chip=None,
     )
     os.chdir(tmp_path / project_name)
     scargo_update(Path("scargo.toml"))
@@ -47,7 +48,7 @@ def test_update_project_content_without_docker(tmp_path: Path) -> None:
 def test_update_project_content_with_docker(tmp_path: Path, fp: FakeProcess) -> None:
     os.chdir(tmp_path)
     project_name = "test_project_with_docker"
-    scargo_new(project_name, None, None, TARGET_X86, True, False)
+    scargo_new(project_name, None, None, TARGET_X86, True, False, None)
     os.chdir(project_name)
     called_subprocess_cmd = get_docker_compose_command()
     called_subprocess_cmd.extend(["pull"])
@@ -62,7 +63,7 @@ def test_update_project_content_with_docker__build(
 ) -> None:
     os.chdir(tmp_path)
     project_name = "test_project_with_docker"
-    scargo_new(project_name, None, None, TARGET_X86, True, False)
+    scargo_new(project_name, None, None, TARGET_X86, True, False, None)
     os.chdir(project_name)
     cmd_pull = get_docker_compose_command()
     cmd_pull.extend(["pull"])

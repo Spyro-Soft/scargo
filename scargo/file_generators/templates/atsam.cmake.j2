@@ -11,7 +11,7 @@ add_definitions(-D__{{ config.atsam.chip[2:]|upper }}__)
 
 add_compile_options(
   --specs=nosys.specs
-  -mthumb 
+  -mthumb
   -mcpu=${ARM_CPU}
 )
 add_link_options(--specs=nosys.specs)

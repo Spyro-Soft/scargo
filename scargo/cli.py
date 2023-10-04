@@ -349,14 +349,6 @@ def new(
         prompt=True,
         prompt_required=False,
     ),
-    cpu: Optional[str] = Option(
-        None,
-        "--cpu",
-        help="Specify cpu (cortex-m0, cortex-m0plus, cortex-m23, ...)",
-        metavar="CPU",
-        prompt=True,
-        prompt_required=False,
-    ),
     create_docker: bool = Option(
         True, "--docker/--no-docker", help="Initialize docker environment."
     ),
@@ -374,7 +366,6 @@ def new(
         create_docker,
         git,
         chip,
-        cpu,
     )
     scargo_update(Path(name, SCARGO_DEFAULT_CONFIG_FILE).absolute())
 
