@@ -49,13 +49,15 @@ find_file(
 target_link_options(
   ${PROJECT_NAME}
   PRIVATE
-  -mthumb
-  --specs=nano.specs
-  -Wl,--start-group
-  -lm
+  -mthumb 
+  --specs=nano.specs 
+  -Wl,--start-group 
+  -lm  
   -Wl,--end-group
-  -Wl,--gc-sections
+  -Wl,--gc-sections 
   -mcpu=${ARM_CPU}
+  -Wl,--entry=Reset_Handler 
+  -Wl,--cref 
   -T${LINKER_SCRIPT})
 
 add_custom_command(
