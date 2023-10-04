@@ -38,7 +38,6 @@ include_directories(${CMAKE_SOURCE_DIR}/${ATMEL_ARCH}_DFP/include
 link_directories(${CMAKE_SOURCE_DIR}/${ATMEL_ARCH}_DFP/gcc
                  ${CMAKE_SOURCE_DIR}/${ATMEL_ARCH}_DFP/gcc/gcc)
 
-
 find_file(
   LINKER_SCRIPT
   NAMES ${SAM_MCU}_flash.ld
@@ -49,15 +48,14 @@ find_file(
 target_link_options(
   ${PROJECT_NAME}
   PRIVATE
-  -mthumb 
-  --specs=nano.specs 
-  -Wl,--start-group 
-  -lm  
+  -mthumb
+  --specs=nano.specs
+  -Wl,--start-group
+  -lm
   -Wl,--end-group
-  -Wl,--gc-sections 
+  -Wl,--gc-sections
   -mcpu=${ARM_CPU}
-  -Wl,--entry=Reset_Handler 
-  -Wl,--cref 
+  -Wl,--entry=Reset_Handler
   -T${LINKER_SCRIPT})
 
 add_custom_command(
