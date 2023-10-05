@@ -25,6 +25,7 @@ class Config(BaseModel):
     tests: "TestConfig"
     dependencies: "Dependencies"
     conan: "ConanConfig"
+    atsam: Optional["ATSAMConfig"]
     stm32: Optional["Stm32Config"]
     esp32: Optional["Esp32Config"]
     scargo: "ScargoConfig" = Field(
@@ -64,6 +65,8 @@ class Config(BaseModel):
                 raise ConfigError("No [stm32] section in config")
             if target_id == "esp32" and not values["esp32"]:
                 raise ConfigError("No [esp32] section in config")
+            if target_id == "atsam" and not values["atsam"]:
+                raise ConfigError("No [atsam] section in config")
 
         # Set default value of cmake_build_type - Debug for non-stanard profiles,
         # If profile is on standard_profiles list, use it's name instead
@@ -160,6 +163,9 @@ TARGETS = {
     "esp32c3": Target(
         id="esp32c3", family="esp32", source_dir="main", include_dir="include"
     ),
+    "atsam": Target(
+        id="atsam", family="atsam", source_dir="src", include_dir="include"
+    ),
 }
 
 
@@ -240,6 +246,15 @@ class ConanConfig(BaseModel):
 class Stm32Config(BaseModel):
     chip: str
     flash_start: int = Field(alias="flash-start")
+
+
+class ATSAMConfig(BaseModel):
+    chip: str
+    cpu: str
+
+    @property
+    def chip_series(self) -> str:
+        return self.chip[2:8].upper()
 
 
 class Esp32Config(BaseModel):

@@ -328,6 +328,7 @@ def new(
         None,
         "--bin",
         help="Create binary target template.",
+        metavar="BIN_NAME",
         prompt=True,
         prompt_required=False,
     ),
@@ -335,10 +336,19 @@ def new(
         None,
         "--lib",
         help="Create library target template.",
+        metavar="LIB_NAME",
         prompt=True,
         prompt_required=False,
     ),
     target: ScargoTargets = Option("x86", help="Target device."),
+    chip: Optional[str] = Option(
+        None,
+        "--chip",
+        help="Specify full chip label for a target (Uses default if not specified)",
+        metavar="CHIP_LABEL",
+        prompt=True,
+        prompt_required=False,
+    ),
     create_docker: bool = Option(
         True, "--docker/--no-docker", help="Initialize docker environment."
     ),
@@ -355,6 +365,7 @@ def new(
         Target.get_target_by_id(target.value),
         create_docker,
         git,
+        chip,
     )
     scargo_update(Path(name, SCARGO_DEFAULT_CONFIG_FILE).absolute())
 
