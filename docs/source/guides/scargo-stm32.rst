@@ -11,7 +11,8 @@ Creating a project
 
 Configure STM32 project
 ------------------------
-To configure your project for chosen STM32 chipset, usage please change it in scargo.toml file in **[stm32]** section
+To configure your project for chosen STM32 chipset use --chip when initializing the project.
+It's also possible to change it in scargo.toml file in **[stm32]** section and run scargo update.
 
 Add and use the external dependencies
 -------------------------------------
