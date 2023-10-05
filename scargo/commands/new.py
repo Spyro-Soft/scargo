@@ -22,6 +22,8 @@ logger = get_logger()
 
 
 CHIP_DEFAULTS = {
+    "x86": None,
+    "esp32": None,
     "atsam": "ATSAML10E16A",
     "stm32": "STM32L496AG",
 }
@@ -69,6 +71,9 @@ def scargo_new(
 
     build_env = get_build_env(create_docker)
 
+    chip_label = chip or CHIP_DEFAULTS.get(target.family)
+    cpu = get_atsam_cpu(chip_label) if chip_label else None
+
     toml_path = project_dir / SCARGO_DEFAULT_CONFIG_FILE
     generate_toml(
         toml_path,
@@ -81,8 +86,8 @@ def scargo_new(
         docker_image_tag=f"{name.lower()}-dev:1.0",
         lib_name=lib_name,
         bin_name=bin_name,
-        chip_label=chip or CHIP_DEFAULTS.get(target.family),
-        cpu=get_atsam_cpu(chip) if chip else None,
+        chip_label=chip_label,
+        cpu=cpu,
     )
 
     config = get_scargo_config_or_exit(toml_path)

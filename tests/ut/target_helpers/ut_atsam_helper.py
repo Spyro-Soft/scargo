@@ -18,6 +18,7 @@ from scargo.target_helpers.atsam_helper import get_atsam_cpu
         ("atsame70q21", "cortex-m7"),
         ("atsamv71j21", "cortex-m7"),
         ("atsaml10e16a", "cortex-m23"),
+        ("ATSAML10E16A", "cortex-m23"),
         ("notatsam", None),
         ("atsamnotsupported", None),
     ],
