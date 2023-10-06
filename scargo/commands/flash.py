@@ -2,13 +2,28 @@
 # @copyright Copyright (C) 2023 SpyroSoft Solutions S.A. All rights reserved.
 # #
 
+import os
+import platform
 import subprocess
 import sys
+from pathlib import Path
 from typing import Optional
+
+from scargo.target_helpers.atsam_helper import (
+    AtsamScrips,
+    generate_gdb_scripts,
+    generate_openocd_script,
+)
+
+if platform.system() == "Windows":
+    from subprocess import DETACHED_PROCESS  # type: ignore[attr-defined]
+else:
+    from subprocess import PIPE
 
 from scargo.config import Config
 from scargo.config_utils import prepare_config
 from scargo.logger import get_logger
+from scargo.path_utils import find_program_path
 
 logger = get_logger()
 
@@ -23,9 +38,6 @@ def scargo_flash(
     config = prepare_config()
     target = config.project.target
 
-    if port and (target.family != "esp32" and target.family != "stm32"):
-        logger.error("--port option is only supported for esp32 and stm32 projects.")
-        sys.exit(1)
     if not erase_memory and target.family != "stm32":
         logger.error("--no-erase option is only supported for stm32 projects.")
         sys.exit(1)
@@ -33,6 +45,8 @@ def scargo_flash(
         flash_esp32(config, app=app, fs=fs, flash_profile=flash_profile, port=port)
     elif target.family == "stm32":
         flash_stm32(config, flash_profile, erase_memory, port=port)
+    elif target.family == "atsam":
+        flash_atsam(config, flash_profile, erase_memory, port=port)
     else:
         logger.error("Flash command not supported for this target yet.")
 
@@ -122,3 +136,61 @@ def flash_stm32(
             command.append(f"--serial={port}")
         command.extend(["write", str(bin_path), flash_start])
         subprocess.check_call(command)
+
+
+def flash_atsam(
+    config: Config,
+    flash_profile: str = "Debug",
+    erase_memory: bool = True,
+    port: Optional[str] = None,
+) -> None:
+    openocd_path = find_program_path("openocd")
+    arm_none_eabi_gdb_path = find_program_path("arm-none-eabi-gdb")
+    if not openocd_path or not arm_none_eabi_gdb_path:
+        logger.error("openocd or arm-none-eabi-gdb not found")
+        logger.info("Please install openocd and arm-none-eabi-gdb")
+        sys.exit(1)
+
+    project_path = config.project_root
+    bin_name = f"{config.project.name.lower()}.bin"
+    bin_path = Path(project_path, "build", flash_profile, "bin", bin_name)
+
+    if not bin_path.exists():
+        logger.error("%s does not exist", bin_path)
+        logger.info("Did you run scargo build --profile %s", flash_profile)
+        sys.exit(1)
+
+    generate_openocd_script(config)
+    generate_gdb_scripts(config, bin_path)
+
+    openocd_process = None
+    try:
+        if platform.system() == "Windows":
+            openocd_process = subprocess.Popen(
+                [openocd_path, "-f", str(project_path / AtsamScrips.openocd_cfg)],
+                creationflags=DETACHED_PROCESS,
+            )
+        else:
+            openocd_process = subprocess.Popen(
+                [
+                    "sudo",
+                    openocd_path,
+                    "-f",
+                    str(project_path / AtsamScrips.openocd_cfg),
+                ],
+                stdin=PIPE,
+                stdout=PIPE,
+                stderr=PIPE,
+            )
+
+        gdb_script = AtsamScrips.gdb_reset if erase_memory else AtsamScrips.gdb_flash
+        gdb_command = [arm_none_eabi_gdb_path, f"--command={gdb_script}", "--batch"]
+        subprocess.check_call(gdb_command, env={"PATH_TO_BINARY": bin_path})
+    except Exception as e:
+        print(e)
+    finally:
+        if openocd_process is not None:
+            if platform.system() == "Windows":
+                openocd_process.terminate()
+            else:
+                os.system("sudo pkill -9 -P " + str(openocd_process.pid))
