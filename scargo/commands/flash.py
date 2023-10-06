@@ -7,11 +7,12 @@ import platform
 import subprocess
 import sys
 from pathlib import Path
+from tempfile import TemporaryDirectory
 from typing import Optional
 
 from scargo.target_helpers.atsam_helper import (
     AtsamScrips,
-    generate_gdb_scripts,
+    generate_gdb_script,
     generate_openocd_script,
 )
 
@@ -46,7 +47,7 @@ def scargo_flash(
     elif target.family == "stm32":
         flash_stm32(config, flash_profile, erase_memory, port=port)
     elif target.family == "atsam":
-        flash_atsam(config, flash_profile, erase_memory, port=port)
+        flash_atsam(config, flash_profile)
     else:
         logger.error("Flash command not supported for this target yet.")
 
@@ -141,8 +142,6 @@ def flash_stm32(
 def flash_atsam(
     config: Config,
     flash_profile: str = "Debug",
-    erase_memory: bool = True,
-    port: Optional[str] = None,
 ) -> None:
     openocd_path = find_program_path("openocd")
     arm_none_eabi_gdb_path = find_program_path("arm-none-eabi-gdb")
@@ -152,7 +151,7 @@ def flash_atsam(
         sys.exit(1)
 
     project_path = config.project_root
-    bin_name = f"{config.project.name.lower()}.hex"
+    bin_name = f"{config.project.name.lower()}.bin"
     bin_path = Path(project_path, "build", flash_profile, "bin", bin_name)
 
     if not bin_path.exists():
@@ -160,14 +159,20 @@ def flash_atsam(
         logger.info("Did you run scargo build --profile %s", flash_profile)
         sys.exit(1)
 
-    generate_openocd_script(config)
-    generate_gdb_scripts(config, bin_path)
+    temp_script_dir = TemporaryDirectory()
+    temp_script_dir_path = Path(temp_script_dir.name)
+    generate_openocd_script(temp_script_dir_path, config)
+    generate_gdb_script(temp_script_dir_path, config, bin_path)
 
     openocd_process = None
     try:
         if platform.system() == "Windows":
             openocd_process = subprocess.Popen(
-                [openocd_path, "-f", str(project_path / AtsamScrips.openocd_cfg)],
+                [
+                    openocd_path,
+                    "-f",
+                    str(temp_script_dir_path / AtsamScrips.openocd_cfg),
+                ],
                 creationflags=DETACHED_PROCESS,
             )
         else:
@@ -176,19 +181,23 @@ def flash_atsam(
                     "sudo",
                     openocd_path,
                     "-f",
-                    str(project_path / AtsamScrips.openocd_cfg),
+                    str(temp_script_dir_path / AtsamScrips.openocd_cfg),
                 ],
                 stdin=PIPE,
                 stdout=PIPE,
                 stderr=PIPE,
             )
 
-        gdb_script = AtsamScrips.gdb_reset if erase_memory else AtsamScrips.gdb_flash
-        gdb_command = [arm_none_eabi_gdb_path, f"--command={gdb_script}", "--batch"]
+        gdb_command = [
+            str(arm_none_eabi_gdb_path),
+            f"--command={temp_script_dir_path / AtsamScrips.gdb_flash}",
+            "--batch",
+        ]
         subprocess.check_call(gdb_command)
     except Exception as e:
         print(e)
     finally:
+        # temp_script_dir.cleanup()
         if openocd_process is not None:
             if platform.system() == "Windows":
                 openocd_process.terminate()

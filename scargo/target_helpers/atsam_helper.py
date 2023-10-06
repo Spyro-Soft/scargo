@@ -4,7 +4,7 @@ from pathlib import Path
 from typing import Optional
 
 from scargo.config import Config
-from scargo.file_generators.base_gen import create_file_from_template
+from scargo.file_generators.base_gen import write_template
 
 script_dir = Path(__file__).parent
 atmel_arxml_path = script_dir / "atmel.xml"
@@ -16,7 +16,6 @@ ADDITIONAL_CPU_DATA = {"cortex-m23": ["atsaml10e16a"]}
 class AtsamScrips:
     openocd_cfg = "config/openocd_script.cfg"
     gdb_flash = "config/gdb-flash.script"
-    gdb_reset = "config/gdb-reset.script"
 
 
 def get_atsam_cpu(chip_label: str) -> Optional[str]:
@@ -47,11 +46,13 @@ def get_openocd_script_name(chip_label: str) -> Optional[str]:
     if chip_label.startswith("atsamd"):
         return "at91samdXX.cfg"
     elif chip_label.startswith("atsaml1"):
-        return "atsaml1x.cfg"
+        return "atsaml1x.cfg"  # Not sure about this
     return None
 
 
 def get_openocd_flash_driver_name(chip_label: str) -> Optional[str]:
+    # https://openocd.org/doc-release/html/Flash-Commands.html
+    # This should probably be done differently
     if chip_label.startswith("atsamd"):
         return "at91samd"
     elif chip_label.startswith("atsaml1"):
@@ -59,37 +60,24 @@ def get_openocd_flash_driver_name(chip_label: str) -> Optional[str]:
     return None
 
 
-def generate_openocd_script(config: Config) -> None:
+def generate_openocd_script(outdir: Path, config: Config) -> None:
     openocd_script_name = get_openocd_script_name(
         config.get_atsam_config().chip.lower()
     )
-    chip_name = get_openocd_flash_driver_name(config.get_atsam_config().chip.lower())
-    if openocd_script_name and chip_name:
-        create_file_from_template(
+    flash_driver = get_openocd_flash_driver_name(config.get_atsam_config().chip.lower())
+    if openocd_script_name and openocd_script_name:
+        write_template(
+            outdir / AtsamScrips.openocd_cfg,
             "atsam/openocd_script.cfg.j2",
-            config.project_root / AtsamScrips.openocd_cfg,
-            {"chip_name": chip_name, "script_name": openocd_script_name},
-            config,
-            True,
+            {"flash_driver": flash_driver, "script_name": openocd_script_name},
         )
 
 
-def generate_gdb_scripts(config: Config, bin_path: Path) -> None:
-    openocd_chip_name = get_openocd_flash_driver_name(
-        config.get_atsam_config().chip.lower()
-    )
-    if openocd_chip_name:
-        create_file_from_template(
-            "atsam/gdb-reset.script.j2",
-            config.project_root / AtsamScrips.gdb_reset,
-            {"openocd_chip": openocd_chip_name},
-            config,
-            True,
-        )
-        create_file_from_template(
+def generate_gdb_script(outdir: Path, config: Config, bin_path: Path) -> None:
+    flash_driver = get_openocd_flash_driver_name(config.get_atsam_config().chip.lower())
+    if flash_driver:
+        write_template(
+            outdir / AtsamScrips.gdb_flash,
             "atsam/gdb-flash.script.j2",
-            config.project_root / AtsamScrips.gdb_flash,
-            {"openocd_chip": openocd_chip_name, "bin_path": bin_path},
-            config,
-            True,
+            {"flash_driver": flash_driver, "bin_path": bin_path},
         )
