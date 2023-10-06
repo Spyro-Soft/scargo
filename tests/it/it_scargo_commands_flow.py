@@ -1035,20 +1035,7 @@ class TestLibProjectFlow:
 
         os.chdir(f"{test_state.proj_path}/{test_state.proj_name}")
 
-        def call_cli(*args, **kwargs):
-            print("here")
-            return subprocess.check_call(*args, **kwargs)
-
-        with patch('subprocess.check_call') as mock_check_call:
-            mock_check_call.side_effect = call_cli
-            result = test_state.runner.invoke(
-                cli,
-                [
-                    "publish",
-                    "--profile",
-                    "Debug"
-                ],
-            )
+        result = test_state.runner.invoke(cli,["publish", "--profile", "Debug"],)
 
         assert (
                 result.exit_code == 0
@@ -1454,35 +1441,6 @@ class TestLibProjectFlow:
                 "No problems found!" in result.output
         ), f"String 'No problems found!' not found in output: {result.output}"
 
-    @pytest.mark.order(after="test_cli_check_after_gen")
-    def test_cli_run_new_proj(self, test_state: ActiveTestState) -> None:
-        """This test check if call of scargo run command will finish without error and with output 'Hello World!'
-        for x86 target, for other targets error should be returned with output "Run project on x86 architecture is
-        not implemented for {test_state.target_id.value} yet"""
-        pytest.skip("No binary file?")
-
-        os.chdir(f"{test_state.proj_path}/{test_state.proj_name}")
-        result = test_state.runner.invoke(cli, ["run"])
-        if test_state.target_id == TargetIds.x86:
-            assert (
-                    result.exit_code == 0
-            ), f"Command 'run' end with non zero exit code: {result.exit_code}"
-            assert (
-                    "Hello World!" in result.output
-            ), f"String 'Hello World!' not found in output: {result.output}"
-        else:
-            assert (
-                    result.exit_code == 1
-            ), f"Command 'run' end with other than expected 1 exit code: {result.exit_code}"
-            assert (
-                    f"Run project on x86 architecture is not implemented for {test_state.target_id.value} yet"
-                    in result.output
-            ), (
-                f"String: 'Run project on x86 architecture is not implemented for "
-                f"{test_state.target_id.value} yet not in output: {result.output}"
-            )
-
-
 def test_project_x86_scargo_from_pypi(create_tmp_directory: None) -> None:
     # Test new and update work with pypi scargo version
     runner = ScargoTestRunner()
@@ -1494,34 +1452,3 @@ def test_project_x86_scargo_from_pypi(create_tmp_directory: None) -> None:
         assert (
             result.exit_code == 0
         ), f"Command 'new {TEST_PROJECT_NAME} --target=x86' end with non zero exit code: {result.exit_code}"
-
-
-# @pytest.fixture
-# def mock_conan_upload_call(mocker: MockerFixture) -> MagicMock:
-#     return mocker.patch(
-#         "scargo.commands.publish.scargo_publish"
-#     )
-
-
-        # def mock_check_call(*args, **kwargs):
-        #     if args[0] == ['conan', 'upload', test_state.proj_name, '-r', 'conancenter', '-all', '-confirm']:
-        #         return 0
-        #     else:
-        #         return subprocess.check_call(*args, **kwargs)
-        # with patch('subprocess.check_call', side_effect=mock_check_call):
-        #     result = test_state.runner.invoke(cli, ["publish", "--profile", "Debug"])
-
-
-        # mock_call_conan_upload = MagicMock()
-        #
-        # # Patch the function1 in your module with the mock
-        # with patch('scargo.commands.publish.call_conan_upload', mock_call_conan_upload):
-        #     # Call the CLI command you want to test
-        #     result = test_state.runner.invoke(cli, ["publish", "--profile", "Debug"])
-        #
-        # # result = test_state.runner.invoke(cli, ["publish", "--profile", "Debug"])
-
-        #
-        # with patch.object(subprocess, 'check_call') as mock_run:
-        #     mock_run.return_value.returncode = 0
-        #     result = test_state.runner.invoke(cli, ["publish", "--profile", "Debug"])
