@@ -763,7 +763,7 @@ class TestBinProjectFlow:
             ), f"String 'Gen --fs command not supported for this target yet.' not found in output: {result.output}"
 
     @pytest.mark.order(after="test_cli_gen_fs_option")
-    def test_cli_gen_b_option(self) -> None:
+    def test_cli_gen_b_option(self, test_state: ActiveTestState) -> None:
         """This test check if call of scargo gen -b command will finish without error and
         if expected files were created"""
         pytest.skip("Test not implemented yet")
@@ -1492,12 +1492,9 @@ class TestLibProjectFlow:
             assert file_path.is_file(), f"File '{file_path}' not exist"
 
     @pytest.mark.order(after="test_cli_gen_c_option")
-    def test_cli_gen_b_option(self, test_state: ActiveTestState) -> None:
+    def test_cli_gen_b_option(self) -> None:
         """This test check if call of scargo gen -b command will finish without error and
         if expected files were created"""
-        if test_state.target_id == TargetIds.esp32:
-            pytest.skip("Lib is not yet implemented for esp32")
-
         pytest.skip("Test not implemented yet")
 
     @pytest.mark.order(after="test_cli_gen_b_option")
