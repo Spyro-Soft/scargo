@@ -51,17 +51,19 @@ def get_openocd_script_name(chip_label: str) -> Optional[str]:
     return None
 
 
-def get_openocd_chip_name(chip_label: str) -> Optional[str]:
+def get_openocd_flash_driver_name(chip_label: str) -> Optional[str]:
     if chip_label.startswith("atsamd"):
         return "at91samd"
     elif chip_label.startswith("atsaml1"):
-        return chip_label
-    return "atsaml1"
+        return "at91samd"
+    return None
 
 
 def generate_openocd_script(config: Config) -> None:
-    openocd_script_name = get_openocd_script_name(config.get_atsam_config().chip.lower())
-    chip_name = get_openocd_chip_name(config.get_atsam_config().chip.lower())
+    openocd_script_name = get_openocd_script_name(
+        config.get_atsam_config().chip.lower()
+    )
+    chip_name = get_openocd_flash_driver_name(config.get_atsam_config().chip.lower())
     if openocd_script_name and chip_name:
         create_file_from_template(
             "atsam/openocd_script.cfg.j2",
@@ -73,7 +75,9 @@ def generate_openocd_script(config: Config) -> None:
 
 
 def generate_gdb_scripts(config: Config, bin_path: Path) -> None:
-    openocd_chip_name = get_openocd_chip_name(config.get_atsam_config().chip.lower())
+    openocd_chip_name = get_openocd_flash_driver_name(
+        config.get_atsam_config().chip.lower()
+    )
     if openocd_chip_name:
         create_file_from_template(
             "atsam/gdb-reset.script.j2",

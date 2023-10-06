@@ -152,7 +152,7 @@ def flash_atsam(
         sys.exit(1)
 
     project_path = config.project_root
-    bin_name = f"{config.project.name.lower()}.bin"
+    bin_name = f"{config.project.name.lower()}.hex"
     bin_path = Path(project_path, "build", flash_profile, "bin", bin_name)
 
     if not bin_path.exists():
@@ -185,7 +185,7 @@ def flash_atsam(
 
         gdb_script = AtsamScrips.gdb_reset if erase_memory else AtsamScrips.gdb_flash
         gdb_command = [arm_none_eabi_gdb_path, f"--command={gdb_script}", "--batch"]
-        subprocess.check_call(gdb_command, env={"PATH_TO_BINARY": bin_path})
+        subprocess.check_call(gdb_command)
     except Exception as e:
         print(e)
     finally:
