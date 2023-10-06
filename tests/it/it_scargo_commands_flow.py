@@ -908,10 +908,17 @@ class TestBinProjectFlow:
             bin_name=TEST_BIN_NAME,
             lib_name=TEST_LIB_NAME,
         ),
+        ActiveTestState(
+            target_id=TargetIds.esp32,
+            proj_name="new_bin_project_esp32",
+            bin_name=TEST_BIN_NAME,
+            lib_name=TEST_LIB_NAME,
+        ),
     ],
     ids=[
         "new_lib_project_x86",
         "new_lib_project_stm32",
+        "new_lib_project_esp32",
     ],
     scope="session",
 )
@@ -926,8 +933,9 @@ class TestLibProjectFlow:
     ) -> None:
         """Simple test which checks if scargo new -h command can be invoked and do not return any error"""
         # create temporary dir for new project
-        if(test_state.target_id == TargetIds.esp32):
-            pytest.skip("Lib is not yet supported for esp32")
+        if test_state.target_id == TargetIds.esp32:
+            pytest.skip("Lib is not yet implemented for esp32")
+
         test_state.proj_path = tmpdir_factory.mktemp(test_state.proj_name)
         os.chdir(test_state.proj_path)
 
@@ -942,6 +950,9 @@ class TestLibProjectFlow:
         """This test invoking scargo new command with binary file and checking if command was executed without error
         and expected project structure and files were generated without checking correctness of those generated files
         content"""
+        if test_state.target_id == TargetIds.esp32:
+            pytest.skip("Lib is not yet implemented for esp32")
+
         if test_state.proj_to_copy_path is not None:
             pytest.skip(
                 "Test of copied project to check backward compatibility, no need to create new project"
@@ -970,51 +981,44 @@ class TestLibProjectFlow:
                 file
             ).is_file(), f"File: {file} was expected after new command, but not exist"
 
-    @pytest.mark.order(after="test_cli_new")
-    def test_copy_project(self, test_state: ActiveTestState) -> None:
-        if test_state.proj_to_copy_path is None:
-            pytest.skip("Test of new project - no copying needed")
-
-        os.mkdir(f"{test_state.proj_path}/{test_state.proj_name}")
-        os.chdir(f"{test_state.proj_path}/{test_state.proj_name}")
-        copytree(test_state.proj_to_copy_path, os.getcwd(), dirs_exist_ok=True)
-        project_path = get_project_root_or_none()
-        assert (
-                project_path is not None
-        ), f"Project not copied under expected location: {project_path}"
-        docker_path = Path(project_path, ".devcontainer")
-        config = parse_config(project_path / "scargo.lock")
-        generate_env(docker_path, config)
-
     @pytest.mark.order(after="test_copy_project")
     def test_cli_docker_run(self, test_state: ActiveTestState) -> None:
         """This test check if call of scargo docker run command will finish without error"""
+        if test_state.target_id == TargetIds.esp32:
+            pytest.skip("Lib is not yet implemented for esp32")
+
         # Docker Run
         os.chdir(f"{test_state.proj_path}/{test_state.proj_name}")
         result = test_state.runner.invoke(cli, ["docker", "run"])
         assert (
-            result.exit_code == 0
+                result.exit_code == 0
         ), f"Command 'docker run' end with non zero exit code: {result.exit_code}"
 
     @pytest.mark.order(after="test_cli_docker_run")
     def test_cli_update(self, test_state: ActiveTestState) -> None:
         """This test check if call of scargo update command will finish without error"""
+        if test_state.target_id == TargetIds.esp32:
+            pytest.skip("Lib is not yet implemented for esp32")
+
         # Update command
         os.chdir(f"{test_state.proj_path}/{test_state.proj_name}")
         result = test_state.runner.invoke(cli, ["update"])
         assert (
-            result.exit_code == 0
+                result.exit_code == 0
         ), f"Command 'update' end with non zero exit code: {result.exit_code}"
 
     @pytest.mark.order(after="test_cli_update")
     def test_cli_build(self, test_state: ActiveTestState) -> None:
         """"This test check if call of scargo build command will finish without error and if under default profile in
         build folder bin file is present"""
+        if test_state.target_id == TargetIds.esp32:
+            pytest.skip("Lib is not yet implemented for esp32")
+
         # Build
         os.chdir(f"{test_state.proj_path}/{test_state.proj_name}")
         result = test_state.runner.invoke(cli, ["build"])
         assert (
-            result.exit_code == 0
+                result.exit_code == 0
         ), f"Command 'build' end with non zero exit code: {result.exit_code}"
         for file in test_state.get_lib_build_result_files_paths():
             assert file.is_file(), f"Expected file: {file} not exist"
@@ -1022,6 +1026,9 @@ class TestLibProjectFlow:
     @pytest.mark.order(after="test_cli_build")
     def test_cli_publish(self, test_state: ActiveTestState) -> None:
         """This test check if call of scargo publish command will finish without error"""
+        if test_state.target_id == TargetIds.esp32:
+            pytest.skip("Lib is not yet implemented for esp32")
+
         # Publish command
         pytest.skip("TODO")
 
@@ -1037,11 +1044,14 @@ class TestLibProjectFlow:
     def test_cli_clean(self, test_state: ActiveTestState) -> None:
         """This test check if call of scargo clean command will finish without error and
         if build folder will be removed"""
+        if test_state.target_id == TargetIds.esp32:
+            pytest.skip("Lib is not yet implemented for esp32")
+
         # Clean
         os.chdir(f"{test_state.proj_path}/{test_state.proj_name}")
         result = test_state.runner.invoke(cli, ["clean"])
         assert (
-            result.exit_code == 0
+                result.exit_code == 0
         ), f"Command 'clean' end with non zero exit code: {result.exit_code}"
 
         assert not Path(
@@ -1052,22 +1062,30 @@ class TestLibProjectFlow:
     def test_cli_build_profile_debug(self, test_state: ActiveTestState) -> None:
         """"This test check if call of scargo build command will finish without error and if under default profile in
         build folder bin file is present"""
+        if test_state.target_id == TargetIds.esp32:
+            pytest.skip("Lib is not yet implemented for esp32")
+
         # Build
         os.chdir(f"{test_state.proj_path}/{test_state.proj_name}")
         result = test_state.runner.invoke(cli, ["build", "--profile", "Debug"])
         assert (
-            result.exit_code == 0
+                result.exit_code == 0
         ), f"Command 'build' end with non zero exit code: {result.exit_code}"
         for file in test_state.get_lib_build_result_files_paths():
             assert file.is_file(), f"Expected file: {file} not exist"
 
     @pytest.mark.order(after="test_cli_build_profile_debug")
     def test_cli_publish_profile_debug(self, test_state: ActiveTestState) -> None:
+        if test_state.target_id == TargetIds.esp32:
+            pytest.skip("Lib is not yet implemented for esp32")
         pytest.skip("TODO")
 
     @pytest.mark.order(after="test_cli_publish_profile_debug")
     def test_debug_bin_file_format_by_objdump_results(self, test_state: ActiveTestState) -> None:
         """This test checks if bin file has expected file format by running objdump on this file"""
+        if test_state.target_id == TargetIds.esp32:
+            pytest.skip("Lib is not yet implemented for esp32")
+
         # objdump
         lib_file_path = test_state.get_lib_file_path(profile="Debug")
         os.chdir(lib_file_path.parent)
@@ -1086,6 +1104,9 @@ class TestLibProjectFlow:
     def test_cli_clean_after_build_profile_debug(self, test_state: ActiveTestState) -> None:
         """This test check if call of scargo clean command will finish without error and
                 if build folder will be removed"""
+        if test_state.target_id == TargetIds.esp32:
+            pytest.skip("Lib is not yet implemented for esp32")
+
         # Clean
         os.chdir(f"{test_state.proj_path}/{test_state.proj_name}")
         result = test_state.runner.invoke(cli, ["clean"])
@@ -1101,6 +1122,9 @@ class TestLibProjectFlow:
     def test_cli_build_profile_release(self, test_state: ActiveTestState) -> None:
         """"This test check if call of scargo build command will finish without error and if under default profile in
                 build folder bin file is present"""
+        if test_state.target_id == TargetIds.esp32:
+            pytest.skip("Lib is not yet implemented for esp32")
+
         # Build
         os.chdir(f"{test_state.proj_path}/{test_state.proj_name}")
         result = test_state.runner.invoke(cli, ["build", "--profile", "Release"])
@@ -1112,11 +1136,16 @@ class TestLibProjectFlow:
 
     @pytest.mark.order(after="test_cli_build_profile_release")
     def test_publish_profile_release(self, test_state: ActiveTestState) -> None:
+        if test_state.target_id == TargetIds.esp32:
+            pytest.skip("Lib is not yet implemented for esp32")
         pytest.skip("TODO")
 
     @pytest.mark.order(after="test_publish_profile_release")
     def test_release_bin_file_format_by_objdump_results(self, test_state: ActiveTestState) -> None:
         """This test checks if bin file has expected file format by running objdump on this file"""
+        if test_state.target_id == TargetIds.esp32:
+            pytest.skip("Lib is not yet implemented for esp32")
+
         # objdump
         lib_file_path = test_state.get_lib_file_path(profile="Release")
         os.chdir(lib_file_path.parent)
@@ -1135,11 +1164,14 @@ class TestLibProjectFlow:
     def test_cli_fix(self, test_state: ActiveTestState) -> None:
         """This test check if call of scargo fix command will finish without error and if no problems to fix
         will be found for newly created project"""
+        if test_state.target_id == TargetIds.esp32:
+            pytest.skip("Lib is not yet implemented for esp32")
+
         # Fix
         os.chdir(f"{test_state.proj_path}/{test_state.proj_name}")
         result = test_state.runner.invoke(cli, ["fix"])
         assert (
-            result.exit_code == 0
+                result.exit_code == 0
         ), f"Command 'fix' end with non zero exit code: {result.exit_code}"
         expected_strings_in_output = [
             "Finished pragma check. Fixed problems in 0 files.",
@@ -1149,33 +1181,41 @@ class TestLibProjectFlow:
         if test_state.proj_to_copy_path is None:
             for expected_string in expected_strings_in_output:
                 assert (
-                    expected_string in result.output
+                        expected_string in result.output
                 ), f"'{expected_string}' not found in output: {result.output}"
 
     @pytest.mark.order(after="test_cli_fix")
     def test_cli_check(self, test_state: ActiveTestState) -> None:
         """This test check if call of scargo check command will finish without error and if no problems will be found
         for newly created project"""
+        if test_state.target_id == TargetIds.esp32:
+            pytest.skip("Lib is not yet implemented for esp32")
+
+        # Check
         os.chdir(f"{test_state.proj_path}/{test_state.proj_name}")
         result = test_state.runner.invoke(cli, ["check"])
         assert (
-            result.exit_code == 0
+                result.exit_code == 0
         ), f"Command 'check' end with non zero exit code: {result.exit_code}"
         assert (
-            "No problems found!" in result.output
+                "No problems found!" in result.output
         ), f"String 'No problems found!' not found in check command output {result.output}"
 
     @pytest.mark.order(after="test_cli_check")
     def test_cli_test(self, test_state: ActiveTestState) -> None:
         """This test check if call of scargo test command will finish without error and if no tests were found
         for newly created project"""
+        if test_state.target_id == TargetIds.esp32:
+            pytest.skip("Lib is not yet implemented for esp32")
+
+        # Test
         os.chdir(f"{test_state.proj_path}/{test_state.proj_name}")
         result = test_state.runner.invoke(cli, ["test"])
         assert (
-            result.exit_code == 0
+                result.exit_code == 0
         ), f"Command 'test' end with non zero exit code: {result.exit_code}"
         assert (
-            "No tests were found!!!" in result.output
+                "No tests were found!!!" in result.output
         ), f"String 'No tests were found!!!' not found in test command output {result.output}"
 
 
@@ -1183,6 +1223,9 @@ class TestLibProjectFlow:
     def test_cli_clean_after_build_profile_release(self, test_state: ActiveTestState) -> None:
         """This test check if call of scargo clean command will finish without error and
                 if build folder will be removed"""
+        if test_state.target_id == TargetIds.esp32:
+            pytest.skip("Lib is not yet implemented for esp32")
+
         # Clean
         os.chdir(f"{test_state.proj_path}/{test_state.proj_name}")
         result = test_state.runner.invoke(cli, ["clean"])
@@ -1197,6 +1240,9 @@ class TestLibProjectFlow:
     @pytest.mark.order(after="test_cli_clean_after_build_profile_release")
     def test_precondition_add_new_profile(self, test_state: ActiveTestState) -> None:
         """This test can be treated as a precondition it's just adding new profile settings to scargo.toml file"""
+        if test_state.target_id == TargetIds.esp32:
+            pytest.skip("Lib is not yet implemented for esp32")
+
         # add new profile
         os.chdir(f"{test_state.proj_path}/{test_state.proj_name}")
         add_profile_to_toml(
@@ -1213,6 +1259,9 @@ class TestLibProjectFlow:
     ) -> None:
         """This test check if call of scargo update command invoked after new adding profile settings to scargo.toml
         file will finish without error"""
+        if test_state.target_id == TargetIds.esp32:
+            pytest.skip("Lib is not yet implemented for esp32")
+
         # Update command
         os.chdir(f"{test_state.proj_path}/{test_state.proj_name}")
         result = test_state.runner.invoke(cli, ["update"])
@@ -1258,6 +1307,9 @@ class TestLibProjectFlow:
     def test_cli_build_profile_new(self, test_state: ActiveTestState) -> None:
         """This test check if call of scargo build command for newly added profile will finish without error and
         if under this new profile in build folder bin file is present"""
+        if test_state.target_id == TargetIds.esp32:
+            pytest.skip("Lib is not yet implemented for esp32")
+
         # Build
         os.chdir(f"{test_state.proj_path}/{test_state.proj_name}")
         result = test_state.runner.invoke(cli, ["build", "--profile", NEW_PROFILE_NAME])
@@ -1269,6 +1321,8 @@ class TestLibProjectFlow:
 
     @pytest.mark.order(after="test_cli_build_profile_new")
     def test_cli_publish_profile_new(self, test_state: ActiveTestState) -> None:
+        if test_state.target_id == TargetIds.esp32:
+            pytest.skip("Lib is not yet implemented for esp32")
         pytest.skip("TODO")
 
     @pytest.mark.order(after="test_cli_publish_profile_new")
@@ -1276,6 +1330,9 @@ class TestLibProjectFlow:
         """This test check if created under new profile in build folder compile_commands.json file contains project
         flags and flags added with newly created profile, also check if c++ standard is set according to definition
         in scargo.toml file"""
+        if test_state.target_id == TargetIds.esp32:
+            pytest.skip("Lib is not yet implemented for esp32")
+
         os.chdir(f"{test_state.proj_path}/{test_state.proj_name}")
         # get expected c++ standard from scargo.toml file
         with open("scargo.toml") as f:
@@ -1316,6 +1373,9 @@ class TestLibProjectFlow:
         """This test check if call of scargo gen -u  "path_to_source_dir" command will finish without error and
         if unit test for added dummy .h file with prefix 'ut_' was created under tests/ut path
         """
+        if test_state.target_id == TargetIds.esp32:
+            pytest.skip("Lib is not yet implemented for esp32")
+
         if test_state.proj_to_copy_path is not None:
             pytest.skip("This test is only for new project")
         os.chdir(f"{test_state.proj_path}/{test_state.proj_name}")
@@ -1336,6 +1396,9 @@ class TestLibProjectFlow:
     ) -> None:
         """This test adding dummy .h file to source project dir fit it by scargo fix command and check if file was
         fixed by scargo check command"""
+        if test_state.target_id == TargetIds.esp32:
+            pytest.skip("Lib is not yet implemented for esp32")
+
         os.chdir(f"{test_state.proj_path}/{test_state.proj_name}")
         Path(test_state.target.source_dir, TEST_DUMMY_LIB_H_FILE).touch()
         result = test_state.runner.invoke(cli, ["fix"])
@@ -1352,6 +1415,9 @@ class TestLibProjectFlow:
         """This test check if call of scargo gen -u  "path_to_source_dir" command will finish without error and
         if unit test for added dummy .h file with prefix 'ut_' was created under tests/ut path
         """
+        if test_state.target_id == TargetIds.esp32:
+            pytest.skip("Lib is not yet implemented for esp32")
+
         os.chdir(f"{test_state.proj_path}/{test_state.proj_name}")
         result = test_state.runner.invoke(
             cli, ["gen", "-u", test_state.target.source_dir]
@@ -1369,6 +1435,9 @@ class TestLibProjectFlow:
     def test_cli_test_some_tests_to_run(self, test_state: ActiveTestState) -> None:
         """This test check if call of scargo test command will finish without error and if one generated dummy unit
         test was found end executed without error"""
+        if test_state.target_id == TargetIds.esp32:
+            pytest.skip("Lib is not yet implemented for esp32")
+
         os.chdir(f"{test_state.proj_path}/{test_state.proj_name}")
         result = test_state.runner.invoke(cli, ["test"])
         assert (
@@ -1380,6 +1449,9 @@ class TestLibProjectFlow:
     def test_cli_gen_m_option(self, test_state: ActiveTestState) -> None:
         """This test check if call of scargo gen -m "path_to_added_test_h_file" command will finish without error and
         if expected files under tests/mocks were created"""
+        if test_state.target_id == TargetIds.esp32:
+            pytest.skip("Lib is not yet implemented for esp32")
+
         # Gen -m
         os.chdir(f"{test_state.proj_path}/{test_state.proj_name}")
         path_to_h_file = Path(test_state.target.source_dir, TEST_DUMMY_LIB_H_FILE)
@@ -1399,6 +1471,9 @@ class TestLibProjectFlow:
     def test_cli_gen_c_option(self, test_state: ActiveTestState) -> None:
         """This test check if call of scargo gen -c "device_id" command will finish without error and
         if expected cert files under build/fs and build/cert directories were created"""
+        if test_state.target_id == TargetIds.esp32:
+            pytest.skip("Lib is not yet implemented for esp32")
+
         # Gen -c
         os.chdir(f"{test_state.proj_path}/{test_state.proj_name}")
         result = test_state.runner.invoke(cli, ["gen", "-c", TEST_DEVICE_ID])
@@ -1418,12 +1493,18 @@ class TestLibProjectFlow:
     def test_cli_gen_b_option(self, test_state: ActiveTestState) -> None:
         """This test check if call of scargo gen -b command will finish without error and
         if expected files were created"""
+        if test_state.target_id == TargetIds.esp32:
+            pytest.skip("Lib is not yet implemented for esp32")
+
         pytest.skip("Test not implemented yet")
 
     @pytest.mark.order(after="test_cli_gen_b_option")
     def test_cli_check_after_gen(self, test_state: ActiveTestState) -> None:
         """This test check if after all generations made by scargo gen command call of scargo check command will finish
         without error and if no problems will be found"""
+        if test_state.target_id == TargetIds.esp32:
+            pytest.skip("Lib is not yet implemented for esp32")
+
         os.chdir(f"{test_state.proj_path}/{test_state.proj_name}")
         result = test_state.runner.invoke(cli, ["check"])
         assert (
