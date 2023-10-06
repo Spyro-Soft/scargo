@@ -3,6 +3,9 @@
 //
 
 #include <cstdio>
+{% if target.family == "atsam" %}
+#include <sam.h>
+{% endif %}
 {% if target.family == "esp32" %}
 #include <freertos/FreeRTOS.h>
 #include <freertos/task.h>

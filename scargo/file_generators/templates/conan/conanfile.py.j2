@@ -4,6 +4,7 @@
 #
 
 from conan import ConanFile
+from conans import tools
 from conan.tools.cmake import CMakeToolchain, CMake, cmake_layout
 
 {% if config.project.target.family == "stm32" %}
@@ -37,11 +38,39 @@ class {{ config.project.name|capitalize|replace("-", "") }}Conan(ConanFile):  # 
         {% endfor %}
     {% endif %}
 
-    {% if config.project.target.family == "stm32" %}
     def source(self) -> None:
+    {% if config.project.target.family == "stm32" %}
         git = tools.Git(folder="third-party/stm32-cmake")
         if not os.listdir(git.folder):
             git.clone("https://github.com/ObKo/stm32-cmake.git", "master")
+    {% elif config.project.target.family == "atsam" %}
+        import requests
+        import re
+        from pathlib import Path
+
+        chip_series = "{{ config.atsam.chip_series }}"
+        dfp_outdir = Path(f"{chip_series}_DFP")
+        cmsis_outdir = Path("CMSIS")
+        if dfp_outdir.is_dir() and cmsis_outdir.is_dir():
+            return
+
+        packs_url = "http://packs.download.atmel.com"
+
+        if not dfp_outdir.is_dir():
+            packs_web_content = requests.get(packs_url).text
+            match_atpack = re.search(
+                f'data-link="(Atmel\.{chip_series}\\S*\\.atpack)"',
+                packs_web_content,
+                re.MULTILINE | re.DOTALL,
+            )
+            dfp_filename = match_atpack.group(1)
+            tools.get(f"{packs_url}/{dfp_filename}", destination=dfp_outdir)
+
+        if not cmsis_outdir.is_dir():
+            cmsis_filename = "ARM.CMSIS.5.4.0.atpack"
+            tools.get(f"{packs_url}/{cmsis_filename}", destination=cmsis_outdir)
+    {% else %}
+        pass
     {% endif %}
 
     def layout(self) -> None:

@@ -20,6 +20,8 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 {% include 'x86.cmake.j2' %}
 {% elif config.project.target.family == "esp32" %}
 {% include 'esp32.cmake.j2' %}
+{% elif config.project.target.family == "atsam" %}
+{% include 'atsam.cmake.j2' %}
 {% endif %}
 
 {% for key, value in config.project.cmake_variables.items() %}
