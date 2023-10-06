@@ -5,23 +5,18 @@ https://github.com/Spyro-Soft/scargo/issues/290
 
 import json
 import os
-import subprocess
 from dataclasses import dataclass
 from enum import Enum
 from pathlib import Path
 from shutil import copytree
 from typing import List, Optional
-from unittest.mock import MagicMock
 from unittest.mock import patch
 
 import pytest
 import toml
 from pytest import TempdirFactory
-from pytest_mock import MockerFixture
 
-import scargo.cli
 from scargo.cli import cli
-from scargo.commands import publish
 from scargo.config import Target, parse_config, Config
 from scargo.config_utils import get_scargo_config_or_exit
 from scargo.file_generators.docker_gen import _DockerComposeTemplate
@@ -62,9 +57,6 @@ TEST_PROJECT_NAME = "test_proj"
 TEST_DUMMY_LIB_H_FILE = "lib_for_gen_test.h"
 TEST_DEVICE_ID = "DUMMY:DEVICE:ID:12345"
 TEST_DUMMY_FS_FILE = "dummy_fs_file.txt"
-
-"""CONAN_UPLOAD_COMMAND = ["conan",  "upload"]"""
-
 
 
 class TargetIds(Enum):
