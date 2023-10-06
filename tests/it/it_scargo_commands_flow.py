@@ -17,7 +17,7 @@ import toml
 from pytest import TempdirFactory
 
 from scargo.cli import cli
-from scargo.config import Target, parse_config, Config
+from scargo.config import Target, parse_config
 from scargo.config_utils import get_scargo_config_or_exit
 from scargo.file_generators.docker_gen import _DockerComposeTemplate
 from scargo.file_generators.env_gen import generate_env
@@ -167,6 +167,7 @@ class ActiveTestState:
 
         return lib_result_files_path
 
+
 def get_expected_files_list_new_proj_bin(src_dir_name: str, bin_name: str) -> List[str]:
     return [
         "CMakeLists.txt",
@@ -185,6 +186,7 @@ def get_expected_files_list_new_proj_bin(src_dir_name: str, bin_name: str) -> Li
         "tests/mocks/static_mock/CMakeLists.txt",
         "tests/mocks/static_mock/static_mock.h",
     ]
+
 
 def get_expected_files_list_new_proj_lib(src_dir_name: str, lib_name: str) -> List[str]:
     return[
@@ -208,6 +210,7 @@ def get_expected_files_list_new_proj_lib(src_dir_name: str, lib_name: str) -> Li
         "test_package/conanfile.py",
         f"test_package/src/example.cpp"
     ]
+
 
 @pytest.mark.parametrize(
     "test_state",
@@ -760,7 +763,7 @@ class TestBinProjectFlow:
             ), f"String 'Gen --fs command not supported for this target yet.' not found in output: {result.output}"
 
     @pytest.mark.order(after="test_cli_gen_fs_option")
-    def test_cli_gen_b_option(self, test_state: ActiveTestState) -> None:
+    def test_cli_gen_b_option(self) -> None:
         """This test check if call of scargo gen -b command will finish without error and
         if expected files were created"""
         pytest.skip("Test not implemented yet")
@@ -1034,7 +1037,7 @@ class TestLibProjectFlow:
 
         os.chdir(f"{test_state.proj_path}/{test_state.proj_name}")
 
-        result = test_state.runner.invoke(cli,["publish", "--profile", "Debug"],)
+        result = test_state.runner.invoke(cli, ["publish", "--profile", "Debug"],)
 
         assert (
                 result.exit_code == 0
@@ -1217,7 +1220,6 @@ class TestLibProjectFlow:
         assert (
                 "No tests were found!!!" in result.output
         ), f"String 'No tests were found!!!' not found in test command output {result.output}"
-
 
     @pytest.mark.order(after="test_cli_test")
     def test_cli_clean_after_build_profile_release(self, test_state: ActiveTestState) -> None:
@@ -1513,6 +1515,7 @@ class TestLibProjectFlow:
         assert (
                 "No problems found!" in result.output
         ), f"String 'No problems found!' not found in output: {result.output}"
+
 
 def test_project_x86_scargo_from_pypi(create_tmp_directory: None) -> None:
     # Test new and update work with pypi scargo version
