@@ -40,10 +40,23 @@ class _ScargoDebug:
         if self._target.family == "stm32":
             stm32_config = config.get_stm32_config()
             self._chip = stm32_config.chip
-            if not self._chip:
-                logger.error("Chip label not defined in toml.")
-                logger.info("Define chip under stm32 section and run scargo update.")
-                sys.exit(1)
+            self._fail_missing_chip_lable(self._chip)
+        elif self._target.family == "esp32":
+            esp32_config = config.get_esp32_config()
+            self._chip = esp32_config.chip
+            self._fail_missing_chip_lable(self._chip)
+        elif self._target.family == "atsam":
+            atsam_config = config.get_atsam_config()
+            self._chip = atsam_config.chip
+            self._fail_missing_chip_lable(self._chip)
+        elif self._target.family == "x86":
+            self._chip = None
+
+    def _fail_missing_chip_lable(self, chip) -> None:
+        if not self._chip:
+            logger.error("Chip label not defined in toml.")
+            logger.info("Define %s under [<microcontroller>] section and run scargo update.", chip)
+            sys.exit(1)
 
     def run_debugger(self) -> None:
         if self._target.family == "x86":

@@ -23,7 +23,7 @@ logger = get_logger()
 
 CHIP_DEFAULTS = {
     "x86": None,
-    "esp32": None,
+    "esp32": "ESP32",
     "atsam": "ATSAML10E16A",
     "stm32": "STM32L496AG",
 }

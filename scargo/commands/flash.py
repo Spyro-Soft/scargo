@@ -46,7 +46,7 @@ def flash_esp32(
 ) -> None:
     project_path = config.project_root
     out_dir = project_path / "build" / flash_profile
-    target = config.project.target
+    chip = config.get_esp32_config().chip
     command = []
     try:
         if app:
@@ -80,7 +80,7 @@ def flash_esp32(
             command = ["esptool.py"]
             if port:
                 command.append(f"--port={port}")
-            command.extend(["--chip", target.id, "write_flash", "@flash_args"])
+            command.extend(["--chip", chip, "write_flash", "@flash_args"])
             subprocess.check_call(command, cwd=out_dir)
     except subprocess.CalledProcessError:
         logger.error("%s fail", command)

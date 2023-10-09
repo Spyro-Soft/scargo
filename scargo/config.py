@@ -45,6 +45,11 @@ class Config(BaseModel):
     def include_dir_path(self) -> Path:
         return self.source_dir_path / self.project.target.include_dir
 
+    def get_atsam_config(self) -> "ATSAMConfig":
+        if not self.atsam:
+            raise ConfigError("No [atsam] section in config")
+        return self.atsam
+    
     def get_stm32_config(self) -> "Stm32Config":
         if not self.stm32:
             raise ConfigError("No [stm32] section in config")
@@ -151,18 +156,6 @@ TARGETS = {
     "esp32": Target(
         id="esp32", family="esp32", source_dir="main", include_dir="include"
     ),
-    "esp32s2": Target(
-        id="esp32s2", family="esp32", source_dir="main", include_dir="include"
-    ),
-    "esp32s3": Target(
-        id="esp32s3", family="esp32", source_dir="main", include_dir="include"
-    ),
-    "esp32c2": Target(
-        id="esp32c2", family="esp32", source_dir="main", include_dir="include"
-    ),
-    "esp32c3": Target(
-        id="esp32c3", family="esp32", source_dir="main", include_dir="include"
-    ),
     "atsam": Target(
         id="atsam", family="atsam", source_dir="src", include_dir="include"
     ),
@@ -258,9 +251,13 @@ class ATSAMConfig(BaseModel):
 
 
 class Esp32Config(BaseModel):
+    chip: str
     extra_component_dirs: List[Path] = Field(default_factory=list)
     partitions: List[str] = Field(default_factory=list)
 
+    @property
+    def chip_series(self) -> str:
+        return self.upper()
 
 class ScargoConfig(BaseModel):
     console_log_level: str = Field("INFO", alias="console-log-level")

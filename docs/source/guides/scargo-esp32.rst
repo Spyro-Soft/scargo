@@ -7,7 +7,7 @@ Creating a project
 ------------------
 ::
 
-    scargo new --target esp32 [project_name]
+    scargo new --target esp32 --chip <esp32...> [project_name]
 
 Generate a filesystem
 ---------------------
@@ -39,3 +39,10 @@ It will generate build/flash_image.bin file. This file can be used with a Quick 
 Building a project
 ------------------
 The project can be built using both scargo build of idf.py build commands.
+
+Configure ESP32 project
+------------------------
+To configure your project for chosen ESP32 chipset, usage please change it in scargo.toml file in **[esp32]** section
+To configure your project for chosen ESP32 chipset use --chip when initializing the project.
+It's also possible to change it in scargo.toml file in **[esp32]** section and run scargo update.
+ Presently following chips are supported 'esp32', 'esp32c2', 'esp32c3', 'esp32s2', 'esp32s3'.

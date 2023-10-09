@@ -180,7 +180,7 @@ def gen_fs_esp32(config: Config) -> None:
 
 def gen_single_binary_esp32(project_profile_path: Path, config: Config) -> None:
     partition_list = config.get_esp32_config().partitions
-    target = config.project.target
+    chip = config.get_esp32_config().chip
 
     flasher_args_path = project_profile_path / "flash_args"
     if not flasher_args_path.is_file():
@@ -206,7 +206,7 @@ def gen_single_binary_esp32(project_profile_path: Path, config: Config) -> None:
     command = [
         "esptool.py",
         "--chip",
-        target.id,
+        chip,
         "merge_bin",
         "-o",
         "build/flash_image.bin",

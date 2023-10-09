@@ -99,6 +99,7 @@ test = [
 
 {% if target.family == "esp32" %}
 [esp32]
+chip = "{{ chip_label|lower }}"
 extra_component_dirs=[]
 partitions = [
     "nvs,      data, nvs,     0x9000,  0x4000,",
