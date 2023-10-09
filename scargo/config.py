@@ -49,7 +49,7 @@ class Config(BaseModel):
         if not self.atsam:
             raise ConfigError("No [atsam] section in config")
         return self.atsam
-    
+
     def get_stm32_config(self) -> "Stm32Config":
         if not self.stm32:
             raise ConfigError("No [stm32] section in config")
@@ -258,6 +258,7 @@ class Esp32Config(BaseModel):
     @property
     def chip_series(self) -> str:
         return self.upper()
+
 
 class ScargoConfig(BaseModel):
     console_log_level: str = Field("INFO", alias="console-log-level")

@@ -55,7 +55,10 @@ class _ScargoDebug:
     def _fail_missing_chip_lable(self, chip) -> None:
         if not self._chip:
             logger.error("Chip label not defined in toml.")
-            logger.info("Define %s under [<microcontroller>] section and run scargo update.", chip)
+            logger.info(
+                "Define %s under [<microcontroller>] section and run scargo update.",
+                chip,
+            )
             sys.exit(1)
 
     def run_debugger(self) -> None:

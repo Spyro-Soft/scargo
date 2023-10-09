@@ -12,7 +12,7 @@ set(EXTRA_COMPONENT_DIRS
 {% endfor %}
 )
 
-{% endif %} 
+{% endif %}
 set(IDF_TARGET {{ config.esp32.chip }})
 
 include($ENV{IDF_PATH}/tools/cmake/project.cmake)
