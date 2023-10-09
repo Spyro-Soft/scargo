@@ -255,10 +255,6 @@ class Esp32Config(BaseModel):
     extra_component_dirs: List[Path] = Field(default_factory=list)
     partitions: List[str] = Field(default_factory=list)
 
-    @property
-    def chip_series(self) -> str:
-        return self.upper()
-
 
 class ScargoConfig(BaseModel):
     console_log_level: str = Field("INFO", alias="console-log-level")
