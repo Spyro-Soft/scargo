@@ -66,11 +66,11 @@ class Config(BaseModel):
     ) -> Dict[str, Any]:
         if "project" in values:
             target_id = values["project"].target_id
-            if target_id == "stm32" and not values["stm32"]:
+            if target_id == "stm32" and not values.get("stm32"):
                 raise ConfigError("No [stm32] section in config")
-            if target_id == "esp32" and not values["esp32"]:
+            if target_id == "esp32" and not values.get("esp32"):
                 raise ConfigError("No [esp32] section in config")
-            if target_id == "atsam" and not values["atsam"]:
+            if target_id == "atsam" and not values.get("atsam"):
                 raise ConfigError("No [atsam] section in config")
 
         # Set default value of cmake_build_type - Debug for non-stanard profiles,
@@ -237,12 +237,12 @@ class ConanConfig(BaseModel):
 
 
 class Stm32Config(BaseModel):
-    chip: str
+    chip: str = Field(default="ATSAML10E16A")
     flash_start: int = Field(alias="flash-start")
 
 
 class ATSAMConfig(BaseModel):
-    chip: str
+    chip: str = Field(default="STM32L496AG")
     cpu: str
 
     @property
@@ -251,7 +251,7 @@ class ATSAMConfig(BaseModel):
 
 
 class Esp32Config(BaseModel):
-    chip: str
+    chip: str = Field(default="esp32")
     extra_component_dirs: List[Path] = Field(default_factory=list)
     partitions: List[str] = Field(default_factory=list)
 
@@ -276,6 +276,7 @@ Esp32Config.update_forward_refs()
 
 def parse_config(config_file_path: Path) -> Config:
     config_obj = toml.load(config_file_path)
+    print(config_obj)
     config_obj["project_root"] = config_file_path.parent.absolute()
     config: Config = Config.parse_obj(config_obj)
     return config

@@ -577,7 +577,7 @@ class TestGenCerts:
         ]
         # test if all password-protected files are encrypted with expected password
         for file in pwd_protected_files:
-            with open(file) as fp:
+            with open(file, encoding="utf-8") as fp:
                 file_content = fp.read()
                 assert (
                     "ENCRYPTED" in file_content
