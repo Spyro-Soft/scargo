@@ -10,6 +10,13 @@ from pydantic import BaseModel, Extra, Field, root_validator
 
 from scargo.global_values import SCARGO_DEFAULT_BUILD_ENV
 
+CHIP_DEFAULTS = {
+    "x86": None,
+    "esp32": "esp32",
+    "atsam": "ATSAML10E16A",
+    "stm32": "STM32L496AG",
+}
+
 
 class ConfigError(Exception):
     pass
@@ -237,12 +244,12 @@ class ConanConfig(BaseModel):
 
 
 class Stm32Config(BaseModel):
-    chip: str = Field(default="ATSAML10E16A")
+    chip: str = Field(default=CHIP_DEFAULTS.get("stm32"))
     flash_start: int = Field(alias="flash-start")
 
 
 class ATSAMConfig(BaseModel):
-    chip: str = Field(default="STM32L496AG")
+    chip: str = Field(default=CHIP_DEFAULTS.get("atsam"))
     cpu: str
 
     @property
@@ -251,7 +258,7 @@ class ATSAMConfig(BaseModel):
 
 
 class Esp32Config(BaseModel):
-    chip: str = Field(default="esp32")
+    chip: str = Field(default=CHIP_DEFAULTS.get("esp32"))
     extra_component_dirs: List[Path] = Field(default_factory=list)
     partitions: List[str] = Field(default_factory=list)
 

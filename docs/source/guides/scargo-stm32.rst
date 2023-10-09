@@ -7,7 +7,7 @@ Creating a project
 ------------------
 ::
 
-    scargo new --target stm32 [project_name]
+    scargo new --target stm32 --chip <stm32...> [project_name]
 
 Configure STM32 project
 ------------------------

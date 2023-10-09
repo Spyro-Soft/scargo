@@ -48,7 +48,7 @@ Do not initialize git repository.
     --target
 
 Chose the target on which you would like to build and manage the project ['x86', 'esp32', 'stm32', 'atsam'].
-ESP32 support: Presently following models are supported 'esp32'. Specify chip using --chip or use default (esp32c3, esp32s3, ...).
+ESP32 support: Presently following models are supported 'esp32'. Specify chip using --chip or use default (esp32).
 STM32 support: Presently there is support for stm32l4 only. Specify chip using --chip or use default (STM32L496AG).
 Atmel SAM series support: Presently scargo supports Atmel SAM series. Specify chip using --chip or use default (ATSAML10E16A).
 
