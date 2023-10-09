@@ -69,6 +69,21 @@ Run scargo commands as you would do natively.
 ## Working natively
 1) Create a project with --no-docker flag (`scargo new <my_proj> --no-docker ...`).
 
+## Testing custom scargo generated project locally
+You can make changes in scargo and install it locally using ```pip install .``` command when you are in the main project folder.
+To test the custom scargo version and have this custom scargo available also inside the docker (crucial for testing), in created project update  docker-compose.yaml:
+
+    volumes:
+
+      - ..:/workspace
+      - /dev:/dev
+      - ~/.local/lib/python3.10/site-packages/scargo:/usr/local/lib/python3.8/dist-packages/scargo
+
+Where ```~/.local/lib/python3.10/site-packages/scargo``` is a path to scargo on your local machine. It the following path is not working, find installation dir using ```pip show scargo```.
+
+To keep this setup between ```scargo update``` commandsn, in scargo.toml file update also:
+
+    update-exclude = [".devcontainer/docker-compose.yaml"]
 # Contributing
 
 See contributing guide on https://spyro-soft.github.io/scargo/contributing.html
