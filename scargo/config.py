@@ -11,7 +11,7 @@ from pydantic import BaseModel, Extra, Field, root_validator
 from scargo.global_values import SCARGO_DEFAULT_BUILD_ENV
 
 CHIP_DEFAULTS = {
-    "x86": None,
+    "x86": "",
     "esp32": "esp32",
     "atsam": "ATSAML10E16A",
     "stm32": "STM32L496AG",
@@ -67,7 +67,7 @@ class Config(BaseModel):
             raise ConfigError("No [esp32] section in config")
         return self.esp32
 
-    @root_validator
+    @root_validator  # type: ignore[call-overload]
     def validate_special_configs(  # pylint: disable=no-self-argument
         cls, values: Dict[str, Any]
     ) -> Dict[str, Any]:
