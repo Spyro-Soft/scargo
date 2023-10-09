@@ -61,7 +61,7 @@ You can always change work environment between docker or native after project is
 Just edit the scargo.toml file ([project] -> build-env = "docker" or build-env = "native").
 
 ## Working in docker
-1) If you create a new project, run `docker-compose run scargo-dev` to run project development image depending on chosen architecture. All dependencies should be already there.
+1) If you create a new project, run `mypy --explicit-package-bases scargo tests common_dev run.py clean.py` to run project development image depending on chosen architecture. All dependencies should be already there.
 Run scargo commands as you would do natively.
 
 2) If you create a project with --docker flag (`scargo new <my_proj> --docker ...`) or with any docker flag, by default each scargo command will be triggered in docker.

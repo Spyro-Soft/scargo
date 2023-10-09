@@ -599,7 +599,7 @@ class TestGenCerts:
                     )
                     assert (
                         False
-                    ), f"Files decrypted with wrong password, exception wasn't raised"
+                    ), "Files decrypted with wrong password, exception wasn't raised"
 
 
 @pytest.mark.parametrize(

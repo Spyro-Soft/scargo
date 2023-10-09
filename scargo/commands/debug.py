@@ -40,28 +40,28 @@ class _ScargoDebug:
         if self._target.family == "stm32":
             stm32_config = config.get_stm32_config()
             self._chip = stm32_config.chip
-            self._fail_missing_chip_lable(self._chip)
+            if not self._chip:
+                logger.warning("Chip label not defined in toml. Default to STM32L496AG")
+                self._chip = "STM32L496AG"
         elif self._target.family == "esp32":
             esp32_config = config.get_esp32_config()
             self._chip = esp32_config.chip
-            self._fail_missing_chip_lable(self._chip)
+            if not self._chip:
+                logger.warning("Chip label not defined in toml. Default to esp32")
+                self._chip = "esp32"
         elif self._target.family == "atsam":
             atsam_config = config.get_atsam_config()
             self._chip = atsam_config.chip
-            self._fail_missing_chip_lable(self._chip)
-        elif self._target.family == "x86":
-            self._chip = None
-
-    def _fail_missing_chip_lable(self, chip) -> None:
-        if not self._chip:
-            logger.error("Chip label not defined in toml.")
-            logger.info(
-                "Define %s under [<microcontroller>] section and run scargo update.",
-                chip,
-            )
-            sys.exit(1)
+            if not self._chip:
+                logger.warning(
+                    "Chip label not defined in toml. Default to ATSAML10E16A"
+                )
+                self._chip = "ATSAML10E16A"
+        else:
+            self._chip = ""
 
     def run_debugger(self) -> None:
+        """Run debugger for target"""
         if self._target.family == "x86":
             self._debug_x86()
         elif self._target.family == "stm32":

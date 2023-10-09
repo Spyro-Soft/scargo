@@ -349,7 +349,9 @@ class ClangTidyChecker(CheckerFixer):
             "-fstrict-volatile-bitfields",
         ]
 
-        with open(str(self.build_path) + "/compile_commands.json") as fin:
+        with open(
+            str(self.build_path) + "/compile_commands.json", encoding="utf-8"
+        ) as fin:
             file_contents = fin.read()
 
         for string in strings_to_substitute:
@@ -362,7 +364,7 @@ class ClangTidyChecker(CheckerFixer):
         )
 
         os.makedirs(os.path.dirname(db_path_for_check), exist_ok=True)
-        with open(db_path_for_check, "w") as fout:
+        with open(db_path_for_check, "w", encoding="utf-8") as fout:
             fout.write(file_contents)
 
         return [
