@@ -146,7 +146,7 @@ def flash_atsam(
     openocd_path = find_program_path("openocd")
     gdb_multiarch_path = find_program_path("gdb-multiarch")
 
-    if not openocd_path :
+    if not openocd_path:
         logger.error("openocd not found")
         logger.info("Please install openocd")
         sys.exit(1)
@@ -158,8 +158,9 @@ def flash_atsam(
 
     project_path = config.project_root
     bin_name = f"{config.project.name.lower()}.bin"
-    bin_path = Path(project_path, "build", flash_profile, "bin", bin_name)
-    exec_path = Path(project_path, "build", flash_profile, "bin", config.project.name.lower())
+    build_path = Path(project_path, "build", flash_profile, "bin")
+    bin_path = build_path / bin_name
+    exec_path = build_path / config.project.name.lower()
 
     if not bin_path.exists():
         logger.error("%s does not exist", bin_path)
