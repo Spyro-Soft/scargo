@@ -144,15 +144,22 @@ def flash_atsam(
     flash_profile: str = "Debug",
 ) -> None:
     openocd_path = find_program_path("openocd")
-    arm_none_eabi_gdb_path = find_program_path("arm-none-eabi-gdb")
-    if not openocd_path or not arm_none_eabi_gdb_path:
-        logger.error("openocd or arm-none-eabi-gdb not found")
-        logger.info("Please install openocd and arm-none-eabi-gdb")
+    gdb_multiarch_path = find_program_path("gdb-multiarch")
+
+    if not openocd_path :
+        logger.error("openocd not found")
+        logger.info("Please install openocd")
+        sys.exit(1)
+
+    if not gdb_multiarch_path:
+        logger.error("gdb-multiarch not found")
+        logger.info("Please install gdb-multiarch")
         sys.exit(1)
 
     project_path = config.project_root
     bin_name = f"{config.project.name.lower()}.bin"
     bin_path = Path(project_path, "build", flash_profile, "bin", bin_name)
+    exec_path = Path(project_path, "build", flash_profile, "bin", config.project.name.lower())
 
     if not bin_path.exists():
         logger.error("%s does not exist", bin_path)
@@ -189,7 +196,8 @@ def flash_atsam(
             )
 
         gdb_command = [
-            str(arm_none_eabi_gdb_path),
+            str(gdb_multiarch_path),
+            f"{exec_path}",
             f"--command={temp_script_dir_path / AtsamScrips.gdb_flash}",
             "--batch",
         ]
