@@ -81,7 +81,7 @@ To test the custom scargo version and have this custom scargo available also ins
 
 Where ```~/.local/lib/python3.10/site-packages/scargo``` is a path to scargo on your local machine. It the following path is not working, find installation dir using ```pip show scargo```.
 
-To keep this setup between ```scargo update``` commandsn, in scargo.toml file update also:
+To keep this setup between ```scargo update``` commands, in scargo.toml file update also ```update-exclude``` as in following example:
 
     update-exclude = [".devcontainer/docker-compose.yaml"]
 # Contributing
