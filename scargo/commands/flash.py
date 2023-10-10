@@ -10,6 +10,10 @@ from pathlib import Path
 from tempfile import TemporaryDirectory
 from typing import Optional
 
+from scargo.config import Config
+from scargo.config_utils import prepare_config
+from scargo.logger import get_logger
+from scargo.path_utils import find_program_path
 from scargo.target_helpers.atsam_helper import (
     AtsamScrips,
     generate_gdb_script,
@@ -20,11 +24,6 @@ if platform.system() == "Windows":
     from subprocess import DETACHED_PROCESS  # type: ignore[attr-defined]
 else:
     from subprocess import PIPE
-
-from scargo.config import Config
-from scargo.config_utils import prepare_config
-from scargo.logger import get_logger
-from scargo.path_utils import find_program_path
 
 logger = get_logger()
 

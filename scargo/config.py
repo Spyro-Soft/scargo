@@ -67,11 +67,6 @@ class Config(BaseModel):
             raise ConfigError("No [esp32] section in config")
         return self.esp32
 
-    def get_atsam_config(self) -> "ATSAMConfig":
-        if not self.atsam:
-            raise ConfigError("No [atsam] section in config")
-        return self.atsam
-
     @root_validator
     def validate_special_configs(  # pylint: disable=no-self-argument
         cls, values: Dict[str, Any]
