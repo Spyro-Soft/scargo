@@ -5,7 +5,7 @@
 from pathlib import Path
 from typing import Any, Dict
 
-import yaml  # type: ignore
+import yaml
 
 from scargo.config import Config
 from scargo.file_generators.base_gen import create_file_from_template
