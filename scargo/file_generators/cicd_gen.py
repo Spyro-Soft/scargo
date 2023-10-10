@@ -5,7 +5,7 @@
 from pathlib import Path
 from typing import Any, Dict
 
-import yaml # type: ignore
+import yaml  # type: ignore
 
 from scargo.config import Config
 from scargo.file_generators.base_gen import create_file_from_template
@@ -62,7 +62,8 @@ class _CicdTemplate:
         with file_path.open("r", encoding="utf-8") as file:
             data = yaml.safe_load(file)
 
-        assert isinstance(data, dict), "Loaded YAML data is not a dictionary"
+        if not isinstance(data, dict):
+            return {}
         return data
 
     def generate_cicd_env(self) -> None:
