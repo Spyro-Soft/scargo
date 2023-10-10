@@ -1,0 +1,6 @@
+target remote localhost:3333
+monitor reset halt
+monitor {{ flash_driver }} chip-erase
+monitor flash write_bank 0 {{ bin_path }} 0
+monitor reset
+quit

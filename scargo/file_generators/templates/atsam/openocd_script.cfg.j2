@@ -1,0 +1,6 @@
+source [find interface/cmsis-dap.cfg]
+
+# chip name
+set CHIPNAME {{ flash_driver }}
+
+source [find target/{{ script_name }}]
