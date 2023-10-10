@@ -8,7 +8,7 @@
 ### Devcontainer
 1. Install Visual Studio Code Dev Containers.
 2. Install docker engine [https://docs.docker.com/get-docker/](https://docs.docker.com/get-docker/)
-3. Development environment is defined as docker image defined inside .devcontainer directory so no additional installations are required (It is also used by CI so you use is what CI use). 
+3. Development environment is defined as docker image defined inside .devcontainer directory so no additional installations are required (It is also used by CI so you use is what CI use).
 
 ### Linux (debian/ubuntu) issues: docker compose is not installed by default
 docker-compose is not installed by default with docker engine so below might be required
@@ -20,9 +20,9 @@ sudo apt install docker-compose
 ```
 
 ### Windows 11 issues: Usb is not available in container
-If you use windows and would like to have device access. You would be forced to forward them. It can be done via usbip tool (usb over ip). So 
+If you use windows and would like to have device access. You would be forced to forward them. It can be done via usbip tool (usb over ip). So
 
-1. Put your Docker Desktop into WSL2 mode (Best during installation, in version v4.18 it is default option). 
+1. Put your Docker Desktop into WSL2 mode (Best during installation, in version v4.18 it is default option).
 2. Change default Docker desktop WSL image to UbuntuDistribution (default one is not debian based and will NOT work with usbip instructions). Best  way is to switch it from docker desktop GUI
     1. Go to DockerDesktopTrayIcon (right click) -> Setting -> Resources -> WSL Integration
     2. Find option described as *Enable integration with additional distros* And mark ubuntu 22.04 option
@@ -32,10 +32,10 @@ If you use windows and would like to have device access. You would be forced to 
     wsl --set-default Ubuntu-22.04 # set default distribution
     ```
 4. Install usbip on windows and inside WSL Ubuntu-22.04
-5. Attach device 
+5. Attach device
     ```
-    usbipd list                   # print all usb devices 
-    usbipd wsl attach --busid 4-2	# attach device 4-2 to docker run env 
+    usbipd list                   # print all usb devices
+    usbipd wsl attach --busid 4-2	# attach device 4-2 to docker run env
     ```
 
 ### Sources
@@ -119,14 +119,14 @@ The folder structure of the source code reflects the layered solution architectu
 * library
 * BSP
 
-It is assumed that any software in given layer should not depend on any upper layer. It is advised that each particular layer should depend only on the direct layer below. 
+It is assumed that any software in given layer should not depend on any upper layer. It is advised that each particular layer should depend only on the direct layer below.
 
 There can be some exceptions but they should be explicitly stated in the software architecture document. By default all layers can use standard C and C++ libraries, RTOS specific libraries and logging.
 
-`/<root>/main`  
+`/<root>/main`
   - root folder for sources
 
-`/<root>/main/apps`  
+`/<root>/main/apps`
   - application layer - main tasks of the application
   - main business logic of the application
   - this folder should not depend on any platform specific libraries and components
@@ -136,21 +136,21 @@ There can be some exceptions but they should be explicitly stated in the softwar
   - components to be used by application layer in order to provide required functionality
   - this folder should not depend on any platform specific libraries
 
-`/<root>/libs`  
+`/<root>/libs`
   - libraries and utilities to be used by upper layers (mainly middleware)
   - in the main library folder - there are no libraries dependent on any platform
   - as an exception some libraries (e.g., logging) may be used by all layers
 
-`/<root>/libs/_platform`  
+`/<root>/libs/_platform`
   - libraries which are platform dependent - i.e., they depend on specific hardware or platform specific SDKs (e.g. ESP-IDF)
 
-`/<root>/bsp`  
+`/<root>/bsp`
   - board support package - libraries and other stuff strictly related to the HW board
   - drivers for peripherals
   - linker scripts
   - etc.
 
-*Note*  
+*Note*
 In order to integrate platform independent libraries with the dependent ones it is suggested to provide platform independent interface libraries with the specific implementation ones. It is up to the main cmake file and main() function (i.e., app_main() on freertos) to integrate everything together.
 
 ## Simulation with qemu

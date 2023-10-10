@@ -8,7 +8,7 @@ from pathlib import Path
 from time import sleep
 from typing import List, Optional
 
-from scargo.config import Config
+from scargo.config import CHIP_DEFAULTS, Config
 from scargo.config_utils import prepare_config
 from scargo.docker_utils import run_scargo_again_in_docker
 from scargo.logger import get_logger
@@ -41,11 +41,27 @@ class _ScargoDebug:
             stm32_config = config.get_stm32_config()
             self._chip = stm32_config.chip
             if not self._chip:
-                logger.error("Chip label not defined in toml.")
-                logger.info("Define chip under stm32 section and run scargo update.")
-                sys.exit(1)
+                logger.warning("Chip label not defined in toml. Default to STM32L496AG")
+                self._chip = CHIP_DEFAULTS.get(self._target.family, "")
+        elif self._target.family == "esp32":
+            esp32_config = config.get_esp32_config()
+            self._chip = esp32_config.chip
+            if not self._chip:
+                logger.warning("Chip label not defined in toml. Default to esp32")
+                self._chip = CHIP_DEFAULTS.get(self._target.family, "")
+        elif self._target.family == "atsam":
+            atsam_config = config.get_atsam_config()
+            self._chip = atsam_config.chip
+            if not self._chip:
+                logger.warning(
+                    "Chip label not defined in toml. Default to ATSAML10E16A"
+                )
+                self._chip = CHIP_DEFAULTS.get(self._target.family, "")
+        else:
+            self._chip = ""
 
     def run_debugger(self) -> None:
+        """Run debugger for target"""
         if self._target.family == "x86":
             self._debug_x86()
         elif self._target.family == "stm32":

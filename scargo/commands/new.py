@@ -10,7 +10,7 @@ from pathlib import Path
 from typing import Optional
 
 from scargo import __version__
-from scargo.config import Target
+from scargo.config import CHIP_DEFAULTS, Target
 from scargo.config_utils import get_scargo_config_or_exit
 from scargo.file_generators.cpp_gen import generate_cpp
 from scargo.file_generators.toml_gen import generate_toml
@@ -19,14 +19,6 @@ from scargo.logger import get_logger
 from scargo.target_helpers.atsam_helper import get_atsam_cpu
 
 logger = get_logger()
-
-
-CHIP_DEFAULTS = {
-    "x86": None,
-    "esp32": None,
-    "atsam": "ATSAML10E16A",
-    "stm32": "STM32L496AG",
-}
 
 
 def scargo_new(
