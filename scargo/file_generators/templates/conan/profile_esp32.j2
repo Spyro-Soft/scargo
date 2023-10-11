@@ -6,7 +6,7 @@ WORKAROUND_FOR_ESP32_CXX_FLAGS="{{ config.project.cxxflags if config.project.cxx
 compiler=gcc
 compiler.version=8
 compiler.cppstd={{ config.project.cxxstandard }}
-compiler.libcxx=libstdc++
+compiler.libcxx=libstdc++11
 os_build=Linux
 arch_build=x86_64
 
@@ -15,7 +15,7 @@ arch=xtensalx6
 build_type={{ config.profiles[profile].cmake_build_type }}
 
 [conf]
-tools.cmake.cmaketoolchain:toolchain_file=/opt/esp-idf/tools/cmake/toolchain-esp32.cmake
+tools.cmake.cmaketoolchain:user_toolchain=["/opt/esp-idf/tools/cmake/toolchain-esp32.cmake"]
 tools.cmake.cmaketoolchain:generator=Ninja
 
 [options]

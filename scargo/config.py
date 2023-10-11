@@ -10,6 +10,13 @@ from pydantic import BaseModel, Extra, Field, root_validator
 
 from scargo.global_values import SCARGO_DEFAULT_BUILD_ENV
 
+CHIP_DEFAULTS = {
+    "x86": "",
+    "esp32": "esp32",
+    "atsam": "ATSAML10E16A",
+    "stm32": "STM32L496AG",
+}
+
 
 class ConfigError(Exception):
     pass
@@ -25,6 +32,7 @@ class Config(BaseModel):
     tests: "TestConfig"
     dependencies: "Dependencies"
     conan: "ConanConfig"
+    atsam: Optional["ATSAMConfig"]
     stm32: Optional["Stm32Config"]
     esp32: Optional["Esp32Config"]
     scargo: "ScargoConfig" = Field(
@@ -44,6 +52,11 @@ class Config(BaseModel):
     def include_dir_path(self) -> Path:
         return self.source_dir_path / self.project.target.include_dir
 
+    def get_atsam_config(self) -> "ATSAMConfig":
+        if not self.atsam:
+            raise ConfigError("No [atsam] section in config")
+        return self.atsam
+
     def get_stm32_config(self) -> "Stm32Config":
         if not self.stm32:
             raise ConfigError("No [stm32] section in config")
@@ -60,10 +73,12 @@ class Config(BaseModel):
     ) -> Dict[str, Any]:
         if "project" in values:
             target_id = values["project"].target_id
-            if target_id == "stm32" and not values["stm32"]:
+            if target_id == "stm32" and not values.get("stm32"):
                 raise ConfigError("No [stm32] section in config")
-            if target_id == "esp32" and not values["esp32"]:
+            if target_id == "esp32" and not values.get("esp32"):
                 raise ConfigError("No [esp32] section in config")
+            if target_id == "atsam" and not values.get("atsam"):
+                raise ConfigError("No [atsam] section in config")
 
         # Set default value of cmake_build_type - Debug for non-stanard profiles,
         # If profile is on standard_profiles list, use it's name instead
@@ -148,17 +163,8 @@ TARGETS = {
     "esp32": Target(
         id="esp32", family="esp32", source_dir="main", include_dir="include"
     ),
-    "esp32s2": Target(
-        id="esp32s2", family="esp32", source_dir="main", include_dir="include"
-    ),
-    "esp32s3": Target(
-        id="esp32s3", family="esp32", source_dir="main", include_dir="include"
-    ),
-    "esp32c2": Target(
-        id="esp32c2", family="esp32", source_dir="main", include_dir="include"
-    ),
-    "esp32c3": Target(
-        id="esp32c3", family="esp32", source_dir="main", include_dir="include"
+    "atsam": Target(
+        id="atsam", family="atsam", source_dir="src", include_dir="include"
     ),
 }
 
@@ -238,11 +244,21 @@ class ConanConfig(BaseModel):
 
 
 class Stm32Config(BaseModel):
-    chip: str
+    chip: str = Field(default=CHIP_DEFAULTS.get("stm32"))
     flash_start: int = Field(alias="flash-start")
 
 
+class ATSAMConfig(BaseModel):
+    chip: str = Field(default=CHIP_DEFAULTS.get("atsam"))
+    cpu: str
+
+    @property
+    def chip_series(self) -> str:
+        return self.chip[2:8].upper()
+
+
 class Esp32Config(BaseModel):
+    chip: str = Field(default=CHIP_DEFAULTS.get("esp32"))
     extra_component_dirs: List[Path] = Field(default_factory=list)
     partitions: List[str] = Field(default_factory=list)
 

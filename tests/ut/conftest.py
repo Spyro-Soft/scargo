@@ -161,6 +161,7 @@ def new_project_x86(tmpdir_factory: TempdirFactory) -> Optional[Path]:
         target=TARGET_X86,
         create_docker=False,
         git=False,
+        chip=None,
     )
     os.chdir(project_name)
     # h file for gen tests added
@@ -184,6 +185,7 @@ def new_project_esp32(tmpdir_factory: TempdirFactory) -> Optional[Path]:
         target=TARGET_ESP32,
         create_docker=False,
         git=False,
+        chip=None,
     )
     os.chdir(project_name)
     # h file for gen tests added
@@ -207,6 +209,7 @@ def new_project_stm32(tmpdir_factory: TempdirFactory) -> Optional[Path]:
         target=TARGET_STM32,
         create_docker=False,
         git=False,
+        chip=None,
     )
     os.chdir(project_name)
     # h file for gen tests added

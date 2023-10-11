@@ -1,0 +1,1340 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!-- atmel.xml from Microchip studio -->
+<asf xmlversion="1.0">
+	<device-map id="map.atmel">
+		<group name="avr">
+			<group name="mega" doc-arch="megaAVR">
+				<mcu name="unspecified-mega"/>
+				<mcu name="atmega8"/>
+				<mcu name="atmega8a"/>
+				<mcu name="atmega16"/>
+				<mcu name="atmega16a"/>
+				<mcu name="atmega32"/>
+				<mcu name="atmega32a"/>
+				<mcu name="atmega64"/>
+				<mcu name="atmega64a"/>
+				<mcu name="atmega128"/>
+				<mcu name="atmega128a"/>
+				<mcu name="atmega162"/>
+				<mcu name="atmega165p"/>
+				<mcu name="atmega8515"/>
+				<mcu name="atmega8535"/>
+				<!-- There is no definite way to group megaAVR devices so the
+				     rule is to group the devices like the datasheets, i.e.,
+				     devices in the same datasheet are grouped together.
+
+				     Deviations from this rule in the groups below are due to
+				     legacy groupings that we chose not to change.
+				-->
+				<group name="megax8">
+					<mcu name="unspecified-megax8"/>
+					<mcu name="atmega48"/>
+					<mcu name="atmega88"/>
+					<mcu name="atmega168"/>
+					<group name="megax8a">
+						<mcu name="atmega48a"/>
+						<mcu name="atmega48pa"/>
+						<mcu name="atmega48pb"/>
+						<mcu name="atmega88a"/>
+						<mcu name="atmega88pa"/>
+						<mcu name="atmega88pb"/>
+						<mcu name="atmega168a"/>
+						<mcu name="atmega168pa"/>
+						<mcu name="atmega168pb"/>
+						<mcu name="atmega328"/>
+						<mcu name="atmega328p"/>
+						<mcu name="atmega328pb"/>
+					</group>
+				</group>
+				<group name="megax8p">
+					<mcu name="atmega48p"/>
+					<mcu name="atmega88p"/>
+					<mcu name="atmega168p"/>
+				</group>
+				<group name="megaxx0_1">
+					<mcu name="atmega640"/>
+					<mcu name="atmega1280"/>
+					<mcu name="atmega1281"/>
+					<mcu name="atmega2560"/>
+					<mcu name="atmega2561"/>
+				</group>
+				<group name="megaxx4a">
+					<mcu name="atmega644"/>
+					<mcu name="atmega164a"/>
+					<mcu name="atmega164pa"/>
+					<mcu name="atmega324a"/>
+					<mcu name="atmega324pa"/>
+					<mcu name="atmega324pb"/>
+					<mcu name="atmega644a"/>
+					<mcu name="atmega644pa"/>
+					<mcu name="atmega1284"/>
+					<mcu name="atmega1284p"/>
+				</group>
+				<group name="megaxx4p">
+					<mcu name="atmega164p"/>
+					<mcu name="atmega324p"/>
+					<mcu name="atmega644p"/>
+				</group>
+				<group name="megaxx5x">
+					<mcu name="atmega325"/>
+					<mcu name="atmega3250"/>
+					<mcu name="atmega645"/>
+					<mcu name="atmega6450"/>
+				</group>
+				<group name="megaxx5xp">
+					<mcu name="atmega325p"/>
+					<mcu name="atmega3250p"/>
+				</group>
+				<group name="megaxx5xa">
+					<mcu name="atmega165a"/>
+					<mcu name="atmega165pa"/>
+					<mcu name="atmega325a"/>
+					<mcu name="atmega325pa"/>
+					<mcu name="atmega3250a"/>
+					<mcu name="atmega3250pa"/>
+					<mcu name="atmega645a"/>
+					<mcu name="atmega645p"/>
+					<mcu name="atmega6450a"/>
+					<mcu name="atmega6450p"/>
+				</group>
+				<group name="megarf">
+					<mcu name="unspecified-megarf"/>
+					<mcu name="atmega128rfa1"/>
+					<mcu name="atmega64rfa2"/>
+					<mcu name="atmega256rfa2"/>
+					<mcu name="atmega64rfr2"/>
+					<mcu name="atmega128rfr2"/>
+					<mcu name="atmega256rfr2"/>
+					<mcu name="atmega644rfr2"/>
+					<mcu name="atmega1284rfr2"/>
+					<mcu name="atmega2564rfr2"/>
+				</group>
+				<group name="mega-lcd">
+					<mcu name="atmega169p"/>
+					<group name="megaxx9xa">
+						<mcu name="atmega169a"/>
+						<mcu name="atmega169pa"/>
+						<mcu name="atmega329a"/>
+						<mcu name="atmega329pa"/>
+						<mcu name="atmega3290a"/>
+						<mcu name="atmega3290pa"/>
+						<mcu name="atmega649a"/>
+						<mcu name="atmega649p"/>
+						<mcu name="atmega6490a"/>
+						<mcu name="atmega6490p"/>
+					</group>
+					<group name="megaxx9xp">
+						<mcu name="atmega329p"/>
+						<mcu name="atmega3290p"/>
+					</group>
+					<group name="megaxx9x">
+						<mcu name="atmega329"/>
+						<mcu name="atmega3290"/>
+						<mcu name="atmega649"/>
+						<mcu name="atmega6490"/>
+					</group>
+				</group>
+				<group name="mega-usb">
+					<group name="90usbxx2">
+						<mcu name="at90usb82"/>
+						<mcu name="at90usb162"/>
+					</group>
+					<group name="90usbxxx6_7">
+						<mcu name="at90usb646"/>
+						<mcu name="at90usb647"/>
+						<mcu name="at90usb1286"/>
+						<mcu name="at90usb1287"/>
+					</group>
+					<group name="megaxxu2">
+						<mcu name="atmega8u2"/>
+						<mcu name="atmega32u2"/>
+						<mcu name="atmega16u2"/>
+					</group>
+					<group name="megaxxu4">
+						<mcu name="atmega16u4"/>
+						<mcu name="atmega32u4"/>
+					</group>
+				</group>
+				<group name="mega-can">
+					<group name="megaxxm1">
+						<mcu name="atmega16m1"/>
+						<mcu name="atmega32m1"/>
+						<mcu name="atmega64m1"/>
+					</group>
+					<group name="90canxxx">
+						<mcu name="at90can32"/>
+						<mcu name="at90can64"/>
+						<mcu name="at90can128"/>
+					</group>
+				</group>
+				<group name="mega-pwm">
+					<mcu name="at90pwm1"/>
+					<mcu name="at90pwm81"/>
+					<group name="90pwmxb">
+						<mcu name="at90pwm2b"/>
+						<mcu name="at90pwm3b"/>
+					</group>
+					<group name="90pwmx16">
+						<mcu name="at90pwm216"/>
+						<mcu name="at90pwm316"/>
+					</group>
+				</group>
+			</group>
+			<group name="tiny" doc-arch="tinyAVR">
+				<mcu name="unspecified-tiny"/>
+				<!-- There is no definite way to group tinyAVR devices so the
+				     rule is to group the devices like the datasheets, i.e.,
+				     devices in the same datasheet are grouped together.
+				-->
+				<mcu name="attiny13"/>
+				<mcu name="attiny13a"/>
+				<mcu name="attiny1634"/>
+				<mcu name="attiny20"/>
+				<mcu name="attiny26"/>
+				<mcu name="attiny2313"/>
+				<mcu name="attiny43u"/>
+				<mcu name="attiny40"/>
+				<mcu name="attiny828"/>
+				<group name="tinyx_10">
+					<mcu name="attiny4"/>
+					<mcu name="attiny5"/>
+					<mcu name="attiny9"/>
+					<mcu name="attiny10"/>
+				</group>
+				<group name="tinyx313a">
+					<mcu name="attiny2313a"/>
+					<mcu name="attiny4313"/>
+				</group>
+				<group name="tinyx4a">
+					<mcu name="attiny24a"/>
+					<mcu name="attiny44a"/>
+					<mcu name="attiny84a"/>
+				</group>
+				<group name="tinyx4">
+					<mcu name="attiny24"/>
+					<mcu name="attiny44"/>
+					<mcu name="attiny84"/>
+				</group>
+				<group name="tinyx5">
+					<mcu name="attiny25"/>
+					<mcu name="attiny45"/>
+					<mcu name="attiny85"/>
+				</group>
+				<group name="tinyx261a">
+					<mcu name="attiny261a"/>
+					<mcu name="attiny461a"/>
+					<mcu name="attiny861a"/>
+				</group>
+				<group name="tinyx261">
+					<mcu name="attiny261"/>
+					<mcu name="attiny461"/>
+					<mcu name="attiny861"/>
+				</group>
+				<group name="tinyx8">
+					<mcu name="attiny48"/>
+					<mcu name="attiny88"/>
+				</group>
+				<group name="tinyxx7">
+					<mcu name="attiny87"/>
+					<mcu name="attiny167"/>
+				</group>
+			</group>
+			<group name="xmega">
+				<mcu name="unspecified-xmega"/>
+				<group name="xmegaa" doc-arch="XMEGA A">
+					<mcu name="unspecified-xmegaa"/>
+					<group name="xmegaa1">
+						<mcu name="unspecified-xmegaa1"/>
+						<mcu name="atxmega64a1"/>
+						<mcu name="atxmega128a1"/>
+						<mcu name="atxmega192a1"/>
+						<mcu name="atxmega256a1"/>
+						<mcu name="atxmega384a1"/>
+					</group>
+					<group name="xmegaa3">
+						<mcu name="unspecified-xmegaa3"/>
+						<mcu name="atxmega64a3"/>
+						<mcu name="atxmega128a3"/>
+						<mcu name="atxmega192a3"/>
+						<mcu name="atxmega256a3"/>
+					</group>
+					<group name="xmegaa3b">
+						<mcu name="atxmega256a3b"/>
+					</group>
+					<group name="xmegaa4">
+						<mcu name="unspecified-xmegaa4"/>
+						<mcu name="atxmega16a4"/>
+						<mcu name="atxmega32a4"/>
+						<mcu name="atxmega64a4"/>
+						<mcu name="atxmega128a4"/>
+					</group>
+				</group>
+				<group name="xmegaau" doc-arch="XMEGA AU">
+					<mcu name="unspecified-xmegaau"/>
+					<group name="xmegaa1u">
+						<mcu name="unspecified-xmegaa1u"/>
+						<mcu name="atxmega64a1u"/>
+						<mcu name="atxmega128a1u"/>
+					</group>
+					<group name="xmegaa3u">
+						<mcu name="unspecified-xmegaa3u"/>
+						<mcu name="atxmega64a3u"/>
+						<mcu name="atxmega128a3u"/>
+						<mcu name="atxmega192a3u"/>
+						<mcu name="atxmega256a3u"/>
+					</group>
+					<group name="xmegaa3bu">
+						<mcu name="atxmega256a3bu"/>
+					</group>
+					<group name="xmegaa4u">
+						<mcu name="unspecified-xmegaa4u"/>
+						<mcu name="atxmega16a4u"/>
+						<mcu name="atxmega32a4u"/>
+						<mcu name="atxmega64a4u"/>
+						<mcu name="atxmega128a4u"/>
+					</group>
+				</group>
+				<group name="xmegab" doc-arch="XMEGA B">
+					<mcu name="unspecified-xmegab"/>
+					<group name="xmegab1">
+						<mcu name="atxmega64b1"/>
+						<mcu name="atxmega128b1"/>
+					</group>
+					<group name="xmegab3">
+						<mcu name="atxmega64b3"/>
+						<mcu name="atxmega128b3"/>
+					</group>
+				</group>
+				<group name="xmegac" doc-arch="XMEGA C">
+					<mcu name="unspecified-xmegac"/>
+					<group name="xmegac3">
+						<mcu name="atxmega32c3"/>
+						<mcu name="atxmega64c3"/>
+						<mcu name="atxmega128c3"/>
+						<mcu name="atxmega192c3"/>
+						<mcu name="atxmega256c3"/>
+						<mcu name="atxmega384c3"/>
+					</group>
+					<group name="xmegac4">
+						<mcu name="atxmega16c4"/>
+						<mcu name="atxmega32c4"/>
+					</group>
+				</group>
+				<group name="xmegad" doc-arch="XMEGA D">
+					<mcu name="unspecified-xmegad"/>
+					<group name="xmegad3">
+						<mcu name="atxmega32d3"/>
+						<mcu name="atxmega64d3"/>
+						<mcu name="atxmega128d3"/>
+						<mcu name="atxmega192d3"/>
+						<mcu name="atxmega256d3"/>
+						<mcu name="atxmega384d3"/>
+					</group>
+					<group name="xmegad4">
+						<mcu name="atxmega16d4"/>
+						<mcu name="atxmega32d4"/>
+						<mcu name="atxmega64d4"/>
+						<mcu name="atxmega128d4"/>
+					</group>
+				</group>
+				<group name="xmegae" doc-arch="XMEGA E">
+					<mcu name="unspecified-xmegae"/>
+					<group name="xmegae5">
+						<mcu name="atxmega8e5"/>
+						<mcu name="atxmega16e5"/>
+						<mcu name="atxmega32e5"/>
+					</group>
+				</group>
+			</group>
+			<group name="uc3">
+				<mcu name="unspecified-uc3"/>
+				<group name="ucr1">
+					<group name="uc3b" doc-arch="UC3 B0/B1">
+						<mcu name="unspecified-uc3b"/>
+						<group name="uc3b0">
+							<mcu name="at32uc3b064"/>
+							<mcu name="at32uc3b0128"/>
+							<mcu name="at32uc3b0256"/>
+						</group>
+						<group name="uc3b1">
+							<mcu name="at32uc3b164"/>
+							<mcu name="at32uc3b1128"/>
+							<mcu name="at32uc3b1256"/>
+						</group>
+					</group>
+				</group>
+				<group name="ucr2">
+					<group name="uc3a" doc-arch="UC3 A0/A1">
+						<mcu name="unspecified-uc3a"/>
+						<group name="uc3a0">
+							<mcu name="at32uc3a0128"/>
+							<mcu name="at32uc3a0256"/>
+							<mcu name="at32uc3a0512"/>
+						</group>
+						<group name="uc3a1">
+							<mcu name="at32uc3a1128"/>
+							<mcu name="at32uc3a1256"/>
+							<mcu name="at32uc3a1512"/>
+						</group>
+					</group>
+					<group name="uc3b" doc-arch="UC3 B0/B1">
+						<group name="uc3b0">
+							<mcu name="at32uc3b0512"/>
+						</group>
+						<group name="uc3b1">
+							<mcu name="at32uc3b1512"/>
+						</group>
+					</group>
+					<group name="uc3a3_a4" doc-arch="UC3 A3/A3S/A4/A4S">
+						<mcu name="unspecified-uc3a3_a4"/>
+						<group name="uc3a3">
+							<mcu name="at32uc3a364"/>
+							<mcu name="at32uc3a3128"/>
+							<mcu name="at32uc3a3256"/>
+						</group>
+						<group name="uc3a4">
+							<mcu name="at32uc3a464"/>
+							<mcu name="at32uc3a4128"/>
+							<mcu name="at32uc3a4256"/>
+						</group>
+						<group name="uc3a3s_a4s">
+							<mcu name="unspecified-uc3a3s_a4s"/>
+							<group name="uc3a3s">
+								<mcu name="at32uc3a364s"/>
+								<mcu name="at32uc3a3128s"/>
+								<mcu name="at32uc3a3256s"/>
+							</group>
+							<group name="uc3a4s">
+								<mcu name="at32uc3a464s"/>
+								<mcu name="at32uc3a4128s"/>
+								<mcu name="at32uc3a4256s"/>
+							</group>
+						</group>
+					</group>
+				</group>
+				<group name="ucr3fp">
+					<group name="uc3c" doc-arch="UC3 C0/C1/C2">
+						<mcu name="unspecified-uc3c"/>
+						<group name="uc3c0">
+							<mcu name="at32uc3c064c"/>
+							<mcu name="at32uc3c0128c"/>
+							<mcu name="at32uc3c0256c"/>
+							<mcu name="at32uc3c0512c"/>
+						</group>
+						<group name="uc3c1">
+							<mcu name="at32uc3c164c"/>
+							<mcu name="at32uc3c1128c"/>
+							<mcu name="at32uc3c1256c"/>
+							<mcu name="at32uc3c1512c"/>
+						</group>
+						<group name="uc3c2">
+							<mcu name="at32uc3c264c"/>
+							<mcu name="at32uc3c2128c"/>
+							<mcu name="at32uc3c2256c"/>
+							<mcu name="at32uc3c2512c"/>
+						</group>
+					</group>
+				</group>
+				<group name="ucr3">
+					<group name="uc3d" doc-arch="UC3 D3/D4">
+						<mcu name="unspecified-uc3d"/>
+						<group name="uc3d3">
+							<mcu name="atuc64d3"/>
+							<mcu name="atuc128d3"/>
+						</group>
+						<group name="uc3d4">
+							<mcu name="atuc64d4"/>
+							<mcu name="atuc128d4"/>
+						</group>
+					</group>
+					<group name="uc3l" doc-arch="UC3 L0/L3U/L4U">
+						<mcu name="unspecified-uc3l"/>
+						<group name="uc3l0">
+							<mcu name="unspecified-uc3l0"/>
+							<mcu name="at32uc3l016"/>
+							<mcu name="at32uc3l032"/>
+							<mcu name="at32uc3l064"/>
+						</group>
+						<group name="uc3l3">
+							<mcu name="atuc64l3u"/>
+							<mcu name="atuc128l3u"/>
+							<mcu name="atuc256l3u"/>
+						</group>
+						<group name="uc3l4">
+							<mcu name="atuc64l4u"/>
+							<mcu name="atuc128l4u"/>
+							<mcu name="atuc256l4u"/>
+						</group>
+						<group name="uc3l0pll">
+							<mcu name="at32uc3l0128"/>
+							<mcu name="at32uc3l0256"/>
+						</group>
+					</group>
+				</group>
+			</group>
+		</group>
+		<group name="sam">
+			<mcu name="unspecified-sam"/>
+			<group name="cortex-m3">
+				<group name="sam3">
+					<mcu name="unspecified-sam3"/>
+					<group name="sam3s" doc-arch="SAM3S">
+						<mcu name="unspecified-sam3s"/>
+						<group name="sam3s1">
+							<mcu name="atsam3s1a"/>
+							<mcu name="atsam3s1b"/>
+							<mcu name="atsam3s1c"/>
+						</group>
+						<group name="sam3s2">
+							<mcu name="atsam3s2a"/>
+							<mcu name="atsam3s2b"/>
+							<mcu name="atsam3s2c"/>
+						</group>
+						<group name="sam3s4">
+							<mcu name="atsam3s4a"/>
+							<mcu name="atsam3s4b"/>
+							<mcu name="atsam3s4c"/>
+						</group>
+					</group>
+					<group name="sam3sd" doc-arch="SAM3SD">
+						<mcu name="unspecified-sam3sd"/>
+						<group name="sam3sd8">
+							<mcu name="atsam3sd8b"/>
+							<mcu name="atsam3sd8c"/>
+						</group>
+						<group name="sam3s8">
+							<mcu name="atsam3s8b"/>
+							<mcu name="atsam3s8c"/>
+						</group>
+					</group>
+					<group name="sam3n" doc-arch="SAM3N">
+						<mcu name="unspecified-sam3n"/>
+						<group name="sam3n00">
+							<mcu name="atsam3n00a"/>
+							<mcu name="atsam3n00b"/>
+						</group>
+						<group name="sam3n0">
+							<mcu name="atsam3n0a"/>
+							<mcu name="atsam3n0b"/>
+							<mcu name="atsam3n0c"/>
+						</group>
+						<group name="sam3n1">
+							<mcu name="atsam3n1a"/>
+							<mcu name="atsam3n1b"/>
+							<mcu name="atsam3n1c"/>
+						</group>
+						<group name="sam3n2">
+							<mcu name="atsam3n2a"/>
+							<mcu name="atsam3n2b"/>
+							<mcu name="atsam3n2c"/>
+						</group>
+						<group name="sam3n4">
+							<mcu name="atsam3n4a"/>
+							<mcu name="atsam3n4b"/>
+							<mcu name="atsam3n4c"/>
+						</group>
+					</group>
+					<group name="sam3u" doc-arch="SAM3U">
+						<mcu name="unspecified-sam3u"/>
+						<group name="sam3u1">
+							<mcu name="atsam3u1c"/>
+							<mcu name="atsam3u1e"/>
+						</group>
+						<group name="sam3u2">
+							<mcu name="atsam3u2c"/>
+							<mcu name="atsam3u2e"/>
+						</group>
+						<group name="sam3u4">
+							<mcu name="atsam3u4c"/>
+							<mcu name="atsam3u4e"/>
+						</group>
+					</group>
+					<group name="sam3x" doc-arch="SAM3X">
+						<mcu name="unspecified-sam3x"/>
+						<group name="sam3x4">
+							<mcu name="atsam3x4c"/>
+							<mcu name="atsam3x4e"/>
+						</group>
+						<group name="sam3x8">
+							<mcu name="atsam3x8c"/>
+							<mcu name="atsam3x8e"/>
+							<mcu name="atsam3x8h"/>
+						</group>
+					</group>
+					<group name="sam3a" doc-arch="SAM3A">
+						<mcu name="unspecified-sam3a"/>
+						<group name="sam3a4">
+							<mcu name="atsam3a4c"/>
+						</group>
+						<group name="sam3a8">
+							<mcu name="atsam3a8c"/>
+						</group>
+					</group>
+				</group>
+			</group>
+			<group name="cortex-m4">
+				<group name="sam4">
+					<group name="sam4s" doc-arch="SAM4S">
+						<mcu name="unspecified-sam4s"/>
+						<group name="sam4s2">
+							<mcu name="atsam4s2a"/>
+							<mcu name="atsam4s2b"/>
+							<mcu name="atsam4s2c"/>
+						</group>
+						<group name="sam4s4">
+							<mcu name="atsam4s4a"/>
+							<mcu name="atsam4s4b"/>
+							<mcu name="atsam4s4c"/>
+						</group>
+						<group name="sam4s8">
+							<mcu name="atsam4s8b"/>
+							<mcu name="atsam4s8c"/>
+						</group>
+						<group name="sam4s16">
+							<mcu name="atsam4s16b"/>
+							<mcu name="atsam4s16c"/>
+						</group>
+						<group name="sam4sa16">
+							<mcu name="atsam4sa16b"/>
+							<mcu name="atsam4sa16c"/>
+						</group>
+						<group name="sam4sd16">
+							<mcu name="atsam4sd16b"/>
+							<mcu name="atsam4sd16c"/>
+						</group>
+						<group name="sam4sd32">
+							<mcu name="atsam4sd32b"/>
+							<mcu name="atsam4sd32c"/>
+						</group>
+					</group>
+					<group name="sam4l"  doc-arch="SAM4L">
+						<mcu name="unspecified-sam4l"/>
+						<group name="sam4lc2">
+							<mcu name="atsam4lc2a"/>
+							<mcu name="atsam4lc2b"/>
+							<mcu name="atsam4lc2c"/>
+						</group>
+						<group name="sam4lc4">
+							<mcu name="atsam4lc4a"/>
+							<mcu name="atsam4lc4b"/>
+							<mcu name="atsam4lc4c"/>
+						</group>
+						<group name="sam4lc8">
+							<mcu name="atsam4lc8a"/>
+							<mcu name="atsam4lc8b"/>
+							<mcu name="atsam4lc8c"/>
+						</group>
+						<group name="sam4ls2">
+							<mcu name="atsam4ls2a"/>
+							<mcu name="atsam4ls2b"/>
+							<mcu name="atsam4ls2c"/>
+						</group>
+						<group name="sam4ls4">
+							<mcu name="atsam4ls4a"/>
+							<mcu name="atsam4ls4b"/>
+							<mcu name="atsam4ls4c"/>
+						</group>
+						<group name="sam4ls8">
+							<mcu name="atsam4ls8a"/>
+							<mcu name="atsam4ls8b"/>
+							<mcu name="atsam4ls8c"/>
+						</group>
+					</group>
+					<group name="sam4e" doc-arch="SAM4E">
+						<mcu name="unspecified-sam4e"/>
+						<group name="sam4e8">
+							<mcu name="atsam4e8c"/>
+							<mcu name="atsam4e8e"/>
+							<mcu name="atsam4e8cb"/>
+						</group>
+						<group name="sam4e16">
+							<mcu name="atsam4e16c"/>
+							<mcu name="atsam4e16e"/>
+							<mcu name="atsam4e16cb"/>
+						</group>
+					</group>
+					<group name="sam4sp" doc-arch="SAM4SP">
+						<mcu name="unspecified-sam4sp"/>
+						<group name="sam4sp32">
+							<mcu name="atsam4sp32a"/>
+						</group>
+					</group>
+					<group name="sam4n" doc-arch="SAM4N">
+						<mcu name="unspecified-sam4n"/>
+						<group name="sam4n8">
+							<mcu name="atsam4n8a"/>
+							<mcu name="atsam4n8b"/>
+							<mcu name="atsam4n8c"/>
+						</group>
+						<group name="sam4n16">
+							<mcu name="atsam4n16b"/>
+							<mcu name="atsam4n16c"/>
+						</group>
+					</group>
+					<group name="sam4c" doc-arch="SAM4C">
+						<mcu name="unspecified-sam4c"/>
+						<group name="sam4c4">
+							<mcu name="atsam4c4c:0"/>
+							<mcu name="atsam4c4c:1"/>
+							<mcu name="atsam4c4c_0"/>
+							<mcu name="atsam4c4c_1"/>
+						</group>
+						<group name="sam4c8">
+							<mcu name="atsam4c8c:0"/>
+							<mcu name="atsam4c8c:1"/>
+							<mcu name="atsam4c8c_0"/>
+							<mcu name="atsam4c8c_1"/>
+						</group>
+						<group name="sam4c16">
+							<mcu name="atsam4c16c:0"/>
+							<mcu name="atsam4c16c:1"/>
+							<mcu name="atsam4c16c_0"/>
+							<mcu name="atsam4c16c_1"/>
+						</group>
+						<group name="sam4c32c">
+							<mcu name="atsam4c32c:0"/>
+							<mcu name="atsam4c32c:1"/>
+							<mcu name="atsam4c32c_0"/>
+							<mcu name="atsam4c32c_1"/>
+						</group>
+						<group name="sam4c32e">
+							<mcu name="atsam4c32e:0"/>
+							<mcu name="atsam4c32e:1"/>
+							<mcu name="atsam4c32e_0"/>
+							<mcu name="atsam4c32e_1"/>
+						</group>
+					</group>
+					<group name="sam4cm" doc-arch="SAM4CM">
+						<mcu name="unspecified-sam4cm"/>
+						<group name="sam4cms4">
+							<mcu name="atsam4cms4c:0"/>
+							<mcu name="atsam4cms4c:1"/>
+							<mcu name="atsam4cms4c_0"/>
+							<mcu name="atsam4cms4c_1"/>
+						</group>
+						<group name="sam4cms8">
+							<mcu name="atsam4cms8c:0"/>
+							<mcu name="atsam4cms8c:1"/>
+							<mcu name="atsam4cms8c_0"/>
+							<mcu name="atsam4cms8c_1"/>
+						</group>
+						<group name="sam4cms16">
+							<mcu name="atsam4cms16c:0"/>
+							<mcu name="atsam4cms16c:1"/>
+							<mcu name="atsam4cms16c_0"/>
+							<mcu name="atsam4cms16c_1"/>
+						</group>
+						<group name="sam4cms32">
+							<mcu name="atsam4cms32c:0"/>
+							<mcu name="atsam4cms32c:1"/>
+							<mcu name="atsam4cms32c_0"/>
+							<mcu name="atsam4cms32c_1"/>
+						</group>
+						<group name="sam4cmp8">
+							<mcu name="atsam4cmp8c:0"/>
+							<mcu name="atsam4cmp8c:1"/>
+							<mcu name="atsam4cmp8c_0"/>
+							<mcu name="atsam4cmp8c_1"/>
+						</group>
+						<group name="sam4cmp16">
+							<mcu name="atsam4cmp16c:0"/>
+							<mcu name="atsam4cmp16c:1"/>
+							<mcu name="atsam4cmp16c_0"/>
+							<mcu name="atsam4cmp16c_1"/>
+						</group>
+						<group name="sam4cmp32">
+							<mcu name="atsam4cmp32c:0"/>
+							<mcu name="atsam4cmp32c:1"/>
+							<mcu name="atsam4cmp32c_0"/>
+							<mcu name="atsam4cmp32c_1"/>
+						</group>
+					</group>
+					<group name="sam4cp" doc-arch="SAM4CP">
+						<mcu name="unspecified-sam4cp"/>
+						<group name="sam4cp16b">
+							<mcu name="atsam4cp16b:0"/>
+							<mcu name="atsam4cp16b:1"/>
+							<mcu name="atsam4cp16b_0"/>
+							<mcu name="atsam4cp16b_1"/>
+						</group>
+					</group>
+				</group>
+				<group name="samg" doc-arch="SAMG">
+					<mcu name="unspecified-samg"/>
+					<group name="samg51">
+						<mcu name="unspecified-samg51"/>
+						<mcu name="atsamg51g18"/>
+					</group>
+					<group name="samg53">
+						<mcu name="unspecified-samg53"/>
+						<mcu name="atsamg53g19"/>
+						<mcu name="atsamg53n19"/>
+					</group>
+					<group name="samg54">
+						<mcu name="unspecified-samg54"/>
+						<mcu name="atsamg54g19"/>
+						<mcu name="atsamg54j19"/>
+						<mcu name="atsamg54n19"/>
+					</group>
+					<group name="samg55">
+						<mcu name="unspecified-samg55"/>
+						<mcu name="atsamg55g18"/>
+						<mcu name="atsamg55g19"/>
+						<mcu name="atsamg55j18"/>
+						<mcu name="atsamg55j19"/>
+						<mcu name="atsamg55n19"/>
+					</group>
+				</group>
+			</group>
+			<group name="cortex-m7">
+				<group name="samv">
+					<group name="samv71" doc-arch="SAMV71">
+						<mcu name="unspecified-samv71"/>
+						<group name="samv71j">
+							<mcu name="unspecified-samv71j"/>
+								<mcu name="atsamv71j19"/>
+								<mcu name="atsamv71j20"/>
+								<mcu name="atsamv71j21"/>
+								<mcu name="atsamv71j19b"/>
+								<mcu name="atsamv71j20b"/>
+								<mcu name="atsamv71j21b"/>
+						</group>
+						<group name="samv71n">
+							<mcu name="unspecified-samv71n"/>
+							<mcu name="atsamv71n19"/>
+							<mcu name="atsamv71n20"/>
+							<mcu name="atsamv71n21"/>
+							<mcu name="atsamv71n19b"/>
+							<mcu name="atsamv71n20b"/>
+							<mcu name="atsamv71n21b"/>
+						</group>
+						<group name="samv71q">
+							<mcu name="unspecified-samv71q"/>
+							<mcu name="atsamv71q19"/>
+							<mcu name="atsamv71q20"/>
+							<mcu name="atsamv71q21"/>
+							<mcu name="atsamv71q19b"/>
+							<mcu name="atsamv71q20b"/>
+							<mcu name="atsamv71q21b"/>
+						</group>
+					</group>
+					<group name="samv70" doc-arch="SAMV70">
+						<mcu name="unspecified-samv70"/>
+						<group name="samv70j">
+							<mcu name="unspecified-samv70j"/>
+							<mcu name="atsamv70j19"/>
+							<mcu name="atsamv70j20"/>
+							<mcu name="atsamv70j19b"/>
+							<mcu name="atsamv70j20b"/>
+						</group>
+						<group name="samv70n">
+						<mcu name="unspecified-samv70n"/>
+							<mcu name="atsamv70n19"/>
+							<mcu name="atsamv70n20"/>
+							<mcu name="atsamv70n19b"/>
+							<mcu name="atsamv70n20b"/>
+						</group>
+						<group name="samv70q">
+							<mcu name="unspecified-samv70q"/>
+							<mcu name="atsamv70q19"/>
+							<mcu name="atsamv70q20"/>
+							<mcu name="atsamv70q19b"/>
+							<mcu name="atsamv70q20b"/>
+						</group>
+					</group>
+				</group>
+				<group name="same">
+					<group name="same70" doc-arch="SAME70">
+						<mcu name="unspecified-same70"/>
+						<group name="same70j">
+							<mcu name="unspecified-same70j"/>
+							<mcu name="atsame70j19"/>
+							<mcu name="atsame70j20"/>
+							<mcu name="atsame70j21"/>
+							<mcu name="atsame70j19b"/>
+							<mcu name="atsame70j20b"/>
+							<mcu name="atsame70j21b"/>
+						</group>
+						<group name="same70n">
+							<mcu name="unspecified-same70n"/>
+							<mcu name="atsame70n19"/>
+							<mcu name="atsame70n20"/>
+							<mcu name="atsame70n21"/>
+							<mcu name="atsame70n19b"/>
+							<mcu name="atsame70n20b"/>
+							<mcu name="atsame70n21b"/>
+						</group>
+						<group name="same70q">
+							<mcu name="unspecified-same70q"/>
+							<mcu name="atsame70q19"/>
+							<mcu name="atsame70q20"/>
+							<mcu name="atsame70q21"/>
+							<mcu name="atsame70q19b"/>
+							<mcu name="atsame70q20b"/>
+							<mcu name="atsame70q21b"/>
+						</group>
+					</group>
+				</group>
+				<group name="sams">
+					<group name="sams70" doc-arch="SAMS70">
+						<mcu name="unspecified-sams70"/>
+						<group name="sams70j">
+							<mcu name="unspecified-sams70j"/>
+							<mcu name="atsams70j19"/>
+							<mcu name="atsams70j20"/>
+							<mcu name="atsams70j21"/>
+							<mcu name="atsams70j19b"/>
+							<mcu name="atsams70j20b"/>
+							<mcu name="atsams70j21b"/>
+						</group>
+						<group name="sams70n">
+							<mcu name="unspecified-sams70n"/>
+							<mcu name="atsams70n19"/>
+							<mcu name="atsams70n20"/>
+							<mcu name="atsams70n21"/>
+							<mcu name="atsams70n19b"/>
+							<mcu name="atsams70n20b"/>
+							<mcu name="atsams70n21b"/>
+						</group>
+						<group name="sams70q">
+							<mcu name="unspecified-sams70q"/>
+							<mcu name="atsams70q19"/>
+							<mcu name="atsams70q20"/>
+							<mcu name="atsams70q21"/>
+							<mcu name="atsams70q19b"/>
+							<mcu name="atsams70q20b"/>
+							<mcu name="atsams70q21b"/>
+						</group>
+					</group>
+				</group>
+			</group>
+		</group>
+		<group name="samb">
+			<mcu name="unspecified-samb"/>
+			<group name="cortex-m0">
+				<group name="samb11" doc-arch="SAMB11">
+					<mcu name="unspecified-samb11"/>
+						<group name="samb11g">
+							<mcu name="unspecified-samb11g"/>
+							<mcu name="atsamb11g18a"/>
+							<mcu name="atsamb11zr"/>
+						</group>
+						<group name="btlc1000">
+							<mcu name="unspecified-btlc1000"/>
+							<mcu name="atbtlc1000wlcsp"/>
+						</group>
+				</group>
+			</group>
+		</group>
+		<group name="sam0">
+			<mcu name="unspecified-sam0"/>
+			<group name="cortex-m0plus">
+				<group name="samd">
+					<group name="samd20" doc-arch="SAMD20">
+						<mcu name="unspecified-samd20"/>
+						<group name="samd20j">
+							<mcu name="unspecified-samd20j"/>
+							<mcu name="atsamd20j14"/>
+							<mcu name="atsamd20j15"/>
+							<mcu name="atsamd20j16"/>
+							<mcu name="atsamd20j14b"/>
+							<mcu name="atsamd20j15b"/>
+							<mcu name="atsamd20j16b"/>
+							<mcu name="atsamd20j17"/>
+							<mcu name="atsamd20j18"/>
+						</group>
+						<group name="samd20g">
+							<mcu name="unspecified-samd20g"/>
+							<mcu name="atsamd20g14"/>
+							<mcu name="atsamd20g15"/>
+							<mcu name="atsamd20g16"/>
+							<mcu name="atsamd20g14b"/>
+							<mcu name="atsamd20g15b"/>
+							<mcu name="atsamd20g16b"/>
+							<mcu name="atsamd20g17"/>
+							<mcu name="atsamd20g17u"/>
+							<mcu name="atsamd20g18"/>
+							<mcu name="atsamd20g18u"/>
+						</group>
+						<group name="samd20e">
+							<mcu name="unspecified-samd20e"/>
+							<mcu name="atsamd20e14"/>
+							<mcu name="atsamd20e15"/>
+							<mcu name="atsamd20e16"/>
+							<mcu name="atsamd20e14b"/>
+							<mcu name="atsamd20e15b"/>
+							<mcu name="atsamd20e16b"/>
+							<mcu name="atsamd20e17"/>
+							<mcu name="atsamd20e18"/>
+						</group>
+					</group>
+					<group name="samd21" doc-arch="SAMD21">
+						<mcu name="unspecified-samd21"/>
+						<group name="samd21j">
+							<mcu name="unspecified-samd21j"/>
+							<mcu name="atsamd21j15a"/>
+							<mcu name="atsamd21j16a"/>
+							<mcu name="atsamd21j17a"/>
+							<mcu name="atsamd21j18a"/>
+							<group name="samd21jxxb">
+								<mcu name="atsamd21j15b"/>
+								<mcu name="atsamd21j16b"/>
+							</group>
+							<group name="samd21jxxd">
+								<mcu name="atsamd21j17d"/>
+							</group>
+						</group>
+						<group name="samd21g">
+							<mcu name="unspecified-samd21g"/>
+							<mcu name="atsamd21g15a"/>
+							<mcu name="atsamd21g16a"/>
+							<mcu name="atsamd21g17a"/>
+							<mcu name="atsamd21g17au"/>
+							<mcu name="atsamd21g18a"/>
+							<mcu name="atsamd21g18au"/>
+							<group name="samd21gxxb">
+								<mcu name="atsamd21g15b"/>
+								<mcu name="atsamd21g16b"/>
+							<group name="samd21gxxl">
+								<mcu name="atsamd21g15l"/>
+								<mcu name="atsamd21g16l"/>
+								<mcu name="atsamd21g17l"/>
+							<group name="samd21gxxd">
+								<mcu name="atsamd21g17d"/>
+							</group>
+							</group>
+							</group>
+						</group>
+						<group name="samd21e">
+							<mcu name="unspecified-samd21e"/>
+							<mcu name="atsamd21e15a"/>
+							<mcu name="atsamd21e16a"/>
+							<mcu name="atsamd21e17a"/>
+							<mcu name="atsamd21e18a"/>
+							<group name="samd21exxb">
+								<mcu name="atsamd21e15b"/>
+								<mcu name="atsamd21e16b"/>
+								<mcu name="atsamd21e15bu"/>
+								<mcu name="atsamd21e16bu"/>
+							</group>
+							<group name="samd21exxl">
+								<mcu name="atsamd21e15l"/>
+								<mcu name="atsamd21e16l"/>
+								<mcu name="atsamd21e17l"/>
+							</group>
+							<group name="samd21exxd">
+								<mcu name="atsamd21e17d"/>
+								<mcu name="atsamd21e17du"/>
+							</group>
+						</group>
+					</group>
+					<group name="samd09" doc-arch="SAMD09">
+						<mcu name="unspecified-samd09"/>
+						<group name="samd09c">
+							<mcu name="unspecified-samd09c"/>
+							<mcu name="atsamd09c13a"/>
+						</group>
+						<group name="samd09d">
+							<mcu name="unspecified-samd09d"/>
+							<mcu name="atsamd09d14a"/>
+						</group>
+					</group>
+					<group name="samd10" doc-arch="SAMD10">
+						<mcu name="unspecified-samd10"/>
+						<group name="samd10c">
+							<mcu name="unspecified-samd10c"/>
+							<mcu name="atsamd10c12a"/>
+							<mcu name="atsamd10c13a"/>
+							<mcu name="atsamd10c14a"/>
+						</group>
+						<group name="samd10dm">
+							<mcu name="unspecified-samd10dm"/>
+							<mcu name="atsamd10d12am"/>
+							<mcu name="atsamd10d13am"/>
+							<mcu name="atsamd10d14am"/>
+						</group>
+						<group name="samd10ds">
+							<mcu name="unspecified-samd10ds"/>
+							<mcu name="atsamd10d12as"/>
+							<mcu name="atsamd10d13as"/>
+							<mcu name="atsamd10d14as"/>
+						</group>
+						<group name="samd10du">
+							<mcu name="unspecified-samd10du"/>
+							<mcu name="atsamd10d14au"/>
+						</group>
+					</group>
+					<group name="samd11" doc-arch="SAMD11">
+						<mcu name="unspecified-samd11"/>
+						<group name="samd11c">
+							<mcu name="unspecified-samd11c"/>
+							<mcu name="atsamd11c14a"/>
+						</group>
+						<group name="samd11dm">
+							<mcu name="unspecified-samd11dm"/>
+							<mcu name="atsamd11d14am"/>
+						</group>
+						<group name="samd11ds">
+							<mcu name="unspecified-samd11ds"/>
+							<mcu name="atsamd11d14as"/>
+						</group>
+						<group name="samd11du">
+							<mcu name="unspecified-samd11du"/>
+							<mcu name="atsamd11d14au"/>
+						</group>
+					</group>
+					<group name="samda1" doc-arch="SAMDA1">
+						<mcu name="unspecified-samda1"/>
+						<group name="samda1xxxa">
+							<mcu name="unspecified-samda1xxxa"/>
+							<group name="samda1e">
+								<mcu name="atsamda1e14a"/>
+								<mcu name="atsamda1e15a"/>
+								<mcu name="atsamda1e16a"/>
+							</group>
+							<group name="samda1g">
+								<mcu name="atsamda1g14a"/>
+								<mcu name="atsamda1g15a"/>
+								<mcu name="atsamda1g16a"/>
+							</group>
+							<group name="samda1j">
+								<mcu name="atsamda1j14a"/>
+								<mcu name="atsamda1j15a"/>
+								<mcu name="atsamda1j16a"/>
+							</group>
+						</group>
+						<group name="samda1xxxb">
+							<mcu name="unspecified-samda1xxxb"/>
+							<group name="samda1exxb">
+								<mcu name="atsamda1e14b"/>
+								<mcu name="atsamda1e15b"/>
+								<mcu name="atsamda1e16b"/>
+							</group>
+							<group name="samda1gxxb">
+								<mcu name="atsamda1g14b"/>
+								<mcu name="atsamda1g15b"/>
+								<mcu name="atsamda1g16b"/>
+							</group>
+							<group name="samda1jxxb">
+								<mcu name="atsamda1j14b"/>
+								<mcu name="atsamda1j15b"/>
+								<mcu name="atsamda1j16b"/>
+							</group>
+						</group>
+					</group>
+				</group>
+				<group name="samr">
+					<group name="samr21" doc-arch="SAMR21">
+						<mcu name="unspecified-samr21"/>
+						<group name="samr21g">
+							<mcu name="unspecified-samr21g"/>
+							<mcu name="atsamr21g16a"/>
+							<mcu name="atsamr21g17a"/>
+							<mcu name="atsamr21g18a"/>
+						</group>
+						<group name="samr21e">
+							<mcu name="unspecified-samr21e"/>
+							<mcu name="atsamr21e16a"/>
+							<mcu name="atsamr21e17a"/>
+							<mcu name="atsamr21e18a"/>
+							<mcu name="atsamr21e19a"/>
+						</group>
+					</group>
+					<group name="samr30" doc-arch="SAMR30">
+						<mcu name="unspecified-samr30"/>
+						<group name="samr30g">
+							<mcu name="unspecified-samr30g"/>
+							<mcu name="atsamr30g18a"/>
+						</group>
+						<group name="samr30e">
+							<mcu name="unspecified-samr30e"/>
+							<mcu name="atsamr30e18a"/>
+						</group>
+					</group>
+					<group name="samr34" doc-arch="SAMR34">
+						<mcu name="unspecified-samr34"/>
+						<group name="samr34jxxb">
+							<mcu name="unspecified-samr34j"/>
+							<mcu name="atsamr34j16b"/>
+							<mcu name="atsamr34j17b"/>
+							<mcu name="atsamr34j18b"/>
+						</group>
+					</group>
+					<group name="samr35" doc-arch="SAMR35">
+						<mcu name="unspecified-samr35"/>
+						<group name="samr35jxxb">
+							<mcu name="unspecified-samr35j"/>
+							<mcu name="atsamr35j16b"/>
+							<mcu name="atsamr35j17b"/>
+							<mcu name="atsamr35j18b"/>
+						</group>
+					</group>
+				</group>
+				<group name="wlr">
+					<group name="wlr089" doc-arch="WLR089">
+						<mcu name="unspecified-wlr089"/>
+						<group name="wlr089u">
+							<mcu name="unspecified-wlr089u"/>
+							<mcu name="wlr089u0"/>
+						</group>
+					</group>
+				</group>
+				<group name="saml">
+					<group name="saml21" doc-arch="SAML21">
+						<mcu name="unspecified-saml21"/>
+						<!-- For AS6 extension forward compatibility,
+							 keep "saml21e", "saml21g", and "saml21j" folder,
+							 and obsolete device SAML21[E/G/J][15/16/17]A.
+						-->
+						<group name="saml21xxxa">
+							<group name="saml21e">
+								<mcu name="atsaml21e15a"/>
+								<mcu name="atsaml21e16a"/>
+								<mcu name="atsaml21e17a"/>
+								<mcu name="atsaml21e18a"/>
+							</group>
+							<group name="saml21g">
+								<mcu name="atsaml21g16a"/>
+								<mcu name="atsaml21g17a"/>
+								<mcu name="atsaml21g18a"/>
+							</group>
+							<group name="saml21j">
+								<mcu name="atsaml21j16a"/>
+								<mcu name="atsaml21j17a"/>
+								<mcu name="atsaml21j18a"/>
+							</group>
+						</group>
+						<group name="saml21xxxb">
+							<mcu name="unspecified-saml21xxxb"/>
+							<group name="saml21exxb">
+								<mcu name="atsaml21e15b"/>
+								<mcu name="atsaml21e16b"/>
+								<mcu name="atsaml21e17b"/>
+								<mcu name="atsaml21e18b"/>
+							</group>
+							<group name="saml21gxxb">
+								<mcu name="atsaml21g16b"/>
+								<mcu name="atsaml21g17b"/>
+								<mcu name="atsaml21g18b"/>
+							</group>
+							<group name="saml21jxxb">
+								<mcu name="atsaml21j16b"/>
+								<mcu name="atsaml21j17b"/>
+								<mcu name="atsaml21j18b"/>
+							</group>
+						</group>
+					</group>
+					<group name="saml22" doc-arch="SAML22">
+						<mcu name="unspecified-saml22"/>
+						<group name="saml22n">
+							<mcu name="unspecified-saml22n"/>
+							<mcu name="atsaml22n16a"/>
+							<mcu name="atsaml22n17a"/>
+							<mcu name="atsaml22n18a"/>
+						</group>
+						<group name="saml22g">
+							<mcu name="unspecified-saml22g"/>
+							<mcu name="atsaml22g16a"/>
+							<mcu name="atsaml22g17a"/>
+							<mcu name="atsaml22g18a"/>
+						</group>
+						<group name="saml22j">
+							<mcu name="unspecified-saml22j"/>
+							<mcu name="atsaml22j16a"/>
+							<mcu name="atsaml22j17a"/>
+							<mcu name="atsaml22j18a"/>
+						</group>
+					</group>
+				</group>
+				<group name="samc">
+					<group name="samc21" doc-arch="SAMC21">
+						<mcu name="unspecified-samc21"/>
+						<group name="samc21e">
+							<mcu name="unspecified-samc21e"/>
+							<mcu name="atsamc21e15a"/>
+							<mcu name="atsamc21e16a"/>
+							<mcu name="atsamc21e17a"/>
+							<mcu name="atsamc21e18a"/>
+						</group>
+						<group name="samc21g">
+							<mcu name="unspecified-samc21g"/>
+							<mcu name="atsamc21g15a"/>
+							<mcu name="atsamc21g16a"/>
+							<mcu name="atsamc21g17a"/>
+							<mcu name="atsamc21g18a"/>
+						</group>
+						<group name="samc21j">
+							<mcu name="unspecified-samc21j"/>
+							<mcu name="atsamc21j15a"/>
+							<mcu name="atsamc21j16a"/>
+							<mcu name="atsamc21j17a"/>
+							<mcu name="atsamc21j18a"/>
+						</group>
+					</group>
+					<group name="samc20" doc-arch="SAMC20">
+						<mcu name="unspecified-samc20"/>
+						<group name="samc20e">
+							<mcu name="unspecified-samc20e"/>
+							<mcu name="atsamc20e15a"/>
+							<mcu name="atsamc20e16a"/>
+							<mcu name="atsamc20e17a"/>
+							<mcu name="atsamc20e18a"/>
+						</group>
+						<group name="samc20g">
+							<mcu name="unspecified-samc20g"/>
+							<mcu name="atsamc20g15a"/>
+							<mcu name="atsamc20g16a"/>
+							<mcu name="atsamc20g17a"/>
+							<mcu name="atsamc20g18a"/>
+						</group>
+						<group name="samc20j">
+							<mcu name="unspecified-samc20j"/>
+							<mcu name="atsamc20j15a"/>
+							<mcu name="atsamc20j16a"/>
+							<mcu name="atsamc20j17a"/>
+							<mcu name="atsamc20j18a"/>
+						</group>
+					</group>
+				</group>
+				<group name="samh">
+					<group name="samha1" doc-arch="SAMHA1">
+						<mcu name="unspecified-samha1"/>
+						<group name="samha1g">
+							<mcu name="unspecified-samha1g"/>
+							<mcu name="atsamha1g14a"/>
+							<mcu name="atsamha1g15a"/>
+							<mcu name="atsamha1g16a"/>
+							<mcu name="atsamha1g14ab"/>
+							<mcu name="atsamha1g15ab"/>
+							<mcu name="atsamha1g16ab"/>
+						</group>
+						<group name="samha1e">
+							<mcu name="unspecified-samha1e"/>
+							<mcu name="atsamha1e14a"/>
+							<mcu name="atsamha1e15a"/>
+							<mcu name="atsamha1e16a"/>
+							<mcu name="atsamha1e14ab"/>
+							<mcu name="atsamha1e15ab"/>
+							<mcu name="atsamha1e16ab"/>
+						</group>
+					</group>
+					<group name="samha0" doc-arch="SAMHA0">
+						<mcu name="unspecified-samha0"/>
+						<group name="samha0g">
+							<mcu name="unspecified-samha0g"/>
+							<mcu name="atsamha0g14ab"/>
+							<mcu name="atsamha0g15ab"/>
+							<mcu name="atsamha0g16ab"/>
+						</group>
+						<group name="samha0e">
+							<mcu name="unspecified-samha0e"/>
+							<mcu name="atsamha0e14ab"/>
+							<mcu name="atsamha0e15ab"/>
+							<mcu name="atsamha0e16ab"/>
+						</group>
+					</group>
+				</group>
+			</group>
+		</group>
+	</device-map>
+</asf>

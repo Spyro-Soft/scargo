@@ -1,0 +1,8 @@
+name: Daily tests
+on:
+  schedule:
+    - cron: '0 3 * * *'
+
+jobs:
+  call-workflow:
+    uses: ./.github/workflows/workflow-common.yml

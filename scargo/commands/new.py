@@ -10,12 +10,13 @@ from pathlib import Path
 from typing import Optional
 
 from scargo import __version__
-from scargo.config import Target
+from scargo.config import CHIP_DEFAULTS, Target
 from scargo.config_utils import get_scargo_config_or_exit
 from scargo.file_generators.cpp_gen import generate_cpp
 from scargo.file_generators.toml_gen import generate_toml
 from scargo.global_values import SCARGO_DEFAULT_CONFIG_FILE, SCARGO_DOCKER_ENV
 from scargo.logger import get_logger
+from scargo.target_helpers.atsam_helper import get_atsam_cpu
 
 logger = get_logger()
 
@@ -27,6 +28,7 @@ def scargo_new(
     target: Target,
     create_docker: bool,
     git: bool,
+    chip: Optional[str],
 ) -> None:
     """
     Create new project
@@ -61,6 +63,9 @@ def scargo_new(
 
     build_env = get_build_env(create_docker)
 
+    chip_label = chip or CHIP_DEFAULTS.get(target.family)
+    cpu = get_atsam_cpu(chip_label) if chip_label else None
+
     toml_path = project_dir / SCARGO_DEFAULT_CONFIG_FILE
     generate_toml(
         toml_path,
@@ -73,6 +78,8 @@ def scargo_new(
         docker_image_tag=f"{name.lower()}-dev:1.0",
         lib_name=lib_name,
         bin_name=bin_name,
+        chip_label=chip_label,
+        cpu=cpu,
     )
 
     config = get_scargo_config_or_exit(toml_path)

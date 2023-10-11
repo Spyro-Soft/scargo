@@ -161,6 +161,14 @@ key-value pairs of short names and conan remote urls, e.g.
 
 **flash-start** = 0x08000000
 
+[atsam]
+-------------------------
+(Applicable for Atmel SAM only)
+
+**chip** = (string)(e.g. ATSAML10E16A)
+
+**cpu** = (string)(e.g. cortex-m23)
+
 [scargo]
 --------
 **console-log-level** = (string)(define scargo log level to console for project default:"INFO")

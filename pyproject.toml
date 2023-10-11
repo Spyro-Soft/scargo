@@ -42,7 +42,9 @@ dependencies = [
     "toml==0.10.2",
     "tomlkit==0.11.6",
     "typer==0.7.0",
-    "typing-extensions==4.6.0"
+    "typing-extensions==4.6.0",
+    "paramiko==3.3.1",
+    "pyyaml==6.0",
 ]
 
 [project.optional-dependencies]
@@ -72,8 +74,8 @@ dev = [
     "types-toml",
     "unittest-xml-reporting",
     "pyopenssl==23.2.0",
-    "types-pyOpenSSL==23.2.0"
-
+    "types-pyOpenSSL==23.2.0",
+    "types-PyYAML==6.0.12.12",
 ]
 doc = [
     "recommonmark",

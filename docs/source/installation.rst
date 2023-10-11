@@ -16,3 +16,15 @@ With some Python installations this may not work and you’ll receive an error, 
 `Setuptools <https://setuptools.pypa.io/en/latest/userguide/quickstart.html>`_ is also a requirement which is not available on all systems by default. You can install it by a package manager of your operating system, or by ``pip install setuptools``.
 
 After installing, you will have ``scargo`` installed into the default Python executables directory and you should be able to run it with the command ``scargo`` or ``python -m scargo``. Please note that probably only ``python -m scargo`` will work for Pythons installed from Windows Store.
+
+If system does not find 'scargo' command after installing, add the installation directory to your env paths. On Ubuntu you can find installation directory by running:
+
+::
+
+   $ find / -name "scargo"
+
+Then add to  PATH:
+
+::
+
+   $ export PATH=~/.local/bin:${PATH}

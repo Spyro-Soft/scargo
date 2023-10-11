@@ -87,7 +87,7 @@ def scargo_update(config_file_path: Path) -> None:
                 out.write(line + "\n")
             out.write("\n")
 
-    generate_cicd(config=config)
+    generate_cicd(config)
     generate_tests(config)
     generate_readme(config)
 

@@ -22,6 +22,14 @@ Scargo is available on [pypi](https://pypi.org/project/scargo/), so you can inst
 
 ```pip install scargo```
 
+If system does not find 'scargo' command after installing, add the installation directory to your env paths. On Ubuntu you can find installation directory by running:
+
+```$ find / -name "scargo"```
+
+Then add to  PATH:
+
+```$ export PATH=~/.local/bin:${PATH}```
+
 # Working with scargo
 You can find all information on how to work with scargo on official documentation webpage: https://spyro-soft.github.io/scargo/index.html
 ![Scargo flow animation](https://raw.githubusercontent.com/Spyro-Soft/scargo/develop/docs/source/_static/scargo_flow_docker.svg)
@@ -53,7 +61,7 @@ You can always change work environment between docker or native after project is
 Just edit the scargo.toml file ([project] -> build-env = "docker" or build-env = "native").
 
 ## Working in docker
-1) If you create a new project, run `docker-compose run scargo-dev` to run project development image depending on chosen architecture. All dependencies should be already there.
+1) If you create a new project, run `docker compose run scargo-dev` to run project development image depending on chosen architecture. All dependencies should be already there.
 Run scargo commands as you would do natively.
 
 2) If you create a project with --docker flag (`scargo new <my_proj> --docker ...`) or with any docker flag, by default each scargo command will be triggered in docker.
@@ -61,6 +69,21 @@ Run scargo commands as you would do natively.
 ## Working natively
 1) Create a project with --no-docker flag (`scargo new <my_proj> --no-docker ...`).
 
+## Testing custom scargo generated project locally
+You can make changes in scargo and install it locally using ```pip install .``` command when you are in the main project folder.
+To test the custom scargo version and have this custom scargo available also inside the docker (crucial for testing), in created project update  docker-compose.yaml:
+
+    volumes:
+
+      - ..:/workspace
+      - /dev:/dev
+      - ~/.local/lib/python3.10/site-packages/scargo:/usr/local/lib/python3.8/dist-packages/scargo
+
+Where ```~/.local/lib/python3.10/site-packages/scargo``` is a path to scargo on your local machine. It the following path is not working, find installation dir using ```pip show scargo```.
+
+To keep this setup between ```scargo update``` commands, in scargo.toml file update also ```update-exclude``` as in following example:
+
+    update-exclude = [".devcontainer/docker-compose.yaml"]
 # Contributing
 
 See contributing guide on https://spyro-soft.github.io/scargo/contributing.html
