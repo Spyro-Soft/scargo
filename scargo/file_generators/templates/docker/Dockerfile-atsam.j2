@@ -13,7 +13,4 @@ RUN wget https://developer.arm.com/-/media/Files/downloads/gnu-rm/10.3-2021.10/g
 # Set up the compiler path
 ENV PATH $PATH:/opt/gcc-arm-none-eabi/bin
 
-RUN curl -sL https://aka.ms/InstallAzureCLIDeb | sudo bash && \
-    rm -rf /var/lib/apt/lists/*
-
 ENV LC_ALL=C

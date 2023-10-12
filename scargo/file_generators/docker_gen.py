@@ -27,7 +27,7 @@ class _DockerComposeTemplate:
         self._create_file_from_template(
             "docker/Dockerfile-custom.j2",
             "Dockerfile-custom",
-            template_params={},
+            template_params={"project": self._config.project},
             overwrite=False,
         )
         self._create_file_from_template(
