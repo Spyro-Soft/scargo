@@ -65,9 +65,6 @@ RUN pip3 install {{ scargo_package_version }}
 
 RUN usermod -a -G dialout ${USER_NAME}
 USER ${USER_NAME}
-{% if project.target.family != "x86" %}
-RUN az extension add --name azure-iot
-{% endif %}
 {% if project.target.family == "esp32" %}
 RUN /bin/bash -c "echo 'source $IDF_PATH/export.sh'" >> ~/.bashrc
 CMD ["/bin/bash"]
