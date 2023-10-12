@@ -1,0 +1,40 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "type": "shell",
+            "label": "Start-OpenOCD",
+            "command": "sudo",
+            "args": [
+                "openocd",
+                "-f",
+                ".devcontainer/openocd-script.cfg"
+            ],
+            "problemMatcher": {
+                "pattern": {
+                    "regexp": "^(Info |Warn |Error):(.*)$",
+                    "severity": 1,
+                    "message": 2
+                },
+                "background": {
+                    "activeOnStart": true,
+                    "beginsPattern": "^.*SWD.*",
+                    "endsPattern": ".*watchpoints.*"
+                }
+            },
+            "presentation": {
+                "reveal": "always"
+            },
+            "isBackground": true
+        },
+        {
+            "label": "Kill-OpenOCD",
+            "command": "sudo",
+            "args": [
+                "pkill",
+                "openocd"
+            ],
+            "type": "shell"
+        }
+    ]
+}
