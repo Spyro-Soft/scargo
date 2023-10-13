@@ -9,12 +9,13 @@ import sys
 from pathlib import Path
 from typing import Optional
 
+import scargo.target_helpers.atsam_helper as atsam_helper
+import scargo.target_helpers.stm32_helper as stm32_helper
 from scargo.config import Config
 from scargo.config_utils import prepare_config
 from scargo.file_generators.vscode_gen import generate_launch_json
 from scargo.logger import get_logger
 from scargo.path_utils import find_program_path
-from scargo.target_helpers.atsam_helper import AtsamScrips, generate_gdb_script
 
 if platform.system() == "Windows":
     from subprocess import DETACHED_PROCESS  # type: ignore[attr-defined]
@@ -103,13 +104,12 @@ def flash_stm32(
     port: Optional[str] = None,
 ) -> None:
     project_path = config.project_root
-    bin_path = (
-        project_path
-        / "build"
-        / flash_profile
-        / "bin"
-        / f"{config.project.name.lower()}.bin"
-    )
+
+    bin_name = f"{config.project.name.lower()}.bin"
+    elf_name = f"{config.project.name.lower()}.elf"
+    build_path = Path(project_path, "build", flash_profile, "bin")
+    bin_path = build_path / bin_name
+    elf_path = build_path / elf_name
 
     flash_start = hex(config.get_stm32_config().flash_start)
 
@@ -132,6 +132,9 @@ def flash_stm32(
             command.append(f"--serial={port}")
         command.extend(["write", str(bin_path), flash_start])
         subprocess.check_call(command)
+
+        stm32_helper.generate_openocd_script(Path(".devcontainer"), config)
+        generate_launch_json(Path(".vscode"), config, elf_path)
 
 
 def flash_atsam(
@@ -163,7 +166,7 @@ def flash_atsam(
         logger.info("Did you run scargo build --profile %s", flash_profile)
         sys.exit(1)
 
-    generate_gdb_script(Path(".devcontainer"), config, bin_path)
+    atsam_helper.generate_gdb_script(Path(".devcontainer"), config, bin_path)
     generate_launch_json(Path(".vscode"), config, elf_path)
 
     openocd_process = None
@@ -173,9 +176,7 @@ def flash_atsam(
                 [
                     openocd_path,
                     "-f",
-                    str(
-                        Path(f"{project_path}/.devcontainer") / AtsamScrips.openocd_cfg
-                    ),
+                    str(Path(f"{project_path}/.devcontainer/openocd-script.cfg")),
                 ],
                 creationflags=DETACHED_PROCESS,
             )
@@ -199,7 +200,7 @@ def flash_atsam(
             "--batch",
         ]
         subprocess.check_call(gdb_command)
-    except Exception as e:
+    except subprocess.CalledProcessError as e:
         print(e)
     finally:
         # temp_script_dir.cleanup()
