@@ -14,8 +14,8 @@ ADDITIONAL_CPU_DATA = {"cortex-m23": ["atsaml10e16a"]}
 
 @dataclass
 class AtsamScrips:
-    openocd_cfg = "config/openocd_script.cfg"
-    gdb_flash = "config/gdb-flash.script"
+    openocd_cfg = "openocd-script.cfg"
+    gdb_flash = "atsam-gdb.script"
 
 
 def get_atsam_cpu(chip_label: str) -> Optional[str]:
@@ -68,8 +68,12 @@ def generate_openocd_script(outdir: Path, config: Config) -> None:
     if openocd_script_name and openocd_script_name:
         write_template(
             outdir / AtsamScrips.openocd_cfg,
-            "atsam/openocd_script.cfg.j2",
-            {"flash_driver": flash_driver, "script_name": openocd_script_name},
+            "docker/atsam-openocd.cfg.j2",
+            {
+                "config": config,
+                "flash_driver": flash_driver,
+                "script_name": openocd_script_name,
+            },
         )
 
 
@@ -78,6 +82,6 @@ def generate_gdb_script(outdir: Path, config: Config, bin_path: Path) -> None:
     if flash_driver:
         write_template(
             outdir / AtsamScrips.gdb_flash,
-            "atsam/gdb-flash.script.j2",
+            "docker/atsam-gdb.script.j2",
             {"flash_driver": flash_driver, "bin_path": bin_path},
         )

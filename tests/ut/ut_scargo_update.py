@@ -11,6 +11,7 @@ from scargo.config import Target
 EXPECTED_FILES_AND_DIRS = [
     ".clang-format",
     ".clang-tidy",
+    ".vscode",
     ".devcontainer",
     ".gitignore",
     ".gitlab-ci.yml",

@@ -7,18 +7,14 @@ import platform
 import subprocess
 import sys
 from pathlib import Path
-from tempfile import TemporaryDirectory
 from typing import Optional
 
 from scargo.config import Config
 from scargo.config_utils import prepare_config
+from scargo.file_generators.vscode_gen import generate_launch_json
 from scargo.logger import get_logger
 from scargo.path_utils import find_program_path
-from scargo.target_helpers.atsam_helper import (
-    AtsamScrips,
-    generate_gdb_script,
-    generate_openocd_script,
-)
+from scargo.target_helpers.atsam_helper import AtsamScrips, generate_gdb_script
 
 if platform.system() == "Windows":
     from subprocess import DETACHED_PROCESS  # type: ignore[attr-defined]
@@ -157,19 +153,18 @@ def flash_atsam(
 
     project_path = config.project_root
     bin_name = f"{config.project.name.lower()}.bin"
+    elf_name = f"{config.project.name.lower()}"
     build_path = Path(project_path, "build", flash_profile, "bin")
     bin_path = build_path / bin_name
-    exec_path = build_path / config.project.name.lower()
+    elf_path = build_path / elf_name
 
     if not bin_path.exists():
         logger.error("%s does not exist", bin_path)
         logger.info("Did you run scargo build --profile %s", flash_profile)
         sys.exit(1)
 
-    temp_script_dir = TemporaryDirectory()
-    temp_script_dir_path = Path(temp_script_dir.name)
-    generate_openocd_script(temp_script_dir_path, config)
-    generate_gdb_script(temp_script_dir_path, config, bin_path)
+    generate_gdb_script(Path(".devcontainer"), config, bin_path)
+    generate_launch_json(Path(".vscode"), config, elf_path)
 
     openocd_process = None
     try:
@@ -178,7 +173,9 @@ def flash_atsam(
                 [
                     openocd_path,
                     "-f",
-                    str(temp_script_dir_path / AtsamScrips.openocd_cfg),
+                    str(
+                        Path(f"{project_path}/.devcontainer") / AtsamScrips.openocd_cfg
+                    ),
                 ],
                 creationflags=DETACHED_PROCESS,
             )
@@ -188,7 +185,7 @@ def flash_atsam(
                     "sudo",
                     openocd_path,
                     "-f",
-                    str(temp_script_dir_path / AtsamScrips.openocd_cfg),
+                    ".devcontainer/openocd-script.cfg",
                 ],
                 stdin=PIPE,
                 stdout=PIPE,
@@ -197,8 +194,8 @@ def flash_atsam(
 
         gdb_command = [
             str(gdb_multiarch_path),
-            f"{exec_path}",
-            f"--command={temp_script_dir_path / AtsamScrips.gdb_flash}",
+            f"{elf_path}",
+            "--command=.devcontainer/atsam-gdb.script",
             "--batch",
         ]
         subprocess.check_call(gdb_command)

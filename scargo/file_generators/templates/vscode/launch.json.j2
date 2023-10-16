@@ -1,0 +1,20 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "GDB",
+            "preLaunchTask": "Start-OpenOCD", // The name of the task defined above
+            "postDebugTask": "Kill-OpenOCD",
+            "type": "by-gdb",
+            "request": "launch",
+            "debuggerPath": "gdb-multiarch",
+            "program": "{{bin_path}}",
+            "remote": {
+                "enabled": true,
+                "address": ":3333",
+                "mode": "remote",
+                "execfile": "{{bin_path}}"
+            }
+        }
+    ]
+}
