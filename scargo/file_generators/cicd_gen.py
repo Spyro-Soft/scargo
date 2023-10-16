@@ -50,11 +50,11 @@ class _CicdTemplate:
         file_path = cicd_dir_path / file_name
 
         # Check if the ci folder exists. If not, create it.
-        if not cicd_dir_path.exists():
+        if not cicd_dir_path.is_dir():
             cicd_dir_path.mkdir(parents=True)
 
         # Check if file exists. If not, create it.
-        if not file_path.is_dir():
+        if not file_path.is_file():
             file_path.touch()
 
         # Read the file
