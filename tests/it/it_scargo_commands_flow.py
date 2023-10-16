@@ -322,6 +322,18 @@ class TestBinProjectFlow:
         for file in test_state.get_build_result_files_paths():
             assert file.is_file(), f"Expected file: {file} not exist"
 
+    @pytest.mark.skip("TODO when conan version be updated to >= 2.0.0")
+    @pytest.mark.order(after="test_cli_build")
+    def test_cli_publish(self, test_state: ActiveTestState) -> None:
+        """This test check if call of scargo publish command will finish without error
+
+        Note: Conan Server is required to properly execute cmd in integration test flow. The server
+        works for conan version 2.0.0 and higher, the same version is required for scargo conan to keep compatibility.
+        The test needs to be implemented when correct version of conan will be applied.
+        """
+        # Publish command
+        pass
+
     @pytest.mark.order(after="test_cli_build")
     def test_cli_clean(self, test_state: ActiveTestState) -> None:
         """This test check if call of scargo clean command will finish without error and
