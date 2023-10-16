@@ -54,6 +54,8 @@ def test_update_project_content_with_docker(tmp_path: Path, fp: FakeProcess) -> 
     called_subprocess_cmd = get_docker_compose_command()
     called_subprocess_cmd.extend(["pull"])
     fp.register(called_subprocess_cmd)
+    fp.register(["conan", "profile", "list"])
+    fp.register(["conan", "profile", "detect"])
     scargo_update(Path("scargo.toml"))
     for path in Path().iterdir():
         assert path.name in EXPECTED_FILES_AND_DIRS
@@ -70,6 +72,8 @@ def test_update_project_content_with_docker__build(
     cmd_pull.extend(["pull"])
     fp.register(cmd_pull, returncode=1)
     cmd_build = get_docker_compose_command()
+    fp.register(["conan", "profile", "list"])
+    fp.register(["conan", "profile", "detect"])
     cmd_build.extend(["build"])
     fp.register(cmd_build)
     scargo_update(Path("scargo.toml"))

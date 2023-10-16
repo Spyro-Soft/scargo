@@ -31,7 +31,7 @@ dependencies = [
     "clang==16.0.1.1",
     "cmake==3.25.2",
     "coloredlogs==15.0.1",
-    "conan==1.59.0",
+    "conan==2.0.13",
     "docker==6.0.1",
     "esptool==4.5.1",
     "jinja2==3.1.2",

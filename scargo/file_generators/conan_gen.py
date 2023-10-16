@@ -2,6 +2,8 @@
 # @copyright Copyright (C) 2023 SpyroSoft Solutions S.A. All rights reserved.
 # #
 
+import subprocess
+
 from scargo.config import Config
 from scargo.file_generators.base_gen import create_file_from_template
 
@@ -21,8 +23,24 @@ def generate_conanfile(config: Config) -> None:
     )
 
 
+def add_default_profile_if_missing() -> None:
+    result = subprocess.run(
+        ["conan", "profile", "list"],
+        stdout=subprocess.PIPE,
+        check=True,
+    )
+    if b"default" not in result.stdout.splitlines():
+        subprocess.run(
+            ["conan", "profile", "detect"],
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL,
+            check=True,
+        )
+
+
 def generate_conanprofile(config: Config) -> None:
     profiles = config.profiles.keys()
+    add_default_profile_if_missing()
 
     if config.project.target.family == "stm32":
         create_file_from_template(

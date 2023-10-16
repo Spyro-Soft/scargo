@@ -35,7 +35,7 @@ def test_scargo_test_no_cmake_file(  # type: ignore[no-any-unimported]
 def test_scargo_test(  # type: ignore[no-any-unimported]
     fp: FakeProcess, fs: FakeFilesystem, mock_prepare_config: MagicMock
 ) -> None:
-    fp.register("conan install tests -if build/tests -sbuild_type=Debug")
+    fp.register("conan install tests -of build/tests -sbuild_type=Debug")
     fp.register("conan build tests -bf build/tests")
     fp.register("ctest")
     fp.register("gcovr -r ut . -f src --html=ut-coverage.html")
@@ -47,7 +47,7 @@ def test_scargo_test(  # type: ignore[no-any-unimported]
         "conan",
         "install",
         Path("tests"),
-        "-if",
+        "-of",
         Path("build/tests"),
         "-sbuild_type=Debug",
     ]

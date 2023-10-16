@@ -49,7 +49,7 @@ def scargo_test(
                 "conan",
                 "install",
                 tests_src_dir,
-                "-if",
+                "-of",
                 test_build_dir,
                 f"-sbuild_type={profile}",
             ],

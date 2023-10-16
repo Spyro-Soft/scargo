@@ -4,11 +4,11 @@
 #
 
 from conan import ConanFile
-from conans import tools
-from conan.tools.cmake import CMakeToolchain, CMake, cmake_layout
+from conan import tools
+from conan.tools.files import copy
+from conan.tools.cmake import CMake, cmake_layout
 
 {% if config.project.target.family == "stm32" %}
-from conans import tools
 import os
 {% endif %}
 
@@ -19,7 +19,7 @@ class {{ config.project.name|capitalize|replace("-", "") }}Conan(ConanFile):  # 
     description = "{{ config.project.description }}"
     settings = "os", "compiler", "build_type", "arch"
     url = "{{ config.project.homepage_url }}"
-    generators = "CMakeDeps"
+    generators = "CMakeToolchain", "CMakeDeps"
     exports_sources = ["{{ config.source_dir_path.relative_to(config.project_root) }}/*", "CMakeLists.txt", "include/*", "config/*"]
     {% if config.dependencies.build or config.dependencies.tool %}
     def build_requirements(self) -> None:
@@ -76,10 +76,6 @@ class {{ config.project.name|capitalize|replace("-", "") }}Conan(ConanFile):  # 
     def layout(self) -> None:
         cmake_layout(self)
 
-    def generate(self) -> None:
-        tc = CMakeToolchain(self)
-        tc.generate()
-
     def build(self) -> None:
         cmake = CMake(self)
         cmake.configure()
@@ -90,8 +86,8 @@ class {{ config.project.name|capitalize|replace("-", "") }}Conan(ConanFile):  # 
         cmake = CMake(self)
         cmake.install()
     {% else %}
-        self.copy("*.bin")
-        self.copy("*.elf")
+        copy("*.bin")
+        copy("*.elf")
     {% endif %}
 
     {% if config.project.lib_name %}

@@ -35,9 +35,7 @@ def scargo_publish(repo: str, profile: str = "Release") -> None:
         logger.info(f"Did you run 'scargo build --profile {profile}'?")
         sys.exit(1)
 
-    conan_clean_remote()
     conan_add_remote(project_path, config)
-    conan_add_conancenter()
     conan_source(project_path)
 
     # Export package
@@ -47,7 +45,7 @@ def scargo_publish(repo: str, profile: str = "Release") -> None:
                 "conan",
                 "export-pkg",
                 ".",
-                "-if",
+                "-of",
                 str(build_dir),
                 "-pr:b",
                 "default",
@@ -117,20 +115,6 @@ def conan_add_remote(project_path: Path, config: Config) -> None:
         except subprocess.CalledProcessError:
             logger.error("Unable to add remote repository")
         conan_add_user(repo_name)
-
-
-def conan_add_conancenter() -> None:
-    """
-    Add conancenter remote repository
-
-    :return: None
-    """
-    try:
-        subprocess.check_call(
-            "conan remote add conancenter https://center.conan.io", shell=True
-        )
-    except subprocess.CalledProcessError:
-        logger.error("Unable to add conancenter remote repository")
 
 
 def conan_clean_remote() -> None:
