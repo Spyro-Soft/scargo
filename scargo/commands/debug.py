@@ -107,14 +107,7 @@ class _ScargoDebug:
         chip_script = f"target/{self._chip[:7].lower()}x.cfg"
         if not Path("/usr/share/openocd/scripts", chip_script).exists():
             chip_script = f"target/{self._chip[:7].lower()}.cfg"
-        openocd_args = [
-            "-f",
-            "interface/stlink-v2-1.cfg",
-            "-f",
-            chip_script,
-            "-f",
-            ".devcontainer/stm32.cfg",
-        ]
+        openocd_args = ["-f", ".devcontainer/openocd-script.cfg"]
         self._debug_embedded(openocd_args, "gdb-multiarch")
 
     def _debug_esp32(self) -> None:
