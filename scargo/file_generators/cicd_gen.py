@@ -46,15 +46,15 @@ class _CicdTemplate:
                 dict1[key] = dict2[key]
         return dict1
 
-    def _get_cicd_content(self, path: Path, file_name: str) -> Dict[str, Any]:
-        file_path = path / file_name
+    def _get_cicd_content(self, cicd_dir_path: Path, file_name: str) -> Dict[str, Any]:
+        file_path = cicd_dir_path / file_name
 
         # Check if the ci folder exists. If not, create it.
-        if not path.exists():
-            path.mkdir(parents=True)
+        if not cicd_dir_path.exists():
+            cicd_dir_path.mkdir(parents=True)
 
         # Check if file exists. If not, create it.
-        if not file_path.exists():
+        if not file_path.is_dir():
             file_path.touch()
 
         # Read the file
@@ -65,11 +65,11 @@ class _CicdTemplate:
             return {}
         return data
 
-    def _generate_custom_cicd(self, custom_cicd: Dict[str, Any]) -> None:
+    def _generate_custom_cicd(self, custom_cicd_dict: Dict[str, Any]) -> None:
         """Generate custom cicd file"""
         # Merge custom_cicd with base_cicd
         base_cicd = self._get_cicd_content(self._config.project_root, ".gitlab-ci.yml")
-        merged_dict = self.merge_dictionaries(base_cicd, custom_cicd)
+        merged_dict = self.merge_dictionaries(base_cicd, custom_cicd_dict)
         with open(
             self._config.project_root / ".gitlab-ci.yml", "w", encoding="utf-8"
         ) as f:
