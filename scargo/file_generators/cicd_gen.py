@@ -46,13 +46,12 @@ class _CicdTemplate:
                 dict1[key] = dict2[key]
         return dict1
 
-    def _get_cicd_content(self, path: str, file_name: str) -> Dict[str, Any]:
-        ci_folder = Path(path)
-        file_path = ci_folder / file_name
+    def _get_cicd_content(self, path: Path, file_name: str) -> Dict[str, Any]:
+        file_path = path / file_name
 
         # Check if the ci folder exists. If not, create it.
-        if not ci_folder.exists():
-            ci_folder.mkdir(parents=True)
+        if not path.exists():
+            path.mkdir(parents=True)
 
         # Check if file exists. If not, create it.
         if not file_path.exists():
@@ -65,6 +64,16 @@ class _CicdTemplate:
         if not isinstance(data, dict):
             return {}
         return data
+
+    def _generate_custom_cicd(self, custom_cicd: Dict[str, Any]) -> None:
+        """Generate custom cicd file"""
+        # Merge custom_cicd with base_cicd
+        base_cicd = self._get_cicd_content(self._config.project_root, ".gitlab-ci.yml")
+        merged_dict = self.merge_dictionaries(base_cicd, custom_cicd)
+        with open(
+            self._config.project_root / ".gitlab-ci.yml", "w", encoding="utf-8"
+        ) as f:
+            yaml.dump(merged_dict, f, sort_keys=False)
 
     def generate_cicd_env(self) -> None:
         """Generate dirs and files"""
@@ -84,18 +93,17 @@ class _CicdTemplate:
             },
             config=self._config,
         )
-        custom_cicd = self._get_cicd_content(".devcontainer", ".gitlab-ci-custom.yml")
 
+        project_path = self._config.project_root
+        output_path = Path(project_path, ".devcontainer")
+
+        custom_cicd = self._get_cicd_content(output_path, ".gitlab-ci-custom.yml")
         # Check if custom_cicd is empty and if so, do not merge
-        if custom_cicd is None:
+        if not custom_cicd:
             logger.info("Custom file is empty or currupted. Skipping cicd file merge.")
             return
 
-        # Merge custom_cicd with base_cicd
-        base_cicd = self._get_cicd_content(".", ".gitlab-ci.yml")
-        merged_dict = self.merge_dictionaries(base_cicd, custom_cicd)
-        with open(".gitlab-ci.yml", "w", encoding="utf-8") as f:
-            yaml.dump(merged_dict, f, sort_keys=False)
+        self._generate_custom_cicd(custom_cicd)
 
 
 def generate_cicd(config: Config) -> None:
