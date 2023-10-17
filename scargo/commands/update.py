@@ -109,7 +109,6 @@ def pull_docker_image(docker_path: Path) -> bool:
             cmd,
             cwd=docker_path,
             stderr=subprocess.PIPE,
-            check=True,
         )
     except subprocess.CalledProcessError as e:
         logger.warning(e.stderr.decode())
