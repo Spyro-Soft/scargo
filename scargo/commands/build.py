@@ -14,6 +14,21 @@ from scargo.logger import get_logger
 logger = get_logger()
 
 
+def conan_add_default_profile_if_missing() -> None:
+    result = subprocess.run(
+        ["conan", "profile", "list"],
+        stdout=subprocess.PIPE,
+        check=True,
+    )
+    if b"default" not in result.stdout.splitlines():
+        subprocess.run(
+            ["conan", "profile", "detect"],
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL,
+            check=True,
+        )
+
+
 def scargo_build(profile: str) -> None:
     """
     Build project exec file.
@@ -36,6 +51,7 @@ def scargo_build(profile: str) -> None:
     build_dir = Path(project_dir, "build", profile)
     build_dir.mkdir(parents=True, exist_ok=True)
 
+    conan_add_default_profile_if_missing()
     conan_add_remote(project_dir, config)
     conan_source(project_dir)
 
