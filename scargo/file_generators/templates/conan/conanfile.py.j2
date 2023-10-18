@@ -4,8 +4,8 @@
 #
 
 from conan import ConanFile
-from conan import tools
-from conan.tools.files import copy
+from conan.tools.scm import Git
+from conan.tools.files import copy, get
 from conan.tools.cmake import CMake, cmake_layout
 
 {% if config.project.target.family == "stm32" %}
@@ -40,9 +40,10 @@ class {{ config.project.name|capitalize|replace("-", "") }}Conan(ConanFile):  # 
 
     def source(self) -> None:
     {% if config.project.target.family == "stm32" %}
-        git = tools.Git(folder="third-party/stm32-cmake")
-        if not os.listdir(git.folder):
-            git.clone("https://github.com/ObKo/stm32-cmake.git", "master")
+        target_dir = "third-party/stm32-cmake"
+        if not os.path.isdir(target_dir):
+            git = Git(self)
+            git.clone("https://github.com/ObKo/stm32-cmake.git", target=target_dir)
     {% elif config.project.target.family == "atsam" %}
         import requests
         import re
@@ -64,11 +65,11 @@ class {{ config.project.name|capitalize|replace("-", "") }}Conan(ConanFile):  # 
                 re.MULTILINE | re.DOTALL,
             )
             dfp_filename = match_atpack.group(1)
-            tools.get(f"{packs_url}/{dfp_filename}", destination=dfp_outdir)
+            get(self, f"{packs_url}/{dfp_filename}", destination=dfp_outdir)
 
         if not cmsis_outdir.is_dir():
             cmsis_filename = "ARM.CMSIS.5.4.0.atpack"
-            tools.get(f"{packs_url}/{cmsis_filename}", destination=cmsis_outdir)
+            get(self, f"{packs_url}/{cmsis_filename}", destination=cmsis_outdir)
     {% else %}
         pass
     {% endif %}

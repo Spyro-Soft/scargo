@@ -46,7 +46,7 @@ def generate_conanprofile(config: Config) -> None:
         create_file_from_template(
             "conan/stm32_gcc_toolchain_wrapper.cmake.j2",
             "config/conan/profiles/stm32_gcc_toolchain_wrapper.cmake",
-            template_params={},
+            template_params={"config": config},
             config=config,
         )
 
