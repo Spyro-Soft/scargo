@@ -115,8 +115,10 @@ def pull_docker_image(docker_path: Path) -> bool:
             stderr=subprocess.PIPE,
             check=True,
         )
-    except subprocess.CalledProcessError as e:
-        logger.warning(e.stderr.decode())
+    except subprocess.CalledProcessError:
+        logger.info(
+            "No docker image does exist yet in the registry or you are not login"
+        )
     else:
         # happens for the default tag, like "myproject-dev:1.0"
         if (
