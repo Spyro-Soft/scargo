@@ -44,7 +44,7 @@ def scargo_test(
 
     try:
         # Run CMake and build tests.
-        subprocess.check_call(
+        subprocess.run(
             [
                 "conan",
                 "install",
@@ -52,12 +52,16 @@ def scargo_test(
                 "-of",
                 test_build_dir,
                 f"-sbuild_type={profile}",
+                "-b",
+                "missing",
             ],
             cwd=project_dir,
+            check=True,
         )
-        subprocess.check_call(
-            ["conan", "build", tests_src_dir, "-bf", test_build_dir],
+        subprocess.run(
+            ["conan", "build", "-of", test_build_dir, tests_src_dir],
             cwd=project_dir,
+            check=True,
         )
     except subprocess.CalledProcessError:
         logger.error("Failed to build tests.")
