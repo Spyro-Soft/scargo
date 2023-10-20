@@ -9,24 +9,10 @@ from pathlib import Path
 
 from scargo.commands.publish import conan_add_remote, conan_source
 from scargo.config_utils import prepare_config
+from scargo.file_generators.conan_gen import conan_add_default_profile_if_missing
 from scargo.logger import get_logger
 
 logger = get_logger()
-
-
-def conan_add_default_profile_if_missing() -> None:
-    result = subprocess.run(
-        ["conan", "profile", "list"],
-        stdout=subprocess.PIPE,
-        check=True,
-    )
-    if b"default" not in result.stdout.splitlines():
-        subprocess.run(
-            ["conan", "profile", "detect"],
-            stdout=subprocess.DEVNULL,
-            stderr=subprocess.DEVNULL,
-            check=True,
-        )
 
 
 def scargo_build(profile: str) -> None:
@@ -63,6 +49,8 @@ def scargo_build(profile: str) -> None:
                 ".",
                 "-pr",
                 f"./config/conan/profiles/{config.project.target.family}_{profile}",
+                "-of",
+                f"build/{profile}",
                 "-b",
                 "missing",
             ],
@@ -73,13 +61,26 @@ def scargo_build(profile: str) -> None:
             [
                 "conan",
                 "build",
+                ".",
                 "-pr",
                 f"./config/conan/profiles/{config.project.target.family}_{profile}",
-                f"{project_dir}",
+                "-of",
+                f"build/{profile}",
             ],
             cwd=project_dir,
             check=True,
         )
+
+        get_logger().info("Copying artifacts...")
+        # This is a workaround so that different profiles can work together with conan
+        # Conan always calls CMake with '
+        subprocess.run(
+            f"cp -r -l -f {build_dir}/build/{config.profiles[profile].cmake_build_type}/* .",
+            cwd=build_dir,
+            shell=True,
+            check=True,
+        )
+        get_logger().info("Artifacts copied")
 
     except subprocess.CalledProcessError:
         logger.error("Unable to build exec file")

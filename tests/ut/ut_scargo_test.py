@@ -35,25 +35,49 @@ def test_scargo_test_no_cmake_file(  # type: ignore[no-any-unimported]
 def test_scargo_test(  # type: ignore[no-any-unimported]
     fp: FakeProcess, fs: FakeFilesystem, mock_prepare_config: MagicMock
 ) -> None:
-    fp.register("conan install tests -of build/tests -sbuild_type=Debug")
-    fp.register("conan build tests -bf build/tests")
-    fp.register("ctest")
+    fp.register("conan profile list")
+    fp.register("conan profile detect")
+    fp.register("conan install tests -of build/tests -sbuild_type=Debug -b missing")
+    fp.register("conan build -of build/tests tests -sbuild_type=Debug -b missing")
     fp.register("gcovr -r ut . -f src --html=ut-coverage.html")
+    fp.register("ctest")
     os.mkdir("tests")
     with open("tests/CMakeLists.txt", "w"):
         pass
     scargo_test(False)
+
     assert fp.calls[0] == [
+        "conan",
+        "profile",
+        "list",
+    ]
+    assert fp.calls[1] == [
+        "conan",
+        "profile",
+        "detect",
+    ]
+    assert fp.calls[2] == [
         "conan",
         "install",
         Path("tests"),
         "-of",
         Path("build/tests"),
         "-sbuild_type=Debug",
+        "-b",
+        "missing",
     ]
-    assert fp.calls[1] == ["conan", "build", Path("tests"), "-bf", Path("build/tests")]
-    assert fp.calls[2] == ["ctest"]
     assert fp.calls[3] == [
+        "conan",
+        "build",
+        "-of",
+        Path("build/tests"),
+        Path("tests"),
+        "-sbuild_type=Debug",
+        "-b",
+        "missing",
+    ]
+    assert fp.calls[4] == ["ctest"]
+    assert fp.calls[5] == [
         "gcovr",
         "-r",
         "ut",

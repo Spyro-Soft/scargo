@@ -10,6 +10,7 @@ from typing import List, Union
 
 from scargo.config import Config
 from scargo.config_utils import prepare_config
+from scargo.file_generators.conan_gen import conan_add_default_profile_if_missing
 from scargo.logger import get_logger
 
 logger = get_logger()
@@ -41,6 +42,7 @@ def scargo_test(
         sys.exit(1)
 
     test_build_dir.mkdir(parents=True, exist_ok=True)
+    conan_add_default_profile_if_missing()
 
     try:
         # Run CMake and build tests.
@@ -59,7 +61,16 @@ def scargo_test(
             check=True,
         )
         subprocess.run(
-            ["conan", "build", "-of", test_build_dir, tests_src_dir],
+            [
+                "conan",
+                "build",
+                "-of",
+                test_build_dir,
+                tests_src_dir,
+                f"-sbuild_type={profile}",
+                "-b",
+                "missing",
+            ],
             cwd=project_dir,
             check=True,
         )
