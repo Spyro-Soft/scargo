@@ -20,7 +20,7 @@ ENV_CONAN_USER = "env_conan_user_name"
 ENV_CONAN_PASSWORD = "env_conan_password"
 
 
-def conan_remote_add_error(process: FakePopen, stderr: str):
+def conan_remote_add_error(process: FakePopen, stderr: str) -> None:
     raise subprocess.CalledProcessError(1, process.args, b"", stderr.encode())
 
 
@@ -168,7 +168,7 @@ def test_conan_add_remote_fail(
     # ARRANGE
     fp.register(["conan", "remote", "add", REMOTE_REPO_NAME_1, EXAMPLE_URL])
     fp.register("conan user", occurrences=2)
-    error = f"ERROR: not remote add failure"
+    error = "ERROR: not remote add failure"
     fp.register(
         ["conan", "remote", "add", REMOTE_REPO_NAME_2, EXAMPLE_URL],
         callback=conan_remote_add_error,
