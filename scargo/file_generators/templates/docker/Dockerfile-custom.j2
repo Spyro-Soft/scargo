@@ -1,3 +1,16 @@
 # user can add his docker code below which will be integrated with
 # main docker file and not overwritten by scargo update
 
+{% if project.target.family == "esp32" %}
+# Install QEMU
+ARG QEMU_VER=esp-develop-20220919
+ARG QEMU_DIST=qemu-${QEMU_VER}.tar.bz2
+ARG QEMU_SHA256=f6565d3f0d1e463a63a7f81aec94cce62df662bd42fc7606de4b4418ed55f870
+RUN : \
+  && wget --no-verbose https://github.com/espressif/qemu/releases/download/${QEMU_VER}/${QEMU_DIST} \
+  && echo "${QEMU_SHA256} *${QEMU_DIST}" | sha256sum --check --strict - \
+  && tar -xf ${QEMU_DIST} -C /opt \
+  && rm ${QEMU_DIST} \
+  && :
+ENV PATH=/opt/qemu/bin:${PATH}
+{% endif %}

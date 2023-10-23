@@ -17,6 +17,7 @@ from scargo.file_generators.docker_gen import generate_docker_compose
 from scargo.file_generators.env_gen import generate_env
 from scargo.file_generators.readme_gen import generate_readme
 from scargo.file_generators.tests_gen import generate_tests
+from scargo.file_generators.vscode_gen import generate_vscode
 from scargo.global_values import SCARGO_DOCKER_ENV, SCARGO_LOCK_FILE, SCARGO_PKG_PATH
 from scargo.logger import get_logger
 
@@ -44,6 +45,7 @@ def scargo_update(config_file_path: Path) -> None:
     """
     project_path = config_file_path.parent
     docker_path = Path(project_path, ".devcontainer")
+    vscode_path = Path(project_path, ".vscode")
     config = get_scargo_config_or_exit(config_file_path)
     if not config.project:
         logger.error("File `%s`: Section `project` not found.", config_file_path)
@@ -69,6 +71,8 @@ def scargo_update(config_file_path: Path) -> None:
     # Copy docker env files to repo directory
     generate_docker_compose(docker_path, config)
     generate_env(docker_path, config)
+
+    generate_vscode(vscode_path, config)
 
     generate_cmake(config)
     generate_conanfile(config)
@@ -111,8 +115,10 @@ def pull_docker_image(docker_path: Path) -> bool:
             stderr=subprocess.PIPE,
             check=True,
         )
-    except subprocess.CalledProcessError as e:
-        logger.warning(e.stderr.decode())
+    except subprocess.CalledProcessError:
+        logger.info(
+            "No docker image does exist yet in the registry or you are not login"
+        )
     else:
         # happens for the default tag, like "myproject-dev:1.0"
         if (

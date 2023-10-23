@@ -8,7 +8,6 @@ import platform
 import subprocess
 import sys
 from pathlib import Path
-from tempfile import TemporaryDirectory
 from time import sleep
 from typing import List, Optional
 
@@ -17,7 +16,6 @@ from scargo.config_utils import prepare_config
 from scargo.docker_utils import run_scargo_again_in_docker
 from scargo.logger import get_logger
 from scargo.path_utils import find_program_path
-from scargo.target_helpers.atsam_helper import AtsamScrips, generate_openocd_script
 
 logger = get_logger()
 
@@ -109,14 +107,7 @@ class _ScargoDebug:
         chip_script = f"target/{self._chip[:7].lower()}x.cfg"
         if not Path("/usr/share/openocd/scripts", chip_script).exists():
             chip_script = f"target/{self._chip[:7].lower()}.cfg"
-        openocd_args = [
-            "-f",
-            "interface/stlink-v2-1.cfg",
-            "-f",
-            chip_script,
-            "-f",
-            ".devcontainer/stm32.cfg",
-        ]
+        openocd_args = ["-f", ".devcontainer/openocd-script.cfg"]
         self._debug_embedded(openocd_args, "gdb-multiarch")
 
     def _debug_esp32(self) -> None:
@@ -129,16 +120,7 @@ class _ScargoDebug:
         self._debug_embedded(openocd_args, "xtensa-esp32-elf-gdb")
 
     def _debug_atsam(self) -> None:
-        config = prepare_config()
-
-        temp_script_dir = TemporaryDirectory()
-        temp_script_dir_path = Path(temp_script_dir.name)
-        generate_openocd_script(temp_script_dir_path, config)
-
-        openocd_args = [
-            "-f",
-            str(temp_script_dir_path / AtsamScrips.openocd_cfg),
-        ]
+        openocd_args = ["-f", ".devcontainer/openocd-script.cfg"]
         self._debug_embedded(openocd_args, "gdb-multiarch")
 
     def _get_bin_path(self, bin_name: str) -> Path:

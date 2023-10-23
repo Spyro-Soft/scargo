@@ -7,6 +7,8 @@ import shutil
 from pathlib import Path
 from typing import Any, Dict
 
+import scargo.target_helpers.atsam_helper as atsam_helper
+import scargo.target_helpers.stm32_helper as stm32_helper
 from scargo import __version__
 from scargo.config import Config
 from scargo.file_generators.base_gen import create_file_from_template
@@ -27,7 +29,7 @@ class _DockerComposeTemplate:
         self._create_file_from_template(
             "docker/Dockerfile-custom.j2",
             "Dockerfile-custom",
-            template_params={},
+            template_params={"project": self._config.project},
             overwrite=False,
         )
         self._create_file_from_template(
@@ -41,11 +43,9 @@ class _DockerComposeTemplate:
             template_params={"project": self._config.project},
         )
         if self._config.project.target.family == "stm32":
-            self._create_file_from_template(
-                "docker/stm32.cfg.j2",
-                "stm32.cfg",
-                template_params={},
-            )
+            stm32_helper.generate_openocd_script(self.docker_path, self._config)
+        if self._config.project.target.family == "atsam":
+            atsam_helper.generate_openocd_script(self.docker_path, self._config)
 
         custom_docker = self._get_dockerfile_custom_content()
         scargo_package_version = self._set_up_package_version()
