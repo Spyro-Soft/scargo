@@ -108,12 +108,16 @@ def conan_add_remote(project_path: Path, config: Config) -> None:
     conan_repo = config.conan.repo
     for repo_name, repo_url in conan_repo.items():
         try:
-            subprocess.check_call(
+            subprocess.run(
                 ["conan", "remote", "add", repo_name, repo_url],
                 cwd=project_path,
+                check=True,
+                stderr=subprocess.PIPE,
             )
-        except subprocess.CalledProcessError:
-            logger.error("Unable to add remote repository")
+        except subprocess.CalledProcessError as e:
+            if b"already exists in remotes" not in e.stderr:
+                logger.error(e.stderr.decode().strip())
+                logger.error("Unable to add remote repository")
         conan_add_user(repo_name)
 
 
