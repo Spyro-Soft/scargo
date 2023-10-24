@@ -101,7 +101,9 @@ class FilesToCheck:
     lang_data: List[str] = []
     lang_other: List[str] = []
 
-    def add_file_to_check(self, file: str, repo_path: str) -> int:
+    def add_file_to_check(  # pylint: disable=too-many-return-statements
+        self, file: str, repo_path: str
+    ) -> int:
         if os.path.islink(file):
             # ignore symbolic links (they are likely to be found as file again)
             return 0
@@ -147,7 +149,7 @@ class FilesToCheck:
 def get_all_files(repo_path: str, exclude_dir: Sequence[str]) -> FilesToCheck:
     files_to_check = FilesToCheck()
     files = []
-    for root, d_names, f_names in os.walk(repo_path):
+    for root, _, f_names in os.walk(repo_path):
         for f in f_names:
             fname = os.path.join(root, f)
             if exclude_dir:
@@ -166,14 +168,15 @@ def check_correct_copyright_embedded(
     enable_verbose_print: bool = False,
 ) -> Optional[int]:
     if file.endswith(file_extensions):
-        for line in open(file, encoding="utf-8"):
-            copyright_regex = COPYRIGHT_CHECK_REGEX
-            copyright_check_with_doxygen = COPYRIGHT_CHECK_WITH_DOXYGEN_REGEX
-            if require_doxygen_tag:
-                copyright_regex = copyright_check_with_doxygen
-            if re.search(copyright_regex, line) is not None:
-                # matching copyright found
-                return 0
+        with open(file, encoding="utf-8") as f:
+            for line in f.readlines():
+                copyright_regex = COPYRIGHT_CHECK_REGEX
+                copyright_check_with_doxygen = COPYRIGHT_CHECK_WITH_DOXYGEN_REGEX
+                if require_doxygen_tag:
+                    copyright_regex = copyright_check_with_doxygen
+                if re.search(copyright_regex, line) is not None:
+                    # matching copyright found
+                    return 0
         if enable_verbose_print:
             print(PRINT_PREFIX + "No matching copyright found in file: " + file)
         # no matching copyright found
@@ -214,28 +217,27 @@ def check_copyrights(files_to_check: FilesToCheck) -> int:
         ):
             fail_count += 1
 
-    if fail_count > 0:
-        return 1
-    else:
-        return 0
+    return fail_count
 
 
 def is_any_copyright_embedded(file: str) -> bool:
-    for line in open(file):
-        if re.search(COPYRIGHT_ANY_CHECK_REGEX, line) is not None:
-            # some copyright found
-            return True
-    # no copyright found
-    return False
+    with open(file, encoding="utf-8") as f:
+        for line in f.readlines():
+            if re.search(COPYRIGHT_ANY_CHECK_REGEX, line) is not None:
+                # some copyright found
+                return True
+        # no copyright found
+        return False
 
 
 def is_correct_copyright_with_any_year_embedded(file: str) -> bool:
-    for line in open(file):
-        if re.search(COPYRIGHT_CHECK_REGEX, line) is not None:
-            # some copyright found
-            return True
-    # no copyright found
-    return False
+    with open(file, encoding="utf-8") as f:
+        for line in f.readlines():
+            if re.search(COPYRIGHT_CHECK_REGEX, line) is not None:
+                # some copyright found
+                return True
+        # no copyright found
+        return False
 
 
 class FixStats:
@@ -271,10 +273,10 @@ def fix_copyright_common(
             if f.isfirstline():
                 if not check_shebang or re.match(SHEBANG_REGEX, line) is None:
                     # start with copyright if no shebang matched
-                    print(copyright_string + line, end=""),
+                    print(copyright_string + line, end="")
                 else:
                     # keep shebang first before copyright
-                    print(line + copyright_string, end=""),
+                    print(line + copyright_string, end="")
             else:
                 # rewrite file
                 print(line, end="")
@@ -407,7 +409,7 @@ def fix_copyrights(files_to_check: FilesToCheck) -> int:
 
 
 def main() -> None:
-    (args, unknown_args) = option_parser_init()
+    (args, _) = option_parser_init()
 
     files_to_check = get_all_files(args.workdir, args.exclude)
 

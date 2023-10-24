@@ -252,11 +252,10 @@ def run_all_code_checkers() -> bool:
 def run_pylint() -> None:
     # can add "tests",  optionally
     command = [
-        "./common_dev/scripts/pylintchecker.py",
-        "-c",
-        "scargo/",
-        "-s",
-        "9.95",
+        "pylint",
+        "scargo",
+        "run.py",
+        "clean.py",
     ]
     subprocess.check_call(command)
 
@@ -316,7 +315,7 @@ def run_mypy() -> None:
     subprocess.check_call(mypy_command)
 
 
-def main() -> None:
+def main() -> None:  # pylint: disable=R0912
     args = get_cmdline_arguments()
     if not len(sys.argv) > 1:
         args.run_all = True

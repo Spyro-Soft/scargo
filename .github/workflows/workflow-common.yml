@@ -61,7 +61,7 @@ jobs:
           continue-on-error: true
           run: ./common_dev/scripts/cyclomatic.py
         - name: Run pylint
-          run: ./common_dev/scripts/pylintchecker.py -c scargo/ -s 9.95 --exclude=tests/
+          run: pylint scargo run.py clean.py
         - name: Check typing with mypy
           run: mypy --explicit-package-bases scargo tests common_dev run.py clean.py
   unit_tests:
