@@ -24,7 +24,10 @@ def __get_logging_config() -> Tuple[int, int]:
         console_log_level = logging.getLevelName(scargo_config.console_log_level)
         file_log_level = logging.getLevelName(scargo_config.file_log_level)
     finally:
-        return console_log_level, file_log_level  # pylint: disable=lost-exception
+        return (  # pylint: disable=[lost-exception,return-in-finally]
+            console_log_level,
+            file_log_level,
+        )
 
 
 def get_logger(name: str = "scargo") -> logging.Logger:

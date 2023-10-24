@@ -20,8 +20,6 @@ bitstring==4.0.1
     # via esptool
 black==23.1.0
     # via scargo (pyproject.toml)
-bottle==0.12.25
-    # via conan
 certifi==2022.12.7
     # via requests
 cffi==1.15.1
@@ -46,7 +44,7 @@ coloredlogs==15.0.1
     # via scargo (pyproject.toml)
 commonmark==0.9.1
     # via recommonmark
-conan==1.59.0
+conan==2.0.13
     # via scargo (pyproject.toml)
 contourpy==1.0.7
     # via matplotlib
@@ -144,8 +142,6 @@ mypy-extensions==1.0.0
     # via
     #   black
     #   mypy
-node-semver==0.6.1
-    # via conan
 nodeenv==1.7.0
     # via pre-commit
 numpy==1.24.2
@@ -174,8 +170,6 @@ platformdirs==3.1.1
     #   virtualenv
 pluggy==1.0.0
     # via pytest
-pluginbase==1.0.1
-    # via conan
 pre-commit==3.1.1
     # via scargo (pyproject.toml)
 pyclean==2.2.0
@@ -194,15 +188,12 @@ pyflakes==3.0.1
     # via flake8
 pygments==2.14.0
     # via
-    #   conan
     #   gcovr
     #   sphinx
 pyinstaller==5.9.0
     # via scargo (pyproject.toml)
 pyinstaller-hooks-contrib==2023.0
     # via pyinstaller
-pyjwt==2.6.0
-    # via conan
 pylint==2.17.0
     # via scargo (pyproject.toml)
 pynacl==1.5.0
@@ -257,7 +248,6 @@ shellingham==1.5.0.post1
     # via scargo (pyproject.toml)
 six==1.16.0
     # via
-    #   conan
     #   ecdsa
     #   pytest-assume
     #   python-dateutil
@@ -301,8 +291,6 @@ tomlkit==0.11.6
     # via
     #   pylint
     #   scargo (pyproject.toml)
-tqdm==4.65.0
-    # via conan
 typer==0.7.0
     # via scargo (pyproject.toml)
 types-clang==0.14.3

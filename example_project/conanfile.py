@@ -1,4 +1,4 @@
-from conans import CMake, ConanFile, tools  # type: ignore[import]
+from conan import CMake, ConanFile, tools  # type: ignore[import]
 
 
 class Example_projectConan(ConanFile):  # type: ignore[misc, no-any-unimported]

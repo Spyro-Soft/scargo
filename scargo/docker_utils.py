@@ -48,13 +48,9 @@ def run_scargo_again_in_docker(
         return
 
     cmd_args = sys.argv[1:]
-    try:
-        # Correct base-dir arg for command in docker
-        for idx, val in enumerate(cmd_args):
-            if val == "-B" or val == "--base-dir":
-                cmd_args[idx + 1] = "."
-    except Exception as e:
-        logger.error(e)
+    for idx, val in enumerate(cmd_args):
+        if val in ("-B", "--base-dir"):
+            cmd_args[idx + 1] = "."
 
     result = run_command_in_docker(
         command=["scargo", *cmd_args], **prepare_docker(project_config, project_path)

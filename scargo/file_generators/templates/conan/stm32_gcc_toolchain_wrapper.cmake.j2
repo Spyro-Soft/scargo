@@ -1,4 +1,5 @@
-include(/workspace/third-party/stm32-cmake/cmake/stm32_gcc.cmake)
+{% set workspace_dir = config.project_root if config.project.build_env != "docker" else "/workspace" %}
+include({{ workspace_dir }}/third-party/stm32-cmake/cmake/stm32_gcc.cmake)
 
 stm32_get_chip_info($ENV{STM32_CHIP} FAMILY STM32_FAMILY DEVICE STM32_DEVICE TYPE STM32_TYPE)
 
