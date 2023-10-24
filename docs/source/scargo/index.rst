@@ -27,7 +27,7 @@ To see all options for a particular command, append ``-h`` to the command name. 
    doc                 Create project documentation
    docker              Manage the docker environment for the project
    fix                 Fix violations reported by the command `check`.
-   flash               Flash the target (only available for esp32 for now).
+   flash               Flash the target.
    gen                 Manage the auto file generator
    new                 Create a new project template.
    publish             Upload conan pkg to repo
