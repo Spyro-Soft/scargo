@@ -58,7 +58,7 @@ def search_multiple_strings_in_file(
 
 def process(path: str, exclude_dir: Sequence[str]) -> int:
     todo_count = 0
-    for root, d_names, f_names in os.walk(path):
+    for root, _, f_names in os.walk(path):
         for f in f_names:
             fname = os.path.join(root, f)
             if exclude_dir:
@@ -74,7 +74,7 @@ def process(path: str, exclude_dir: Sequence[str]) -> int:
 
 
 def main() -> None:
-    (args, unknown_args) = option_parser_init()
+    (args, _) = option_parser_init()
 
     todo_count = 0
     for workdir in args.workdirs:

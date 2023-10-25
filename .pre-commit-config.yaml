@@ -43,6 +43,10 @@ repos:
       - id: flake8
         additional_dependencies:
           - flake8-absolute-import
+  - repo: https://github.com/pylint-dev/pylint
+    rev: v3.0.2
+    hooks:
+      - id: pylint
   - repo: https://github.com/pre-commit/mirrors-mypy
     rev: v1.0.1
     hooks:

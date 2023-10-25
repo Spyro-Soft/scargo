@@ -23,8 +23,8 @@ src_paths = [
 sys.path.extend(src_paths)
 
 # -- Project information -----------------------------------------------------
-project = "scargo"
-copyright = "2022, Spyrosoft Solution S.A."
+project = "scargo"  # pylint: disable=redefined-builtin
+copyright = "2022, Spyrosoft Solution S.A."  # pylint: disable=redefined-builtin
 author = "Spyrosoft Solution S.A."
 
 # The full version, including alpha/beta/rc tags
@@ -50,7 +50,7 @@ extensions = [
     "sphinxcontrib.plantuml",
 ]
 autosummary_generate = True  # Turn on sphinx.ext.autosummary
-inheritance_graph_attrs = dict(rankdir="TB", size='""')  # TB=Top to bottom view
+inheritance_graph_attrs = {"rankdir": "TB", "size": '""'}  # TB=Top to bottom view
 graphviz_output_format = "svg"
 
 plantuml_output_format = "svg"
