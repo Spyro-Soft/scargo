@@ -4,7 +4,7 @@
 #
 
 from conan import ConanFile
-from conan.tools.cmake import CMake  # type: ignore[import]
+from conan.tools.cmake import CMake
 
 
 class {{ config.project.name|capitalize|replace("-", "") }}TestConan(ConanFile):  # type: ignore[misc, no-any-unimported]
@@ -33,7 +33,6 @@ class {{ config.project.name|capitalize|replace("-", "") }}TestConan(ConanFile):
         self.requires("{{ dep }}")
         {% endfor %}
     {% endif %}
-
     {% if config.dependencies.build or config.dependencies.tool %}
     def build_requirements(self) -> None:
         {% for dep in config.dependencies.build %}
@@ -43,4 +42,3 @@ class {{ config.project.name|capitalize|replace("-", "") }}TestConan(ConanFile):
         self.tool_requires("{{ tool_dep }}")
         {% endfor %}
     {% endif %}
-

@@ -36,7 +36,9 @@ debug:
   stage: build
   extends: .merge_request
   script:
-    - scargo build
+    - CONAN_LOGIN_USERNAME=ci_user
+    - CONAN_PASSWORD=${CI_JOB_TOKEN}
+    - scargo build --profile Debug
   artifacts:
     paths:
       - build/Debug/bin
@@ -49,10 +51,12 @@ tests:
   extends: .merge_request
   allow_failure: true
   script:
+    - CONAN_LOGIN_USERNAME=ci_user
+    - CONAN_PASSWORD=${CI_JOB_TOKEN}
     - scargo test
   artifacts:
     paths:
-      - build/doc/ut_coverage_html
+      - build/tests/ut-coverage.html
 
 #______________________________________________________________________________________________CLANG_FORMAT
 clang format:
