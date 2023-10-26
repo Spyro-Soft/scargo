@@ -44,7 +44,7 @@ TEST_PROJECT_STM32_PATH = Path(TEST_DATA_PATH, "test_projects", TEST_PROJECT_STM
 def config(fs: FakeFilesystem) -> Config:  # type: ignore[no-any-unimported]
     return Config(
         project=ProjectConfig(
-            **{
+            **{  # type: ignore
                 "name": "test_project",
                 "version": "0.1.0",
                 "description": "Project description.",
@@ -72,7 +72,7 @@ def config(fs: FakeFilesystem) -> Config:  # type: ignore[no-any-unimported]
             "MinSizeRel": ProfileConfig(cflags="-Os -DNDEBUG", cxxflags="-Os -DNDEBUG"),
         },
         check=ChecksConfig(
-            **{
+            **{  # type: ignore
                 "exclude": [],
                 "pragma": CheckConfig(description=None, exclude=[]),
                 "copyright": CheckConfig(description="Copyright", exclude=[]),
@@ -98,9 +98,10 @@ def config(fs: FakeFilesystem) -> Config:  # type: ignore[no-any-unimported]
             general=[], build=[], tool=[], test=["gtest/cci.20210126"]
         ),
         conan=ConanConfig(repo={}),
+        atsam=None,
         stm32=None,
         esp32=None,
-        scargo=ScargoConfig(
+        scargo=ScargoConfig(  # type: ignore
             console_log_level="INFO",
             file_log_level="WARNING",
             update_exclude=[],

@@ -232,7 +232,7 @@ class TestBinProjectFlow:
         """Simple test which checks if scargo new -h command can be invoked and do not return any error"""
         # create temporary dir for new project
         test_state.proj_path = tmpdir_factory.mktemp(test_state.proj_name)
-        os.chdir(test_state.proj_path)
+        os.chdir(test_state.proj_path)  # type: ignore
 
         # New Help
         result = test_state.runner.invoke(cli, ["new", "-h"])

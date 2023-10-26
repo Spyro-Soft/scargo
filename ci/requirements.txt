@@ -134,7 +134,7 @@ mccabe==0.7.0
     # via
     #   flake8
     #   pylint
-mypy==1.0.1
+mypy==1.6.1
     # via scargo (pyproject.toml)
 mypy-extensions==1.0.0
     # via

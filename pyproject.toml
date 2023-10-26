@@ -54,7 +54,7 @@ dev = [
     "gcovr>=5.2",
     "isort==5.11.4",
     "matplotlib",
-    "mypy==1.0.1",
+    "mypy==1.6.1",
     "pre-commit",
     "pyclean==2.2.0",
     "pyelftools",
@@ -109,18 +109,6 @@ profile = "black"
 ignore-paths = ["example_project", "tests"]
 max-line-length = 120
 output-format = "colorized"
-ignored-modules = [
-    "clang.cindex",
-    "clang",
-    "coloredlogs",
-    "docker",
-    "jinja2",
-    "matplotlib.pyplot",
-    "pydantic",
-    "toml",
-    "typer",
-    "yaml",
-]
 
 [tool.pylint.messages_control]
 disable = [
@@ -143,6 +131,9 @@ strict = true
 disallow_any_unimported = true
 no_implicit_optional = true
 show_error_codes = true
+explicit_package_bases = true
+scripts_are_modules = false
+exclude = ["conanfile.py"]
 
 [[tool.mypy.overrides]]
 module = "coloredlogs"
