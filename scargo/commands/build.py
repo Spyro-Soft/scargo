@@ -7,7 +7,7 @@ import subprocess
 import sys
 from pathlib import Path
 
-from scargo.commands.update import conan_add_remote
+from scargo.commands.test import conan_add_remote, conan_source
 from scargo.config_utils import prepare_config
 from scargo.file_generators.conan_gen import conan_add_default_profile_if_missing
 from scargo.logger import get_logger
@@ -85,17 +85,3 @@ def scargo_build(profile: str) -> None:
     except subprocess.CalledProcessError:
         logger.error("Unable to build exec file")
         sys.exit(1)
-
-
-def conan_source(project_dir: Path) -> None:
-    try:
-        subprocess.check_call(
-            [
-                "conan",
-                "source",
-                ".",
-            ],
-            cwd=project_dir,
-        )
-    except subprocess.CalledProcessError:
-        logger.error("Unable to source")
