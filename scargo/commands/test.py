@@ -8,6 +8,7 @@ import sys
 from pathlib import Path
 from typing import List, Union
 
+from scargo.commands.update import conan_add_remote, conan_source
 from scargo.config import Config
 from scargo.config_utils import prepare_config
 from scargo.file_generators.conan_gen import conan_add_default_profile_if_missing
@@ -43,6 +44,9 @@ def scargo_test(
 
     test_build_dir.mkdir(parents=True, exist_ok=True)
     conan_add_default_profile_if_missing()
+
+    conan_add_remote(project_dir, config)
+    conan_source(project_dir)
 
     try:
         # Run CMake and build tests.
