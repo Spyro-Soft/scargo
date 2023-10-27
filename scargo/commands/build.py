@@ -7,7 +7,7 @@ import subprocess
 import sys
 from pathlib import Path
 
-from scargo.commands.test import conan_add_remote, conan_source
+from scargo.conan_utils import conan_add_remote, conan_source
 from scargo.config_utils import prepare_config
 from scargo.file_generators.conan_gen import conan_add_default_profile_if_missing
 from scargo.logger import get_logger

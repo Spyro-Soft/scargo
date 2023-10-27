@@ -9,7 +9,8 @@ from pytest_mock import MockerFixture
 from pytest_subprocess import FakeProcess
 from pytest_subprocess.fake_popen import FakePopen
 
-from scargo.commands.test import conan_add_remote, conan_add_user, scargo_test
+from scargo.commands.test import scargo_test
+from scargo.conan_utils import conan_add_remote, conan_add_user
 from scargo.config import Config
 from tests.ut.ut_scargo_publish import (
     ENV_CONAN_PASSWORD,
