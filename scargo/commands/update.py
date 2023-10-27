@@ -81,7 +81,6 @@ def scargo_update(config_file_path: Path) -> None:
     generate_conanprofile(config)
 
     conan_add_remote(project_path, config)
-    conan_source(project_path)
 
     if target.family == "esp32":
         Path(config.source_dir_path, "fs").mkdir(parents=True, exist_ok=True)

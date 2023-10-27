@@ -67,16 +67,10 @@ def test_update_project_content_with_docker(tmp_path: Path, fp: FakeProcess) -> 
     conan_add_remote_1_cmd = ["conan", "remote", "add", REMOTE_REPO_NAME_1, EXAMPLE_URL]
     conan_add_remote_2_cmd = ["conan", "remote", "add", REMOTE_REPO_NAME_2, EXAMPLE_URL]
     conan_user_cmd = "conan user"
-    conan_source_cmd = [
-        "conan",
-        "source",
-        ".",
-    ]
 
     fp.register(conan_add_remote_1_cmd)
     fp.register(conan_add_remote_2_cmd)
     fp.register(conan_user_cmd, occurrences=2)
-    fp.register(conan_source_cmd)
     os.chdir(tmp_path)
     project_name = "test_project_with_docker"
     scargo_new(project_name, None, None, TARGET_X86, True, False, None)
@@ -97,16 +91,10 @@ def test_update_project_content_with_docker__build(
     conan_add_remote_1_cmd = ["conan", "remote", "add", REMOTE_REPO_NAME_1, EXAMPLE_URL]
     conan_add_remote_2_cmd = ["conan", "remote", "add", REMOTE_REPO_NAME_2, EXAMPLE_URL]
     conan_user_cmd = "conan user"
-    conan_source_cmd = [
-        "conan",
-        "source",
-        ".",
-    ]
 
     fp.register(conan_add_remote_1_cmd)
     fp.register(conan_add_remote_2_cmd)
     fp.register(conan_user_cmd, occurrences=2)
-    fp.register(conan_source_cmd)
     os.chdir(tmp_path)
     project_name = "test_project_with_docker"
     scargo_new(project_name, None, None, TARGET_X86, True, False, None)
