@@ -47,26 +47,15 @@ repos:
     rev: v3.0.2
     hooks:
       - id: pylint
+        language: system
   - repo: https://github.com/pre-commit/mirrors-mypy
-    rev: v1.0.1
+    rev: v1.6.1
     hooks:
       - id: mypy
-        args: [--explicit-package-bases]
-        additional_dependencies: [
-          click,
-          jinja2,
-          matplotlib,
-          pydantic,
-          pytest,
-          pytest_subprocess,
-          pytest-mock,
-          python-dotenv,
-          tomlkit,
-          typer,
-          types-clang==0.14.3,
-          types-toml,
-          types-openssl-python,
-        ]
+        exclude: conanfile.py
+        args:
+          - --config-file=pyproject.toml
+        language: system
 
 # sets up .pre-commit-ci.yaml to ensure pre-commit dependencies stay up to date
 ci:
