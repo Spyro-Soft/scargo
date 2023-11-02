@@ -1,12 +1,14 @@
 from logging import LogRecord
+from pathlib import Path
 from typing import Iterable, List, Tuple
 
 from scargo.config import Config, parse_config
-from scargo.global_values import SCARGO_PKG_PATH
 
 
-def get_test_project_config() -> Config:
-    return parse_config(SCARGO_PKG_PATH.parent / "tests/ut/data/scargo_test.toml")
+def get_test_project_config(target: str = "x86") -> Config:
+    config_path = Path(__file__).parent / f"data/scargo_test_{target}.toml"
+    assert config_path.is_file()
+    return parse_config(config_path)
 
 
 def get_log_data(records: Iterable[LogRecord]) -> List[Tuple[str, str]]:
