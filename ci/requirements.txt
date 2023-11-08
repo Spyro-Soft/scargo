@@ -289,7 +289,7 @@ tomlkit==0.11.6
     # via
     #   pylint
     #   scargo (pyproject.toml)
-typer==0.7.0
+typer==0.9.0
     # via scargo (pyproject.toml)
 types-clang==0.14.3
     # via scargo (pyproject.toml)
@@ -305,6 +305,7 @@ typing-extensions==4.6.0
     #   mypy
     #   pydantic
     #   scargo (pyproject.toml)
+    #   typer
 unittest-xml-reporting==3.2.0
     # via scargo (pyproject.toml)
 urllib3==1.26.15
