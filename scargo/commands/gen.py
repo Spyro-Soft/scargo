@@ -2,9 +2,6 @@
 # @copyright Copyright (C) 2023 SpyroSoft Solutions S.A. All rights reserved.
 # #
 
-import os
-import re
-import shutil
 import subprocess
 import sys
 from pathlib import Path
@@ -17,10 +14,13 @@ from scargo.file_generators.mock_gen import generate_mocks
 from scargo.file_generators.ut_gen import generate_ut
 from scargo.global_values import SCARGO_PKG_PATH
 from scargo.logger import get_logger
+from scargo.target_helpers.esp32_helper import (
+    OUT_FS_DIR,
+    gen_fs_esp32,
+    gen_single_binary_esp32,
+)
 
 logger = get_logger()
-
-OUT_FS_DIR = Path("build", "fs")
 
 
 def scargo_gen(
@@ -57,8 +57,7 @@ def scargo_gen(
         generate_fs(config)
 
     if single_bin:
-        project_profile_path = config.project_root / "build" / profile
-        gen_single_binary(project_profile_path, config)
+        gen_single_binary(profile, config)
 
 
 def generate_certs(
@@ -76,9 +75,7 @@ def generate_certs(
     if not certs_passwd:
         certs_passwd = "1234"
 
-    if mode_for_certs == "all":
-        mode_for_certs = "All-certificates"
-    elif mode_for_certs == "device":
+    if mode_for_certs == "device":
         mode_for_certs = "Device-certificate"
     else:
         mode_for_certs = "All-certificates"
@@ -135,92 +132,9 @@ def generate_fs(config: Config) -> None:
         logger.warning("Gen --fs command not supported for this target yet.")
 
 
-def gen_single_binary(project_profile_path: Path, config: Config) -> None:
+def gen_single_binary(build_profile: str, config: Config) -> None:
     target = config.project.target
     if target.family == "esp32":
-        gen_single_binary_esp32(project_profile_path, config)
+        gen_single_binary_esp32(build_profile, config)
     else:
         logger.warning("Gen --bin command not supported for this target yet.")
-
-
-def gen_fs_esp32(config: Config) -> None:
-    command = []
-    partition_list = config.get_esp32_config().partitions
-    fs_size = 0
-    for i in partition_list:
-        split_list = i.split(",")
-        if "spiffs" in split_list[0]:
-            fs_size = int(re.sub(",", "", split_list[4]), 16)
-
-    try:
-        project_path = config.project_root
-        fs_in_dir = project_path / "main/fs"
-        fs_out_dir = project_path / OUT_FS_DIR
-        fs_out_bin = project_path / "build/spiffs.bin"
-        fs_in_dir.mkdir(parents=True, exist_ok=True)
-        fs_out_dir.mkdir(parents=True, exist_ok=True)
-
-        shutil.copytree(fs_in_dir, fs_out_dir, dirs_exist_ok=True)
-
-        idf_path = os.environ.get("IDF_PATH")
-        command = [
-            f"{idf_path}/components/spiffs/spiffsgen.py",
-            str(fs_size),
-            str(fs_out_dir),
-            str(fs_out_bin),
-        ]
-
-        subprocess.check_call(command, cwd=project_path)
-        logger.info("Generated %s of size:%s", fs_out_bin, fs_size)
-
-    except subprocess.CalledProcessError:
-        logger.error("%s fail", command)
-        sys.exit(1)
-
-
-def gen_single_binary_esp32(project_profile_path: Path, config: Config) -> None:
-    partition_list = config.get_esp32_config().partitions
-    chip = config.get_esp32_config().chip
-
-    flasher_args_path = project_profile_path / "flash_args"
-    if not flasher_args_path.is_file():
-        logger.warning("%s does not exists", flasher_args_path)
-        sys.exit(1)
-
-    line_list = flasher_args_path.read_text().split()
-
-    spiffs_addr = None
-    for i in partition_list:
-        if "spiffs" in i:
-            split_list = i.split(",")
-            spiffs_addr = split_list[3].strip()
-            break
-
-    flash_size = "4MB"
-    for index, arg in enumerate(line_list):
-        if "flash_size" in arg:
-            flash_size = line_list[index + 1]
-        if arg.endswith(".bin"):
-            line_list[index] = str(project_profile_path / arg)
-
-    command = [
-        "esptool.py",
-        "--chip",
-        chip,
-        "merge_bin",
-        "-o",
-        "build/flash_image.bin",
-        "--fill-flash-size",
-        f"{flash_size}",
-    ]
-    command.extend(line_list)
-
-    if spiffs_addr:
-        command.extend([spiffs_addr, "build/spiffs.bin"])
-
-    try:
-        logger.info("Running: %s", " ".join(command))
-        subprocess.check_call(command, cwd=config.project_root)
-    except subprocess.CalledProcessError:
-        logger.error("Generation of single binary failed")
-        sys.exit(1)

@@ -1,689 +1,314 @@
 import os
-import shutil
+from dataclasses import dataclass
 from pathlib import Path
-from typing import Dict
+from typing import Optional
+from unittest.mock import MagicMock
 
 import pytest
-from clang import native  # type: ignore[attr-defined]
-from clang.cindex import Config as ClangConfig
-from OpenSSL import crypto
 from pytest_mock import MockerFixture
+from pytest_subprocess import FakeProcess, fake_popen
 
 from scargo.commands.gen import scargo_gen
-from scargo.commands.update import scargo_update
-from scargo.config_utils import get_scargo_config_or_exit
-
-NAME_OF_LIB_HPP_FILE = "lib_hpp.hpp"
-NAME_OF_TEST_TXT_FILE = "test_dummy_file.txt"
-NAME_OF_TEST_NO_EXTENSION_FILE = "test_dummy_no_ext_file"
-NESTED_LIB_FILE_LOCATION = "libs/test_lib/"
-
-TEST_DEVICE_ID = "com.example.my.solution:gw-01:da:device:ZWave:CA0D6357%2F4"
-TEST_DEVICE_ID_2 = "com.example.my.solution:gw-01:da:device:ZWave:AAAA1111%1A1"
-TEST_DEVICE_ID_3 = "com.example.my.solution:gw-01:da:device:ZWave:BBBB2222%2B2"
-
-CERTS_DIR = "build/certs"
-FS_DIR = "build/fs"
-
-CUSTOM_CERTS_DIR = "custom_certs"
+from tests.ut.utils import get_test_project_config
 
 
-@pytest.fixture(autouse=True, scope="session")
-def clang_config() -> None:
-    ClangConfig().set_library_file(str(Path(native.__file__).with_name("libclang.so")))
+@pytest.fixture
+def mock_prepare_config(tmpdir: Path, mocker: MockerFixture) -> MagicMock:
+    os.chdir(tmpdir)
 
+    x86_config = get_test_project_config("x86")
+    x86_config.project_root = Path(tmpdir)
 
-def project_add_nested_hpp_test_file(project_src_path: Path) -> None:
-    """This function adding to project src directory some dummy .hpp file in nested directory for stronger tests"""
-    os.makedirs(str(project_src_path / NESTED_LIB_FILE_LOCATION), exist_ok=True)
-    with open(
-        str(project_src_path / NESTED_LIB_FILE_LOCATION / NAME_OF_LIB_HPP_FILE), "w"
-    ) as fp:
-        fp.write("//THIS IS TMP TEST HPP FILE")
-
-
-def project_add_extra_test_files(project_src_path: Path) -> None:
-    """This function adding to project src directory some .txt file and file without extension for negative tests"""
-    os.makedirs(str(project_src_path / NESTED_LIB_FILE_LOCATION), exist_ok=True)
-    with open(str(project_src_path / NAME_OF_TEST_TXT_FILE), "w") as fp:
-        fp.write("//THIS IS TMP TEST TXT FILE")
-    with open(str(project_src_path / NAME_OF_TEST_NO_EXTENSION_FILE), "w") as fp:
-        fp.write("//THIS IS TMP TEST NO EXTENSION FILE")
-
-
-@pytest.mark.parametrize(
-    "test_project_data",
-    [
-        {"proj_path": "copy_test_project", "src_files_dir": "src"},
-        {"proj_path": "copy_test_project_esp32", "src_files_dir": "main"},
-        {"proj_path": "copy_test_project_stm32", "src_files_dir": "src"},
-        {"proj_path": "new_project_x86", "src_files_dir": "src"},
-        {"proj_path": "new_project_esp32", "src_files_dir": "main"},
-        {"proj_path": "new_project_stm32", "src_files_dir": "src"},
-    ],
-    ids=[
-        "copied_proj",
-        "copied_esp32_proj",
-        "copied_stm32_proj",
-        "new_project_x86",
-        "new_project_esp32",
-        "new_project_stm32",
-    ],
-    scope="class",
-)
-class TestGenMockPositive:
-    """This class collects all unit tests for scargo_gen command with gen_mock option"""
-
-    def test_gen_mock_for_simple_h_file(
-        self,
-        request: pytest.FixtureRequest,
-        test_project_data: Dict[str, str],
-        mocker: MockerFixture,
-    ) -> None:
-        """
-        This test check if for .h located in src dictionary mock files will be created under tests/mocks dictionary
-        as a result of scargo gen command.
-        """
-        proj_path = request.getfixturevalue(test_project_data["proj_path"])
-        os.chdir(proj_path)
-        path_to_h_file = Path(
-            os.getcwd(), test_project_data["src_files_dir"], "test_lib.h"
-        )
-
-        # make sure that files which needs to be generated do not exist - precondition
-        assert not os.path.exists("tests/mocks/test_lib.h")
-        assert not os.path.exists("tests/mocks/mock_test_lib.h")
-        assert not os.path.exists("tests/mocks/mock_test_lib.cpp")
-
-        mocker.patch(
-            f"{scargo_gen.__module__}.prepare_config",
-            return_value=get_scargo_config_or_exit(),
-        )
-        scargo_gen(
-            profile="Debug",
-            gen_ut=None,
-            gen_mock=path_to_h_file,
-            certs=None,
-            certs_mode=None,
-            certs_input=None,
-            certs_passwd=None,
-            fs=False,
-            single_bin=False,
-        )
-
-        # test if expected files was generated
-        assert os.path.exists("tests/mocks/test_lib.h")
-        assert os.path.exists("tests/mocks/mock_test_lib.h")
-        assert os.path.exists("tests/mocks/mock_test_lib.cpp")
-
-    def test_gen_mock_for_nested_h_file(
-        self,
-        request: pytest.FixtureRequest,
-        test_project_data: Dict[str, str],
-        mocker: MockerFixture,
-    ) -> None:
-        """
-        This test check if for .hpp located in nested directory not just under src dictionary mock files will be created
-        under path mirroring the path to sources in tests/mocks dictionary as a result of scargo gen command.
-        """
-        proj_path = request.getfixturevalue(test_project_data["proj_path"])
-        os.chdir(proj_path)
-        project_add_nested_hpp_test_file(proj_path / test_project_data["src_files_dir"])
-        path_to_nested_hpp_file = Path(
-            os.getcwd(),
-            test_project_data["src_files_dir"],
-            NESTED_LIB_FILE_LOCATION,
-            NAME_OF_LIB_HPP_FILE,
-        )
-
-        # make sure that files which needs to be generated do not exist
-        assert not os.path.exists(
-            f"tests/mocks/{NESTED_LIB_FILE_LOCATION}/{NAME_OF_LIB_HPP_FILE}"
-        )
-        assert not os.path.exists(
-            f"tests/mocks/{NESTED_LIB_FILE_LOCATION}/mock_{NAME_OF_LIB_HPP_FILE}"
-        )
-        assert not os.path.exists(
-            f"tests/mocks/{NESTED_LIB_FILE_LOCATION}/mock_{NAME_OF_LIB_HPP_FILE}".replace(
-                ".hpp", ".cpp"
-            )
-        )
-
-        mocker.patch(
-            f"{scargo_gen.__module__}.prepare_config",
-            return_value=get_scargo_config_or_exit(),
-        )
-        scargo_gen(
-            profile="Debug",
-            gen_ut=None,
-            gen_mock=path_to_nested_hpp_file,
-            certs=None,
-            certs_mode=None,
-            certs_input=None,
-            certs_passwd=None,
-            fs=False,
-            single_bin=False,
-        )
-
-        # test if expected files was generated
-        assert os.path.exists(
-            f"tests/mocks/{NESTED_LIB_FILE_LOCATION}/{NAME_OF_LIB_HPP_FILE}"
-        )
-        assert os.path.exists(
-            f"tests/mocks/{NESTED_LIB_FILE_LOCATION}/mock_{NAME_OF_LIB_HPP_FILE}"
-        )
-        assert os.path.exists(
-            f"tests/mocks/{NESTED_LIB_FILE_LOCATION}/mock_{NAME_OF_LIB_HPP_FILE}".replace(
-                ".hpp", ".cpp"
-            )
-        )
-
-
-@pytest.mark.parametrize(
-    "file",
-    ["test_lib.cpp", NAME_OF_TEST_TXT_FILE, NAME_OF_TEST_NO_EXTENSION_FILE],
-    ids=["cpp file", "txt file", "file_with_no_extension"],
-)
-def test_gen_mock_for_unexpected_extension_file(
-    copy_test_project_stm32: Path,
-    mocker: MockerFixture,
-    file: str,
-) -> None:
-    """
-    This test check if for .h located in src dictionary mock files will be created under tests/mocks dictionary
-    as a result of scargo gen command.
-    """
-    os.chdir(copy_test_project_stm32)
-    project_add_extra_test_files(copy_test_project_stm32 / "src")
-    path_to_file = Path(os.getcwd(), "src", file)
-    # make sure that files which needs to be generated do not exist - precondition
-    assert not os.path.exists(f"tests/mocks/{file}")
-
-    mocker.patch(
-        f"{scargo_gen.__module__}.prepare_config",
-        return_value=get_scargo_config_or_exit(),
+    return mocker.patch(
+        f"{scargo_gen.__module__}.prepare_config", return_value=x86_config
     )
-    with pytest.raises(SystemExit) as scargo_gen_sys_exit:
-        scargo_gen(
-            profile="Debug",
-            gen_ut=None,
-            gen_mock=path_to_file,
-            certs=None,
-            certs_mode=None,
-            certs_input=None,
-            certs_passwd=None,
-            fs=False,
-            single_bin=False,
-        )
-    assert scargo_gen_sys_exit.type == SystemExit
-    assert scargo_gen_sys_exit.value.code == 1
-
-    # test if expected files was generated
-    assert not os.path.exists(f"tests/mocks/{file}")
 
 
-@pytest.mark.parametrize(
-    "test_project_data",
-    [
-        {"proj_path": "copy_test_project", "src_files_dir": "src"},
-        {"proj_path": "copy_test_project_esp32", "src_files_dir": "main"},
-        {"proj_path": "copy_test_project_stm32", "src_files_dir": "src"},
-        {"proj_path": "new_project_x86", "src_files_dir": "src"},
-        {"proj_path": "new_project_esp32", "src_files_dir": "main"},
-        {"proj_path": "new_project_stm32", "src_files_dir": "src"},
-    ],
-    ids=[
-        "copied_proj",
-        "copied_esp32_proj",
-        "copied_stm32_proj",
-        "new_project_x86",
-        "new_project_esp32",
-        "new_project_stm32",
-    ],
-    scope="class",
-)
-class TestGenCerts:
-    """This class collects all unit tests for scargo_gen command with certs option"""
+@pytest.fixture
+def mock_prepare_config_esp32(tmpdir: Path, mocker: MockerFixture) -> MagicMock:
+    os.environ["IDF_PATH"] = "idf_path"
+    os.chdir(tmpdir)
 
-    def test_gen_certs_simple(
-        self,
-        request: pytest.FixtureRequest,
-        test_project_data: Dict[str, str],
-        mocker: MockerFixture,
-    ) -> None:
-        """This test simply check if command gen certs create certs files"""
-        proj_path = request.getfixturevalue(test_project_data["proj_path"])
-        os.chdir(proj_path)
+    esp_config = get_test_project_config("esp32")
+    esp_config.project_root = Path(tmpdir)
 
-        # remove directory with certs if already present
-        if os.path.exists(CERTS_DIR):
-            shutil.rmtree(CERTS_DIR)
-        if os.path.exists(FS_DIR):
-            shutil.rmtree(FS_DIR)
-
-        assert not os.path.exists(CERTS_DIR)
-        assert not os.path.exists(FS_DIR)
-
-        mocker.patch(
-            f"{scargo_gen.__module__}.prepare_config",
-            return_value=get_scargo_config_or_exit(),
-        )
-        scargo_gen(
-            profile="Debug",
-            gen_ut=None,
-            gen_mock=None,
-            certs=TEST_DEVICE_ID,
-            certs_mode=None,
-            certs_input=None,
-            certs_passwd=None,
-            fs=False,
-            single_bin=False,
-        )
-        # test if expected cert files was generated
-        pytest.assume(os.path.exists(FS_DIR))  # type: ignore
-        pytest.assume(os.path.exists(CERTS_DIR))  # type: ignore
-
-        pytest.assume(os.path.exists(f"{FS_DIR}/ca.pem"))  # type: ignore
-        pytest.assume(os.path.exists(f"{FS_DIR}/device_cert.pem"))  # type: ignore
-        pytest.assume(os.path.exists(f"{FS_DIR}/device_priv_key.pem"))  # type: ignore
-
-        pytest.assume(os.path.exists(f"{CERTS_DIR}/azure"))  # type: ignore
-        pytest.assume(os.path.exists(f"{CERTS_DIR}/azure/{TEST_DEVICE_ID}-root-ca.pem"))  # type: ignore
-
-        # other files in certs dir
-        pytest.assume(os.path.exists(f"{CERTS_DIR}/ca.pem"))  # type: ignore
-        pytest.assume(os.path.exists(f"{CERTS_DIR}/digiroot.pem"))  # type: ignore
-        pytest.assume(os.path.exists(f"{CERTS_DIR}/index.txt"))  # type: ignore
-        pytest.assume(os.path.exists(f"{CERTS_DIR}/index.txt.attr"))  # type: ignore
-        pytest.assume(os.path.exists(f"{CERTS_DIR}/index.txt.attr.old"))  # type: ignore
-        pytest.assume(os.path.exists(f"{CERTS_DIR}/index.txt.old"))  # type: ignore
-        pytest.assume(os.path.exists(f"{CERTS_DIR}/serial"))  # type: ignore
-        pytest.assume(os.path.exists(f"{CERTS_DIR}/serial.old"))  # type: ignore
-        #
-        pytest.assume(os.path.exists(f"{CERTS_DIR}/certs"))  # type: ignore
-        pytest.assume(
-            os.path.exists(f"{CERTS_DIR}/certs/azure-iot-test-only.chain.ca.cert.pem")
-        )  # type: ignore
-        pytest.assume(
-            os.path.exists(
-                f"{CERTS_DIR}/certs/azure-iot-test-only.intermediate.cert.pem"
-            )
-        )  # type: ignore
-        pytest.assume(
-            os.path.exists(f"{CERTS_DIR}/certs/azure-iot-test-only.root.ca.cert.pem")
-        )  # type: ignore
-        pytest.assume(os.path.exists(f"{CERTS_DIR}/certs/iot-device.cert.pem"))  # type: ignore
-        pytest.assume(os.path.exists(f"{CERTS_DIR}/certs/iot-device.cert.pfx"))  # type: ignore
-
-        pytest.assume(os.path.exists(f"{CERTS_DIR}/csr"))  # type: ignore
-        pytest.assume(
-            os.path.exists(f"{CERTS_DIR}/csr/azure-iot-test-only.intermediate.csr.pem")
-        )  # type: ignore
-        pytest.assume(os.path.exists(f"{CERTS_DIR}/csr/iot-device.csr.pem"))  # type: ignore
-
-        pytest.assume(os.path.exists(f"{CERTS_DIR}/intermediateCerts"))  # type: ignore
-
-        pytest.assume(os.path.exists(f"{CERTS_DIR}/newcerts"))  # type: ignore
-        pytest.assume(os.path.exists(f"{CERTS_DIR}/newcerts/01.pem"))  # type: ignore
-        pytest.assume(os.path.exists(f"{CERTS_DIR}/newcerts/02.pem"))  # type: ignore
-
-        pytest.assume(os.path.exists(f"{CERTS_DIR}/private"))  # type: ignore
-        pytest.assume(
-            os.path.exists(
-                f"{CERTS_DIR}/private/azure-iot-test-only.intermediate.key.pem"
-            )
-        )  # type: ignore
-        pytest.assume(
-            os.path.exists(f"{CERTS_DIR}/private/azure-iot-test-only.root.ca.key.pem")
-        )  # type: ignore
-        pytest.assume(os.path.exists(f"{CERTS_DIR}/private/iot-device.key.pem"))  # type: ignore
-
-    def test_gen_certs_mode_device(
-        self,
-        request: pytest.FixtureRequest,
-        test_project_data: Dict[str, str],
-        mocker: MockerFixture,
-    ) -> None:
-        """This test check if command gen certs with certs_mode='device' will generate device certs files for
-        new device id"""
-        proj_path = request.getfixturevalue(test_project_data["proj_path"])
-        os.chdir(proj_path)
-
-        # some files need to be present before we regenerate certs for device
-        if not os.path.exists(f"{CERTS_DIR}/index.txt"):
-            pytest.fail(
-                "Preconditions not meet, please generate all certificates as precondition"
-            )
-
-        # removing files which should be regenerated
-        # from build/certs dir
-        if os.path.exists(f"{CERTS_DIR}/ca.pem"):
-            os.remove(f"{CERTS_DIR}/ca.pem")
-        if os.path.exists(f"{CERTS_DIR}/certs/iot-device.cert.pem"):
-            os.remove(f"{CERTS_DIR}/certs/iot-device.cert.pem")
-        if os.path.exists(f"{CERTS_DIR}/private/iot-device.key.pem"):
-            os.remove(f"{CERTS_DIR}/private/iot-device.key.pem")
-        # from build/fs dir
-        if os.path.exists(f"{FS_DIR}/ca.pem"):
-            os.remove(f"{FS_DIR}/ca.pem")
-        if os.path.exists(f"{FS_DIR}/device_cert.pem"):
-            os.remove(f"{FS_DIR}/device_cert.pem")
-        if os.path.exists(f"{FS_DIR}/device_priv_key.pem"):
-            os.remove(f"{FS_DIR}/device_priv_key.pem")
-
-        mocker.patch(
-            f"{scargo_gen.__module__}.prepare_config",
-            return_value=get_scargo_config_or_exit(),
-        )
-        # generate keys for new device
-        scargo_gen(
-            profile="Debug",
-            gen_ut=None,
-            gen_mock=None,
-            certs=TEST_DEVICE_ID_2,
-            certs_mode="device",
-            certs_input=None,
-            certs_passwd=None,
-            fs=False,
-            single_bin=False,
-        )
-
-        assert os.path.exists(f"{CERTS_DIR}/ca.pem")
-        assert os.path.exists(f"{CERTS_DIR}/certs/iot-device.cert.pem")
-        assert os.path.exists(f"{CERTS_DIR}/private/iot-device.key.pem")
-        assert os.path.exists(f"{CERTS_DIR}/certs/azure-iot-test-only.root.ca.cert.pem")
-
-        assert os.path.exists(f"{CERTS_DIR}/azure/{TEST_DEVICE_ID_2}-root-ca.pem")
-        assert os.path.exists(f"{CERTS_DIR}/azure/{TEST_DEVICE_ID}-root-ca.pem")
-
-        assert os.path.exists(f"{FS_DIR}/ca.pem")
-        assert os.path.exists(f"{FS_DIR}/device_cert.pem")
-        assert os.path.exists(f"{FS_DIR}/device_priv_key.pem")
-
-    @pytest.mark.skip("Not ready yet")
-    def test_gen_certs_mode_device_custom_input_certs_dir(
-        self,
-        request: pytest.FixtureRequest,
-        test_project_data: Dict[str, str],
-        mocker: MockerFixture,
-    ) -> None:
-        """This test check if command gen certs with certs_mode='device' will generate device certs files for
-        new device id based on custom intermediate certs dir"""
-        proj_path = request.getfixturevalue(test_project_data["proj_path"])
-        os.chdir(proj_path)
-
-        # some files need to be present before we regenerate certs for device
-        if not os.path.exists(f"{CERTS_DIR}/index.txt"):
-            pytest.fail(
-                "Preconditions not meet, please generate all certificates as precondition"
-            )
-
-        # move generated intermediate certs to custom location
-        # os.mkdir(CUSTOM_CERTS_DIR)
-        # shutil.move(CERTS_DIR, CUSTOM_CERTS_DIR)
-        shutil.copytree(CERTS_DIR, CUSTOM_CERTS_DIR)
-        if os.path.exists(f"{CERTS_DIR}/certs"):
-            shutil.rmtree(f"{CERTS_DIR}/certs")
-
-        # removing files which should be regenerated build/fs dir
-        if os.path.exists(f"{FS_DIR}/ca.pem"):
-            os.remove(f"{FS_DIR}/ca.pem")
-        if os.path.exists(f"{FS_DIR}/device_cert.pem"):
-            os.remove(f"{FS_DIR}/device_cert.pem")
-        if os.path.exists(f"{FS_DIR}/device_priv_key.pem"):
-            os.remove(f"{FS_DIR}/device_priv_key.pem")
-
-        mocker.patch(
-            f"{scargo_gen.__module__}.prepare_config",
-            return_value=get_scargo_config_or_exit(),
-        )
-        # generate keys for new device
-        scargo_gen(
-            profile="Debug",
-            gen_ut=None,
-            gen_mock=None,
-            certs=TEST_DEVICE_ID_3,
-            certs_mode="device",
-            certs_input=Path(CUSTOM_CERTS_DIR).absolute() / "certs",
-            certs_passwd=None,
-            fs=False,
-            single_bin=False,
-        )
-
-        assert os.path.exists(f"{CERTS_DIR}/ca.pem")
-        assert os.path.exists(f"{CERTS_DIR}/certs/iot-device.cert.pem")
-        assert os.path.exists(f"{CERTS_DIR}/private/iot-device.key.pem")
-        assert os.path.exists(f"{CERTS_DIR}/certs/azure-iot-test-only.root.ca.cert.pem")
-
-        assert os.path.exists(f"{CERTS_DIR}/azure/{TEST_DEVICE_ID_3}-root-ca.pem")
-
-        assert os.path.exists(f"{FS_DIR}/ca.pem")
-        assert os.path.exists(f"{FS_DIR}/device_cert.pem")
-        assert os.path.exists(f"{FS_DIR}/device_priv_key.pem")
-
-    def test_gen_certs_default_password(
-        self,
-        request: pytest.FixtureRequest,
-        test_project_data: Dict[str, str],
-        mocker: MockerFixture,
-    ) -> None:
-        """This test check if command gen certs with provided certs_passwd parameter set expected password for
-        regenerated certs files"""
-        proj_path = request.getfixturevalue(test_project_data["proj_path"])
-        os.chdir(proj_path)
-
-        # remove directory with certs if already present
-        if os.path.exists(CERTS_DIR):
-            shutil.rmtree(CERTS_DIR)
-        if os.path.exists(FS_DIR):
-            shutil.rmtree(FS_DIR)
-
-        assert not os.path.exists(CERTS_DIR)
-        assert not os.path.exists(FS_DIR)
-
-        mocker.patch(
-            f"{scargo_gen.__module__}.prepare_config",
-            return_value=get_scargo_config_or_exit(),
-        )
-        default_passwd = "1234"
-        incorrect_passwd = "1111"
-        # generate certs protected by custom password
-        scargo_gen(
-            profile="Debug",
-            gen_ut=None,
-            gen_mock=None,
-            certs=TEST_DEVICE_ID,
-            certs_mode=None,
-            certs_input=None,
-            certs_passwd=None,
-            fs=False,
-            single_bin=False,
-        )
-
-        # password protected files
-        pwd_protected_files = [
-            f"{CERTS_DIR}/private/azure-iot-test-only.root.ca.key.pem",
-            f"{CERTS_DIR}/private/azure-iot-test-only.intermediate.key.pem",
-        ]
-        # test if all password-protected files are encrypted with expected password
-        for file in pwd_protected_files:
-            with open(file) as fp:
-                file_content = fp.read()
-                assert (
-                    "ENCRYPTED" in file_content
-                ), f"File {file} seems to be not encrypted"
-                # positive test encryption with correct password
-                passwd_bytes = bytes(default_passwd, "utf-8")
-                assert crypto.load_privatekey(
-                    type=crypto.FILETYPE_PEM,
-                    buffer=file_content,
-                    passphrase=passwd_bytes,
-                )
-                # negative test encryption with incorrect password
-                incorrect_passwd_bytes = bytes(incorrect_passwd, "utf-8")
-                with pytest.raises(crypto.Error):
-                    crypto.load_privatekey(
-                        type=crypto.FILETYPE_PEM,
-                        buffer=file_content,
-                        passphrase=incorrect_passwd_bytes,
-                    )
-                    assert (
-                        False
-                    ), "Files decrypted with wrong password, exception wasn't raised"
-
-    def test_gen_certs_custom_password(
-        self,
-        request: pytest.FixtureRequest,
-        test_project_data: Dict[str, str],
-        mocker: MockerFixture,
-    ) -> None:
-        """This test check if command gen certs with provided certs_passwd parameter set expected password for
-        regenerated certs files"""
-        proj_path = request.getfixturevalue(test_project_data["proj_path"])
-        os.chdir(proj_path)
-
-        # remove directory with certs if already present
-        if os.path.exists(CERTS_DIR):
-            shutil.rmtree(CERTS_DIR)
-        if os.path.exists(FS_DIR):
-            shutil.rmtree(FS_DIR)
-
-        assert not os.path.exists(CERTS_DIR)
-        assert not os.path.exists(FS_DIR)
-
-        mocker.patch(
-            f"{scargo_gen.__module__}.prepare_config",
-            return_value=get_scargo_config_or_exit(),
-        )
-        custom_passwd = "TEST_PASSWD"
-        incorrect_passwd = "INCORECT_PW"
-        # generate certs protected by custom password
-        scargo_gen(
-            profile="Debug",
-            gen_ut=None,
-            gen_mock=None,
-            certs=TEST_DEVICE_ID,
-            certs_mode=None,
-            certs_input=None,
-            certs_passwd=custom_passwd,
-            fs=False,
-            single_bin=False,
-        )
-
-        # password protected files
-        pwd_protected_files = [
-            f"{CERTS_DIR}/private/azure-iot-test-only.root.ca.key.pem",
-            f"{CERTS_DIR}/private/azure-iot-test-only.intermediate.key.pem",
-        ]
-        # test if all password-protected files are encrypted with expected password
-        for file in pwd_protected_files:
-            with open(file, encoding="utf-8") as fp:
-                file_content = fp.read()
-                assert (
-                    "ENCRYPTED" in file_content
-                ), f"File {file} seems to be not encrypted"
-                # positive test encryption with correct password
-                passwd_bytes = bytes(custom_passwd, "utf-8")
-                assert crypto.load_privatekey(
-                    type=crypto.FILETYPE_PEM,
-                    buffer=file_content,
-                    passphrase=passwd_bytes,
-                )
-                # negative test encryption with incorrect password
-                incorrect_passwd_bytes = bytes(incorrect_passwd, "utf-8")
-                with pytest.raises(crypto.Error):
-                    crypto.load_privatekey(
-                        type=crypto.FILETYPE_PEM,
-                        buffer=file_content,
-                        passphrase=incorrect_passwd_bytes,
-                    )
-                    assert (
-                        False
-                    ), "Files decrypted with wrong password, exception wasn't raised"
-
-
-@pytest.mark.parametrize(
-    "test_project_data",
-    [
-        "new_project_x86",
-        "new_project_esp32",
-        "new_project_stm32",
-    ],
-    ids=[
-        "new_project_x86",
-        "new_project_esp32",
-        "new_project_stm32",
-    ],
-    scope="class",
-)
-def test_gen_ut_new_project(
-    request: pytest.FixtureRequest, test_project_data: str, mocker: MockerFixture
-) -> None:
-    proj_path = request.getfixturevalue(test_project_data)
-    os.chdir(proj_path)
-
-    if test_project_data == "new_project_esp32":
-        test_data = Path(__file__).parents[1].joinpath("test_data")
-        os.environ["IDF_PATH"] = Path(test_data, "esp32_spiff").as_posix()
-        h_file_path = Path(os.getcwd(), "main")
-    else:
-        h_file_path = Path(os.getcwd(), "src")
-
-    scargo_update(Path(os.getcwd(), "scargo.toml"))
-    mocker.patch(
-        f"{scargo_gen.__module__}.prepare_config",
-        return_value=get_scargo_config_or_exit(),
+    return mocker.patch(
+        f"{scargo_gen.__module__}.prepare_config", return_value=esp_config
     )
+
+
+# -------------- Gen unit_tests tests --------------
+def test_gen_ut(mock_prepare_config: MagicMock, mocker: MockerFixture) -> None:
+    # This test just checks that generator is called
+    # Unit tests for unit test generator should be in seperate file
+
+    mocked_generate_ut = mocker.patch(f"{scargo_gen.__module__}.generate_ut")
+    path_to_srcs = Path("path_not_none")
+
     scargo_gen(
         profile="Debug",
-        gen_ut=h_file_path,
-        fs=True,
-        single_bin=False,
+        gen_ut=path_to_srcs,
         gen_mock=None,
         certs=None,
         certs_mode=None,
         certs_input=None,
         certs_passwd=None,
+        fs=False,
+        single_bin=False,
     )
-    ut_path = Path(os.getcwd(), "tests", "ut")
-    assert "ut_test_lib.cpp" in os.listdir(
-        ut_path
-    ), f"File 'ut_test_lib.cpp' should be present in {ut_path}. Files under path: {os.listdir(ut_path)}"
+
+    mocked_generate_ut.assert_called_once_with(
+        path_to_srcs, mock_prepare_config.return_value
+    )
+
+
+# -------------- Gen mocks tests --------------
+def test_gen_mocknot_header(
+    mock_prepare_config: MagicMock, caplog: pytest.LogCaptureFixture
+) -> None:
+    some_path = Path("not_header_file")
+
+    with pytest.raises(SystemExit):
+        scargo_gen(
+            profile="Debug",
+            gen_ut=None,
+            gen_mock=some_path,
+            certs=None,
+            certs_mode=None,
+            certs_input=None,
+            certs_passwd=None,
+            fs=False,
+            single_bin=False,
+        )
+
+    assert "Not a header file. Please chose .h or .hpp file." in caplog.text
+
+
+def test_gen_mock(
+    mock_prepare_config: MagicMock,
+    mocker: MockerFixture,
+    caplog: pytest.LogCaptureFixture,
+) -> None:
+    # This test just checks that generator is called
+    # Unit tests for mock generator should be in seperate file
+
+    mocked_generate_ut = mocker.patch(f"{scargo_gen.__module__}.generate_mocks")
+    path_to_hdr = Path("header.h")
+
+    scargo_gen(
+        profile="Debug",
+        gen_ut=None,
+        gen_mock=path_to_hdr,
+        certs=None,
+        certs_mode=None,
+        certs_input=None,
+        certs_passwd=None,
+        fs=False,
+        single_bin=False,
+    )
+
+    mocked_generate_ut.assert_called_once_with(
+        path_to_hdr, mock_prepare_config.return_value
+    )
+    assert f"Generated: {path_to_hdr}" in caplog.text
+
+
+def test_gen_mock_fails(
+    mock_prepare_config: MagicMock,
+    mocker: MockerFixture,
+    caplog: pytest.LogCaptureFixture,
+) -> None:
+    mocked_generate_ut = mocker.patch(
+        f"{scargo_gen.__module__}.generate_mocks", return_value=False
+    )
+    path_to_hdr = Path("header.h")
+
+    scargo_gen(
+        profile="Debug",
+        gen_ut=None,
+        gen_mock=path_to_hdr,
+        certs=None,
+        certs_mode=None,
+        certs_input=None,
+        certs_passwd=None,
+        fs=False,
+        single_bin=False,
+    )
+
+    mocked_generate_ut.assert_called_once_with(
+        path_to_hdr, mock_prepare_config.return_value
+    )
+    assert f"Skipping: {path_to_hdr}" in caplog.text
+
+
+# -------------- Gen certs tests --------------
+TEST_DEVICE_ID = r"com.example.my.solution:gw-01:da:device:ZWave:CA0D6357%2F4"
+
+
+def mock_create_certs(process: fake_popen.FakePopen, certs_dir: Path) -> None:
+    cert_files = [
+        certs_dir / "certs/iot-device.cert.pem",
+        certs_dir / "private/iot-device.key.pem",
+        certs_dir / "ca.pem",
+        certs_dir / "certs/azure-iot-test-only.root.ca.cert.pem",
+    ]
+    for cert_file in cert_files:
+        cert_file.parent.mkdir(parents=True, exist_ok=True)
+        cert_file.touch()
+
+
+def test_gen_certs_files_not_exist(
+    fp: FakeProcess, mock_prepare_config: MagicMock
+) -> None:
+    fp.register([fp.any()])
+
+    with pytest.raises(SystemExit):
+        scargo_gen(
+            profile="Debug",
+            gen_ut=None,
+            gen_mock=None,
+            certs=TEST_DEVICE_ID,
+            certs_mode=None,
+            certs_input=None,
+            certs_passwd=None,
+            fs=False,
+            single_bin=False,
+        )
+
+
+@dataclass
+class GenCertTestData:
+    mode_argument: Optional[str]
+    expeced_mode_argument: str
+    intermediate_dir: Optional[Path] = None
+    certs_password: Optional[str] = None
 
 
 @pytest.mark.parametrize(
-    "test_project_data",
+    "test_data",
     [
-        "copy_test_project_esp32",
-        "copy_test_project_stm32",
+        GenCertTestData(None, "All-certificates"),
+        GenCertTestData("all", "All-certificates", Path("dir1"), "4321"),
+        GenCertTestData("device", "Device-certificate", Path("dir2"), "0123"),
     ],
 )
-def test_gen_ut_copy_old_project(
-    request: pytest.FixtureRequest,
-    test_project_data: str,
-    mocker: MockerFixture,
+def test_gen_certs(
+    fp: FakeProcess,
+    mock_prepare_config: MagicMock,
+    test_data: GenCertTestData,
 ) -> None:
-    test_data = Path(__file__).parents[1].joinpath("test_data")
-    os.environ["IDF_PATH"] = Path(test_data, "esp32_spiff").as_posix()
-    proj_path = request.getfixturevalue(test_project_data)
-    os.chdir(proj_path)
-    h_file_path = Path(os.getcwd(), "main" if "esp32" in test_project_data else "src")
-    mocker.patch(
-        f"{scargo_gen.__module__}.prepare_config",
-        return_value=get_scargo_config_or_exit(),
+    certs_dir = Path("build/certs").absolute()
+    scargo_root = Path(__file__).parent.parent.parent
+    script_path = scargo_root / "scargo/certs/generateAllCertificates.sh"
+
+    fp.register(
+        [
+            str(script_path),
+            "--name",
+            TEST_DEVICE_ID,
+            "--mode",
+            test_data.expeced_mode_argument,
+            "--output",
+            certs_dir,
+            "--input",
+            test_data.intermediate_dir or certs_dir,
+            "--passwd",
+            test_data.certs_password or "1234",
+        ],
+        callback=mock_create_certs,
+        callback_kwargs={"certs_dir": certs_dir},
     )
+
     scargo_gen(
         profile="Debug",
-        gen_ut=h_file_path,
-        fs=True,
+        gen_ut=None,
+        gen_mock=None,
+        certs=TEST_DEVICE_ID,
+        certs_mode=test_data.mode_argument,
+        certs_input=test_data.intermediate_dir,
+        certs_passwd=test_data.certs_password,
+        fs=False,
         single_bin=False,
+    )
+
+    assert Path("build/fs/device_cert.pem").is_file()
+    assert Path("build/fs/device_priv_key.pem").is_file()
+    assert Path("build/fs/ca.pem").is_file()
+    assert Path(certs_dir, f"azure/{TEST_DEVICE_ID}-root-ca.pem").is_file()
+
+
+# -------------- Gen fs tests --------------
+def test_gen_fs_unsupored_target(
+    caplog: pytest.LogCaptureFixture, mock_prepare_config: MagicMock
+) -> None:
+    scargo_gen(
+        profile="Debug",
+        gen_ut=None,
         gen_mock=None,
         certs=None,
         certs_mode=None,
         certs_input=None,
         certs_passwd=None,
+        fs=True,
+        single_bin=False,
     )
-    ut_path = Path(os.getcwd(), "tests", "ut")
-    assert "ut_test_lib.cpp" in os.listdir(
-        ut_path
-    ), f"File 'ut_test_lib.cpp' should be present in {ut_path}. Files under path: {os.listdir(ut_path)}"
+
+    assert "Gen --fs command not supported for this target yet." in caplog.text
+
+
+def test_gen_fs_esp32(fp: FakeProcess, mock_prepare_config_esp32: MagicMock) -> None:
+    fp.register([fp.any()])
+
+    scargo_gen(
+        profile="Debug",
+        gen_ut=None,
+        gen_mock=None,
+        certs=None,
+        certs_mode=None,
+        certs_input=None,
+        certs_passwd=None,
+        fs=True,
+        single_bin=False,
+    )
+
+
+# -------------- Gen single bin tests --------------
+def test_gen_single_bin_unsupored_target(
+    caplog: pytest.LogCaptureFixture, mock_prepare_config: MagicMock
+) -> None:
+    scargo_gen(
+        profile="Debug",
+        gen_ut=None,
+        gen_mock=None,
+        certs=None,
+        certs_mode=None,
+        certs_input=None,
+        certs_passwd=None,
+        fs=False,
+        single_bin=True,
+    )
+
+    assert "Gen --bin command not supported for this target yet." in caplog.text
+
+
+def test_gen_single_bin_esp32(
+    fp: FakeProcess,
+    mock_prepare_config_esp32: MagicMock,
+) -> None:
+    build_profile = "Debug"
+    flash_args_path = Path(f"build/{build_profile}/flash_args")
+    flash_args_path.parent.mkdir(parents=True)
+    flash_args_path.touch()
+    fp.register([fp.any()])
+
+    scargo_gen(
+        profile=build_profile,
+        gen_ut=None,
+        gen_mock=None,
+        certs=None,
+        certs_mode=None,
+        certs_input=None,
+        certs_passwd=None,
+        fs=False,
+        single_bin=True,
+    )
