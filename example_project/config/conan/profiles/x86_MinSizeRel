@@ -1,0 +1,16 @@
+[buildenv]
+CC=gcc
+CXX=g++
+
+[settings]
+compiler=gcc
+compiler.version=9
+compiler.libcxx=libstdc++
+compiler.cppstd=17
+os=Linux
+arch=x86_64
+build_type=MinSizeRel
+
+[conf]
+tools.build:cflags=["-Wall -Wextra -Os -DNDEBUG"]
+tools.build:cxxflags=["-Wall -Wextra -Os -DNDEBUG"]

@@ -9,13 +9,12 @@ import sys
 from pathlib import Path
 from typing import Optional
 
-import scargo.target_helpers.atsam_helper as atsam_helper
-import scargo.target_helpers.stm32_helper as stm32_helper
 from scargo.config import Config
 from scargo.config_utils import prepare_config
 from scargo.file_generators.vscode_gen import generate_launch_json
 from scargo.logger import get_logger
 from scargo.path_utils import find_program_path
+from scargo.target_helpers import atsam_helper, stm32_helper
 
 if platform.system() == "Windows":
     from subprocess import DETACHED_PROCESS  # type: ignore[attr-defined]
@@ -121,13 +120,13 @@ def flash_stm32(
         logger.info("Define flash-start in scargo.toml under stm32 section")
     else:
         if erase_memory:
-            command = ["st-flash"]
+            command = ["sudo", "st-flash"]
             if port:
                 command.append(f"--serial={port}")
             command.append("erase")
             subprocess.check_call(command)
 
-        command = ["st-flash", "--reset"]
+        command = ["sudo", "st-flash", "--reset"]
         if port:
             command.append(f"--serial={port}")
         command.extend(["write", str(bin_path), flash_start])
@@ -181,7 +180,7 @@ def flash_atsam(
                 creationflags=DETACHED_PROCESS,
             )
         else:
-            openocd_process = subprocess.Popen(
+            openocd_process = subprocess.Popen(  # pylint: disable=consider-using-with
                 [
                     "sudo",
                     openocd_path,

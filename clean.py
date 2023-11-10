@@ -51,10 +51,9 @@ def list_files(path: str) -> Optional[List[str]]:
     if path:
         if os.path.isdir(path):
             return [path]
-        else:
-            raise argparse.ArgumentTypeError(
-                f"readable_dir:schemas/{path} is not a valid path"
-            )
+        raise argparse.ArgumentTypeError(
+            f"readable_dir:schemas/{path} is not a valid path"
+        )
     return None
 
 
@@ -66,7 +65,7 @@ def clean(output_file_names: Sequence[str]) -> None:
         print("Pyclean fail")
 
     for item in output_file_names:
-        subprocess.run(["rm", "-rf", item])
+        subprocess.run(["rm", "-rf", item], check=True)
 
 
 def main() -> None:

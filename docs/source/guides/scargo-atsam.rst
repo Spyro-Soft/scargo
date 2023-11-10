@@ -15,8 +15,16 @@ It's also possible to change the chip in *scargo.toml* file and run scargo updat
 
 Flashing
 --------
-Flashing the Atmel SAM series is currently not supported, but it will be implemented
+Flashing the Atmel SAM series is currently supported by using openocd in the background.
+Run the :doc:`scargo flash command </scargo/scargo-flash>` to flash the board.
+
+This flashing procedure might not work for all boards.
+If you have any problems you can  `open issue on github <https://github.com/Spyro-Soft/scargo/issues/new/choose>`_ or contact Spyrosoft members via email (e.g. aak@spyro-soft.com).
 
 Debugging
 ---------
-Debugging the Atmel SAM series is currently not supported, but it will be implemented
+If you plan on debugging make sure that your board has debugger or you are connected to the board using debugger.
+First build the project in Debug and then you can run :doc:`scargo debug command </scargo/scargo-debug>`: ::
+
+    scargo build --profile Debug
+    scargo debug

@@ -99,7 +99,7 @@ def add_test_pie_chart(ax: plt.Axes, test_data: TestData) -> None:  # type: igno
     ax.set_title("Test Case Status")
     marks = [test_data.passed, test_data.failures, test_data.errors, test_data.skipped]
     colors = ["green", "red", "yellow", "grey"]
-    patches, texts = ax.pie(marks, colors=colors)
+    patches, _ = ax.pie(marks, colors=colors)
     white_circle = plt.Circle((0, 0), 0.7, color="white")
     ax.add_artist(white_circle)
     labels = ["passed", "failed", "errors", "skipped"]

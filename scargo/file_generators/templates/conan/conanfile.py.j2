@@ -4,11 +4,11 @@
 #
 
 from conan import ConanFile
-from conans import tools
-from conan.tools.cmake import CMakeToolchain, CMake, cmake_layout
+from conan.tools.cmake import CMake, cmake_layout
+from conan.tools.files import copy, get
+from conan.tools.scm import Git
 
 {% if config.project.target.family == "stm32" %}
-from conans import tools
 import os
 {% endif %}
 
@@ -19,8 +19,9 @@ class {{ config.project.name|capitalize|replace("-", "") }}Conan(ConanFile):  # 
     description = "{{ config.project.description }}"
     settings = "os", "compiler", "build_type", "arch"
     url = "{{ config.project.homepage_url }}"
-    generators = "CMakeDeps"
+    generators = "CMakeToolchain", "CMakeDeps"
     exports_sources = ["{{ config.source_dir_path.relative_to(config.project_root) }}/*", "CMakeLists.txt", "include/*", "config/*"]
+
     {% if config.dependencies.build or config.dependencies.tool %}
     def build_requirements(self) -> None:
         {% for dep in config.dependencies.build %}
@@ -29,20 +30,21 @@ class {{ config.project.name|capitalize|replace("-", "") }}Conan(ConanFile):  # 
         {% for tool_dep in config.dependencies.tool %}
         self.tool_requires("{{ tool_dep }}")
         {% endfor %}
-    {% endif %}
 
+    {% endif %}
     {% if config.dependencies.general %}
     def requirements(self) -> None:
         {% for dep in config.dependencies.general %}
         self.requires("{{ dep }}")
         {% endfor %}
-    {% endif %}
 
+    {% endif %}
     def source(self) -> None:
     {% if config.project.target.family == "stm32" %}
-        git = tools.Git(folder="third-party/stm32-cmake")
-        if not os.listdir(git.folder):
-            git.clone("https://github.com/ObKo/stm32-cmake.git", "master")
+        target_dir = "third-party/stm32-cmake"
+        if not os.path.isdir(target_dir):
+            git = Git(self)
+            git.clone("https://github.com/ObKo/stm32-cmake.git", target=target_dir)
     {% elif config.project.target.family == "atsam" %}
         import requests
         import re
@@ -64,21 +66,17 @@ class {{ config.project.name|capitalize|replace("-", "") }}Conan(ConanFile):  # 
                 re.MULTILINE | re.DOTALL,
             )
             dfp_filename = match_atpack.group(1)
-            tools.get(f"{packs_url}/{dfp_filename}", destination=dfp_outdir)
+            get(self, f"{packs_url}/{dfp_filename}", destination=dfp_outdir)
 
         if not cmsis_outdir.is_dir():
             cmsis_filename = "ARM.CMSIS.5.4.0.atpack"
-            tools.get(f"{packs_url}/{cmsis_filename}", destination=cmsis_outdir)
+            get(self, f"{packs_url}/{cmsis_filename}", destination=cmsis_outdir)
     {% else %}
         pass
     {% endif %}
 
     def layout(self) -> None:
         cmake_layout(self)
-
-    def generate(self) -> None:
-        tc = CMakeToolchain(self)
-        tc.generate()
 
     def build(self) -> None:
         cmake = CMake(self)
@@ -90,10 +88,9 @@ class {{ config.project.name|capitalize|replace("-", "") }}Conan(ConanFile):  # 
         cmake = CMake(self)
         cmake.install()
     {% else %}
-        self.copy("*.bin")
-        self.copy("*.elf")
+        copy("*.bin")
+        copy("*.elf")
     {% endif %}
-
     {% if config.project.lib_name %}
     def package_info(self) -> None:
         self.cpp_info.libs = ["{{ config.project.name }}"]

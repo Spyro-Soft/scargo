@@ -8,8 +8,10 @@ import sys
 from pathlib import Path
 from typing import List, Union
 
+from scargo.conan_utils import conan_add_remote, conan_source
 from scargo.config import Config
 from scargo.config_utils import prepare_config
+from scargo.file_generators.conan_gen import conan_add_default_profile_if_missing
 from scargo.logger import get_logger
 
 logger = get_logger()
@@ -41,23 +43,40 @@ def scargo_test(
         sys.exit(1)
 
     test_build_dir.mkdir(parents=True, exist_ok=True)
+    conan_add_default_profile_if_missing()
+
+    conan_add_remote(project_dir, config)
+    conan_source(project_dir)
 
     try:
         # Run CMake and build tests.
-        subprocess.check_call(
+        subprocess.run(
             [
                 "conan",
                 "install",
                 tests_src_dir,
-                "-if",
+                "-of",
                 test_build_dir,
                 f"-sbuild_type={profile}",
+                "-b",
+                "missing",
             ],
             cwd=project_dir,
+            check=True,
         )
-        subprocess.check_call(
-            ["conan", "build", tests_src_dir, "-bf", test_build_dir],
+        subprocess.run(
+            [
+                "conan",
+                "build",
+                "-of",
+                test_build_dir,
+                tests_src_dir,
+                f"-sbuild_type={profile}",
+                "-b",
+                "missing",
+            ],
             cwd=project_dir,
+            check=True,
         )
     except subprocess.CalledProcessError:
         logger.error("Failed to build tests.")

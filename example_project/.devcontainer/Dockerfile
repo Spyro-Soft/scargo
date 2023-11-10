@@ -9,30 +9,22 @@ FROM ${DOCKER_IMAGE_ROOT} as base
 ENV DEBIAN_FRONTEND noninteractive
 
 RUN apt update --fix-missing && \
-    apt -y install python3.8 python3.8-venv python3-pip \
-    binutils git wget \
-    scons build-essential pkg-config \
-    unzip graphviz nano vim && \
+    apt -y install --no-install-recommends python3 python3-pip \
+    git build-essential pkg-config graphviz && \
     apt -y install sudo && \
-    update-alternatives --install /usr/bin/python python /usr/bin/python3 1 && \
-    update-alternatives --install /usr/bin/pip pip /usr/bin/pip3 1
+    rm -rf /var/lib/apt/lists/* && \
+    update-alternatives --install /usr/bin/python python /usr/bin/python3 1
 
 FROM base AS cpp
 
-RUN apt -y install cppcheck bzr lib32z1 \
-    clang clang-format clang-tidy valgrind \
-    gcovr doxygen curl libcurl4-openssl-dev \
-    libcmocka0 libcmocka-dev plantuml
+RUN apt update --fix-missing && apt -y --no-install-recommends install cppcheck lib32z1 \
+    make cmake clang clang-format clang-tidy gcovr doxygen libcmocka0 libcmocka-dev gdb screen wget && \
+    rm -rf /var/lib/apt/lists/*
 
 FROM cpp AS x86
 ARG SSH_PORT
 
 ENV DEBIAN_FRONTEND noninteractive
-
-# configure wxWidget
-RUN apt update --fix-missing && \
-    apt install -y adwaita-icon-theme-full libwxgtk3.0-gtk3-dev dbus-x11 \
-    bzr lib32z1 libncurses5:amd64 usbutils xterm minicom
 WORKDIR /opt
 
 FROM x86 AS custom_example_project
@@ -47,16 +39,17 @@ ARG USER_PASSWORD=user
 ARG UID_NUMBER=1000
 ARG GID_NUMBER=1000
 ARG SSH_PORT=2000
+ARG CONAN_LOGIN_USERNAME=""
+ARG CONAN_PASSWORD=""
 
-ARG CONAN_LOGIN_USERNAME
-ARG CONAN_PASSWORD
 ENV CONAN_LOGIN_USERNAME=${CONAN_LOGIN_USERNAME}
 ENV CONAN_PASSWORD=${CONAN_PASSWORD}
 
 WORKDIR /opt
 
 # configure ssh
-RUN apt install -y openssh-server ssh-askpass && apt install -y rsync grsync && \
+RUN apt update --fix-missing && apt install -y --no-install-recommends openssh-server && \
+    rm -rf /var/lib/apt/lists/* && \
     ssh-keygen -A && mkdir -p /run/sshd && \
     echo "Port $SSH_PORT" >> /etc/ssh/sshd_config
 
@@ -69,16 +62,7 @@ RUN printf "\n\nADDING USER $USER_NAME TO SUDOERS - DEV ENV ONLY!\n\n" >&2 && \
     echo "$USER_NAME:$USER_PASSWORD" | chpasswd && \
     echo "$USER_NAME ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers
 
-# install scargo from spyro rep (temporarily before pip repo will be available)
-COPY requirements.txt requirements.txt
-RUN pip3 install -r requirements.txt && \
-    rm requirements.txt
-
-ENV SCARGO_VERSION="release_1.0.0"
-ENV SCARGO_PATH="/opt/scargo"
-ENV SCARGO_REPO_URL="https://github.com/Spyro-Soft/scargo.git"
-RUN git clone --single-branch --branch ${SCARGO_VERSION} ${SCARGO_REPO_URL} ${SCARGO_PATH} && \
-    cd scargo && pip install .
+RUN pip3 install scargo==1.8.0
 
 RUN usermod -a -G dialout ${USER_NAME}
 USER ${USER_NAME}

@@ -232,7 +232,7 @@ class TestBinProjectFlow:
         """Simple test which checks if scargo new -h command can be invoked and do not return any error"""
         # create temporary dir for new project
         test_state.proj_path = tmpdir_factory.mktemp(test_state.proj_name)
-        os.chdir(test_state.proj_path)
+        os.chdir(test_state.proj_path)  # type: ignore
 
         # New Help
         result = test_state.runner.invoke(cli, ["new", "-h"])
@@ -505,14 +505,12 @@ class TestBinProjectFlow:
             result.exit_code == 0
         ), f"Command 'update' end with non zero exit code: {result.exit_code}"
         if test_state.target_id == TargetIds.esp32:
-            c_flags_re = (
-                r"WORKAROUND_FOR_ESP32_C_FLAGS=\"(.+?) " + NEW_PROFILE_CFLAGS + r"\""
-            )
+            c_flags_re = r"WORKAROUND_FOR_ESP32_C_FLAGS=(.+?)" + NEW_PROFILE_CFLAGS
+
             cxx_flags_re = (
-                r"WORKAROUND_FOR_ESP32_CXX_FLAGS=\"(.+?) "
-                + NEW_PROFILE_CXXFLAGS
-                + r"\""
+                r"WORKAROUND_FOR_ESP32_CXX_FLAGS=(.+?)" + NEW_PROFILE_CXXFLAGS
             )
+
         else:
             c_flags_re = (
                 r"tools\.build:cflags=\[\"(.+?) " + NEW_PROFILE_CFLAGS + r"\"\]"

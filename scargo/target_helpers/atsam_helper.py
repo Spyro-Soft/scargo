@@ -45,7 +45,7 @@ def get_atsam_cpu(chip_label: str) -> Optional[str]:
 def get_openocd_script_name(chip_label: str) -> Optional[str]:
     if chip_label.startswith("atsamd"):
         return "at91samdXX.cfg"
-    elif chip_label.startswith("atsaml1"):
+    if chip_label.startswith("atsaml1"):
         return "atsaml1x.cfg"  # Not sure about this
     return None
 
@@ -55,7 +55,7 @@ def get_openocd_flash_driver_name(chip_label: str) -> Optional[str]:
     # This should probably be done differently
     if chip_label.startswith("atsamd"):
         return "at91samd"
-    elif chip_label.startswith("atsaml1"):
+    if chip_label.startswith("atsaml1"):
         return "at91samd"
     return None
 

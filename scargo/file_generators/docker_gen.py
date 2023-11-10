@@ -7,12 +7,11 @@ import shutil
 from pathlib import Path
 from typing import Any, Dict
 
-import scargo.target_helpers.atsam_helper as atsam_helper
-import scargo.target_helpers.stm32_helper as stm32_helper
 from scargo import __version__
 from scargo.config import Config
 from scargo.file_generators.base_gen import create_file_from_template
 from scargo.global_values import SCARGO_PKG_PATH
+from scargo.target_helpers import atsam_helper, stm32_helper
 
 
 class _DockerComposeTemplate:

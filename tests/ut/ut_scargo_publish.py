@@ -1,18 +1,10 @@
-import os
 from pathlib import Path
-from unittest.mock import patch
 
 import pytest
 from _pytest.logging import LogCaptureFixture
 from pytest_subprocess import FakeProcess
 
-from scargo.commands.publish import (
-    conan_add_conancenter,
-    conan_add_remote,
-    conan_add_user,
-    conan_clean_remote,
-    scargo_publish,
-)
+from scargo.commands.publish import scargo_publish
 from scargo.config import Config
 from tests.ut.utils import get_test_project_config
 
@@ -44,11 +36,9 @@ def test_publish(config: Config, fp: FakeProcess) -> None:
     build_path = Path(f"{config.project_root}/build/Release")
     build_path.mkdir(parents=True, exist_ok=True)
 
-    conan_clean_cmd = "conan remote clean"
     conan_add_remote_1_cmd = ["conan", "remote", "add", REMOTE_REPO_NAME_1, EXAMPLE_URL]
     conan_add_remote_2_cmd = ["conan", "remote", "add", REMOTE_REPO_NAME_2, EXAMPLE_URL]
     conan_user_cmd = "conan user"
-    conan_add_conacenter_cmd = "conan remote add conancenter https://center.conan.io"
     conan_source_cmd = [
         "conan",
         "source",
@@ -58,7 +48,7 @@ def test_publish(config: Config, fp: FakeProcess) -> None:
         "conan",
         "export-pkg",
         ".",
-        "-if",
+        "-of",
         str(build_path),
         "-pr:b",
         "default",
@@ -86,11 +76,9 @@ def test_publish(config: Config, fp: FakeProcess) -> None:
         "--confirm",
     ]
 
-    fp.register(conan_clean_cmd)
     fp.register(conan_add_remote_1_cmd)
     fp.register(conan_add_remote_2_cmd)
     fp.register(conan_user_cmd, occurrences=2)
-    fp.register(conan_add_conacenter_cmd)
     fp.register(conan_source_cmd)
     fp.register(conan_export_pkg_cmd)
     fp.register(conan_test_cmd)
@@ -100,87 +88,15 @@ def test_publish(config: Config, fp: FakeProcess) -> None:
     scargo_publish(REPO_NAME)
 
     # ASSERT
-    assert fp.calls[0] == conan_clean_cmd
-    assert fp.calls[1] == conan_add_remote_1_cmd
-    assert fp.calls[2] == conan_user_cmd
-    assert fp.calls[3] == conan_add_remote_2_cmd
-    assert fp.calls[4] == conan_user_cmd
-    assert fp.calls[5] == conan_add_conacenter_cmd
-    assert fp.calls[6] == conan_source_cmd
-    assert fp.calls[7] == conan_export_pkg_cmd
-    assert fp.calls[8] == conan_test_cmd
-    assert fp.calls[9] == conan_upload_cmd
-    assert len(fp.calls) == 10
-
-
-def test_conan_add_user(fp: FakeProcess) -> None:
-    # ARRANGE
-    conan_user_cmd = "conan user"
-    add_user_cmd = [
-        "conan",
-        "user",
-        "-p",
-        ENV_CONAN_PASSWORD,
-        "-r",
-        REPO_NAME,
-        ENV_CONAN_USER,
-    ]
-    fp.register(conan_user_cmd, occurrences=2)
-    fp.register(add_user_cmd)
-
-    # ACT
-    with patch.dict(
-        os.environ,
-        {"CONAN_LOGIN_USERNAME": ENV_CONAN_USER, "CONAN_PASSWORD": ENV_CONAN_PASSWORD},
-    ):
-        conan_add_user(REPO_NAME)
-
-    assert fp.calls[0] == conan_user_cmd
-    assert fp.calls[1] == add_user_cmd
-    assert len(fp.calls) == 2
-
-
-def test_conan_add_remote_fail(
-    config: Config,
-    caplog: pytest.LogCaptureFixture,
-    fp: FakeProcess,
-) -> None:
-    # ARRANGE
-    fp.register(["conan", "remote", "add", REMOTE_REPO_NAME_1, EXAMPLE_URL])
-    fp.register("conan user", occurrences=2)
-    fp.register(
-        ["conan", "remote", "add", REMOTE_REPO_NAME_2, EXAMPLE_URL], returncode=1
-    )
-
-    # ACT
-    conan_add_remote(Path("some_path"), config)
-
-    # ASSERT
-    assert "Unable to add remote repository" in caplog.text
-
-
-def test_conan_add_conancenter_fail(caplog: LogCaptureFixture, fp: FakeProcess) -> None:
-    # ARRANGE
-    cmd = "conan remote add conancenter https://center.conan.io"
-    fp.register(cmd, returncode=1)
-
-    # ACT
-    conan_add_conancenter()
-
-    # ASSERT
-    assert "Unable to add conancenter remote repository" in caplog.text
-
-
-def test_conan_clean_remote_fail(caplog: LogCaptureFixture, fp: FakeProcess) -> None:
-    # ARRANGE
-    cmd = "conan remote clean"
-    fp.register(cmd, returncode=1)
-
-    # ACT
-    conan_clean_remote()
-
-    # ASSERT
-    assert "Unable to clean remote repository list" in caplog.text
+    assert fp.calls[0] == conan_add_remote_1_cmd
+    assert fp.calls[1] == conan_user_cmd
+    assert fp.calls[2] == conan_add_remote_2_cmd
+    assert fp.calls[3] == conan_user_cmd
+    assert fp.calls[4] == conan_source_cmd
+    assert fp.calls[5] == conan_export_pkg_cmd
+    assert fp.calls[6] == conan_test_cmd
+    assert fp.calls[7] == conan_upload_cmd
+    assert len(fp.calls) == 8
 
 
 def test_create_package_fail(
@@ -193,11 +109,9 @@ def test_create_package_fail(
     build_path = Path(f"{config.project_root}/build/Release")
     build_path.mkdir(parents=True, exist_ok=True)
 
-    fp.register("conan remote clean")
     fp.register(["conan", "remote", "add", REMOTE_REPO_NAME_1, EXAMPLE_URL])
     fp.register(["conan", "remote", "add", REMOTE_REPO_NAME_2, EXAMPLE_URL])
     fp.register("conan user", occurrences=2)
-    fp.register("conan remote add conancenter https://center.conan.io")
     fp.register(
         [
             "conan",
@@ -211,7 +125,7 @@ def test_create_package_fail(
             "conan",
             "export-pkg",
             ".",
-            "-if",
+            "-of",
             str(build_path),
             "-pr:b",
             "default",
@@ -266,11 +180,10 @@ def test_upload_package_fail(
     build_path = Path(f"{config.project_root}/build/Release")
     build_path.mkdir(parents=True, exist_ok=True)
 
-    fp.register("conan remote clean")
+    fp.register(["conan", "remote", "clean"])
     fp.register(["conan", "remote", "add", REMOTE_REPO_NAME_1, EXAMPLE_URL])
     fp.register(["conan", "remote", "add", REMOTE_REPO_NAME_2, EXAMPLE_URL])
     fp.register("conan user", occurrences=2)
-    fp.register("conan remote add conancenter https://center.conan.io")
     fp.register(
         [
             "conan",
@@ -283,7 +196,7 @@ def test_upload_package_fail(
             "conan",
             "export-pkg",
             ".",
-            "-if",
+            "-of",
             str(build_path),
             "-pr:b",
             "default",
@@ -324,20 +237,3 @@ def test_upload_package_fail(
     # ASSERT
     assert "Unable to publish package" in caplog.text
     assert error.value.code == 1
-
-
-def test_conan_add_user_fail(caplog: pytest.LogCaptureFixture, fp: FakeProcess) -> None:
-    # ARRANGE
-    cmd = ["conan", "user", "-p", ENV_CONAN_PASSWORD, "-r", REPO_NAME, ENV_CONAN_USER]
-    fp.register(cmd, returncode=1)
-    fp.register("conan user", stdout="user_name")
-
-    # ACT
-    with patch.dict(
-        os.environ,
-        {"CONAN_LOGIN_USERNAME": ENV_CONAN_USER, "CONAN_PASSWORD": ENV_CONAN_PASSWORD},
-    ):
-        conan_add_user(REPO_NAME)
-
-    # ASSERT
-    assert "Unable to add user" in caplog.text

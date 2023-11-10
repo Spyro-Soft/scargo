@@ -20,7 +20,7 @@ from scargo.logger import get_logger
 logger = get_logger()
 
 
-def scargo_check(
+def scargo_check(  # pylint: disable=too-many-branches
     clang_format: bool,
     clang_tidy: bool,
     copy_right: bool,

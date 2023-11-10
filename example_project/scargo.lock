@@ -72,7 +72,7 @@ gcov-executable = "" # Empty string -> use default gcov executable
 general = []
 build = []
 tool = []
-test = ["gtest/cci.20210126"]
+test = ["gtest/1.13.0"]
 
 [conan.repo]
 # conancenter = "https://center.conan.io"
@@ -82,4 +82,4 @@ test = ["gtest/cci.20210126"]
 console-log-level = "INFO"
 file-log-level = "WARNING"
 update-exclude = []
-version = "1.0.0"
+version = "1.8.0"

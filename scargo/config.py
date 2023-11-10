@@ -102,7 +102,7 @@ class ProjectConfig(BaseModel):
     name: str
     version: str
     description: Optional[str]
-    homepage_url: Optional[str] = Field(None, alias="homepage-url")
+    homepage_url: Optional[str] = Field(default=None, alias="homepage-url")
 
     bin_name: Optional[str]
     lib_name: Optional[str]
@@ -119,7 +119,7 @@ class ProjectConfig(BaseModel):
     cflags: str
     cxxflags: str
 
-    max_build_jobs: Optional[int] = Field(None, alias="max-build-jobs")
+    max_build_jobs: Optional[int] = Field(default=None, alias="max-build-jobs")
 
     cmake_variables: Dict[str, str] = Field(
         default_factory=dict, alias="cmake-variables"
@@ -168,7 +168,6 @@ TARGETS = {
     ),
 }
 
-
 # for typer
 ScargoTargets = Enum(  # type: ignore[misc]
     "ScargoTargets", {target.id: target.id for target in TARGETS.values()}
@@ -180,7 +179,7 @@ class ProfileConfig(BaseModel, extra=Extra.allow):
     cxxflags: Optional[str]
     cc: Optional[str] = None
     cxx: Optional[str] = None
-    cmake_build_type: Optional[str] = Field(None, alias="cmake-build-type")
+    cmake_build_type: Optional[str] = Field(default=None, alias="cmake-build-type")
 
     @property
     def extras(self) -> Dict[str, Any]:
@@ -202,7 +201,7 @@ class ChecksConfig(BaseModel):
 
 
 class CheckConfig(BaseModel):
-    description: Optional[str]
+    description: Optional[str] = None
     exclude: List[str] = Field(default_factory=list)
 
 
@@ -264,10 +263,10 @@ class Esp32Config(BaseModel):
 
 
 class ScargoConfig(BaseModel):
-    console_log_level: str = Field("INFO", alias="console-log-level")
-    file_log_level: str = Field("WARNING", alias="file-log-level")
+    console_log_level: str = Field(default="INFO", alias="console-log-level")
+    file_log_level: str = Field(default="WARNING", alias="file-log-level")
     update_exclude: List[str] = Field(alias="update-exclude", default_factory=list)
-    version: Optional[str]
+    version: Optional[str] = None
 
 
 class DockerComposeConfig(BaseModel):
