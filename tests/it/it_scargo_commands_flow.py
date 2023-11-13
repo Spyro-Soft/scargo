@@ -25,6 +25,7 @@ from scargo.path_utils import get_project_root_or_none
 from tests.it.utils import (
     ScargoTestRunner,
     add_profile_to_toml,
+    assert_profile_toml,
     assert_regex_in_file,
     assert_str_in_file,
     get_copyright_text,
@@ -474,7 +475,7 @@ class TestBinProjectFlow:
         result = test_state.runner.invoke(cli, ["test"])
         assert (
             result.exit_code == 0
-        ), f"Command 'test' end with non zero exit code: {result.exit_code}"
+        ), f"Command 'test' end with non zero exit code: {result.exit_code}"    
         assert (
             "No tests were found!!!" in result.output
         ), f"String 'No tests were found!!!' not found in test command output {result.output}"
@@ -485,6 +486,13 @@ class TestBinProjectFlow:
         # add new profile
         os.chdir(f"{test_state.proj_path}/{test_state.proj_name}")
         add_profile_to_toml(
+            NEW_PROFILE_NAME,
+            "cflags",
+            "cxxflags",
+            NEW_PROFILE_CFLAGS,
+            NEW_PROFILE_CXXFLAGS,
+        )
+        assert_profile_toml(
             NEW_PROFILE_NAME,
             "cflags",
             "cxxflags",

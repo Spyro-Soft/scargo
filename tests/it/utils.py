@@ -126,6 +126,21 @@ def add_profile_to_toml(
     with toml_path.open("w") as f:
         toml.dump(data, f)
 
+def assert_profile_toml(
+    profile: str,
+    var: str,
+    var2: str,
+    value: str,
+    value2: str,
+    toml_path: Path = Path("scargo.toml"),
+    ) -> None:
+    data = toml.load(toml_path)
+    assert profile in data["profile"], f"Profile '{profile}' not found in {toml_path}"
+    profile_data = data["profile"][profile]
+    assert var in profile_data, f"Variable '{var}' not found in profile '{profile}'"
+    assert profile_data[var] == value, f"Variable '{var}' has an unexpected value in profile '{profile}'"
+    assert var2 in profile_data, f"Variable '{var2}' not found in profile '{profile}'"
+    assert profile_data[var2] == value2, f"Variable '{var2}' has an unexpected value in profile '{profile}'"
 
 def assert_str_in_CMakeLists(
     str_to_check: str, file_path: Path = Path("CMakeLists.txt")
