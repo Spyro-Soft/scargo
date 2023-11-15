@@ -1,7 +1,8 @@
 from dataclasses import dataclass
 from pathlib import Path
+from typing import Optional
 
-from scargo.config import Config
+from scargo.config import Config, Stm32Config
 from scargo.file_generators.base_gen import write_template
 
 script_dir = Path(__file__).parent
@@ -13,6 +14,12 @@ ADDITIONAL_CPU_DATA = {"cortex-m23": ["atsaml10e16a"]}
 @dataclass
 class STM32Scrips:
     openocd_cfg = "openocd-script.cfg"
+
+
+def create_stm32_config(chip: Optional[str]) -> Optional[Stm32Config]:
+    if chip is None:
+        return None
+    return Stm32Config(chip=chip)
 
 
 def generate_openocd_script(outdir: Path, config: Config) -> None:

@@ -4,12 +4,19 @@ import shutil
 import subprocess
 import sys
 from pathlib import Path
+from typing import Optional
 
-from scargo.config import Config
+from scargo.config import Config, Esp32Config
 from scargo.logger import get_logger
 
 logger = get_logger()
 OUT_FS_DIR = Path("build", "fs")
+
+
+def create_esp32_config(chip: Optional[str]) -> Optional[Esp32Config]:
+    if chip is None:
+        return None
+    return Esp32Config(chip=chip)
 
 
 def gen_fs_esp32(config: Config) -> None:

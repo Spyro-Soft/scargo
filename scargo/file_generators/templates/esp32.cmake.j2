@@ -5,13 +5,11 @@ set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} $ENV{WORKAROUND_FOR_ESP32_C_FLAGS}")
 set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} $ENV{WORKAROUND_FOR_ESP32_CXX_FLAGS}")
 
 {% if config.esp32.extra_component_dirs %}
-
 set(EXTRA_COMPONENT_DIRS
 {% for dirs in config.esp32.extra_component_dirs %}
     {{ dirs }}
 {% endfor %}
 )
-
 {% endif %}
 set(IDF_TARGET {{ config.esp32.chip|lower }})
 

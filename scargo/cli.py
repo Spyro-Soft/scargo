@@ -27,7 +27,7 @@ from scargo.commands.run import scargo_run
 from scargo.commands.test import scargo_test
 from scargo.commands.update import scargo_update
 from scargo.commands.version import scargo_version
-from scargo.config import ScargoTargets, Target
+from scargo.config import ScargoTargets
 from scargo.global_values import DESCRIPTION, SCARGO_DEFAULT_CONFIG_FILE
 from scargo.logger import get_logger
 from scargo.path_utils import get_config_file_path
@@ -324,7 +324,7 @@ def gen(
 
 @cli.command()
 def new(
-    name: str,
+    project_name: str,
     bin_name: Optional[str] = Option(
         None,
         "--bin",
@@ -341,17 +341,20 @@ def new(
         prompt=True,
         prompt_required=False,
     ),
-    target: ScargoTargets = Option("x86", help="Target device."),
-    chip: Optional[str] = Option(
-        None,
+    target: List[ScargoTargets] = Option(
+        ["x86"], "-t", "--target", help="Specify targets for a project."
+    ),
+    chip: List[str] = Option(
+        [],
+        "-c",
         "--chip",
         help="Specify full chip label for a target (Uses default if not specified)",
-        metavar="CHIP_LABEL",
+        metavar="[stm32...|atsam...|esp32...]",
         prompt=True,
         prompt_required=False,
     ),
     create_docker: bool = Option(
-        True, "--docker/--no-docker", help="Initialize docker environment."
+        True, "-d/-nd", "--docker/--no-docker", help="Initialize docker environment."
     ),
     git: bool = Option(True, "--git/--no-git", help="Initialize git repository."),
     base_dir: Optional[Path] = BASE_DIR_OPTION,
@@ -359,16 +362,17 @@ def new(
     """Create new project template."""
     if base_dir:
         os.chdir(base_dir)
+
     scargo_new(
-        name,
+        project_name,
         bin_name,
         lib_name,
-        Target.get_target_by_id(target.value),
+        target,
         create_docker,
         git,
         chip,
     )
-    scargo_update(Path(name, SCARGO_DEFAULT_CONFIG_FILE).absolute())
+    scargo_update(Path(project_name, SCARGO_DEFAULT_CONFIG_FILE).absolute())
 
 
 ###############################################################################

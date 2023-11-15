@@ -10,7 +10,7 @@ bin_name = "{{ bin_name }}"
 {% if lib_name %}
 lib_name = "{{ lib_name }}"
 {% endif %}
-target = "{{ target.id }}"
+target = {{ project_targets }}
 build-env = "{{ build_env }}"
 docker-file = ".devcontainer/Dockerfile-custom"
 docker-image-tag = "{{ docker_image_tag }}"
@@ -23,8 +23,8 @@ cxx = "{{ target.cxx }}"
 {% endif %}
 cxxstandard = "17"
 
-cflags   = "{{ cflags }}"
-cxxflags = "{{ cxxflags }}"
+cflags   = "-Wall -Wextra"
+cxxflags = "-Wall -Wextra"
 
 in-repo-conan-cache = false
 
@@ -97,26 +97,28 @@ test = [
 #Below example of private binary artifacts repository
 #gitlab = "https://git.my_extra_gitlab_server.com"
 
-{% if target.family == "esp32" %}
+{% if esp32_config %}
 [esp32]
-chip = "{{ chip_label|lower }}"
-extra_component_dirs=[]
+chip = "{{ esp32_config.chip }}"
+extra_component_dirs = {{ esp32_config.extra_component_dirs }}
 partitions = [
-    "nvs,      data, nvs,     0x9000,  0x4000,",
-    "otadata,  data, ota,     0xd000,  0x2000,",
-    "phy_init, data, phy,     0xf000,  0x1000,",
-    "ota_0,    app,  ota_0,   0x10000, 0x180000,",
-    "ota_1,    app,  ota_1,   0x190000,0x180000,",
-    "spiffs,   data, spiffs,  0x310000,0x6000,"
+{% for partition in esp32_config.partitions %}
+    "{{ partition }}",
+{% endfor %}
 ]
-{% elif target.family == "stm32" %}
+
+{% endif %}
+{% if stm32_config %}
 [stm32]
-chip = "{{ chip_label }}"
-flash-start = 0x08000000
-{% elif target.family == "atsam" %}
+chip = "{{ stm32_config.chip|upper }}"
+flash-start = 0x{{ "%08x" % stm32_config.flash_start }}
+
+{% endif %}
+{% if atsam_config %}
 [atsam]
-chip = "{{ chip_label }}"
-cpu = "{{ cpu }}"
+chip = "{{ atsam_config.chip }}"
+cpu = "{{ atsam_config.cpu }}"
+
 {% endif %}
 
 [scargo]

@@ -3,7 +3,7 @@
 # #
 from enum import Enum
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, Union
 
 import toml
 from pydantic import BaseModel, Extra, Field, root_validator
@@ -16,6 +16,15 @@ CHIP_DEFAULTS = {
     "atsam": "ATSAML10E16A",
     "stm32": "STM32L496AG",
 }
+
+ESP32_DEFAULT_PARTITIONS = [
+    "nvs,      data, nvs,     0x9000,  0x4000,",
+    "otadata,  data, ota,     0xd000,  0x2000,",
+    "phy_init, data, phy,     0xf000,  0x1000,",
+    "ota_0,    app,  ota_0,   0x10000, 0x180000,",
+    "ota_1,    app,  ota_1,   0x190000,0x180000,",
+    "spiffs,   data, spiffs,  0x310000,0x6000,",
+]
 
 
 class ConfigError(Exception):
@@ -46,11 +55,15 @@ class Config(BaseModel):
 
     @property
     def source_dir_path(self) -> Path:
-        return self.project_root / self.project.target.source_dir
+        if len(self.project.target) == 1:
+            return self.project_root / self.project.target[0].source_dir
+        return self.project_root / DEFAULT_SRC_DIR
 
     @property
     def include_dir_path(self) -> Path:
-        return self.source_dir_path / self.project.target.include_dir
+        if len(self.project.target) == 1:
+            return self.source_dir_path / self.project.target[0].include_dir
+        return self.project_root / DEFAULT_INCLUDE_DIR
 
     def get_atsam_config(self) -> "ATSAMConfig":
         if not self.atsam:
@@ -106,7 +119,7 @@ class ProjectConfig(BaseModel):
 
     bin_name: Optional[str]
     lib_name: Optional[str]
-    target_id: str = Field(..., alias="target")
+    target_id: Union[str, List[str]] = Field(..., alias="target")
     build_env: str = Field(SCARGO_DEFAULT_BUILD_ENV, alias="build-env")
     docker_file: Path = Field(..., alias="docker-file")
     docker_image_tag: str = Field(..., alias="docker-image-tag")
@@ -126,12 +139,12 @@ class ProjectConfig(BaseModel):
     )
 
     @property
-    def target(self) -> "Target":
+    def target(self) -> List["Target"]:
         return Target.get_target_by_id(self.target_id)
 
     def get_compiler_warning(self) -> Optional[str]:
-        if (self.cc and not self.target.cc) or (self.cxx and not self.target.cxx):
-            return "Compiler settings are ignored for this target"
+        # if (self.cc and not self.target.cc) or (self.cxx and not self.target.cxx):
+        #     return "Compiler settings are ignored for this target"
         return None
 
     def is_docker_buildenv(self) -> bool:
@@ -147,27 +160,41 @@ class Target(BaseModel):
     cxx: Optional[str] = None
 
     @classmethod
-    def get_target_by_id(cls, target_id: str) -> "Target":
-        return TARGETS[target_id]
+    def get_target_by_id(cls, target_id: Union[str, List[str]]) -> List["Target"]:
+        if isinstance(target_id, str):
+            target_id = [target_id]
+        return [TARGETS[id] for id in target_id]
 
 
+DEFAULT_SRC_DIR = "src"
+ESP32_SRC_DIR = "main"
+DEFAULT_INCLUDE_DIR = "include"
 TARGETS = {
     "x86": Target(
         id="x86",
         family="x86",
-        source_dir="src",
-        include_dir="include",
+        source_dir=DEFAULT_SRC_DIR,
+        include_dir=DEFAULT_INCLUDE_DIR,
         cc="gcc",
         cxx="g++",
     ),
     "stm32": Target(
-        id="stm32", family="stm32", source_dir="src", include_dir="include"
+        id="stm32",
+        family="stm32",
+        source_dir=DEFAULT_SRC_DIR,
+        include_dir=DEFAULT_INCLUDE_DIR,
     ),
     "esp32": Target(
-        id="esp32", family="esp32", source_dir="main", include_dir="include"
+        id="esp32",
+        family="esp32",
+        source_dir=ESP32_SRC_DIR,
+        include_dir=DEFAULT_INCLUDE_DIR,
     ),
     "atsam": Target(
-        id="atsam", family="atsam", source_dir="src", include_dir="include"
+        id="atsam",
+        family="atsam",
+        source_dir=DEFAULT_SRC_DIR,
+        include_dir=DEFAULT_INCLUDE_DIR,
     ),
 }
 
@@ -247,12 +274,12 @@ class ConanConfig(BaseModel):
 
 class Stm32Config(BaseModel):
     chip: str = Field(default=CHIP_DEFAULTS.get("stm32"))
-    flash_start: int = Field(alias="flash-start")
+    flash_start: int = Field(default=0x08000000, alias="flash-start")
 
 
 class ATSAMConfig(BaseModel):
     chip: str = Field(default=CHIP_DEFAULTS.get("atsam"))
-    cpu: str
+    cpu: str = Field()
 
     @property
     def chip_series(self) -> str:
@@ -261,8 +288,8 @@ class ATSAMConfig(BaseModel):
 
 class Esp32Config(BaseModel):
     chip: str = Field(default=CHIP_DEFAULTS.get("esp32"))
-    extra_component_dirs: List[Path] = Field(default_factory=list)
-    partitions: List[str] = Field(default_factory=list)
+    extra_component_dirs: List[Path] = Field(default=["src"])
+    partitions: List[str] = Field(default=ESP32_DEFAULT_PARTITIONS)
 
 
 class ScargoConfig(BaseModel):

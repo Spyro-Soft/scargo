@@ -7,38 +7,71 @@ import re
 import subprocess
 import sys
 from pathlib import Path
-from typing import Optional
+from typing import Dict, List, Optional
 
 from scargo import __version__
-from scargo.config import CHIP_DEFAULTS, Target
+from scargo.config import CHIP_DEFAULTS, TARGETS, ScargoTargets, Target
 from scargo.config_utils import get_scargo_config_or_exit
 from scargo.file_generators.cpp_gen import generate_cpp
 from scargo.file_generators.toml_gen import generate_toml
 from scargo.global_values import SCARGO_DEFAULT_CONFIG_FILE, SCARGO_DOCKER_ENV
 from scargo.logger import get_logger
-from scargo.target_helpers.atsam_helper import get_atsam_cpu
+from scargo.target_helpers.atsam_helper import create_atsam_config
+from scargo.target_helpers.esp32_helper import create_esp32_config
+from scargo.target_helpers.stm32_helper import create_stm32_config
 
 logger = get_logger()
+
+
+def get_chip_target(chip_label: str) -> Optional[str]:
+    for target in TARGETS:
+        if chip_label.startswith(target):
+            return target
+    return None
+
+
+def process_chips(chips: List[str], targets: List[ScargoTargets]) -> Dict[str, str]:
+    targets_chips = {}
+    unsupported_chips = []
+
+    for chip_label in chips:
+        chip_label = chip_label.lower()
+        chip_target = get_chip_target(chip_label)
+        if chip_target is not None:
+            targets_chips[chip_target] = chip_label
+        else:
+            unsupported_chips.append(chip_label)
+
+    if unsupported_chips:
+        logger.error(f"Unsupported chips: {unsupported_chips}")
+        sys.exit(1)
+
+    for target in targets:
+        if target.value not in targets_chips:
+            targets_chips[target.value] = CHIP_DEFAULTS[target.value]
+
+    return targets_chips
 
 
 def scargo_new(
     name: str,
     bin_name: Optional[str],
     lib_name: Optional[str],
-    target: Target,
+    target: List[ScargoTargets],
     create_docker: bool,
     git: bool,
-    chip: Optional[str],
+    chip: List[str],
 ) -> None:
     """
     Create new project
 
     :param str name: name of project
-    :param str bin_name: name of bin file
-    :param str lib_name: name of lib file
-    :param Target target: architecture type
+    :param Optional[str] bin_name: name of bin file
+    :param Optional[str] lib_name: name of lib file
+    :param List[Target] target: target types for a project
     :param bool create_docker: initialize docker environment
     :param bool git: initialize git repository
+    :param List[str] chip: list of chips for targets
     :return: None
     :raises FileExistsError: if project with provided name exist
     """
@@ -48,6 +81,8 @@ def scargo_new(
             " and the first character must be a letter"
         )
         sys.exit(1)
+
+    targets_chips: Dict[str, str] = process_chips(chip, target)
 
     # If neither binary target nor library target is specified then create a
     # binary target named same as the project name.
@@ -62,24 +97,24 @@ def scargo_new(
         sys.exit(1)
 
     build_env = get_build_env(create_docker)
-
-    chip_label = chip or CHIP_DEFAULTS.get(target.family)
-    cpu = get_atsam_cpu(chip_label) if chip_label else None
+    targets = ", ".join([f'"{t.name}"' for t in target])
+    if len(target) > 1:
+        targets = f"[{targets}]"
 
     toml_path = project_dir / SCARGO_DEFAULT_CONFIG_FILE
     generate_toml(
         toml_path,
         project_name=name,
-        target=target,
+        project_targets=targets,
+        target=[Target.get_target_by_id(t.value) for t in target],
         build_env=build_env,
-        cflags="-Wall -Wextra",
-        cxxflags="-Wall -Wextra",
         version=__version__,
         docker_image_tag=f"{name.lower()}-dev:1.0",
         lib_name=lib_name,
         bin_name=bin_name,
-        chip_label=chip_label,
-        cpu=cpu,
+        atsam_config=create_atsam_config(targets_chips.get("atsam")),
+        esp32_config=create_esp32_config(targets_chips.get("esp32")),
+        stm32_config=create_stm32_config(targets_chips.get("stm32")),
     )
 
     config = get_scargo_config_or_exit(toml_path)
