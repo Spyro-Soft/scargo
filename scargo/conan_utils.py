@@ -1,4 +1,3 @@
-import os
 import subprocess
 from pathlib import Path
 from typing import Dict, List
@@ -43,23 +42,13 @@ def conan_remote_login(remote: str) -> None:
     :param str remote: name of remote repository
     :return: None
     """
-    env_conan_user = os.environ.get("CONAN_LOGIN_USERNAME", "")
-    env_conan_passwd = os.environ.get("CONAN_PASSWORD", "")
     remote_login_command = ["conan", "remote", "login", remote]
-
     logger.info("Login to conan remote %s", remote)
-    if env_conan_user:
-        remote_login_command.append(env_conan_user)
-
-    if env_conan_passwd:
-        remote_login_command.extend(["-p", env_conan_passwd])
 
     try:
         subprocess.run(remote_login_command, check=True)
     except subprocess.CalledProcessError:
-        logger.error(
-            f"Unable to log in to conan remote {remote} as user {env_conan_user}"
-        )
+        logger.error(f"Unable to log in to conan remote {remote}")
 
 
 def conan_source(project_dir: Path) -> None:

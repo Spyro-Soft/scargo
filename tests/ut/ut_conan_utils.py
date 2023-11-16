@@ -116,9 +116,6 @@ def test_conan_remote_login_env_vars(fp: FakeProcess) -> None:
         "remote",
         "login",
         REPO_NAME,
-        ENV_CONAN_USER,
-        "-p",
-        ENV_CONAN_PASSWORD,
     ]
     fp.register(add_user_cmd)
 
@@ -141,9 +138,6 @@ def test_conan_remote_login_fail(
         "remote",
         "login",
         REPO_NAME,
-        ENV_CONAN_USER,
-        "-p",
-        ENV_CONAN_PASSWORD,
     ]
     fp.register(add_user_cmd, returncode=1)
 
@@ -155,10 +149,7 @@ def test_conan_remote_login_fail(
         conan_remote_login(REPO_NAME)
 
     # ASSERT
-    assert (
-        "Unable to log in to conan remote repo_name as user env_conan_user_name"
-        in caplog.text
-    )
+    assert "Unable to log in to conan remote repo_name" in caplog.text
 
 
 def test_conan_source_fails(
