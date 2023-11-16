@@ -1,6 +1,7 @@
 import os
 import subprocess
 from pathlib import Path
+from typing import Dict, List
 
 from scargo.config import Config
 from scargo.logger import get_logger
@@ -16,8 +17,8 @@ def conan_add_remote(project_path: Path, config: Config) -> None:
     :param Config config:
     :return: None
     """
-    conan_repo = config.conan.repo
-    for repo_name, repo_url in conan_repo.items():
+    remotes_without_user = _get_remotes_without_user(config.conan.repo)
+    for repo_name, repo_url in config.conan.repo.items():
         try:
             subprocess.run(
                 ["conan", "remote", "add", repo_name, repo_url],
@@ -29,30 +30,36 @@ def conan_add_remote(project_path: Path, config: Config) -> None:
             if b"already exists in remotes" not in e.stderr:
                 logger.error(e.stderr.decode().strip())
                 logger.error("Unable to add remote repository")
-        conan_add_user(repo_name)
+            else:
+                pass
+        if repo_name in remotes_without_user:
+            conan_remote_login(repo_name)
 
 
-def conan_add_user(remote: str) -> None:
+def conan_remote_login(remote: str) -> None:
     """
     Add conan user
 
     :param str remote: name of remote repository
     :return: None
     """
-    conan_user = subprocess.run(
-        "conan user", capture_output=True, shell=True, check=False
-    ).stdout.decode("utf-8")
-
     env_conan_user = os.environ.get("CONAN_LOGIN_USERNAME", "")
     env_conan_passwd = os.environ.get("CONAN_PASSWORD", "")
+    remote_login_command = ["conan", "remote", "login", remote]
 
-    if env_conan_user not in conan_user:
-        try:
-            subprocess.check_call(
-                ["conan", "user", "-p", env_conan_passwd, "-r", remote, env_conan_user],
-            )
-        except subprocess.CalledProcessError:
-            logger.error("Unable to add user")
+    logger.info("Login to conan remote %s", remote)
+    if env_conan_user:
+        remote_login_command.append(env_conan_user)
+
+    if env_conan_passwd:
+        remote_login_command.extend(["-p", env_conan_passwd])
+
+    try:
+        subprocess.run(remote_login_command, check=True)
+    except subprocess.CalledProcessError:
+        logger.error(
+            f"Unable to log in to conan remote {remote} as user {env_conan_user}"
+        )
 
 
 def conan_source(project_dir: Path) -> None:
@@ -67,3 +74,21 @@ def conan_source(project_dir: Path) -> None:
         )
     except subprocess.CalledProcessError:
         logger.error("Unable to source")
+
+
+def _get_remotes_without_user(conan_remotes: Dict[str, str]) -> List[str]:
+    result = subprocess.run(
+        ["conan", "remote", "list-users"], check=True, stdout=subprocess.PIPE
+    )
+    user_list_stdout = result.stdout.decode().splitlines()
+
+    no_users = []
+    for index, line in enumerate(user_list_stdout):
+        if remote_line := line.strip().split(":")[0]:
+            if (
+                remote_line in conan_remotes
+                and "No user" in user_list_stdout[index + 1]
+            ):
+                no_users.append(remote_line)
+
+    return no_users

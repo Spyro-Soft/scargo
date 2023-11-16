@@ -39,19 +39,17 @@ def scargo_publish(repo: str, profile: str = "Release") -> None:
 
     # Export package
     try:
-        subprocess.check_call(
+        subprocess.run(
             [
                 "conan",
                 "export-pkg",
                 ".",
-                "-of",
-                str(build_dir),
-                "-pr:b",
-                "default",
-                "-pr:h",
+                "-pr",
                 f"./config/conan/profiles/{config.project.target.family}_{profile}",
-                "-f",
+                "-of",
+                build_dir,
             ],
+            check=True,
             cwd=project_path,
         )
     except subprocess.CalledProcessError:
@@ -60,35 +58,34 @@ def scargo_publish(repo: str, profile: str = "Release") -> None:
 
     # Test if package has been exported successfully
     try:
-        subprocess.check_call(
+        subprocess.run(
             [
                 "conan",
                 "test",
                 "test_package",
                 f"{project_name}/{config.project.version}",
-                "-pr:b",
-                "default",
-                "-pr:h",
+                "-pr",
                 f"./config/conan/profiles/{config.project.target.family}_{profile}",
             ],
+            check=True,
             cwd=project_path,
         )
     except subprocess.CalledProcessError:
         logger.error("Package test failed")
         sys.exit(1)
 
-    # Upload package to artifactory
+    # Upload package to conan remote
     conan_repo = ["-r", repo] if repo else []
     try:
-        subprocess.check_call(
+        subprocess.run(
             [
                 "conan",
                 "upload",
                 f"{project_name}",
                 *conan_repo,
-                "--all",
                 "--confirm",
             ],
+            check=True,
             cwd=project_path,
         )
     except subprocess.CalledProcessError:
