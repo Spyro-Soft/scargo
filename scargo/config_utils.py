@@ -1,3 +1,4 @@
+import os
 import sys
 from pathlib import Path
 from typing import Optional
@@ -12,6 +13,11 @@ from scargo.logger import get_logger
 from scargo.path_utils import get_config_file_path
 
 logger = get_logger()
+
+
+def set_up_environment_variables(config: Config) -> None:
+    if config.project.in_repo_conan_cache:
+        os.environ["CONAN_HOME"] = f"{config.project_root}/.conan2"
 
 
 def get_scargo_config_or_exit(
@@ -41,12 +47,13 @@ def get_scargo_config_or_exit(
 
 def prepare_config(run_in_docker: bool = True) -> Config:
     """
-    Prepare configuration file
+    Prepare configuration file and set up eniromnent variables
 
     :return: project configuration
     """
     config = get_scargo_config_or_exit()
     check_scargo_version(config)
+    set_up_environment_variables(config)
     if run_in_docker:
         run_scargo_again_in_docker(config.project, config.project_root)
     return config
