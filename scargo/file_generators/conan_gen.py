@@ -2,10 +2,12 @@
 # @copyright Copyright (C) 2023 SpyroSoft Solutions S.A. All rights reserved.
 # #
 
+import shutil
 import subprocess
+from pathlib import Path
 
 from scargo.config import Config
-from scargo.file_generators.base_gen import create_file_from_template
+from scargo.file_generators.base_gen import TEMPLATE_ROOT, create_file_from_template
 
 
 def generate_conanfile(config: Config) -> None:
@@ -28,10 +30,17 @@ def generate_conanprofile(config: Config) -> None:
 
     if config.project.target.family == "stm32":
         create_file_from_template(
-            "conan/stm32_gcc_toolchain_wrapper.cmake.j2",
-            "config/conan/profiles/stm32_gcc_toolchain_wrapper.cmake",
+            "conan/toolchain/stm32_gcc_toolchain.cmake.j2",
+            "config/conan/profiles/stm32_gcc_toolchain.cmake",
             template_params={"config": config},
             config=config,
+        )
+    elif config.project.target.family == "atsam":
+        outpath = Path("config/conan/profiles/arm_gcc_toolchain.cmake")
+        outpath.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copyfile(
+            TEMPLATE_ROOT / "conan/toolchain/arm_gcc_toolchain.cmake",
+            outpath,
         )
 
     for profile in profiles:
