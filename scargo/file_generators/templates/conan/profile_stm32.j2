@@ -18,5 +18,4 @@ tools.build:cxxflags=["{{ config.project.cxxflags if config.project.cxxflags }} 
 {% if config.project.max_build_jobs != None %}
 tools.build:jobs={{config.project.max_build_jobs}}
 {% endif %}
-{% set workspace_dir = config.project_root if config.project.build_env != "docker" else "/workspace" %}
-tools.cmake.cmaketoolchain:user_toolchain=["{{ workspace_dir }}/config/conan/profiles/stm32_gcc_toolchain_wrapper.cmake"]
+tools.cmake.cmaketoolchain:user_toolchain=["{{ '{{ os.path.join(profile_dir, "stm32_gcc_toolchain.cmake") }}' }}"]

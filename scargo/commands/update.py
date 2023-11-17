@@ -18,7 +18,7 @@ from scargo.file_generators.env_gen import generate_env
 from scargo.file_generators.readme_gen import generate_readme
 from scargo.file_generators.tests_gen import generate_tests
 from scargo.file_generators.vscode_gen import generate_vscode
-from scargo.global_values import SCARGO_DOCKER_ENV, SCARGO_LOCK_FILE, SCARGO_PKG_PATH
+from scargo.global_values import SCARGO_LOCK_FILE, SCARGO_PKG_PATH
 from scargo.logger import get_logger
 
 logger = get_logger()
@@ -96,7 +96,7 @@ def scargo_update(config_file_path: Path) -> None:
     generate_readme(config)
 
     # do not rebuild dockers in the docker
-    if project_config.build_env == SCARGO_DOCKER_ENV:
+    if project_config.is_docker_buildenv():
         if not Path("/.dockerenv").exists():
             if not pull_docker_image(docker_path):
                 scargo_docker_build([], config.project_root)

@@ -6,7 +6,6 @@ import docker as dock
 from docker import DockerClient
 
 from scargo.config import ProjectConfig
-from scargo.global_values import SCARGO_DOCKER_ENV
 from scargo.logger import get_logger
 
 logger = get_logger()
@@ -43,8 +42,7 @@ def run_scargo_again_in_docker(
     :return: None
     """
 
-    build_env = project_config.build_env
-    if build_env != SCARGO_DOCKER_ENV or Path("/.dockerenv").exists():
+    if not project_config.is_docker_buildenv() or Path("/.dockerenv").exists():
         return
 
     cmd_args = sys.argv[1:]

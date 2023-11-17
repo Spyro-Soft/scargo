@@ -13,7 +13,7 @@ __pycache__/
 package-lock.json
 .env
 .devcontainer/.env
-.conan
+.conan2
 
 ### Linux ###
 *~
