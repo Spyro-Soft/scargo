@@ -16,6 +16,7 @@ logger = get_logger()
 
 
 def set_up_environment_variables(config: Config) -> None:
+    os.environ["SCARGO_PROJECT_ROOT"] = str(config.project_root.absolute())
     if config.project.in_repo_conan_cache:
         os.environ["CONAN_HOME"] = f"{config.project_root}/.conan2"
 

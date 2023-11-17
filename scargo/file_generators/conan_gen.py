@@ -28,8 +28,8 @@ def generate_conanprofile(config: Config) -> None:
 
     if config.project.target.family == "stm32":
         create_file_from_template(
-            "conan/stm32_gcc_toolchain_wrapper.cmake.j2",
-            "config/conan/profiles/stm32_gcc_toolchain_wrapper.cmake",
+            "conan/toolchain/stm32_gcc_toolchain.cmake.j2",
+            "config/conan/toolchain/stm32_gcc_toolchain.cmake",
             template_params={"config": config},
             config=config,
         )
