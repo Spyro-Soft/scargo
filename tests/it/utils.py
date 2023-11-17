@@ -10,7 +10,6 @@ from typer.testing import CliRunner
 
 from scargo.config import ProjectConfig
 from scargo.docker_utils import prepare_docker
-from scargo.global_values import SCARGO_DOCKER_ENV
 from scargo.logger import get_logger
 
 logger = get_logger()
@@ -149,8 +148,7 @@ def run_custom_command_in_docker(
     :param Path project_path: path to project root
     :return: None
     """
-    build_env = project_config.build_env
-    if build_env != SCARGO_DOCKER_ENV or Path("/.dockerenv").exists():
+    if not project_config.is_docker_buildenv() or Path("/.dockerenv").exists():
         return None
 
     docker_settings = prepare_docker(project_config, project_path)

@@ -24,10 +24,6 @@ services:
       - ..:/workspace
       - /dev:/dev
     command: sleep infinity
-  {% if config.project.in_repo_conan_cache %}
-    environment:
-      - CONAN_USER_HOME=/workspace
-  {% endif %}
   {% if config.docker_compose.ports %}
     ports:
     {% for port_ranges in config.docker_compose.ports %}

@@ -8,7 +8,7 @@ from typing import Any, Dict, List, Optional
 import toml
 from pydantic import BaseModel, Extra, Field, root_validator
 
-from scargo.global_values import SCARGO_DEFAULT_BUILD_ENV
+from scargo.global_values import SCARGO_DEFAULT_BUILD_ENV, SCARGO_DOCKER_ENV
 
 CHIP_DEFAULTS = {
     "x86": "",
@@ -133,6 +133,9 @@ class ProjectConfig(BaseModel):
         if (self.cc and not self.target.cc) or (self.cxx and not self.target.cxx):
             return "Compiler settings are ignored for this target"
         return None
+
+    def is_docker_buildenv(self) -> bool:
+        return self.build_env == SCARGO_DOCKER_ENV
 
 
 class Target(BaseModel):
