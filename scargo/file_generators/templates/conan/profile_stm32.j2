@@ -18,4 +18,4 @@ tools.build:cxxflags=["{{ config.project.cxxflags if config.project.cxxflags }} 
 {% if config.project.max_build_jobs != None %}
 tools.build:jobs={{config.project.max_build_jobs}}
 {% endif %}
-tools.cmake.cmaketoolchain:user_toolchain=["$ENV{SCARGO_PROJECT_ROOT}/config/conan/toolchain/stm32_gcc_toolchain.cmake"]
+tools.cmake.cmaketoolchain:user_toolchain=["{{ '{{ os.path.join(profile_dir, "stm32_gcc_toolchain.cmake") }}' }}"]

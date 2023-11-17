@@ -31,12 +31,12 @@ def generate_conanprofile(config: Config) -> None:
     if config.project.target.family == "stm32":
         create_file_from_template(
             "conan/toolchain/stm32_gcc_toolchain.cmake.j2",
-            "config/conan/toolchain/stm32_gcc_toolchain.cmake",
+            "config/conan/profiles/stm32_gcc_toolchain.cmake",
             template_params={"config": config},
             config=config,
         )
     elif config.project.target.family == "atsam":
-        outpath = Path("config/conan/toolchain/arm_gcc_toolchain.cmake")
+        outpath = Path("config/conan/profiles/arm_gcc_toolchain.cmake")
         outpath.parent.mkdir(parents=True, exist_ok=True)
         shutil.copyfile(
             TEMPLATE_ROOT / "conan/toolchain/arm_gcc_toolchain.cmake",
