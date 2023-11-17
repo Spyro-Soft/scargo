@@ -14,10 +14,18 @@ EXAMPLE_URL = "https://example.com"
 REPO_NAME = "repo_name"
 ENV_CONAN_USER = "env_conan_user_name"
 ENV_CONAN_PASSWORD = "env_conan_password"
+CONAN_REMOTE_CALLS = [
+    ["conan", "remote", "list-users"],
+    ["conan", "remote", "add", REMOTE_REPO_NAME_1, EXAMPLE_URL],
+    ["conan", "remote", "add", REMOTE_REPO_NAME_2, EXAMPLE_URL],
+]
+CONAN_SETUP_CALLS = CONAN_REMOTE_CALLS + [
+    ["conan", "source", "."],
+]
 
 
 @pytest.fixture
-def config(monkeypatch: pytest.MonkeyPatch) -> Config:
+def config(monkeypatch: pytest.MonkeyPatch, fp: FakeProcess) -> Config:
     test_project_config = get_test_project_config()
     test_project_config.conan.repo[REMOTE_REPO_NAME_1] = EXAMPLE_URL
     test_project_config.conan.repo[REMOTE_REPO_NAME_2] = EXAMPLE_URL
@@ -27,6 +35,9 @@ def config(monkeypatch: pytest.MonkeyPatch) -> Config:
         lambda: test_project_config,
     )
 
+    for command in CONAN_SETUP_CALLS:
+        fp.register(command)
+
     return test_project_config
 
 
@@ -35,68 +46,44 @@ def test_publish(config: Config, fp: FakeProcess) -> None:
     project_name = config.project.name
     build_path = Path(f"{config.project_root}/build/Release")
     build_path.mkdir(parents=True, exist_ok=True)
+    profile_path = f"./config/conan/profiles/{config.project.target.family}_Release"
 
-    conan_add_remote_1_cmd = ["conan", "remote", "add", REMOTE_REPO_NAME_1, EXAMPLE_URL]
-    conan_add_remote_2_cmd = ["conan", "remote", "add", REMOTE_REPO_NAME_2, EXAMPLE_URL]
-    conan_user_cmd = "conan user"
-    conan_source_cmd = [
-        "conan",
-        "source",
-        ".",
-    ]
-    conan_export_pkg_cmd = [
-        "conan",
-        "export-pkg",
-        ".",
-        "-of",
-        str(build_path),
-        "-pr:b",
-        "default",
-        "-pr:h",
-        f"./config/conan/profiles/{config.project.target.family}_Release",
-        "-f",
-    ]
-    conan_test_cmd = [
-        "conan",
-        "test",
-        "test_package",
-        f"{project_name}/{config.project.version}",
-        "-pr:b",
-        "default",
-        "-pr:h",
-        f"./config/conan/profiles/{config.project.target.family}_Release",
-    ]
-    conan_upload_cmd = [
-        "conan",
-        "upload",
-        f"{project_name}",
-        "-r",
-        REPO_NAME,
-        "--all",
-        "--confirm",
+    subprocess_commands = [
+        [
+            "conan",
+            "export-pkg",
+            ".",
+            "-pr",
+            profile_path,
+            "-of",
+            build_path,
+        ],
+        [
+            "conan",
+            "test",
+            "test_package",
+            f"{project_name}/{config.project.version}",
+            "-pr",
+            profile_path,
+        ],
+        [
+            "conan",
+            "upload",
+            f"{project_name}",
+            "-r",
+            REPO_NAME,
+            "--confirm",
+        ],
     ]
 
-    fp.register(conan_add_remote_1_cmd)
-    fp.register(conan_add_remote_2_cmd)
-    fp.register(conan_user_cmd, occurrences=2)
-    fp.register(conan_source_cmd)
-    fp.register(conan_export_pkg_cmd)
-    fp.register(conan_test_cmd)
-    fp.register(conan_upload_cmd)
+    for command in subprocess_commands:
+        fp.register(command)  # type: ignore[arg-type]
 
     # ACT
     scargo_publish(REPO_NAME)
 
     # ASSERT
-    assert fp.calls[0] == conan_add_remote_1_cmd
-    assert fp.calls[1] == conan_user_cmd
-    assert fp.calls[2] == conan_add_remote_2_cmd
-    assert fp.calls[3] == conan_user_cmd
-    assert fp.calls[4] == conan_source_cmd
-    assert fp.calls[5] == conan_export_pkg_cmd
-    assert fp.calls[6] == conan_test_cmd
-    assert fp.calls[7] == conan_upload_cmd
-    assert len(fp.calls) == 8
+    assert list(fp.calls) == CONAN_SETUP_CALLS + subprocess_commands
 
 
 def test_create_package_fail(
@@ -105,60 +92,21 @@ def test_create_package_fail(
     fp: FakeProcess,
 ) -> None:
     # ARRANGE
-    project_name = config.project.name
     build_path = Path(f"{config.project_root}/build/Release")
     build_path.mkdir(parents=True, exist_ok=True)
-
-    fp.register(["conan", "remote", "add", REMOTE_REPO_NAME_1, EXAMPLE_URL])
-    fp.register(["conan", "remote", "add", REMOTE_REPO_NAME_2, EXAMPLE_URL])
-    fp.register("conan user", occurrences=2)
-    fp.register(
-        [
-            "conan",
-            "source",
-            ".",
-        ]
-    )
+    profile_path = f"./config/conan/profiles/{config.project.target.family}_Release"
 
     fp.register(
         [
             "conan",
             "export-pkg",
             ".",
+            "-pr",
+            profile_path,
             "-of",
-            str(build_path),
-            "-pr:b",
-            "default",
-            "-pr:h",
-            f"./config/conan/profiles/{config.project.target.family}_Release",
-            "-f",
+            f"{build_path}",
         ],
         returncode=1,
-    )
-
-    fp.register(
-        [
-            "conan",
-            "test",
-            "test_package",
-            f"{project_name}/{config.project.version}",
-            "-pr:b",
-            "default",
-            "-pr:h",
-            f"./config/conan/profiles/{config.project.target.family}_Release",
-        ]
-    )
-
-    fp.register(
-        [
-            "conan",
-            "upload",
-            f"{project_name}",
-            "-r",
-            REPO_NAME,
-            "--all",
-            "--confirm",
-        ]
     )
 
     # ACT
@@ -179,31 +127,18 @@ def test_upload_package_fail(
     project_name = config.project.name
     build_path = Path(f"{config.project_root}/build/Release")
     build_path.mkdir(parents=True, exist_ok=True)
+    profile_path = f"./config/conan/profiles/{config.project.target.family}_Release"
 
-    fp.register(["conan", "remote", "clean"])
-    fp.register(["conan", "remote", "add", REMOTE_REPO_NAME_1, EXAMPLE_URL])
-    fp.register(["conan", "remote", "add", REMOTE_REPO_NAME_2, EXAMPLE_URL])
-    fp.register("conan user", occurrences=2)
-    fp.register(
-        [
-            "conan",
-            "source",
-            ".",
-        ]
-    )
     fp.register(
         [
             "conan",
             "export-pkg",
             ".",
+            "-pr",
+            profile_path,
             "-of",
-            str(build_path),
-            "-pr:b",
-            "default",
-            "-pr:h",
-            f"./config/conan/profiles/{config.project.target.family}_Release",
-            "-f",
-        ]
+            f"{build_path}",
+        ],
     )
     fp.register(
         [
@@ -211,22 +146,12 @@ def test_upload_package_fail(
             "test",
             "test_package",
             f"{project_name}/{config.project.version}",
-            "-pr:b",
-            "default",
-            "-pr:h",
-            f"./config/conan/profiles/{config.project.target.family}_Release",
+            "-pr",
+            profile_path,
         ]
     )
     fp.register(
-        [
-            "conan",
-            "upload",
-            f"{project_name}",
-            "-r",
-            REPO_NAME,
-            "--all",
-            "--confirm",
-        ],
+        ["conan", "upload", f"{project_name}", "-r", REPO_NAME, "--confirm"],
         returncode=1,
     )
 
