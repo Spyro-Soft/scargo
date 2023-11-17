@@ -15,7 +15,7 @@ CXX=arm-none-eabi-g++
 [conf]
 tools.build:cflags=["{{ config.project.cflags if config.project.cflags}} {{config.profiles.get(profile).cflags if config.profiles.get(profile).cflags}}"]
 tools.build:cxxflags=["{{ config.project.cxxflags if config.project.cxxflags }} {{ config.profiles.get(profile).cxxflags if config.profiles.get(profile).cxxflags }}"]
-
 {% if config.project.max_build_jobs != None %}
 tools.build:jobs={{config.project.max_build_jobs}}
 {% endif %}
+tools.cmake.cmaketoolchain:user_toolchain=["$ENV{SCARGO_PROJECT_ROOT}/config/conan/toolchain/arm_gcc_toolchain.cmake"]

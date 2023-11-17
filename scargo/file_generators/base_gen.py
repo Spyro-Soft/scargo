@@ -13,9 +13,9 @@ from scargo.logger import get_logger
 
 logger = get_logger()
 
-_TEMPLATE_ROOT = Path(SCARGO_PKG_PATH, "file_generators", "templates")
+TEMPLATE_ROOT = Path(SCARGO_PKG_PATH, "file_generators", "templates")
 _JINJA_ENV = Environment(
-    loader=FileSystemLoader(_TEMPLATE_ROOT),
+    loader=FileSystemLoader(TEMPLATE_ROOT),
     trim_blocks=True,
     lstrip_blocks=True,
 )
