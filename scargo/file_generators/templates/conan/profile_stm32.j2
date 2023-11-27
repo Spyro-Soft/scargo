@@ -8,6 +8,7 @@ compiler.cppstd={{ config.project.cxxstandard }}
 build_type={{ config.profiles[profile].cmake_build_type }}
 
 [buildenv]
+SCARGO_BUILD_TARGET=stm32
 STM32_CHIP={{config.stm32.chip}}
 STM32_TOOLCHAIN_PATH=/opt/gcc-arm-none-eabi
 STM32_TARGET_TRIPLET=arm-none-eabi
@@ -15,7 +16,7 @@ STM32_TARGET_TRIPLET=arm-none-eabi
 [conf]
 tools.build:cflags=["{{ config.project.cflags if config.project.cflags}} {{config.profiles.get(profile).cflags if config.profiles.get(profile).cflags}}"]
 tools.build:cxxflags=["{{ config.project.cxxflags if config.project.cxxflags }} {{ config.profiles.get(profile).cxxflags if config.profiles.get(profile).cxxflags }}"]
+tools.cmake.cmaketoolchain:user_toolchain=["{{ '{{ os.path.join(profile_dir, "stm32_gcc_toolchain.cmake") }}' }}"]
 {% if config.project.max_build_jobs != None %}
 tools.build:jobs={{config.project.max_build_jobs}}
 {% endif %}
-tools.cmake.cmaketoolchain:user_toolchain=["{{ '{{ os.path.join(profile_dir, "stm32_gcc_toolchain.cmake") }}' }}"]

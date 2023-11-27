@@ -14,5 +14,3 @@ set(EXTRA_COMPONENT_DIRS
 set(IDF_TARGET {{ config.esp32.chip|lower }})
 
 include($ENV{IDF_PATH}/tools/cmake/project.cmake)
-
-{% include 'project.cmake.j2' %}

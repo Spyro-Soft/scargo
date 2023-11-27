@@ -8,9 +8,13 @@ compiler.libcxx=libstdc++11
 build_type={{ config.profiles[profile].cmake_build_type }}
 
 [buildenv]
+SCARGO_BUILD_TARGET=esp32
 WORKAROUND_FOR_ESP32_C_FLAGS={{ config.project.cflags if config.project.cflags}} {{config.profiles.get(profile).cflags if config.profiles.get(profile).cflags}}
 WORKAROUND_FOR_ESP32_CXX_FLAGS={{ config.project.cxxflags if config.project.cxxflags }} {{ config.profiles.get(profile).cxxflags if config.profiles.get(profile).cxxflags }}
 
 [conf]
-tools.cmake.cmaketoolchain:user_toolchain=["/opt/esp-idf/tools/cmake/toolchain-esp32.cmake"]
 tools.cmake.cmaketoolchain:generator=Ninja
+tools.cmake.cmaketoolchain:user_toolchain=["{{ '{{ os.path.join(profile_dir, "esp32_toolchain.cmake") }}' }}"]
+{% if config.project.max_build_jobs != None %}
+tools.build:jobs={{config.project.max_build_jobs}}
+{% endif %}

@@ -58,7 +58,8 @@ class _CppTemplateGen:
 
         create_file_from_template(
             "cpp/lib.cpp.j2",
-            self._src_dir / f"{self._config.project.target.source_dir}/{lib_name}.cpp",
+            self._src_dir
+            / f"{self._config.project.target[0].source_dir}/{lib_name}.cpp",
             template_params={"class_name": class_name, "lib_name": lib_name},
             config=self._config,
         )
@@ -73,7 +74,7 @@ class _CppTemplateGen:
 
     def _generate_cmake(self) -> None:
         self._create_file_from_template(
-            f"cpp/cmake-src-{self._config.project.target.family}.j2",
+            f"cpp/cmake-src-{self._config.project.target[0].family}.j2",
             "CMakeLists.txt",
             template_params={"config": self._config},
         )

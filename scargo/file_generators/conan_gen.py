@@ -42,6 +42,14 @@ def generate_conanprofile(config: Config) -> None:
             config=config,
         )
 
+    if config.project.is_esp32():
+        create_file_from_template(
+            "conan/toolchain/esp32_toolchain.cmake.j2",
+            "config/conan/profiles/esp32_toolchain.cmake",
+            template_params={"config": config},
+            config=config,
+        )
+
     for target in config.project.target:
         for profile in profiles:
             create_file_from_template(

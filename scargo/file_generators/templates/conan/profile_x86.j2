@@ -1,4 +1,14 @@
+[settings]
+compiler=gcc
+compiler.version=9
+compiler.libcxx=libstdc++
+compiler.cppstd={{ config.project.cxxstandard }}
+os=Linux
+arch=x86_64
+build_type={{ config.profiles[profile].cmake_build_type }}
+
 [buildenv]
+SCARGO_BUILD_TARGET=x86
 {% if config.profiles[profile].cc %}
 CC={{ config.profiles[profile].cc }}
 {% else %}
@@ -9,15 +19,6 @@ CXX={{ config.profiles[profile].cxx }}
 {% else %}
 CXX=g++
 {% endif %}
-
-[settings]
-compiler=gcc
-compiler.version=9
-compiler.libcxx=libstdc++
-compiler.cppstd={{ config.project.cxxstandard }}
-os=Linux
-arch=x86_64
-build_type={{ config.profiles[profile].cmake_build_type }}
 
 [conf]
 tools.build:cflags=["{{ config.project.cflags if config.project.cflags}} {{config.profiles.get(profile).cflags if config.profiles.get(profile).cflags}}"]

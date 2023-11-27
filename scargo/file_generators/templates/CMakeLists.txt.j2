@@ -9,20 +9,20 @@
 cmake_minimum_required(VERSION 3.22)
 
 list(APPEND CMAKE_PREFIX_PATH "${CMAKE_BINARY_DIR}/generators/")
-{% if config.project.target.family != 'esp32' %}
-set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
-{% endif %}
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
-{% if config.project.target.family == 'stm32' %}
-{% include 'stm32.cmake.j2' %}
-{% elif config.project.target.family == 'x86' %}
-{% include 'x86.cmake.j2' %}
-{% elif config.project.target.family == "esp32" %}
-{% include 'esp32.cmake.j2' %}
-{% elif config.project.target.family == "atsam" %}
-{% include 'atsam.cmake.j2' %}
-{% endif %}
+project( {{ config.project.name }}
+    {% if config.project.version %}
+    VERSION {{ config.project.version }}
+    {% endif %}
+    {% if config.project.description %}
+    DESCRIPTION "{{ config.project.description }}"
+    {% endif %}
+    {% if config.project.homepage_url %}
+    HOMEPAGE_URL "{{ config.project.homepage_url }}"
+    {% endif %}
+    LANGUAGES C CXX ASM
+)
 
 {% for key, value in config.project.cmake_variables.items() %}
 set({{ key }} "{{ value }}")
@@ -38,6 +38,6 @@ ENDIF()
     {% endif %}
 {% endfor %}
 
-{% if config.project.target.family != "esp32" %}
-add_subdirectory({{ config.source_dir_path.relative_to(config.project_root) }})
-{% endif %}
+IF(NOT $ENV{SCARGO_BUILD_TARGET} STREQUAL esp32)
+    add_subdirectory({{ config.source_dir_path.relative_to(config.project_root) }})
+ENDIF()

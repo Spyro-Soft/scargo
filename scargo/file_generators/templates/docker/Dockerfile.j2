@@ -23,17 +23,17 @@ RUN apt update --fix-missing && apt -y --no-install-recommends install cppcheck 
     rm -rf /var/lib/apt/lists/*
 
 {% if project.is_esp32() %}
-FROM {{ previous_base }} as esp32
+FROM {{ previous_base }} AS esp32
 {% set previous_base = 'esp32' %}
 {% include 'docker/Dockerfile-esp32.j2' %}
 {% endif %}
 
 {% if project.is_stm32() %}
-FROM {{ previous_base }} as stm32
+FROM {{ previous_base }} AS stm32
 {% set previous_base = 'stm32' %}
 {% include 'docker/Dockerfile-arm.j2' %}
 {% elif project.is_atsam() %}
-FROM {{ previous_base }} as atsam
+FROM {{ previous_base }} AS atsam
 {% set previous_base = 'atsam' %}
 {% include 'docker/Dockerfile-arm.j2' %}
 {% endif %}
