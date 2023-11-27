@@ -36,7 +36,7 @@ debug:
   stage: build
   extends: .merge_request
   script:
-  {% if project.target.family == "esp32" %}
+  {% if project.is_esp32() %}
     - source /opt/esp/entrypoint.sh
   {% endif %}
     - CONAN_LOGIN_USERNAME=ci_user

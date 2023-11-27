@@ -2,12 +2,10 @@
 # @copyright Copyright (C) 2023 SpyroSoft Solutions S.A. All rights reserved.
 # #
 
-import shutil
 import subprocess
-from pathlib import Path
 
 from scargo.config import Config
-from scargo.file_generators.base_gen import TEMPLATE_ROOT, create_file_from_template
+from scargo.file_generators.base_gen import create_file_from_template
 
 
 def generate_conanfile(config: Config) -> None:
@@ -28,31 +26,33 @@ def generate_conanfile(config: Config) -> None:
 def generate_conanprofile(config: Config) -> None:
     profiles = config.profiles.keys()
 
-    if config.project.target.family == "stm32":
+    if config.project.is_stm32():
         create_file_from_template(
             "conan/toolchain/stm32_gcc_toolchain.cmake.j2",
             "config/conan/profiles/stm32_gcc_toolchain.cmake",
             template_params={"config": config},
             config=config,
         )
-    elif config.project.target.family == "atsam":
-        outpath = Path("config/conan/profiles/arm_gcc_toolchain.cmake")
-        outpath.parent.mkdir(parents=True, exist_ok=True)
-        shutil.copyfile(
-            TEMPLATE_ROOT / "conan/toolchain/arm_gcc_toolchain.cmake",
-            outpath,
-        )
 
-    for profile in profiles:
+    if config.project.is_atsam():
         create_file_from_template(
-            "conan/profile.j2",
-            f"config/conan/profiles/{config.project.target.family}_{profile}",
-            template_params={
-                "config": config,
-                "profile": profile,
-            },
+            "conan/toolchain/arm_gcc_toolchain.cmake.j2",
+            "config/conan/profiles/arm_gcc_toolchain.cmake",
+            template_params={"config": config},
             config=config,
         )
+
+    for target in config.project.target:
+        for profile in profiles:
+            create_file_from_template(
+                f"conan/profile_{target.family}.j2",
+                f"config/conan/profiles/{target.family}_{profile}",
+                template_params={
+                    "config": config,
+                    "profile": profile,
+                },
+                config=config,
+            )
 
 
 def conan_add_default_profile_if_missing() -> None:

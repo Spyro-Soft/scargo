@@ -8,7 +8,7 @@ from conan.tools.cmake import CMake, cmake_layout
 from conan.tools.files import copy, get
 from conan.tools.scm import Git
 
-{% if config.project.target.family == "stm32" %}
+{% if config.project.is_stm32() %}
 import os
 {% endif %}
 
@@ -40,12 +40,13 @@ class {{ config.project.name|capitalize|replace("-", "") }}Conan(ConanFile):  # 
 
     {% endif %}
     def source(self) -> None:
-    {% if config.project.target.family == "stm32" %}
+    {% if config.project.is_stm32() %}
         target_dir = "third-party/stm32-cmake"
         if not os.path.isdir(target_dir):
             git = Git(self)
             git.clone("https://github.com/ObKo/stm32-cmake.git", target=target_dir)
-    {% elif config.project.target.family == "atsam" %}
+    {% endif %}
+    {% if config.project.is_atsam() %}
         import requests
         import re
         from pathlib import Path
@@ -71,7 +72,8 @@ class {{ config.project.name|capitalize|replace("-", "") }}Conan(ConanFile):  # 
         if not cmsis_outdir.is_dir():
             cmsis_filename = "ARM.CMSIS.5.4.0.atpack"
             get(self, f"{packs_url}/{cmsis_filename}", destination=cmsis_outdir)
-    {% else %}
+    {% endif %}
+    {% if config.project.is_x86() or config.project.is_esp32() %}
         pass
     {% endif %}
 

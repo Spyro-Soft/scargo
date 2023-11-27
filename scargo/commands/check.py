@@ -324,11 +324,11 @@ class ClangTidyChecker(CheckerFixer):
             logger.info("Did you run `scargo build`?")
             sys.exit(1)
 
-        if self._config.project.target.family == "esp32":
+        if self._config.project.is_esp32():
             cmd = self.__get_cmd_esp32(file_path)
-        elif self._config.project.target.family == "stm32":
+        elif self._config.project.is_stm32():
             cmd = self.__get_cmd_stm32(file_path)
-        elif self._config.project.target.family == "x86":
+        elif self._config.project.is_x86():
             cmd = self.__get_cmd_x86(file_path)
 
         try:

@@ -41,6 +41,9 @@ def scargo_build(profile: str) -> None:
     conan_add_remote(project_dir, config)
     conan_source(project_dir)
 
+    # TODO add target argument, take first as default if not given []
+    target = config.project.target[0].family
+
     try:
         subprocess.run(
             [
@@ -48,7 +51,7 @@ def scargo_build(profile: str) -> None:
                 "install",
                 ".",
                 "-pr",
-                f"./config/conan/profiles/{config.project.target.family}_{profile}",
+                f"./config/conan/profiles/{target}_{profile}",
                 "-of",
                 f"build/{profile}",
                 "-b",
@@ -63,7 +66,7 @@ def scargo_build(profile: str) -> None:
                 "build",
                 ".",
                 "-pr",
-                f"./config/conan/profiles/{config.project.target.family}_{profile}",
+                f"./config/conan/profiles/{target}_{profile}",
                 "-of",
                 f"build/{profile}",
             ],
