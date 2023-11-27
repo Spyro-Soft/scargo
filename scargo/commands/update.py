@@ -66,7 +66,6 @@ def scargo_update(config_file_path: Path) -> None:
     ###########################################################################
     add_version_to_scargo_lock(lock_path)
     project_config = config.project
-    target = project_config.target
 
     # Copy docker env files to repo directory
     generate_docker_compose(docker_path, config)
@@ -78,7 +77,7 @@ def scargo_update(config_file_path: Path) -> None:
     generate_conanfile(config)
     generate_conanprofile(config)
 
-    if target.family == "esp32":
+    if project_config.is_esp32():
         Path(config.source_dir_path, "fs").mkdir(parents=True, exist_ok=True)
         with open(Path(project_path, "version.txt"), "w", encoding="utf-8") as out:
             out.write(project_config.version)

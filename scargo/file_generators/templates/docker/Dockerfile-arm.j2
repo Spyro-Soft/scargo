@@ -1,7 +1,13 @@
 WORKDIR /opt/
 
+{% if project.is_stm32() %}
+{% set additional_tools = 'stlink-tools' %}
+{% else %}
+{% set additional_tools = '' %}
+{% endif %}
+
 RUN apt-get update -q -y && \
-    apt-get install -y --no-install-recommends curl wget openocd gdb-multiarch && \
+    apt-get install -y --no-install-recommends curl wget openocd gdb-multiarch {{ additional_tools }} && \
     rm -rf /var/lib/apt/lists/*
 
 # pull the gcc-arm-none-eabi tarball, add path to tar file

@@ -16,17 +16,31 @@ RUN apt update --fix-missing && \
     update-alternatives --install /usr/bin/python python /usr/bin/python3 1
 
 FROM base AS cpp
+{% set previous_base = 'cpp' %}
 
 RUN apt update --fix-missing && apt -y --no-install-recommends install cppcheck lib32z1 \
     make cmake clang clang-format clang-tidy gcovr doxygen libcmocka0 libcmocka-dev gdb screen wget && \
     rm -rf /var/lib/apt/lists/*
 
-FROM cpp AS {{ project.target.family }}
-{% include 'docker/Dockerfile-' + project.target.family + '.j2' %}
+{% if project.is_esp32() %}
+FROM {{ previous_base }} as esp32
+{% set previous_base = 'esp32' %}
+{% include 'docker/Dockerfile-esp32.j2' %}
+{% endif %}
+
+{% if project.is_stm32() %}
+FROM {{ previous_base }} as stm32
+{% set previous_base = 'stm32' %}
+{% include 'docker/Dockerfile-arm.j2' %}
+{% elif project.is_atsam() %}
+FROM {{ previous_base }} as atsam
+{% set previous_base = 'atsam' %}
+{% include 'docker/Dockerfile-arm.j2' %}
+{% endif %}
 
 WORKDIR /opt
 
-FROM {{ project.target.family }} AS custom_{{ project.name }}
+FROM {{ previous_base }} AS custom_{{ project.name }}
 {{ custom_docker }}
 FROM custom_{{ project.name }} AS {{ project.name }}_dev
 
@@ -65,7 +79,7 @@ RUN pip3 install {{ scargo_package_version }}
 
 RUN usermod -a -G dialout ${USER_NAME}
 USER ${USER_NAME}
-{% if project.target.family == "esp32" %}
+{% if project.is_esp32() %}
 RUN /bin/bash -c "echo 'source $IDF_PATH/export.sh'" >> ~/.bashrc
 CMD ["/bin/bash"]
 {% endif %}

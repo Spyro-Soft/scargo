@@ -150,6 +150,18 @@ class ProjectConfig(BaseModel):
     def is_docker_buildenv(self) -> bool:
         return self.build_env == SCARGO_DOCKER_ENV
 
+    def is_x86(self) -> bool:
+        return "x86" in self.target_id
+
+    def is_stm32(self) -> bool:
+        return "stm32" in self.target_id
+
+    def is_esp32(self) -> bool:
+        return "esp32" in self.target_id
+
+    def is_atsam(self) -> bool:
+        return "atsam" in self.target_id
+
 
 class Target(BaseModel):
     id: str
