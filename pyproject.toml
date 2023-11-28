@@ -66,6 +66,7 @@ dev = [
     "pytest-subprocess",
     "pytest",
     "pytest-assume==2.4.3",
+    "pytest-lazy-fixture==0.6.3",
     "pytest-xdist==3.3.1",
     "pytest-order==1.1.0",
     "types-clang==0.14.3",

@@ -206,6 +206,7 @@ pytest==7.2.2
     # via
     #   pytest-assume
     #   pytest-cov
+    #   pytest-lazy-fixture
     #   pytest-mock
     #   pytest-order
     #   pytest-subprocess
@@ -214,6 +215,8 @@ pytest==7.2.2
 pytest-assume==2.4.3
     # via scargo (pyproject.toml)
 pytest-cov==4.0.0
+    # via scargo (pyproject.toml)
+pytest-lazy-fixture==0.6.3
     # via scargo (pyproject.toml)
 pytest-mock==3.10.0
     # via scargo (pyproject.toml)
