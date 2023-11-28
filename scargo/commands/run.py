@@ -26,10 +26,13 @@ def scargo_run(bin_path: Optional[Path], profile: str, params: List[str]) -> Non
     logger.info('Running "%s" build', profile)
 
     config = prepare_config()
-    if "x86" not in config.project.target.family:
+    # TODO add target argument, take first as default if not given
+    target = config.project.target[0]
+
+    if "x86" not in target.id:
         logger.info(
             "Run project on x86 architecture is not implemented for %s yet.",
-            config.project.target.family,
+            target.id,
         )
         sys.exit(1)
 

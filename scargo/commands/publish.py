@@ -27,6 +27,9 @@ def scargo_publish(repo: str, profile: str = "Release") -> None:
     project_config = config.project
     project_name = project_config.name
 
+    # TODO add target argument, take first as default if not given
+    target = project_config.target[0]
+
     build_dir = Path(project_path, "build", profile)
 
     if not build_dir.exists():
@@ -45,7 +48,7 @@ def scargo_publish(repo: str, profile: str = "Release") -> None:
                 "export-pkg",
                 ".",
                 "-pr",
-                f"./config/conan/profiles/{config.project.target.family}_{profile}",
+                f"./config/conan/profiles/{target.id}_{profile}",
                 "-of",
                 build_dir,
             ],
@@ -65,7 +68,7 @@ def scargo_publish(repo: str, profile: str = "Release") -> None:
                 "test_package",
                 f"{project_name}/{config.project.version}",
                 "-pr",
-                f"./config/conan/profiles/{config.project.target.family}_{profile}",
+                f"./config/conan/profiles/{target.id}_{profile}",
             ],
             check=True,
             cwd=project_path,

@@ -46,7 +46,7 @@ def test_publish(config: Config, fp: FakeProcess) -> None:
     project_name = config.project.name
     build_path = Path(f"{config.project_root}/build/Release")
     build_path.mkdir(parents=True, exist_ok=True)
-    profile_path = f"./config/conan/profiles/{config.project.target.family}_Release"
+    profile_path = f"./config/conan/profiles/{config.project.target[0].id}_Release"
 
     subprocess_commands = [
         [
@@ -94,7 +94,7 @@ def test_create_package_fail(
     # ARRANGE
     build_path = Path(f"{config.project_root}/build/Release")
     build_path.mkdir(parents=True, exist_ok=True)
-    profile_path = f"./config/conan/profiles/{config.project.target.family}_Release"
+    profile_path = f"./config/conan/profiles/{config.project.target[0].id}_Release"
 
     fp.register(
         [
@@ -127,7 +127,7 @@ def test_upload_package_fail(
     project_name = config.project.name
     build_path = Path(f"{config.project_root}/build/Release")
     build_path.mkdir(parents=True, exist_ok=True)
-    profile_path = f"./config/conan/profiles/{config.project.target.family}_Release"
+    profile_path = f"./config/conan/profiles/{config.project.target[0].id}_Release"
 
     fp.register(
         [

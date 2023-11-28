@@ -32,7 +32,7 @@ def generate_tests(config: Config) -> None:
         "tests/CMakeLists.txt",
         overwrite=True,
         template_params={
-            "target": config.project.target,
+            "project": config.project,
             "tests": config.tests,
             "cxxstandard": config.project.cxxstandard,
         },

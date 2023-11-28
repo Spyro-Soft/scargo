@@ -42,7 +42,7 @@ def scargo_build(profile: str) -> None:
     conan_source(project_dir)
 
     # TODO add target argument, take first as default if not given []
-    target = config.project.target[0].family
+    target = config.project.target[0].id
 
     try:
         subprocess.run(

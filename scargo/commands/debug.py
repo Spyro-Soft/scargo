@@ -29,7 +29,7 @@ class _ScargoDebug:
         # TODO add target argument, take first as default if not given
         self._target = config.project.target[0]
 
-        if self._target.family not in self.SUPPORTED_TARGETS:
+        if self._target.id not in self.SUPPORTED_TARGETS:
             logger.error("Debugging currently not supported for %s", self._target)
             logger.info(
                 "Scargo currently supports debug for %s", self.SUPPORTED_TARGETS
@@ -44,13 +44,13 @@ class _ScargoDebug:
 
     def run_debugger(self) -> None:
         """Run debugger for target"""
-        if self._target.family == "x86":
+        if self._target.id == "x86":
             self._debug_x86()
-        elif self._target.family == "stm32":
+        elif self._target.id == "stm32":
             self._debug_stm32()
-        elif self._target.family == "esp32":
+        elif self._target.id == "esp32":
             self._debug_esp32()
-        elif self._target.family == "atsam":
+        elif self._target.id == "atsam":
             self._debug_atsam()
 
     def _debug_x86(self) -> None:

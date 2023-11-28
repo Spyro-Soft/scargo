@@ -55,14 +55,15 @@ class Config(BaseModel):
 
     @property
     def source_dir_path(self) -> Path:
-        if len(self.project.target) == 1:
-            return self.project_root / self.project.target[0].source_dir
+        if self.project.is_esp32():
+            # Backwards compatibility for main dir
+            main_dir = self.project_root / COMPATIBILITY_ESP32_SRC_DIR
+            if main_dir.is_dir():
+                return main_dir
         return self.project_root / DEFAULT_SRC_DIR
 
     @property
     def include_dir_path(self) -> Path:
-        if len(self.project.target) == 1:
-            return self.source_dir_path / self.project.target[0].include_dir
         return self.project_root / DEFAULT_INCLUDE_DIR
 
     def get_atsam_config(self) -> "ATSAMConfig":
@@ -165,9 +166,6 @@ class ProjectConfig(BaseModel):
 
 class Target(BaseModel):
     id: str
-    family: str
-    source_dir: str
-    include_dir: str
     cc: Optional[str] = None
     cxx: Optional[str] = None
 
@@ -179,34 +177,22 @@ class Target(BaseModel):
 
 
 DEFAULT_SRC_DIR = "src"
-ESP32_SRC_DIR = "main"
+COMPATIBILITY_ESP32_SRC_DIR = "main"
 DEFAULT_INCLUDE_DIR = "include"
 TARGETS = {
     "x86": Target(
         id="x86",
-        family="x86",
-        source_dir=DEFAULT_SRC_DIR,
-        include_dir=DEFAULT_INCLUDE_DIR,
         cc="gcc",
         cxx="g++",
     ),
     "stm32": Target(
         id="stm32",
-        family="stm32",
-        source_dir=DEFAULT_SRC_DIR,
-        include_dir=DEFAULT_INCLUDE_DIR,
     ),
     "esp32": Target(
         id="esp32",
-        family="esp32",
-        source_dir=ESP32_SRC_DIR,
-        include_dir=DEFAULT_INCLUDE_DIR,
     ),
     "atsam": Target(
         id="atsam",
-        family="atsam",
-        source_dir=DEFAULT_SRC_DIR,
-        include_dir=DEFAULT_INCLUDE_DIR,
     ),
 }
 

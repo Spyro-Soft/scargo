@@ -3,10 +3,10 @@
 //
 
 #include <cstdio>
-{% if target.family == "atsam" %}
+{% if project.is_atsam() %}
 #include <sam.h>
 {% endif %}
-{% if target.family == "esp32" %}
+{% if project.is_esp32() %}
 #include <freertos/FreeRTOS.h>
 #include <freertos/task.h>
 #include <esp_log.h>
@@ -35,7 +35,7 @@ void app_main(void)  // NOLINT(readability-identifier-naming): name required by 
  */
 int main()
 {
-    {% if target.family != "x86" %}
+    {% if project.is_x86() %}
     while (true)
     {
     }

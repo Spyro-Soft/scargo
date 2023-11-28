@@ -37,18 +37,18 @@ def scargo_flash(
     # TODO add target argument, take first as default if not given
     target = config.project.target[0]
 
-    if target.family not in SUPPORTED_TARGETS:
+    if target.id not in SUPPORTED_TARGETS:
         logger.error("Flash command not supported for this target yet.")
         sys.exit(1)
 
-    if not erase_memory and target.family != "stm32":
+    if not erase_memory and target.id != "stm32":
         logger.error("--no-erase option is only supported for stm32 projects.")
         sys.exit(1)
-    if target.family == "esp32":
+    if target.id == "esp32":
         flash_esp32(config, app=app, fs=fs, flash_profile=flash_profile, port=port)
-    elif target.family == "stm32":
+    elif target.id == "stm32":
         flash_stm32(config, flash_profile, erase_memory, port=port)
-    elif target.family == "atsam":
+    elif target.id == "atsam":
         flash_atsam(config, flash_profile)
 
 
