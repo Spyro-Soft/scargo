@@ -11,6 +11,24 @@ cmake_minimum_required(VERSION 3.22)
 list(APPEND CMAKE_PREFIX_PATH "${CMAKE_BINARY_DIR}/generators/")
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
+{% if config.project.is_esp32()  %}
+IF($ENV{SCARGO_BUILD_TARGET} STREQUAL esp32)
+    include($ENV{IDF_PATH}/tools/cmake/project.cmake)
+    set (CMAKE_CXX_STANDARD {{ config.project.cxxstandard }})
+    set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} $ENV{WORKAROUND_FOR_ESP32_C_FLAGS}")
+    set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} $ENV{WORKAROUND_FOR_ESP32_CXX_FLAGS}")
+
+    {% if config.esp32.extra_component_dirs %}
+    set(EXTRA_COMPONENT_DIRS
+    {% for dirs in config.esp32.extra_component_dirs %}
+        {{ dirs }}
+    {% endfor %}
+    )
+    {% endif %}
+    set(IDF_TARGET {{ config.esp32.chip|lower }})
+ENDIF()
+{% endif %}
+
 project( {{ config.project.name }}
     {% if config.project.version %}
     VERSION {{ config.project.version }}

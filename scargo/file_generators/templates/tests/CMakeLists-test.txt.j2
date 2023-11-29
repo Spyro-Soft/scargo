@@ -4,31 +4,31 @@
 
 cmake_minimum_required(VERSION 3.22)
 
-{% if tests %}
-{% if tests.cc %}
-set(CMAKE_C_COMPILER   "{{ tests.cc }}")
-{% endif %} {# tests.cc #}
+{% if config.tests %}
+{% if config.tests.cc %}
+set(CMAKE_C_COMPILER   "{{ config.tests.cc }}")
+{% endif %} {# config.tests.cc #}
 
-{% if tests.cxx %}
-set(CMAKE_CXX_COMPILER "{{ tests.cxx }}")
-{% endif %} {# tests.cxx #}
+{% if config.tests.cxx %}
+set(CMAKE_CXX_COMPILER "{{ config.tests.cxx }}")
+{% endif %} {# config.tests.cxx #}
 
 set(CMAKE_CXX_STANDARD {{ cxxstandard }})
 
-{% if tests.cflags %}
-set(CMAKE_C_FLAGS   "{{ tests.cflags }}")
-{% endif %} {# tests.cflags #}
+{% if config.tests.cflags %}
+set(CMAKE_C_FLAGS   "{{ config.tests.cflags }}")
+{% endif %} {# config.tests.cflags #}
 
-{% if tests.cxxflags %}
-set(CMAKE_CXX_FLAGS "{{ tests.cxxflags }}")
-{% endif %} {# tests.cxxflags #}
+{% if config.tests.cxxflags %}
+set(CMAKE_CXX_FLAGS "{{ config.tests.cxxflags }}")
+{% endif %} {# config.tests.cxxflags #}
 
-{% if tests.extras %}
-{% for key, value in tests.extras.items() %}
+{% if config.tests.extras %}
+{% for key, value in config.tests.extras.items() %}
 SET({{ key }} {{ value }})
 {% endfor %}
-{% endif %} {# tests.extras #}
-{% endif %} {# tests #}
+{% endif %} {# config.tests.extras #}
+{% endif %} {# config.tests #}
 
 project(tests LANGUAGES C CXX ASM)
 
