@@ -72,11 +72,24 @@ class _CppTemplateGen:
         self._generate_test_package(class_name)
 
     def _generate_cmake(self) -> None:
-        self._create_file_from_template(
-            f"cpp/cmake-src-{self._config.project.target[0].id}.j2",
-            "CMakeLists.txt",
-            template_params={"config": self._config},
-        )
+        if self._config.project.is_multitarget():
+            self._create_file_from_template(
+                "cpp/cmake-src-multitarget.j2",
+                "CMakeLists.txt",
+                template_params={"config": self._config},
+            )
+            for target in self._config.project.target:
+                self._create_file_from_template(
+                    f"cpp/cmake-src-{target.id}.j2",
+                    f"{target.id}-src.cmake",
+                    template_params={"config": self._config},
+                )
+        else:
+            self._create_file_from_template(
+                f"cpp/cmake-src-{self._config.project.target[0].id}.j2",
+                "CMakeLists.txt",
+                template_params={"config": self._config},
+            )
 
     def _create_file_from_template(
         self,

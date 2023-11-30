@@ -10,7 +10,7 @@ from pathlib import Path
 from typing import Dict, List, Optional
 
 from scargo import __version__
-from scargo.config import CHIP_DEFAULTS, TARGETS, ScargoTargets, Target
+from scargo.config import CHIP_DEFAULTS, TARGETS, ScargoTarget, Target
 from scargo.config_utils import get_scargo_config_or_exit
 from scargo.file_generators.cpp_gen import generate_cpp
 from scargo.file_generators.toml_gen import generate_toml
@@ -30,7 +30,7 @@ def get_chip_target(chip_label: str) -> Optional[str]:
     return None
 
 
-def process_chips(chips: List[str], targets: List[ScargoTargets]) -> Dict[str, str]:
+def process_chips(chips: List[str], targets: List[ScargoTarget]) -> Dict[str, str]:
     targets_chips = {}
     unsupported_chips = []
 
@@ -57,7 +57,7 @@ def scargo_new(
     name: str,
     bin_name: Optional[str],
     lib_name: Optional[str],
-    target: List[ScargoTargets],
+    target: List[ScargoTarget],
     create_docker: bool,
     git: bool,
     chip: List[str],

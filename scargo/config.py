@@ -134,10 +134,7 @@ class ProjectConfig(BaseModel):
     cxxflags: str
 
     max_build_jobs: Optional[int] = Field(default=None, alias="max-build-jobs")
-
-    cmake_variables: Dict[str, str] = Field(
-        default_factory=dict, alias="cmake-variables"
-    )
+    cmake_variables: Dict[str, str] = Field(default={}, alias="cmake-variables")
 
     @property
     def target(self) -> List["Target"]:
@@ -163,11 +160,20 @@ class ProjectConfig(BaseModel):
     def is_atsam(self) -> bool:
         return "atsam" in self.target_id
 
+    def is_multitarget(self) -> bool:
+        return isinstance(self.target_id, list) and len(self.target_id) > 1
+
 
 class Target(BaseModel):
     id: str
     cc: Optional[str] = None
     cxx: Optional[str] = None
+
+    def get_build_dir(self, profile: str = "Debug") -> str:
+        return f"build/{self.id}/{profile}"
+
+    def get_profile_name(self, profile: str = "Debug") -> str:
+        return f"{self.id}_{profile}"
 
     @classmethod
     def get_target_by_id(cls, target_id: Union[str, List[str]]) -> List["Target"]:
@@ -176,30 +182,26 @@ class Target(BaseModel):
         return [TARGETS[id] for id in target_id]
 
 
+class ScargoTarget(Enum):
+    atsam = "atsam"
+    esp32 = "esp32"
+    stm32 = "stm32"
+    x86 = "x86"
+
+
 DEFAULT_SRC_DIR = "src"
 COMPATIBILITY_ESP32_SRC_DIR = "main"
 DEFAULT_INCLUDE_DIR = "include"
 TARGETS = {
-    "x86": Target(
-        id="x86",
+    ScargoTarget.x86.value: Target(
+        id=ScargoTarget.x86.value,
         cc="gcc",
         cxx="g++",
     ),
-    "stm32": Target(
-        id="stm32",
-    ),
-    "esp32": Target(
-        id="esp32",
-    ),
-    "atsam": Target(
-        id="atsam",
-    ),
+    ScargoTarget.stm32.value: Target(id=ScargoTarget.stm32.value),
+    ScargoTarget.esp32.value: Target(id=ScargoTarget.esp32.value),
+    ScargoTarget.atsam.value: Target(id=ScargoTarget.atsam.value),
 }
-
-# for typer
-ScargoTargets = Enum(  # type: ignore[misc]
-    "ScargoTargets", {target.id: target.id for target in TARGETS.values()}
-)
 
 
 class ProfileConfig(BaseModel, extra=Extra.allow):

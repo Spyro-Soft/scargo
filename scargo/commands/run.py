@@ -4,10 +4,10 @@
 
 """Run feature depending on provided args"""
 import subprocess
-import sys
 from pathlib import Path
 from typing import List, Optional
 
+from scargo.config import ScargoTarget, Target
 from scargo.config_utils import prepare_config
 from scargo.logger import get_logger
 
@@ -24,17 +24,7 @@ def scargo_run(bin_path: Optional[Path], profile: str, params: List[str]) -> Non
     :return: None
     """
     logger.info('Running "%s" build', profile)
-
     config = prepare_config()
-    # TODO add target argument, take first as default if not given
-    target = config.project.target[0]
-
-    if "x86" not in target.id:
-        logger.info(
-            "Run project on x86 architecture is not implemented for %s yet.",
-            target.id,
-        )
-        sys.exit(1)
 
     if bin_path:
         bin_file_name = bin_path.name
@@ -42,10 +32,10 @@ def scargo_run(bin_path: Optional[Path], profile: str, params: List[str]) -> Non
         try:
             subprocess.check_call([f"./{bin_file_name}"] + params, cwd=bin_file_path)
         except subprocess.CalledProcessError:
-            logger.error("bin file not found")
+            logger.error(f"Bin file '{bin_path}' not found!")
     else:
-        project_profile_path = config.project_root / "build" / profile
-        bin_dir = project_profile_path / "bin"
+        x86_target = Target.get_target_by_id(ScargoTarget.x86.value)[0]
+        bin_dir = config.project_root / x86_target.get_build_dir() / "bin"
         if bin_dir.is_dir():
             first_bin = next(bin_dir.iterdir())
             # Run project
@@ -54,4 +44,4 @@ def scargo_run(bin_path: Optional[Path], profile: str, params: List[str]) -> Non
             except subprocess.CalledProcessError:
                 logger.error("Unable to run bin file")
         else:
-            logger.error("Bin file not found")
+            logger.error(f"Bin dir '{bin_dir}' not found!")

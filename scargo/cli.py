@@ -27,7 +27,8 @@ from scargo.commands.run import scargo_run
 from scargo.commands.test import scargo_test
 from scargo.commands.update import scargo_update
 from scargo.commands.version import scargo_version
-from scargo.config import ScargoTargets
+from scargo.config import ScargoTarget
+from scargo.config_utils import prepare_config
 from scargo.global_values import DESCRIPTION, SCARGO_DEFAULT_CONFIG_FILE
 from scargo.logger import get_logger
 from scargo.path_utils import get_config_file_path
@@ -57,11 +58,17 @@ BASE_DIR_OPTION = Option(
 def build(
     profile: str = Option("Debug", "--profile"),
     base_dir: Optional[Path] = BASE_DIR_OPTION,
+    target: Optional[ScargoTarget] = Option(
+        None,
+        "-t",
+        "--target",
+        help="Target device. Defaults to first one from toml if not specified.",
+    ),
 ) -> None:
     """Compile sources."""
     if base_dir:
         os.chdir(base_dir)
-    scargo_build(profile)
+    scargo_build(profile, target)
 
 
 ###############################################################################
@@ -341,7 +348,7 @@ def new(
         prompt=True,
         prompt_required=False,
     ),
-    target: List[ScargoTargets] = Option(
+    target: List[ScargoTarget] = Option(
         ["x86"], "-t", "--target", help="Specify targets for a project."
     ),
     chip: List[str] = Option(
@@ -410,10 +417,17 @@ def run(
     base_dir: Optional[Path] = BASE_DIR_OPTION,
 ) -> None:
     """Build and run project"""
+    config = prepare_config()
+    if not config.project.is_x86():
+        logger.info(
+            "Running non x86 projects on x86 architecture is not implemented yet."
+        )
+        sys.exit(1)
+
     if base_dir:
         os.chdir(base_dir)
     if not skip_build:
-        scargo_build(profile)
+        scargo_build(profile, ScargoTarget.x86)
     scargo_run(bin_path, profile, bin_params)
 
 

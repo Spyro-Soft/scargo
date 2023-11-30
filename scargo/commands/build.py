@@ -6,8 +6,10 @@
 import subprocess
 import sys
 from pathlib import Path
+from typing import Optional
 
 from scargo.conan_utils import conan_add_remote, conan_source
+from scargo.config import ScargoTarget, Target
 from scargo.config_utils import prepare_config
 from scargo.file_generators.conan_gen import conan_add_default_profile_if_missing
 from scargo.logger import get_logger
@@ -15,7 +17,7 @@ from scargo.logger import get_logger
 logger = get_logger()
 
 
-def scargo_build(profile: str) -> None:
+def scargo_build(profile: str, target: Optional[ScargoTarget]) -> None:
     """
     Build project exec file.
 
@@ -34,15 +36,21 @@ def scargo_build(profile: str) -> None:
         logger.info("Did you run `scargo update`?")
         sys.exit(1)
 
-    build_dir = Path(project_dir, "build", profile)
-    build_dir.mkdir(parents=True, exist_ok=True)
+    if target:
+        if target.value not in config.project.target_id:
+            logger.error(f"Target {target.value} not defined in scargo toml")
+            sys.exit(1)
+        build_target = Target.get_target_by_id(target.value)[0]
+    else:
+        build_target = config.project.target[0]
 
+    logger.info(f"Running scargo build for {build_target.id} target")
     conan_add_default_profile_if_missing()
     conan_add_remote(project_dir, config)
     conan_source(project_dir)
 
-    # TODO add target argument, take first as default if not given []
-    target = config.project.target[0].id
+    build_dir = Path(project_dir, build_target.get_build_dir(profile))
+    build_dir.mkdir(parents=True, exist_ok=True)
 
     try:
         subprocess.run(
@@ -51,9 +59,9 @@ def scargo_build(profile: str) -> None:
                 "install",
                 ".",
                 "-pr",
-                f"./config/conan/profiles/{target}_{profile}",
+                f"./config/conan/profiles/{build_target.id}_{profile}",
                 "-of",
-                f"build/{profile}",
+                build_dir,
                 "-b",
                 "missing",
             ],
@@ -66,9 +74,9 @@ def scargo_build(profile: str) -> None:
                 "build",
                 ".",
                 "-pr",
-                f"./config/conan/profiles/{target}_{profile}",
+                f"./config/conan/profiles/{build_target.id}_{profile}",
                 "-of",
-                f"build/{profile}",
+                build_dir,
             ],
             cwd=project_dir,
             check=True,
@@ -86,5 +94,5 @@ def scargo_build(profile: str) -> None:
         get_logger().info("Artifacts copied")
 
     except subprocess.CalledProcessError:
-        logger.error("Unable to build exec file")
+        logger.error("Scargo build failed")
         sys.exit(1)
