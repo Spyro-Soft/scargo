@@ -28,10 +28,9 @@ from scargo.commands.test import scargo_test
 from scargo.commands.update import scargo_update
 from scargo.commands.version import scargo_version
 from scargo.config import ScargoTarget
-from scargo.config_utils import prepare_config
+from scargo.config_utils import get_config_file_path, prepare_config
 from scargo.global_values import DESCRIPTION, SCARGO_DEFAULT_CONFIG_FILE
 from scargo.logger import get_logger
-from scargo.path_utils import get_config_file_path
 
 logger = get_logger()
 
@@ -240,13 +239,19 @@ def flash(
         help="(esp32 only) port where the target device of the command is"
         " connected to, e.g. /dev/ttyUSB0",
     ),
+    target: Optional[ScargoTarget] = Option(
+        None,
+        "-t",
+        "--target",
+        help="Target device. Defaults to first one from toml if not specified.",
+    ),
     no_erase: bool = Option(False, help="(stm32 only) Don't erase target memory"),
     base_dir: Optional[Path] = BASE_DIR_OPTION,
 ) -> None:
     """Flash the target."""
     if base_dir:
         os.chdir(base_dir)
-    scargo_flash(app, file_system, flash_profile, port, not no_erase)
+    scargo_flash(flash_profile, port, target, app, file_system, not no_erase)
 
 
 ###############################################################################

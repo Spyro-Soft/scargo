@@ -7,9 +7,9 @@ import platform
 import subprocess
 import sys
 from pathlib import Path
-from typing import Optional
+from typing import List, Optional
 
-from scargo.config import Config
+from scargo.config import ScargoTarget, Target
 from scargo.config_utils import prepare_config
 from scargo.file_generators.vscode_gen import generate_launch_json
 from scargo.logger import get_logger
@@ -24,192 +24,211 @@ else:
 logger = get_logger()
 
 
-def scargo_flash(
-    app: bool,
-    fs: bool,
-    flash_profile: str,
-    port: Optional[str] = None,
-    erase_memory: bool = True,
-) -> None:
-    SUPPORTED_TARGETS = ["stm32", "esp32", "atsam"]
-    config = prepare_config()
+class _ScargoFlash:
+    FLASH_SUPPORTED_TARGETS = [
+        ScargoTarget.stm32.value,
+        ScargoTarget.esp32.value,
+        ScargoTarget.atsam.value,
+    ]
 
-    # TODO add target argument, take first as default if not given
-    target = config.project.target[0]
+    def __init__(
+        self,
+        flash_profile: str,
+        port: Optional[str],
+        target: Optional[ScargoTarget],
+        app: bool,
+        file_system: bool,
+        erase_memory: bool,
+    ):
+        self._config = prepare_config()
+        self._target = self._initialize_target(target)
+        self._validate_target()
+        self._validate_erase_memory()
 
-    if target.id not in SUPPORTED_TARGETS:
-        logger.error("Flash command not supported for this target yet.")
+        self._flash_profile = flash_profile
+        self._port = port
+        self._app = app
+        self._file_system = file_system
+        self._erase_memory = erase_memory
+
+    def _initialize_target(self, target: Optional[ScargoTarget]) -> Target:
+        if target:
+            if target.value not in self._config.project.target_id:
+                logger.error(f"Target {target.value} not defined in scargo toml")
+                sys.exit(1)
+            return Target.get_target_by_id(target.value)[0]
+        return self._get_first_supported_target()
+
+    def _validate_target(self) -> None:
+        if self._target.id not in self.FLASH_SUPPORTED_TARGETS:
+            logger.error("Flash command not supported for this target yet.")
+            sys.exit(1)
+
+    def _validate_erase_memory(self) -> None:
+        if not self._erase_memory and self._target.id != ScargoTarget.stm32.value:
+            logger.error("--no-erase option is only supported for stm32 projects.")
+            sys.exit(1)
+
+    def _get_first_supported_target(self) -> Target:
+        for target in self._config.project.target:
+            if target.id in self.FLASH_SUPPORTED_TARGETS:
+                return target
+        logger.error("Project does not contain target that supports flashing")
         sys.exit(1)
 
-    if not erase_memory and target.id != "stm32":
-        logger.error("--no-erase option is only supported for stm32 projects.")
-        sys.exit(1)
-    if target.id == "esp32":
-        flash_esp32(config, app=app, fs=fs, flash_profile=flash_profile, port=port)
-    elif target.id == "stm32":
-        flash_stm32(config, flash_profile, erase_memory, port=port)
-    elif target.id == "atsam":
-        flash_atsam(config, flash_profile)
+    def _get_binary_and_elf_paths(self) -> tuple[Path, Path]:
+        project_root = self._config.project_root
+        bin_dir_path = project_root / self._target.get_bin_dir_path(self._flash_profile)
+        bin_path = bin_dir_path / f"{self._config.project.name.lower()}.bin"
+        elf_path = bin_path.with_suffix(self._target.elf_file_extension)
+        return bin_path, elf_path
 
+    def _check_bin_path(self, bin_path: Path) -> None:
+        if not bin_path.is_file():
+            logger.error("%s does not exist", bin_path)
+            logger.info("Did you run scargo build --profile %s", self._flash_profile)
+            sys.exit(1)
 
-def flash_esp32(
-    config: Config,
-    app: bool,
-    fs: bool,
-    flash_profile: str = "Debug",
-    port: Optional[str] = None,
-) -> None:
-    project_path = config.project_root
-    out_dir = project_path / "build" / flash_profile
-    chip = config.get_esp32_config().chip
-    command = []
-    try:
-        if app:
-            app_name = config.project.name
-            app_path = out_dir / f"{app_name}.bin"
-            command = ["parttool.py"]
-            if port:
-                command.append(f"--port={port}")
-            command.extend(
-                [
-                    "write_partition",
-                    "--partition-name=ota_0",
-                    f"--input={app_path}",
-                ]
-            )
-            subprocess.check_call(command)
-        elif fs:
-            fs_path = config.project_root / "build" / "spiffs.bin"
-            command = ["parttool.py"]
-            if port:
-                command.append(f"--port={port}")
-            command.extend(
-                [
-                    "write_partition",
-                    "--partition-name=spiffs",
-                    f"--input={fs_path}",
-                ]
-            )
-            subprocess.check_call(command)
-        else:
-            command = ["esptool.py"]
-            if port:
-                command.append(f"--port={port}")
-            command.extend(["--chip", chip, "write_flash", "@flash_args"])
-            subprocess.check_call(command, cwd=out_dir)
-    except subprocess.CalledProcessError:
-        logger.error("%s fail", command)
+    def flash_target(self) -> None:
+        if self._target.id == ScargoTarget.atsam.value:
+            self._flash_atsam()
+        elif self._target.id == ScargoTarget.esp32.value:
+            self._flash_esp32()
+        elif self._target.id == ScargoTarget.stm32.value:
+            self._flash_stm32()
 
+    def _flash_atsam(self) -> None:
+        openocd_path = find_program_path("openocd")
+        gdb_multiarch_path = find_program_path("gdb-multiarch")
 
-def flash_stm32(
-    config: Config,
-    flash_profile: str = "Debug",
-    erase_memory: bool = True,
-    port: Optional[str] = None,
-) -> None:
-    project_path = config.project_root
+        bin_path, elf_path = self._get_binary_and_elf_paths()
+        self._check_bin_path(bin_path)
 
-    bin_name = f"{config.project.name.lower()}.bin"
-    elf_name = f"{config.project.name.lower()}.elf"
-    build_path = Path(project_path, "build", flash_profile, "bin")
-    bin_path = build_path / bin_name
-    elf_path = build_path / elf_name
+        atsam_helper.generate_gdb_script(Path(".devcontainer"), self._config, bin_path)
+        generate_launch_json(Path(".vscode"), self._config, elf_path)
 
-    flash_start = hex(config.get_stm32_config().flash_start)
+        openocd_process = None
+        try:
+            openocd_process = self._start_openocd(openocd_path)
 
-    if not bin_path.exists():
-        logger.error("%s does not exist", bin_path)
-        logger.info("Did you run scargo build --profile %s", flash_profile)
-    elif not flash_start:
-        logger.error("Flash start address not found in lock file")
-        logger.info("Define flash-start in scargo.toml under stm32 section")
-    else:
-        if erase_memory:
+            gdb_command = [
+                str(gdb_multiarch_path),
+                f"{elf_path}",
+                "--command=.devcontainer/atsam-gdb.script",
+                "--batch",
+            ]
+            subprocess.run(gdb_command, cwd=self._config.project_root, check=True)
+        except subprocess.CalledProcessError as e:
+            logger.error("Failed to flash atsam target: %s", e.stderr)
+            sys.exit(1)
+        finally:
+            self._cleanup_openocd(openocd_process)
+
+    def _flash_esp32(self) -> None:
+        try:
+            if self._app:
+                self._flash_esp32_app()
+            elif self._file_system:
+                self._flash_esp32_fs()
+            else:
+                self._flash_esp32_default()
+        except subprocess.CalledProcessError as e:
+            logger.error("Failed to flash esp32 target: %s", e.stderr)
+            sys.exit(1)
+
+    def _flash_stm32(self) -> None:
+        bin_path, elf_path = self._get_binary_and_elf_paths()
+        self._check_bin_path(bin_path)
+
+        flash_start = hex(self._config.get_stm32_config().flash_start)
+        if not flash_start:
+            logger.error("Flash start address not found in lock file")
+            logger.info("Define flash-start in scargo.toml under stm32 section")
+            sys.exit(1)
+
+        if self._erase_memory:
             command = ["sudo", "st-flash"]
-            if port:
-                command.append(f"--serial={port}")
+            if self._port:
+                command.append(f"--serial={self._port}")
             command.append("erase")
-            subprocess.check_call(command)
+            subprocess.run(command, check=True)
 
         command = ["sudo", "st-flash", "--reset"]
-        if port:
-            command.append(f"--serial={port}")
+        if self._port:
+            command.append(f"--serial={self._port}")
         command.extend(["write", str(bin_path), flash_start])
-        subprocess.check_call(command)
+        subprocess.run(command, check=True)
 
-        stm32_helper.generate_openocd_script(Path(".devcontainer"), config)
-        generate_launch_json(Path(".vscode"), config, elf_path)
+        stm32_helper.generate_openocd_script(Path(".devcontainer"), self._config)
+        generate_launch_json(Path(".vscode"), self._config, elf_path)
 
-
-def flash_atsam(
-    config: Config,
-    flash_profile: str = "Debug",
-) -> None:
-    openocd_path = find_program_path("openocd")
-    gdb_multiarch_path = find_program_path("gdb-multiarch")
-
-    if not openocd_path:
-        logger.error("openocd not found")
-        logger.info("Please install openocd")
-        sys.exit(1)
-
-    if not gdb_multiarch_path:
-        logger.error("gdb-multiarch not found")
-        logger.info("Please install gdb-multiarch")
-        sys.exit(1)
-
-    project_path = config.project_root
-    bin_name = f"{config.project.name.lower()}.bin"
-    elf_name = f"{config.project.name.lower()}"
-    build_path = Path(project_path, "build", flash_profile, "bin")
-    bin_path = build_path / bin_name
-    elf_path = build_path / elf_name
-
-    if not bin_path.exists():
-        logger.error("%s does not exist", bin_path)
-        logger.info("Did you run scargo build --profile %s", flash_profile)
-        sys.exit(1)
-
-    atsam_helper.generate_gdb_script(Path(".devcontainer"), config, bin_path)
-    generate_launch_json(Path(".vscode"), config, elf_path)
-
-    openocd_process = None
-    try:
+    def _start_openocd(self, openocd_path: Path) -> subprocess.Popen[bytes]:
+        openocd_script = self._config.project_root / ".devcontainer/openocd-script.cfg"
         if platform.system() == "Windows":
-            openocd_process = subprocess.Popen(
-                [
-                    openocd_path,
-                    "-f",
-                    str(Path(f"{project_path}/.devcontainer/openocd-script.cfg")),
-                ],
+            return subprocess.Popen(
+                [str(openocd_path), "-f", str(openocd_script)],
                 creationflags=DETACHED_PROCESS,
             )
-        else:
-            openocd_process = subprocess.Popen(  # pylint: disable=consider-using-with
-                [
-                    "sudo",
-                    openocd_path,
-                    "-f",
-                    ".devcontainer/openocd-script.cfg",
-                ],
-                stdin=PIPE,
-                stdout=PIPE,
-                stderr=PIPE,
-            )
+        return subprocess.Popen(
+            ["sudo", str(openocd_path), "-f", str(openocd_script)],
+            stdin=PIPE,
+            stdout=PIPE,
+            stderr=PIPE,
+        )
 
-        gdb_command = [
-            str(gdb_multiarch_path),
-            f"{elf_path}",
-            "--command=.devcontainer/atsam-gdb.script",
-            "--batch",
-        ]
-        subprocess.check_call(gdb_command)
-    except subprocess.CalledProcessError as e:
-        print(e)
-    finally:
-        # temp_script_dir.cleanup()
+    def _cleanup_openocd(
+        self, openocd_process: Optional[subprocess.Popen[bytes]]
+    ) -> None:
         if openocd_process is not None:
             if platform.system() == "Windows":
                 openocd_process.terminate()
             else:
-                os.system("sudo pkill -9 -P " + str(openocd_process.pid))
+                os.system(f"sudo pkill -9 -P {openocd_process.pid}")
+
+    def _flash_esp32_app(self) -> None:
+        bin_dir_path = self._target.get_bin_dir_path(self._flash_profile)
+        bin_path = Path(bin_dir_path, f"{self._config.project.name}.bin")
+        command = self._build_esp32_flash_command(
+            "parttool.py", "ota_0", f"--input={bin_path}"
+        )
+        subprocess.run(command, cwd=self._config.project_root, check=True)
+
+    def _flash_esp32_fs(self) -> None:
+        command = self._build_esp32_flash_command(
+            "parttool.py", "spiffs", "--input=build/spiffs.bin"
+        )
+        subprocess.run(command, cwd=self._config.project_root, check=True)
+
+    def _flash_esp32_default(self) -> None:
+        command = self._build_esp32_flash_command(
+            "esptool.py", "write_flash", "@flash_args"
+        )
+        subprocess.run(command, check=True)
+
+    def _build_esp32_flash_command(
+        self, tool: str, partition_name: str, extra_args: str
+    ) -> List[str]:
+        command = [tool]
+        if self._port:
+            command.append(f"--port={self._port}")
+
+        if tool == "esptool.py":
+            chip = self._config.get_esp32_config().chip
+            command.extend(["--chip", chip])
+
+        command.extend(
+            ["write_partition", f"--partition-name={partition_name}", extra_args]
+        )
+        return command
+
+
+def scargo_flash(
+    flash_profile: str,
+    port: Optional[str],
+    target: Optional[ScargoTarget],
+    app: bool,
+    file_system: bool,
+    erase_memory: bool,
+) -> None:
+    flasher = _ScargoFlash(flash_profile, port, target, app, file_system, erase_memory)
+    flasher.flash_target()

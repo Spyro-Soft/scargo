@@ -4,32 +4,20 @@
 
 import platform
 import subprocess
+import sys
 from pathlib import Path
-from typing import Optional
 
-from scargo.global_values import SCARGO_DEFAULT_CONFIG_FILE, SCARGO_LOCK_FILE
+from scargo.logger import get_logger
+
+logger = get_logger()
 
 
-def find_program_path(program_name: str) -> Optional[Path]:
+def find_program_path(program_name: str) -> Path:
     cmd = "where" if platform.system() == "Windows" else "/usr/bin/which"
     try:
         cmd_output = subprocess.check_output([cmd, program_name])
+        return Path(cmd_output.decode("utf-8").strip())
     except subprocess.CalledProcessError:
-        return None
-    return Path(cmd_output.decode("utf-8").strip())
-
-
-def get_config_file_path(config_file_name: str) -> Optional[Path]:
-    current_path = Path.cwd()
-    directories_to_check = [current_path] + list(current_path.parents)
-    for directory in directories_to_check:
-        if (directory / config_file_name).exists():
-            return directory / config_file_name
-    return None
-
-
-def get_project_root_or_none() -> Optional[Path]:
-    config_path = get_config_file_path(SCARGO_LOCK_FILE) or get_config_file_path(
-        SCARGO_DEFAULT_CONFIG_FILE
-    )
-    return config_path.parent if config_path else None
+        logger.error("%s not installed or not added to PATH", program_name)
+        logger.info("Please install %s or add to PATH", program_name)
+        sys.exit(1)

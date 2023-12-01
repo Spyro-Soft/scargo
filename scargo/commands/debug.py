@@ -44,7 +44,7 @@ class _ScargoDebug:
             sys.exit(1)
 
         self._bin_path = bin_path or self._get_debug_bin_path(
-            config.project.name.lower(), self._target.bin_file_extension
+            config.project.name.lower(), self._target.elf_file_extension
         )
         if not self._bin_path.exists():
             logger.error("Binary %s does not exist", self._bin_path)
@@ -67,9 +67,6 @@ class _ScargoDebug:
 
     def _debug_embedded(self, openocd_args: List[str], gdb_bin: str) -> None:
         openocd_path = find_program_path("openocd")
-        if not openocd_path:
-            logger.error("Could not find openocd.")
-            sys.exit(1)
         openocd_call = ["sudo"] + [openocd_path] + openocd_args
 
         openocd = subprocess.Popen(openocd_call)  # pylint: disable=consider-using-with

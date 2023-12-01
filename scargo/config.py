@@ -166,7 +166,7 @@ class ProjectConfig(BaseModel):
 
 class Target(BaseModel):
     id: str
-    bin_file_extension: str
+    elf_file_extension: str
     cc: Optional[str] = None
     cxx: Optional[str] = None
 
@@ -202,18 +202,18 @@ DEFAULT_INCLUDE_DIR = "include"
 TARGETS = {
     ScargoTarget.x86.value: Target(
         id=ScargoTarget.x86.value,
-        bin_file_extension="",
+        elf_file_extension="",
         cc="gcc",
         cxx="g++",
     ),
     ScargoTarget.stm32.value: Target(
-        id=ScargoTarget.stm32.value, bin_file_extension=".elf"
+        id=ScargoTarget.stm32.value, elf_file_extension=".elf"
     ),
     ScargoTarget.esp32.value: Target(
-        id=ScargoTarget.esp32.value, bin_file_extension=".elf"
+        id=ScargoTarget.esp32.value, elf_file_extension=".elf"
     ),
     ScargoTarget.atsam.value: Target(
-        id=ScargoTarget.atsam.value, bin_file_extension=""
+        id=ScargoTarget.atsam.value, elf_file_extension=""
     ),
 }
 
