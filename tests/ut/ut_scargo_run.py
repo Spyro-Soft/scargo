@@ -18,13 +18,14 @@ def test_scargo_run_bin_path(fp: FakeProcess, mock_prepare_config: MagicMock) ->
 
 
 def test_scargo_run(fp: FakeProcess, mock_prepare_config: MagicMock) -> None:
-    bin_name = "test_project"
-    bin_dir_path = Path("./build/Debug/bin/")
+    config = mock_prepare_config.return_value
+    target = config.project.target[0]
+    bin_dir_path = Path(target.get_bin_dir_path("Debug"))
     bin_dir_path.mkdir(parents=True)
-    with open(bin_dir_path / bin_name, "w"):
-        pass
+    bin_path = bin_dir_path / "test_project"
+    bin_path.touch()
 
-    fp_bin = fp.register(f"./{bin_name}", stdout="Response")
+    fp_bin = fp.register(f"./{bin_path.name}", stdout="Response")
     scargo_run(None, "Debug", [])
     assert fp_bin.calls[0].returncode == 0
 

@@ -10,18 +10,19 @@ from scargo.commands.build import scargo_build
 from scargo.config import Config
 
 
-def test_scargo_build_dir_exist(  # type: ignore[no-any-unimported]
+def test_scargo_build_dir_exist(
     fp: FakeProcess, fs: FakeFilesystem, mock_prepare_config: MagicMock
 ) -> None:
     profile = "Debug"
-    build_dir = Path("build", profile)
-    with open("CMakeLists.txt", "w"):
-        pass
+    config = mock_prepare_config.return_value
+    target = config.project.target[0]
+    build_dir = Path(target.get_build_dir(profile))
+    Path("CMakeLists.txt").touch()
     fp.keep_last_process(True)
     # any command can be called
     fp.register([fp.any()])
-    scargo_build(profile)
-    assert build_dir.exists()
+    scargo_build(profile, None)
+    assert build_dir.is_dir()
 
 
 @pytest.fixture
