@@ -64,7 +64,7 @@ class Config(BaseModel):
 
     @property
     def include_dir_path(self) -> Path:
-        return self.project_root / DEFAULT_INCLUDE_DIR
+        return self.source_dir_path / DEFAULT_INCLUDE_DIR
 
     def get_atsam_config(self) -> "ATSAMConfig":
         if not self.atsam:
