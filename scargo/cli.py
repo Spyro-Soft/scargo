@@ -126,12 +126,18 @@ def debug(
         resolve_path=True,
         help="Path to bin file",
     ),
+    target: Optional[ScargoTarget] = Option(
+        None,
+        "-t",
+        "--target",
+        help="Target device. Defaults to first one from toml if not specified.",
+    ),
     base_dir: Optional[Path] = BASE_DIR_OPTION,
 ) -> None:
     """Use gdb cli to debug"""
     if base_dir:
         os.chdir(base_dir)
-    scargo_debug(bin_path)
+    scargo_debug(bin_path, target)
 
 
 ###############################################################################

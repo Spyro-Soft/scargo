@@ -166,6 +166,7 @@ class ProjectConfig(BaseModel):
 
 class Target(BaseModel):
     id: str
+    bin_file_extension: str
     cc: Optional[str] = None
     cxx: Optional[str] = None
 
@@ -174,6 +175,12 @@ class Target(BaseModel):
 
     def get_profile_name(self, profile: str = "Debug") -> str:
         return f"{self.id}_{profile}"
+
+    def get_bin_dir_path(self, profile: str = "Debug") -> str:
+        build_dir = self.get_build_dir(profile)
+        if self.id == ScargoTarget.esp32.value:
+            return build_dir
+        return f"{build_dir}/bin"
 
     @classmethod
     def get_target_by_id(cls, target_id: Union[str, List[str]]) -> List["Target"]:
@@ -195,12 +202,19 @@ DEFAULT_INCLUDE_DIR = "include"
 TARGETS = {
     ScargoTarget.x86.value: Target(
         id=ScargoTarget.x86.value,
+        bin_file_extension="",
         cc="gcc",
         cxx="g++",
     ),
-    ScargoTarget.stm32.value: Target(id=ScargoTarget.stm32.value),
-    ScargoTarget.esp32.value: Target(id=ScargoTarget.esp32.value),
-    ScargoTarget.atsam.value: Target(id=ScargoTarget.atsam.value),
+    ScargoTarget.stm32.value: Target(
+        id=ScargoTarget.stm32.value, bin_file_extension=".elf"
+    ),
+    ScargoTarget.esp32.value: Target(
+        id=ScargoTarget.esp32.value, bin_file_extension=".elf"
+    ),
+    ScargoTarget.atsam.value: Target(
+        id=ScargoTarget.atsam.value, bin_file_extension=""
+    ),
 }
 
 

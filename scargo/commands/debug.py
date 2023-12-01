@@ -11,7 +11,7 @@ from pathlib import Path
 from time import sleep
 from typing import List, Optional
 
-from scargo.config import CHIP_DEFAULTS, Config
+from scargo.config import CHIP_DEFAULTS, Config, ScargoTarget, Target
 from scargo.config_utils import prepare_config
 from scargo.docker_utils import run_scargo_again_in_docker
 from scargo.logger import get_logger
@@ -23,12 +23,19 @@ logger = get_logger()
 class _ScargoDebug:
     SUPPORTED_TARGETS = ["x86", "stm32", "esp32", "atsam"]
 
-    def __init__(self, config: Config, bin_path: Optional[Path]):
+    def __init__(
+        self, config: Config, bin_path: Optional[Path], target: Optional[ScargoTarget]
+    ):
         self._config = config
+        if target:
+            if target.value not in config.project.target_id:
+                logger.error(f"Target {target.value} not defined in scargo toml")
+                sys.exit(1)
+            self._target = Target.get_target_by_id(target.value)[0]
+        else:
+            self._target = config.project.target[0]
 
-        # TODO add target argument, take first as default if not given
-        self._target = config.project.target[0]
-
+        logger.info(f"Running scargo debug for {self._target.id} target")
         if self._target.id not in self.SUPPORTED_TARGETS:
             logger.error("Debugging currently not supported for %s", self._target)
             logger.info(
@@ -36,7 +43,9 @@ class _ScargoDebug:
             )
             sys.exit(1)
 
-        self._bin_path = bin_path or self._get_bin_path(config.project.name.lower())
+        self._bin_path = bin_path or self._get_debug_bin_path(
+            config.project.name.lower(), self._target.bin_file_extension
+        )
         if not self._bin_path.exists():
             logger.error("Binary %s does not exist", self._bin_path)
             logger.info("Did you run scargo build --profile Debug?")
@@ -44,13 +53,13 @@ class _ScargoDebug:
 
     def run_debugger(self) -> None:
         """Run debugger for target"""
-        if self._target.id == "x86":
+        if self._target.id == ScargoTarget.x86.value:
             self._debug_x86()
-        elif self._target.id == "stm32":
+        elif self._target.id == ScargoTarget.stm32.value:
             self._debug_stm32()
-        elif self._target.id == "esp32":
+        elif self._target.id == ScargoTarget.esp32.value:
             self._debug_esp32()
-        elif self._target.id == "atsam":
+        elif self._target.id == ScargoTarget.atsam.value:
             self._debug_atsam()
 
     def _debug_x86(self) -> None:
@@ -106,23 +115,16 @@ class _ScargoDebug:
         openocd_args = ["-f", ".devcontainer/openocd-script.cfg"]
         self._debug_embedded(openocd_args, "gdb-multiarch")
 
-    def _get_bin_path(self, bin_name: str) -> Path:
-        if self._config.project.is_esp32():
-            bin_path = Path(self._config.project_root, "build/Debug", bin_name)
-        else:
-            bin_path = Path(self._config.project_root, "build/Debug/bin", bin_name)
-        if (
-            self._config.project.is_esp32()
-            or self._config.project.is_stm32()
-            and bin_path.suffix != "elf"
-        ):
-            bin_path = bin_path.with_suffix(".elf")
+    def _get_debug_bin_path(self, project_name: str, bin_file_extension: str) -> Path:
+        bin_dir = self._target.get_bin_dir_path("Debug")
+        bin_path = Path(self._config.project_root, bin_dir, project_name)
+        bin_path = bin_path.with_suffix(bin_file_extension)
         return bin_path
 
 
-def scargo_debug(bin_path: Optional[Path]) -> None:
+def scargo_debug(bin_path: Optional[Path], target: Optional[ScargoTarget]) -> None:
     config = prepare_config(run_in_docker=False)
     if config.project.is_x86():
         run_scargo_again_in_docker(config.project, config.project_root)
-    debug = _ScargoDebug(config, bin_path)
+    debug = _ScargoDebug(config, bin_path, target)
     debug.run_debugger()
