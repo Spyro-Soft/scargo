@@ -13,7 +13,7 @@ from scargo.config import ScargoTarget, Target
 from scargo.config_utils import prepare_config
 from scargo.file_generators.vscode_gen import generate_launch_json
 from scargo.logger import get_logger
-from scargo.path_utils import find_program_path
+from scargo.sys_utils import find_program_path
 from scargo.target_helpers import atsam_helper, stm32_helper
 
 if platform.system() == "Windows":

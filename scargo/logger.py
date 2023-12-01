@@ -3,20 +3,20 @@
 # #
 
 import logging
-from pathlib import Path
-from typing import Optional, Tuple
+from typing import Tuple
 
 import coloredlogs
 
 from scargo.config import parse_config
-from scargo.global_values import SCARGO_DEFAULT_CONFIG_FILE, SCARGO_LOCK_FILE
+from scargo.global_values import SCARGO_LOCK_FILE
+from scargo.path_utils import get_config_file_path, get_project_root_or_none
 
 
 def __get_logging_config() -> Tuple[int, int]:
     console_log_level = logging.INFO
     file_log_level = logging.WARNING
     try:
-        lock_file = _get_config_file_path(SCARGO_LOCK_FILE)
+        lock_file = get_config_file_path(SCARGO_LOCK_FILE)
         if not lock_file:
             return console_log_level, file_log_level
         config = parse_config(lock_file)
@@ -28,22 +28,6 @@ def __get_logging_config() -> Tuple[int, int]:
             console_log_level,
             file_log_level,
         )
-
-
-def _get_project_root_or_none() -> Optional[Path]:
-    config_path = _get_config_file_path(SCARGO_LOCK_FILE) or _get_config_file_path(
-        SCARGO_DEFAULT_CONFIG_FILE
-    )
-    return config_path.parent if config_path else None
-
-
-def _get_config_file_path(config_file_name: str) -> Optional[Path]:
-    current_path = Path.cwd()
-    directories_to_check = [current_path] + list(current_path.parents)
-    for directory in directories_to_check:
-        if (directory / config_file_name).exists():
-            return directory / config_file_name
-    return None
 
 
 def get_logger(name: str = "scargo") -> logging.Logger:
@@ -63,7 +47,7 @@ def get_logger(name: str = "scargo") -> logging.Logger:
     stream_handler.setFormatter(stream_formatter)
     logger.addHandler(stream_handler)
 
-    project_root = _get_project_root_or_none()
+    project_root = get_project_root_or_none()
     if project_root:
         log_path = project_root / f"{name}.log"
         file_handler = logging.FileHandler(log_path)

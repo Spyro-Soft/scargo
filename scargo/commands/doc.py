@@ -13,7 +13,7 @@ import typer
 from scargo.config import Config
 from scargo.config_utils import prepare_config
 from scargo.logger import get_logger
-from scargo.path_utils import find_program_path
+from scargo.sys_utils import find_program_path
 
 logger = get_logger()
 

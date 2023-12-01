@@ -10,6 +10,7 @@ from scargo.config import Config, ConfigError, parse_config
 from scargo.docker_utils import run_scargo_again_in_docker
 from scargo.global_values import SCARGO_LOCK_FILE
 from scargo.logger import get_logger
+from scargo.path_utils import get_config_file_path
 
 logger = get_logger()
 
@@ -18,15 +19,6 @@ def set_up_environment_variables(config: Config) -> None:
     os.environ["SCARGO_PROJECT_ROOT"] = str(config.project_root.absolute())
     if config.project.in_repo_conan_cache:
         os.environ["CONAN_HOME"] = f"{config.project_root}/.conan2"
-
-
-def get_config_file_path(config_file_name: str) -> Optional[Path]:
-    current_path = Path.cwd()
-    directories_to_check = [current_path] + list(current_path.parents)
-    for directory in directories_to_check:
-        if (directory / config_file_name).exists():
-            return directory / config_file_name
-    return None
 
 
 def get_scargo_config_or_exit(

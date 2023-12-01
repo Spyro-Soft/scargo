@@ -15,7 +15,7 @@ from scargo.config import CHIP_DEFAULTS, Config, ScargoTarget, Target
 from scargo.config_utils import prepare_config
 from scargo.docker_utils import run_scargo_again_in_docker
 from scargo.logger import get_logger
-from scargo.path_utils import find_program_path
+from scargo.sys_utils import find_program_path
 
 logger = get_logger()
 
