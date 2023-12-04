@@ -62,7 +62,7 @@ add_custom_command(
   COMMENT "Generating hex file ${PROJECT_NAME}.hex")
 {% elif config.project.lib_name%}
 add_library(${PROJECT_NAME} STATIC
-  ${CMAKE_CURRENT_SOURCE_DIR}/{{ config.source_dir_path }}/{{ config.project.lib_name|lower }}.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/{{ config.source_dir_path.name }}/{{ config.project.lib_name|lower }}.cpp
 )
 
 target_include_directories(${PROJECT_NAME}
