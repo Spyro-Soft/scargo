@@ -40,16 +40,16 @@ class _ScargoFlash:
         file_system: bool,
         erase_memory: bool,
     ):
-        self._config = prepare_config()
-        self._target = self._initialize_target(target)
-        self._validate_target()
-        self._validate_erase_memory()
-
         self._flash_profile = flash_profile
         self._port = port
         self._app = app
         self._file_system = file_system
         self._erase_memory = erase_memory
+
+        self._config = prepare_config()
+        self._target = self._initialize_target(target)
+        self._validate_target()
+        self._validate_erase_memory()
 
     def _initialize_target(self, target: Optional[ScargoTarget]) -> Target:
         if target:

@@ -51,6 +51,7 @@ def scargo_build(profile: str, target: Optional[ScargoTarget]) -> None:
 
     build_dir = Path(project_dir, build_target.get_build_dir(profile))
     build_dir.mkdir(parents=True, exist_ok=True)
+    profile_name = build_target.get_profile_name(profile)
 
     try:
         subprocess.run(
@@ -59,7 +60,7 @@ def scargo_build(profile: str, target: Optional[ScargoTarget]) -> None:
                 "install",
                 ".",
                 "-pr",
-                f"./config/conan/profiles/{build_target.id}_{profile}",
+                f"./config/conan/profiles/{profile_name}",
                 "-of",
                 build_dir,
                 "-b",
@@ -74,7 +75,7 @@ def scargo_build(profile: str, target: Optional[ScargoTarget]) -> None:
                 "build",
                 ".",
                 "-pr",
-                f"./config/conan/profiles/{build_target.id}_{profile}",
+                f"./config/conan/profiles/{profile_name}",
                 "-of",
                 build_dir,
             ],

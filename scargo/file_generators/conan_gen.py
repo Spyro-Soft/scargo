@@ -44,9 +44,10 @@ def generate_conanprofile(config: Config) -> None:
 
     for target in config.project.target:
         for profile in profiles:
+            profile_name = target.get_profile_name(profile)
             create_file_from_template(
                 f"conan/profile_{target.id}.j2",
-                f"config/conan/profiles/{target.id}_{profile}",
+                f"config/conan/profiles/{profile_name}",
                 template_params={
                     "config": config,
                     "profile": profile,
