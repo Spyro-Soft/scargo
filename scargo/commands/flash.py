@@ -7,7 +7,7 @@ import platform
 import subprocess
 import sys
 from pathlib import Path
-from typing import List, Optional
+from typing import List, Optional, Tuple
 
 from scargo.config import ScargoTarget, Target
 from scargo.config_utils import prepare_config
@@ -76,7 +76,7 @@ class _ScargoFlash:
         logger.error("Project does not contain target that supports flashing")
         sys.exit(1)
 
-    def _get_binary_and_elf_paths(self) -> tuple[Path, Path]:
+    def _get_binary_and_elf_paths(self) -> Tuple[Path, Path]:
         project_root = self._config.project_root
         bin_dir_path = project_root / self._target.get_bin_dir_path(self._flash_profile)
         bin_path = bin_dir_path / f"{self._config.project.name.lower()}.bin"
@@ -86,7 +86,11 @@ class _ScargoFlash:
     def _check_bin_path(self, bin_path: Path) -> None:
         if not bin_path.is_file():
             logger.error("%s does not exist", bin_path)
-            logger.info("Did you run scargo build --profile %s", self._flash_profile)
+            logger.info(
+                "Did you run scargo build --profile %s --target %s",
+                self._flash_profile,
+                self._target.id,
+            )
             sys.exit(1)
 
     def flash_target(self) -> None:
@@ -162,7 +166,7 @@ class _ScargoFlash:
         stm32_helper.generate_openocd_script(Path(".devcontainer"), self._config)
         generate_launch_json(Path(".vscode"), self._config, elf_path)
 
-    def _start_openocd(self, openocd_path: Path) -> subprocess.Popen[bytes]:
+    def _start_openocd(self, openocd_path: Path) -> subprocess.Popen:  # type: ignore[type-arg]
         openocd_script = self._config.project_root / ".devcontainer/openocd-script.cfg"
         if platform.system() == "Windows":
             return subprocess.Popen(
@@ -176,9 +180,7 @@ class _ScargoFlash:
             stderr=PIPE,
         )
 
-    def _cleanup_openocd(
-        self, openocd_process: Optional[subprocess.Popen[bytes]]
-    ) -> None:
+    def _cleanup_openocd(self, openocd_process: Optional[subprocess.Popen]) -> None:  # type: ignore[type-arg]
         if openocd_process is not None:
             if platform.system() == "Windows":
                 openocd_process.terminate()

@@ -20,16 +20,16 @@ from scargo.config import (
     ProfileConfig,
     ProjectConfig,
     ScargoConfig,
-    Target,
+    ScargoTarget,
     TestConfig,
     TodoCheckConfig,
 )
 from scargo.path_utils import get_project_root_or_none
 from tests.it.utils import get_bin_name
 
-TARGET_X86 = Target.get_target_by_id("x86")
-TARGET_ESP32 = Target.get_target_by_id("esp32")
-TARGET_STM32 = Target.get_target_by_id("stm32")
+TARGET_X86 = ScargoTarget.x86
+TARGET_ESP32 = ScargoTarget.esp32
+TARGET_STM32 = ScargoTarget.stm32
 
 TEST_PROJECT_NAME = "common_scargo_project"
 TEST_PROJECT_STM32_NAME = "common_scargo_project_stm32"
@@ -41,7 +41,7 @@ TEST_PROJECT_STM32_PATH = Path(TEST_DATA_PATH, "test_projects", TEST_PROJECT_STM
 
 
 @pytest.fixture()
-def config(fs: FakeFilesystem) -> Config:  # type: ignore[no-any-unimported]
+def config(fs: FakeFilesystem) -> Config:
     return Config(
         project=ProjectConfig(
             **{  # type: ignore
@@ -159,10 +159,10 @@ def new_project_x86(tmpdir_factory: TempdirFactory) -> Optional[Path]:
         project_name,
         bin_name="main",
         lib_name="test_lib",
-        target=TARGET_X86,
+        target=[TARGET_X86],
         create_docker=False,
         git=False,
-        chip=None,
+        chip=[],
     )
     os.chdir(project_name)
     # h file for gen tests added
@@ -183,10 +183,10 @@ def new_project_esp32(tmpdir_factory: TempdirFactory) -> Optional[Path]:
         project_name,
         bin_name="test_bin",
         lib_name="test_lib",
-        target=TARGET_ESP32,
+        target=[TARGET_ESP32],
         create_docker=False,
         git=False,
-        chip=None,
+        chip=[],
     )
     os.chdir(project_name)
     # h file for gen tests added
@@ -207,10 +207,10 @@ def new_project_stm32(tmpdir_factory: TempdirFactory) -> Optional[Path]:
         project_name,
         bin_name="test_bin",
         lib_name="test_lib",
-        target=TARGET_STM32,
+        target=[TARGET_STM32],
         create_docker=False,
         git=False,
-        chip=None,
+        chip=[],
     )
     os.chdir(project_name)
     # h file for gen tests added

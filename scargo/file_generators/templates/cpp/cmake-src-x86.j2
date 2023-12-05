@@ -1,19 +1,19 @@
 {% if config.project.bin_name %}
 add_executable(${PROJECT_NAME}
-    ${CMAKE_CURRENT_SOURCE_DIR}/{{ config.project.bin_name|lower }}.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/{{ config.project.bin_name|lower }}.cpp
 )
 
 {% endif %}
 {% if config.project.lib_name %}
 add_library(${PROJECT_NAME} STATIC
-    ${CMAKE_CURRENT_SOURCE_DIR}/{{ config.source_dir_path.name }}/{{ config.project.lib_name|lower }}.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/{{ config.source_dir_path.name }}/{{ config.project.lib_name|lower }}.cpp
 )
 
 target_include_directories(${PROJECT_NAME}
-    PUBLIC
-        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>/{{ config.include_dir_path.name }}
-    PRIVATE
-        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>/{{ config.source_dir_path.name }}
+  PUBLIC
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>/{{ config.include_dir_path.name }}
+  PRIVATE
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>/{{ config.source_dir_path.name }}
 )
 
 {% endif %}

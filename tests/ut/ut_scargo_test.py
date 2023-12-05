@@ -11,7 +11,7 @@ from scargo.commands.test import scargo_test
 from scargo.config import Config
 
 
-def test_scargo_test_no_test_dir(  # type: ignore[no-any-unimported]
+def test_scargo_test_no_test_dir(
     config: Config,
     fs: FakeFilesystem,
     caplog: pytest.LogCaptureFixture,
@@ -24,7 +24,7 @@ def test_scargo_test_no_test_dir(  # type: ignore[no-any-unimported]
     assert "Directory `tests` does not exist." in caplog.text
 
 
-def test_scargo_test_no_cmake_file(  # type: ignore[no-any-unimported]
+def test_scargo_test_no_cmake_file(
     config: Config,
     caplog: pytest.LogCaptureFixture,
     mock_prepare_config: MagicMock,
@@ -38,7 +38,7 @@ def test_scargo_test_no_cmake_file(  # type: ignore[no-any-unimported]
     assert "Directory `tests`: File `CMakeLists.txt` does not exist." in caplog.text
 
 
-def test_scargo_test(  # type: ignore[no-any-unimported]
+def test_scargo_test(
     config: Config, fp: FakeProcess, fs: FakeFilesystem, mock_prepare_config: MagicMock
 ) -> None:
     config.project_root = Path(".")

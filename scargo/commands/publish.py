@@ -30,7 +30,7 @@ def scargo_publish(repo: str, profile: str = "Release") -> None:
     # TODO add target argument, take first as default if not given
     target = project_config.target[0]
 
-    build_dir = Path(project_path, "build", profile)
+    build_dir = Path(project_path, target.get_build_dir(profile))
 
     if not build_dir.exists():
         logger.error("Build folder for specified build type does not exist")
@@ -40,6 +40,9 @@ def scargo_publish(repo: str, profile: str = "Release") -> None:
     conan_add_remote(project_path, config)
     conan_source(project_path)
 
+    profile_name = target.get_profile_name(profile)
+    profile_path = f"./config/conan/profiles/{profile_name}"
+
     # Export package
     try:
         subprocess.run(
@@ -48,7 +51,7 @@ def scargo_publish(repo: str, profile: str = "Release") -> None:
                 "export-pkg",
                 ".",
                 "-pr",
-                f"./config/conan/profiles/{target.id}_{profile}",
+                profile_path,
                 "-of",
                 build_dir,
             ],
@@ -68,7 +71,7 @@ def scargo_publish(repo: str, profile: str = "Release") -> None:
                 "test_package",
                 f"{project_name}/{config.project.version}",
                 "-pr",
-                f"./config/conan/profiles/{target.id}_{profile}",
+                profile_path,
             ],
             check=True,
             cwd=project_path,

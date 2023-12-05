@@ -48,7 +48,9 @@ class _ScargoDebug:
         )
         if not self._bin_path.exists():
             logger.error("Binary %s does not exist", self._bin_path)
-            logger.info("Did you run scargo build --profile Debug?")
+            logger.info(
+                "Did you run scargo build --profile Debug --target %s?", self._target.id
+            )
             sys.exit(1)
 
     def run_debugger(self) -> None:
