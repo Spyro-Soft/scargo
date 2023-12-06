@@ -26,9 +26,9 @@ logger = get_logger()
 
 class _ScargoFlash:
     FLASH_SUPPORTED_TARGETS = [
-        ScargoTarget.stm32.value,
-        ScargoTarget.esp32.value,
-        ScargoTarget.atsam.value,
+        ScargoTarget.stm32,
+        ScargoTarget.esp32,
+        ScargoTarget.atsam,
     ]
 
     def __init__(
@@ -56,7 +56,7 @@ class _ScargoFlash:
             if target.value not in self._config.project.target_id:
                 logger.error(f"Target {target.value} not defined in scargo toml")
                 sys.exit(1)
-            return Target.get_target_by_id(target.value)[0]
+            return Target.get_target_by_id(target.value)
         return self._get_first_supported_target()
 
     def _validate_target(self) -> None:
@@ -65,7 +65,7 @@ class _ScargoFlash:
             sys.exit(1)
 
     def _validate_erase_memory(self) -> None:
-        if not self._erase_memory and self._target.id != ScargoTarget.stm32.value:
+        if not self._erase_memory and self._target.id != ScargoTarget.stm32:
             logger.error("--no-erase option is only supported for stm32 projects.")
             sys.exit(1)
 
@@ -94,11 +94,11 @@ class _ScargoFlash:
             sys.exit(1)
 
     def flash_target(self) -> None:
-        if self._target.id == ScargoTarget.atsam.value:
+        if self._target.id == ScargoTarget.atsam:
             self._flash_atsam()
-        elif self._target.id == ScargoTarget.esp32.value:
+        elif self._target.id == ScargoTarget.esp32:
             self._flash_esp32()
-        elif self._target.id == ScargoTarget.stm32.value:
+        elif self._target.id == ScargoTarget.stm32:
             self._flash_stm32()
 
     def _flash_atsam(self) -> None:

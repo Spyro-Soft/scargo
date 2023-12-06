@@ -87,12 +87,14 @@ class Config(BaseModel):
     ) -> Dict[str, Any]:
         if "project" in values:
             target_id = values["project"].target_id
-            if target_id == "stm32" and not values.get("stm32"):
-                raise ConfigError("No [stm32] section in config")
-            if target_id == "esp32" and not values.get("esp32"):
-                raise ConfigError("No [esp32] section in config")
-            if target_id == "atsam" and not values.get("atsam"):
-                raise ConfigError("No [atsam] section in config")
+            targets_for_validation = [
+                ScargoTarget.stm32.value,
+                ScargoTarget.esp32.value,
+                ScargoTarget.atsam.value,
+            ]
+            for target in targets_for_validation:
+                if target in target_id and not values.get(target):
+                    raise ConfigError(f"No [{target}] section in config")
 
         # Set default value of cmake_build_type - Debug for non-stanard profiles,
         # If profile is on standard_profiles list, use it's name instead
@@ -138,12 +140,15 @@ class ProjectConfig(BaseModel):
 
     @property
     def target(self) -> List["Target"]:
-        return Target.get_target_by_id(self.target_id)
+        if isinstance(self.target_id, str):
+            return Target.get_targets_by_id([self.target_id])
+        return Target.get_targets_by_id(self.target_id)
 
-    def get_compiler_warning(self) -> Optional[str]:
-        # if (self.cc and not self.target.cc) or (self.cxx and not self.target.cxx):
-        #     return "Compiler settings are ignored for this target"
-        return None
+    @property
+    def default_target(self) -> "Target":
+        if isinstance(self.target_id, str):
+            return Target.get_target_by_id(self.target_id)
+        return Target.get_target_by_id(self.target_id[0])
 
     def is_docker_buildenv(self) -> bool:
         return self.build_env == SCARGO_DOCKER_ENV
@@ -178,15 +183,17 @@ class Target(BaseModel):
 
     def get_bin_dir_path(self, profile: str = "Debug") -> str:
         build_dir = self.get_build_dir(profile)
-        if self.id == ScargoTarget.esp32.value:
+        if self.id == ScargoTarget.esp32:
             return build_dir
         return f"{build_dir}/bin"
 
     @classmethod
-    def get_target_by_id(cls, target_id: Union[str, List[str]]) -> List["Target"]:
-        if isinstance(target_id, str):
-            target_id = [target_id]
-        return [TARGETS[id] for id in target_id]
+    def get_target_by_id(cls, target_id: str) -> "Target":
+        return TARGETS[target_id]
+
+    @classmethod
+    def get_targets_by_id(cls, target_ids: List[str]) -> List["Target"]:
+        return [TARGETS[id] for id in target_ids]
 
 
 class ScargoTarget(Enum):
@@ -194,6 +201,13 @@ class ScargoTarget(Enum):
     esp32 = "esp32"
     stm32 = "stm32"
     x86 = "x86"
+
+    def __eq__(self, other: Any) -> bool:
+        if isinstance(other, str):
+            return self.value == other
+        if isinstance(other, ScargoTarget):
+            return self.value == other.value
+        return False
 
 
 DEFAULT_SRC_DIR = "src"

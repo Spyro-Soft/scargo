@@ -9,8 +9,8 @@ from pathlib import Path
 from typing import Optional
 
 from scargo.conan_utils import conan_add_remote, conan_source
-from scargo.config import ScargoTarget, Target
-from scargo.config_utils import prepare_config
+from scargo.config import ScargoTarget
+from scargo.config_utils import get_target_or_default, prepare_config
 from scargo.file_generators.conan_gen import conan_add_default_profile_if_missing
 from scargo.logger import get_logger
 
@@ -25,6 +25,7 @@ def scargo_build(profile: str, target: Optional[ScargoTarget]) -> None:
     :return: None
     """
     config = prepare_config()
+    build_target = get_target_or_default(config, target)
 
     project_dir = config.project_root
     if not project_dir:
@@ -35,14 +36,6 @@ def scargo_build(profile: str, target: Optional[ScargoTarget]) -> None:
         logger.error("File `CMakeLists.txt` does not exist.")
         logger.info("Did you run `scargo update`?")
         sys.exit(1)
-
-    if target:
-        if target.value not in config.project.target_id:
-            logger.error(f"Target {target.value} not defined in scargo toml")
-            sys.exit(1)
-        build_target = Target.get_target_by_id(target.value)[0]
-    else:
-        build_target = config.project.target[0]
 
     logger.info(f"Running scargo build for {build_target.id} target")
     conan_add_default_profile_if_missing()

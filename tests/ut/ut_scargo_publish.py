@@ -2,6 +2,7 @@ from pathlib import Path
 
 import pytest
 from _pytest.logging import LogCaptureFixture
+from pyfakefs.fake_filesystem import FakeFilesystem
 from pytest_subprocess import FakeProcess
 
 from scargo.commands.publish import scargo_publish
@@ -41,10 +42,11 @@ def config(monkeypatch: pytest.MonkeyPatch, fp: FakeProcess) -> Config:
     return test_project_config
 
 
-def test_publish(config: Config, fp: FakeProcess) -> None:
+def test_publish(config: Config, fp: FakeProcess, fs: FakeFilesystem) -> None:
     # ARRANGE
     project_name = config.project.name
-    build_path = Path(f"{config.project_root}/build/Release")
+    target = config.project.target[0]
+    build_path = Path(config.project_root, target.get_build_dir("Release"))
     build_path.mkdir(parents=True, exist_ok=True)
     profile_name = config.project.target[0].get_profile_name("Release")
     profile_path = f"./config/conan/profiles/{profile_name}"
@@ -88,12 +90,11 @@ def test_publish(config: Config, fp: FakeProcess) -> None:
 
 
 def test_create_package_fail(
-    config: Config,
-    caplog: LogCaptureFixture,
-    fp: FakeProcess,
+    config: Config, caplog: LogCaptureFixture, fp: FakeProcess, fs: FakeFilesystem
 ) -> None:
     # ARRANGE
-    build_path = Path(f"{config.project_root}/build/Release")
+    target = config.project.target[0]
+    build_path = Path(config.project_root, target.get_build_dir("Release"))
     build_path.mkdir(parents=True, exist_ok=True)
     profile_name = config.project.target[0].get_profile_name("Release")
     profile_path = f"./config/conan/profiles/{profile_name}"
@@ -127,7 +128,8 @@ def test_upload_package_fail(
 ) -> None:
     # ARRANGE
     project_name = config.project.name
-    build_path = Path(f"{config.project_root}/build/Release")
+    target = config.project.target[0]
+    build_path = Path(config.project_root, target.get_build_dir("Release"))
     build_path.mkdir(parents=True, exist_ok=True)
     profile_name = config.project.target[0].get_profile_name("Release")
     profile_path = f"./config/conan/profiles/{profile_name}"

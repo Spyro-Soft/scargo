@@ -11,8 +11,8 @@ from pathlib import Path
 from time import sleep
 from typing import List, Optional
 
-from scargo.config import CHIP_DEFAULTS, Config, ScargoTarget, Target
-from scargo.config_utils import prepare_config
+from scargo.config import CHIP_DEFAULTS, Config, ScargoTarget
+from scargo.config_utils import get_target_or_default, prepare_config
 from scargo.docker_utils import run_scargo_again_in_docker
 from scargo.logger import get_logger
 from scargo.sys_utils import find_program_path
@@ -27,13 +27,7 @@ class _ScargoDebug:
         self, config: Config, bin_path: Optional[Path], target: Optional[ScargoTarget]
     ):
         self._config = config
-        if target:
-            if target.value not in config.project.target_id:
-                logger.error(f"Target {target.value} not defined in scargo toml")
-                sys.exit(1)
-            self._target = Target.get_target_by_id(target.value)[0]
-        else:
-            self._target = config.project.target[0]
+        self._target = get_target_or_default(config, target)
 
         logger.info(f"Running scargo debug for {self._target.id} target")
         if self._target.id not in self.SUPPORTED_TARGETS:
@@ -55,13 +49,13 @@ class _ScargoDebug:
 
     def run_debugger(self) -> None:
         """Run debugger for target"""
-        if self._target.id == ScargoTarget.x86.value:
+        if self._target.id == ScargoTarget.x86:
             self._debug_x86()
-        elif self._target.id == ScargoTarget.stm32.value:
+        elif self._target.id == ScargoTarget.stm32:
             self._debug_stm32()
-        elif self._target.id == ScargoTarget.esp32.value:
+        elif self._target.id == ScargoTarget.esp32:
             self._debug_esp32()
-        elif self._target.id == ScargoTarget.atsam.value:
+        elif self._target.id == ScargoTarget.atsam:
             self._debug_atsam()
 
     def _debug_x86(self) -> None:
