@@ -40,6 +40,9 @@ def get_scargo_config_or_exit(
     except ConfigError as e:
         logger.error(e.args[0])
         sys.exit(1)
+    except Exception as e:  # pylint: disable=W0718
+        logger.error("Error while parsing config file %s: %s", config_file_path, e)
+        sys.exit(1)
 
     return config
 

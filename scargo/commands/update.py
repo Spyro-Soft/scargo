@@ -5,7 +5,6 @@
 """Update project"""
 import shutil
 import subprocess
-import sys
 from pathlib import Path
 
 from scargo.commands.docker import get_docker_compose_command, scargo_docker_build
@@ -47,15 +46,6 @@ def scargo_update(config_file_path: Path) -> None:
     docker_path = Path(project_path, ".devcontainer")
     vscode_path = Path(project_path, ".vscode")
     config = get_scargo_config_or_exit(config_file_path)
-    if not config.project:
-        logger.error("File `%s`: Section `project` not found.", config_file_path)
-        sys.exit(1)
-
-    if not config.project.name:
-        logger.error(
-            "File `{config_file_path}`: `name` not found under `project` section."
-        )
-        sys.exit(1)
 
     # Copy templates project files to repo directory
     copy_file_if_not_exists(project_path)
