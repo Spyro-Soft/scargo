@@ -27,9 +27,9 @@ def scargo_publish(repo: str, profile: str = "Release") -> None:
     project_config = config.project
     project_name = project_config.name
 
-    # TODO add target argument, take first as default if not given
-    target = project_config.target[0]
-
+    # For now upload only for default target, in future we can add support for
+    # multiple targets and how to handle them
+    target = project_config.default_target
     build_dir = Path(project_path, target.get_build_dir(profile))
 
     if not build_dir.exists():
