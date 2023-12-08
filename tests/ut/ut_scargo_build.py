@@ -15,8 +15,8 @@ def test_scargo_build_dir_exist(
 ) -> None:
     profile = "Debug"
     config = mock_prepare_config.return_value
-    target = config.project.target[0]
-    build_dir = Path(target.get_build_dir(profile))
+    target = config.project.default_target
+    build_dir = Path(target.get_profile_build_dir(profile))
     Path("CMakeLists.txt").touch()
     fp.keep_last_process(True)
     # any command can be called

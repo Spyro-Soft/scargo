@@ -37,8 +37,8 @@ class _ScargoDebug:
             )
             sys.exit(1)
 
-        self._bin_path = bin_path or self._get_debug_bin_path(
-            config.project.name.lower(), self._target.elf_file_extension
+        self._bin_path = bin_path or config.project_root / self._target.get_bin_path(
+            config.project.name.lower()
         )
         if not self._bin_path.exists():
             logger.error("Binary %s does not exist", self._bin_path)
@@ -107,12 +107,6 @@ class _ScargoDebug:
     def _debug_atsam(self) -> None:
         openocd_args = ["-f", ".devcontainer/openocd-script.cfg"]
         self._debug_embedded(openocd_args, "gdb-multiarch")
-
-    def _get_debug_bin_path(self, project_name: str, bin_file_extension: str) -> Path:
-        bin_dir = self._target.get_bin_dir_path("Debug")
-        bin_path = Path(self._config.project_root, bin_dir, project_name)
-        bin_path = bin_path.with_suffix(bin_file_extension)
-        return bin_path
 
 
 def scargo_debug(bin_path: Optional[Path], target: Optional[ScargoTarget]) -> None:

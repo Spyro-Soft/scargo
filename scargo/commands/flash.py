@@ -78,9 +78,10 @@ class _ScargoFlash:
 
     def _get_binary_and_elf_paths(self) -> Tuple[Path, Path]:
         project_root = self._config.project_root
-        bin_dir_path = project_root / self._target.get_bin_dir_path(self._flash_profile)
-        bin_path = bin_dir_path / f"{self._config.project.name.lower()}.bin"
-        elf_path = bin_path.with_suffix(self._target.elf_file_extension)
+        elf_path = project_root / self._target.get_bin_path(
+            self._config.project.name.lower(), self._flash_profile
+        )
+        bin_path = elf_path.with_suffix(".bin")
         return bin_path, elf_path
 
     def _check_bin_path(self, bin_path: Path) -> None:

@@ -35,7 +35,7 @@ def scargo_run(bin_path: Optional[Path], profile: str, params: List[str]) -> Non
             logger.error(f"Bin file '{bin_path}' not found!")
     else:
         x86_target = Target.get_target_by_id(ScargoTarget.x86.value)
-        bin_dir = config.project_root / x86_target.get_build_dir() / "bin"
+        bin_dir = config.project_root / x86_target.get_profile_build_dir() / "bin"
         if bin_dir.is_dir():
             first_bin = next(bin_dir.iterdir())
             # Run project

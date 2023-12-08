@@ -10,6 +10,21 @@ from pydantic import BaseModel, Extra, Field, root_validator
 
 from scargo.global_values import SCARGO_DEFAULT_BUILD_ENV, SCARGO_DOCKER_ENV
 
+
+class ScargoTarget(Enum):
+    atsam = "atsam"
+    esp32 = "esp32"
+    stm32 = "stm32"
+    x86 = "x86"
+
+    def __eq__(self, other: Any) -> bool:
+        if isinstance(other, str):
+            return self.value == other
+        if isinstance(other, ScargoTarget):
+            return self.value == other.value
+        return False
+
+
 CHIP_DEFAULTS = {
     "x86": "",
     "esp32": "esp32",
@@ -175,17 +190,21 @@ class Target(BaseModel):
     cc: Optional[str] = None
     cxx: Optional[str] = None
 
-    def get_build_dir(self, profile: str = "Debug") -> str:
+    def get_profile_build_dir(self, profile: str = "Debug") -> str:
         return f"build/{self.id}/{profile}"
 
-    def get_profile_name(self, profile: str = "Debug") -> str:
+    def get_conan_profile_name(self, profile: str = "Debug") -> str:
         return f"{self.id}_{profile}"
 
     def get_bin_dir_path(self, profile: str = "Debug") -> str:
-        build_dir = self.get_build_dir(profile)
+        build_dir = self.get_profile_build_dir(profile)
         if self.id == ScargoTarget.esp32:
             return build_dir
         return f"{build_dir}/bin"
+
+    def get_bin_path(self, bin_name: str, profile: str = "Debug") -> str:
+        bin_dir = self.get_bin_dir_path(profile)
+        return f"{bin_dir}/{bin_name}{self.elf_file_extension}"
 
     @classmethod
     def get_target_by_id(cls, target_id: str) -> "Target":
@@ -194,20 +213,6 @@ class Target(BaseModel):
     @classmethod
     def get_targets_by_id(cls, target_ids: List[str]) -> List["Target"]:
         return [TARGETS[id] for id in target_ids]
-
-
-class ScargoTarget(Enum):
-    atsam = "atsam"
-    esp32 = "esp32"
-    stm32 = "stm32"
-    x86 = "x86"
-
-    def __eq__(self, other: Any) -> bool:
-        if isinstance(other, str):
-            return self.value == other
-        if isinstance(other, ScargoTarget):
-            return self.value == other.value
-        return False
 
 
 DEFAULT_SRC_DIR = "src"

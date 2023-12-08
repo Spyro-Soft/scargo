@@ -16,11 +16,9 @@ import toml
 from pytest import FixtureRequest, TempdirFactory
 
 from scargo.cli import cli
-from scargo.config import Config, ScargoTarget, Target, parse_config
+from scargo.config import ScargoTarget, Target
 from scargo.config_utils import get_scargo_config_or_exit
 from scargo.file_generators.docker_gen import _DockerComposeTemplate
-from scargo.file_generators.env_gen import generate_env
-from scargo.path_utils import get_project_root_or_none
 from tests.it.utils import (
     ScargoTestRunner,
     add_profile_to_toml,
@@ -61,17 +59,15 @@ TEST_DUMMY_FS_FILE = "dummy_fs_file.txt"
 class ActiveTestState:
     target_id: ScargoTarget
     proj_name: str
+    bin_name: str
     proj_to_copy_path: Optional[Path]
     proj_path: Optional[Path] = None
-    bin_name: Optional[str] = None
     lib_name: Optional[str] = None
-    config: Optional[Config] = None
 
     def __post_init__(self) -> None:
         if self.proj_to_copy_path is None:
             self.bin_name = self.proj_name
-        else:
-            self.bin_name = self._get_bin_name_fom_cmake()
+
         if self.target_id == ScargoTarget.x86:
             self.obj_dump_path = Path("objdump")
             self.expected_bin_file_format = "elf64-x86-64"
@@ -94,60 +90,19 @@ class ActiveTestState:
         self.target = Target.get_target_by_id(str(self.target_id.value))
         self.runner = ScargoTestRunner()
 
-    def _get_bin_name_fom_cmake(self) -> str:
-        cmake_lists_file_path = Path(f"{self.proj_to_copy_path}/CMakeLists.txt")
-        assert cmake_lists_file_path.is_file(), f"No such file {cmake_lists_file_path}"
-        with open(cmake_lists_file_path) as cmake_lists_file:
-            cmake_data = cmake_lists_file.read()
-        start_pattern = "project("
-        end_pattern = " "
-        index = cmake_data.find(start_pattern)
-        if index == -1:
-            raise ValueError("Can not extract expected binary file name from file")
-        start_index = index + len(start_pattern)
-        data_prefix_removed = cmake_data[start_index:].lstrip()
-        end_index = data_prefix_removed.find(end_pattern)
-        return data_prefix_removed[:end_index].strip()
+    def get_build_result_files_paths(self, profile: str = "Debug") -> List[Path]:
+        target = Target.get_target_by_id(str(self.target_id.value))
+        bin_dir_path = target.get_bin_dir_path(profile)
+        elf_path = Path(bin_dir_path, f"{self.bin_name}{target.elf_file_extension}")
 
-    def _get_path_to_build_profile(self, profile: Optional[str] = "Debug") -> Path:
-        if self.proj_path is None:
-            raise ValueError("Attribute 'proj_path' need to be set before this action")
-        return Path(f"{self.proj_path}/{self.proj_name}/build/{profile}")
-
-    def get_bin_file_path(self, profile: Optional[str] = "Debug") -> Path:
-        path_to_profile = self._get_path_to_build_profile(profile)
-        if self.target_id == ScargoTarget.x86:
-            bin_file_path = Path(f"{path_to_profile}/bin/{self.bin_name}")
-        elif self.target_id == ScargoTarget.stm32:
-            bin_file_path = Path(f"{path_to_profile}/bin/{self.bin_name}.elf")
-        elif self.target_id == ScargoTarget.esp32:
-            bin_file_path = Path(f"{path_to_profile}/{self.bin_name}.elf")
-        else:
-            raise ValueError(
-                f"Bin path not defined for target id {self.target_id.value}"
-            )
-        return bin_file_path
-
-    def get_build_result_files_paths(
-        self, profile: Optional[str] = "Debug"
-    ) -> List[Path]:
-        bin_result_files_path = [self.get_bin_file_path(profile)]
-        path_to_profile = self._get_path_to_build_profile(profile)
+        build_files_to_check = [elf_path]
         if self.target_id == ScargoTarget.stm32:
-            bin_result_files_path.append(
-                Path(f"{path_to_profile}/bin/{self.bin_name}.elf")
-            )
-            bin_result_files_path.append(
-                Path(f"{path_to_profile}/bin/{self.bin_name}.hex")
-            )
+            build_files_to_check.append(elf_path.with_suffix(".hex"))
+            build_files_to_check.append(elf_path.with_suffix(".bin"))
         elif self.target_id == ScargoTarget.esp32:
-            bin_result_files_path.append(Path(f"{path_to_profile}/{self.bin_name}.elf"))
-            bin_result_files_path.append(Path(f"{path_to_profile}/{self.bin_name}.map"))
-        elif self.target_id != ScargoTarget.x86:
-            raise ValueError(
-                f"Bin path not defined for target id {self.target_id.value}"
-            )
-        return bin_result_files_path
+            build_files_to_check.append(elf_path.with_suffix(".map"))
+
+        return build_files_to_check
 
 
 def create_test_dir(tmpdir_factory: TempdirFactory, state: ActiveTestState) -> None:
@@ -197,6 +152,7 @@ def active_state_x86_path(tmpdir_factory: TempdirFactory) -> ActiveTestState:
     state = ActiveTestState(
         target_id=ScargoTarget.x86,
         proj_name=TEST_PROJECT_x86_NAME,
+        bin_name="common_scargo_project_path",
         proj_to_copy_path=TEST_PROJECT_x86_PATH,
     )
 
@@ -208,6 +164,7 @@ def active_state_esp32_path(tmpdir_factory: TempdirFactory) -> ActiveTestState:
     state = ActiveTestState(
         target_id=ScargoTarget.esp32,
         proj_name=TEST_PROJECT_ESP32_NAME,
+        bin_name="esp32project",
         proj_to_copy_path=TEST_PROJECT_ESP32_PATH,
     )
 
@@ -219,6 +176,7 @@ def active_state_stm32_path(tmpdir_factory: TempdirFactory) -> ActiveTestState:
     state = ActiveTestState(
         target_id=ScargoTarget.stm32,
         proj_name=TEST_PROJECT_STM32_NAME,
+        bin_name="common_scargo_project_stm32",
         proj_to_copy_path=TEST_PROJECT_STM32_PATH,
     )
 
@@ -226,39 +184,27 @@ def active_state_stm32_path(tmpdir_factory: TempdirFactory) -> ActiveTestState:
 
 
 @pytest.fixture
-def test_state(request: FixtureRequest, tmpdir_factory: TempdirFactory) -> Any:
+def test_state(
+    request: FixtureRequest, tmpdir_factory: TempdirFactory, use_local_scargo: None
+) -> Any:
     test_state = request.param
     test_state.proj_path = tmpdir_factory.mktemp(test_state.proj_name)
     return test_state
 
 
 @pytest.fixture
-def copy_project(test_state: ActiveTestState) -> None:
+def copy_project_and_update(test_state: ActiveTestState) -> None:
     if test_state.proj_to_copy_path is None:
-        pytest.skip("Test of new project - no copying needed")
+        return  # Test of new project - no copying needed
     os.makedirs(f"{test_state.proj_path}/{test_state.proj_name}", exist_ok=True)
     os.chdir(f"{test_state.proj_path}/{test_state.proj_name}")
     copytree(test_state.proj_to_copy_path, os.getcwd(), dirs_exist_ok=True)
+    result = test_state.runner.invoke(cli, ["update"])
+    assert result.exit_code == 0
 
 
 @pytest.fixture
-def copy_project_and_update(test_state: ActiveTestState, copy_project: None) -> None:
-    project_path = get_project_root_or_none()
-    assert (
-        project_path is not None
-    ), f"Project not copied under expected location: {project_path}"
-    docker_path = Path(project_path, ".devcontainer")
-    config = parse_config(project_path / "scargo.lock")
-    generate_env(docker_path, config)
-
-
-@pytest.fixture
-def copy_project_and_update2(test_state: ActiveTestState, copy_project: None) -> None:
-    test_state.runner.invoke(cli, ["update"])
-
-
-@pytest.fixture
-def build_project(test_state: ActiveTestState, copy_project_and_update2: None) -> None:
+def build_project(test_state: ActiveTestState, copy_project_and_update: None) -> None:
     os.makedirs(f"{test_state.proj_path}/{test_state.proj_name}", exist_ok=True)
     os.chdir(f"{test_state.proj_path}/{test_state.proj_name}")
     result = test_state.runner.invoke(cli, ["build"])
@@ -271,7 +217,7 @@ def build_project(test_state: ActiveTestState, copy_project_and_update2: None) -
 
 @pytest.fixture
 def build_project_debug(
-    test_state: ActiveTestState, copy_project_and_update2: None
+    test_state: ActiveTestState, copy_project_and_update: None
 ) -> None:
     os.makedirs(f"{test_state.proj_path}/{test_state.proj_name}", exist_ok=True)
     os.chdir(f"{test_state.proj_path}/{test_state.proj_name}")
@@ -285,7 +231,7 @@ def build_project_debug(
 
 @pytest.fixture
 def build_project_release(
-    test_state: ActiveTestState, copy_project_and_update2: None
+    test_state: ActiveTestState, copy_project_and_update: None
 ) -> None:
     os.makedirs(f"{test_state.proj_path}/{test_state.proj_name}", exist_ok=True)
     os.chdir(f"{test_state.proj_path}/{test_state.proj_name}")
@@ -311,7 +257,7 @@ def build_project_release_fix(
 
 @pytest.fixture
 def new_profile_project(
-    test_state: ActiveTestState, copy_project_and_update2: None
+    test_state: ActiveTestState, copy_project_and_update: None
 ) -> None:
     os.makedirs(f"{test_state.proj_path}/{test_state.proj_name}", exist_ok=True)
     os.chdir(f"{test_state.proj_path}/{test_state.proj_name}")
@@ -483,17 +429,6 @@ class TestBinProjectFlow:
             result.exit_code == 0
         ), f"Command 'new' end with non zero exit code: {result.exit_code}"
 
-    def test_copy_project(
-        self, test_state: ActiveTestState, copy_project: None
-    ) -> None:
-        project_path = get_project_root_or_none()
-        assert (
-            project_path is not None
-        ), f"Project not copied under expected location: {project_path}"
-        docker_path = Path(project_path, ".devcontainer")
-        config = parse_config(project_path / "scargo.lock")
-        generate_env(docker_path, config)
-
     def test_cli_docker_run(
         self, test_state: ActiveTestState, copy_project_and_update: None
     ) -> None:
@@ -507,18 +442,8 @@ class TestBinProjectFlow:
             result.exit_code == 0
         ), f"Command 'docker run' end with non zero exit code: {result.exit_code}"
 
-    def test_cli_update(self, test_state: ActiveTestState, copy_project: None) -> None:
-        """This test check if call of scargo update command will finish without error"""
-        # Update command
-        os.makedirs(f"{test_state.proj_path}/{test_state.proj_name}", exist_ok=True)
-        os.chdir(f"{test_state.proj_path}/{test_state.proj_name}")
-        result = test_state.runner.invoke(cli, ["update"])
-        assert (
-            result.exit_code == 0
-        ), f"Command 'update' end with non zero exit code: {result.exit_code}"
-
     def test_cli_build(
-        self, test_state: ActiveTestState, copy_project_and_update2: None
+        self, test_state: ActiveTestState, copy_project_and_update: None
     ) -> None:
         """This test check if call of scargo build command will finish without error and if under default profile in
         build folder bin file is present"""
@@ -533,7 +458,7 @@ class TestBinProjectFlow:
             assert file.is_file(), f"Expected file: {file} not exist"
 
     def test_cli_build_profile_debug(
-        self, test_state: ActiveTestState, copy_project_and_update2: None
+        self, test_state: ActiveTestState, copy_project_and_update: None
     ) -> None:
         """This test check if call of scargo build --profile=Debug command will finish without error and if under Debug
         profile in build folder bin file is present"""
@@ -551,12 +476,15 @@ class TestBinProjectFlow:
     ) -> None:
         """This test checks if bin file has expected file format by running objdump on this file"""
         # objdump
-        bin_file_path = test_state.get_bin_file_path(profile="Debug")
-        os.chdir(bin_file_path.parent)
+        config = get_scargo_config_or_exit()
+        bin__dir_file_path = Path(
+            config.project.default_target.get_bin_dir_path("Debug")
+        )
+        os.chdir(bin__dir_file_path)
         config = get_scargo_config_or_exit()
         # run command in docker
         output = run_custom_command_in_docker(
-            [str(test_state.obj_dump_path), bin_file_path.name, "-a"],
+            [str(test_state.obj_dump_path), test_state.bin_name, "-a"],
             config.project,
             config.project_root,
         )
@@ -565,7 +493,7 @@ class TestBinProjectFlow:
         ), f"Objdump results: {output} did not contain expected bin file format: {test_state.expected_bin_file_format}"
 
     def test_cli_build_profile_release(
-        self, test_state: ActiveTestState, copy_project_and_update2: None
+        self, test_state: ActiveTestState, copy_project_and_update: None
     ) -> None:
         """This test check if call of scargo build --profile=Release command will finish without error and if under
         Release profile in build folder bin file is present"""
@@ -583,12 +511,13 @@ class TestBinProjectFlow:
     ) -> None:
         """This test checks if bin file has expected file format by running objdump on this file"""
         # objdump
-        bin_file_path = test_state.get_bin_file_path(profile="Release")
-        os.chdir(bin_file_path.parent)
         config = get_scargo_config_or_exit()
+        bin_file_path = config.project.default_target.get_bin_path(
+            test_state.bin_name, profile="Release"
+        )
         # run command in docker
         output = run_custom_command_in_docker(
-            [str(test_state.obj_dump_path), bin_file_path.name, "-a"],
+            [str(test_state.obj_dump_path), bin_file_path, "-a"],
             config.project,
             config.project_root,
         )
@@ -633,7 +562,7 @@ class TestBinProjectFlow:
         ), f"String 'No problems found!' not found in check command output {result.output}"
 
     def test_cli_test(
-        self, test_state: ActiveTestState, copy_project_and_update2: None
+        self, test_state: ActiveTestState, copy_project_and_update: None
     ) -> None:
         """This test check if call of scargo test command will finish without error and if no tests were found
         for newly created project"""
@@ -647,7 +576,7 @@ class TestBinProjectFlow:
         ), f"String 'No tests were found!!!' not found in test command output {result.output}"
 
     def test_precondition_add_new_profile(
-        self, test_state: ActiveTestState, copy_project_and_update2: None
+        self, test_state: ActiveTestState, copy_project_and_update: None
     ) -> None:
         """This test can be treated as a precondition it's just adding new profile settings to scargo.toml file"""
         # add new profile
@@ -740,7 +669,12 @@ class TestBinProjectFlow:
         cpp_toml_std = toml_data["project"]["cxxstandard"]
         default_toml_c_flags = toml_data["project"]["cflags"]
         default_toml_cxx_flags = toml_data["project"]["cxxflags"]
-        with open(f"build/{NEW_PROFILE_NAME}/compile_commands.json") as f:
+
+        config = get_scargo_config_or_exit()
+        build_dir = config.project.default_target.get_profile_build_dir(
+            NEW_PROFILE_NAME
+        )
+        with open(f"{build_dir}/compile_commands.json") as f:
             compile_commands = json.load(f)
         for compile_command in compile_commands:
             if compile_command["file"].split(".")[-1] == "c":

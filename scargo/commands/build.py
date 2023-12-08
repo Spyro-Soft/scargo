@@ -42,9 +42,9 @@ def scargo_build(profile: str, target: Optional[ScargoTarget]) -> None:
     conan_add_remote(project_dir, config)
     conan_source(project_dir)
 
-    build_dir = Path(project_dir, build_target.get_build_dir(profile))
+    build_dir = Path(project_dir, build_target.get_profile_build_dir(profile))
     build_dir.mkdir(parents=True, exist_ok=True)
-    profile_name = build_target.get_profile_name(profile)
+    profile_name = build_target.get_conan_profile_name(profile)
 
     try:
         subprocess.run(

@@ -45,10 +45,10 @@ def config(monkeypatch: pytest.MonkeyPatch, fp: FakeProcess) -> Config:
 def test_publish(config: Config, fp: FakeProcess, fs: FakeFilesystem) -> None:
     # ARRANGE
     project_name = config.project.name
-    target = config.project.target[0]
-    build_path = Path(config.project_root, target.get_build_dir("Release"))
+    target = config.project.default_target
+    build_path = Path(config.project_root, target.get_profile_build_dir("Release"))
     build_path.mkdir(parents=True, exist_ok=True)
-    profile_name = config.project.target[0].get_profile_name("Release")
+    profile_name = config.project.default_target.get_conan_profile_name("Release")
     profile_path = f"./config/conan/profiles/{profile_name}"
 
     subprocess_commands = [
@@ -93,10 +93,10 @@ def test_create_package_fail(
     config: Config, caplog: LogCaptureFixture, fp: FakeProcess, fs: FakeFilesystem
 ) -> None:
     # ARRANGE
-    target = config.project.target[0]
-    build_path = Path(config.project_root, target.get_build_dir("Release"))
+    target = config.project.default_target
+    build_path = Path(config.project_root, target.get_profile_build_dir("Release"))
     build_path.mkdir(parents=True, exist_ok=True)
-    profile_name = config.project.target[0].get_profile_name("Release")
+    profile_name = config.project.default_target.get_conan_profile_name("Release")
     profile_path = f"./config/conan/profiles/{profile_name}"
 
     fp.register(
@@ -128,10 +128,10 @@ def test_upload_package_fail(
 ) -> None:
     # ARRANGE
     project_name = config.project.name
-    target = config.project.target[0]
-    build_path = Path(config.project_root, target.get_build_dir("Release"))
+    target = config.project.default_target
+    build_path = Path(config.project_root, target.get_profile_build_dir("Release"))
     build_path.mkdir(parents=True, exist_ok=True)
-    profile_name = config.project.target[0].get_profile_name("Release")
+    profile_name = config.project.default_target.get_conan_profile_name("Release")
     profile_path = f"./config/conan/profiles/{profile_name}"
 
     fp.register(

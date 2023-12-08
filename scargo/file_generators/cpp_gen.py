@@ -84,7 +84,7 @@ class _CppTemplateGen:
                 )
         else:
             self._create_file_from_template(
-                f"cpp/cmake-src-{self._config.project.target[0].id}.j2",
+                f"cpp/cmake-src-{self._config.project.default_target.id}.j2",
                 "CMakeLists.txt",
                 template_params={"config": self._config},
             )

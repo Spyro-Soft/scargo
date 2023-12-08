@@ -30,7 +30,7 @@ def scargo_publish(repo: str, profile: str = "Release") -> None:
     # For now upload only for default target, in future we can add support for
     # multiple targets and how to handle them
     target = project_config.default_target
-    build_dir = Path(project_path, target.get_build_dir(profile))
+    build_dir = Path(project_path, target.get_profile_build_dir(profile))
 
     if not build_dir.exists():
         logger.error("Build folder for specified build type does not exist")
@@ -40,7 +40,7 @@ def scargo_publish(repo: str, profile: str = "Release") -> None:
     conan_add_remote(project_path, config)
     conan_source(project_path)
 
-    profile_name = target.get_profile_name(profile)
+    profile_name = target.get_conan_profile_name(profile)
     profile_path = f"./config/conan/profiles/{profile_name}"
 
     # Export package

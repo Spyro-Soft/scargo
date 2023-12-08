@@ -17,7 +17,12 @@ CLANG_TIDY_ERROR_OUTPUT = "error: something is not tidy!"
 
 @pytest.mark.parametrize(
     "build_path_str",
-    ["build/Debug", "build/Release", "build/RelWithDebInfo", "build/MinSizeRel"],
+    [
+        "build/x86/Debug",
+        "build/x86/Release",
+        "build/x86/RelWithDebInfo",
+        "build/x86/MinSizeRel",
+    ],
 )
 def test_check_clang_tidy_pass(
     build_path_str: str,
@@ -56,7 +61,7 @@ def test_check_clang_tidy_fail(
     mock_find_files: MagicMock,
     fake_process: FakeProcess,
 ) -> None:
-    build_path = Path("build/Debug")
+    build_path = Path("build/x86/Debug")
     build_path.mkdir(parents=True)
     compilation_db_path = Path(build_path, "compile_commands.json")
     compilation_db_path.touch(exist_ok=True)

@@ -19,10 +19,9 @@ def test_scargo_run_bin_path(fp: FakeProcess, mock_prepare_config: MagicMock) ->
 
 def test_scargo_run(fp: FakeProcess, mock_prepare_config: MagicMock) -> None:
     config = mock_prepare_config.return_value
-    target = config.project.target[0]
-    bin_dir_path = Path(target.get_bin_dir_path("Debug"))
-    bin_dir_path.mkdir(parents=True)
-    bin_path = bin_dir_path / "test_project"
+    target = config.project.default_target
+    bin_path = Path(target.get_bin_path(config.project.name.lower(), "Debug"))
+    bin_path.parent.mkdir(parents=True)
     bin_path.touch()
 
     fp_bin = fp.register(f"./{bin_path.name}", stdout="Response")
