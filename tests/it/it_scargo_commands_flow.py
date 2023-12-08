@@ -13,7 +13,7 @@ from unittest.mock import patch
 
 import pytest
 import toml
-from pytest import FixtureRequest, TempdirFactory
+from pytest import FixtureRequest, TempPathFactory
 
 from scargo.cli import cli
 from scargo.config import ScargoTarget, Target
@@ -105,14 +105,8 @@ class ActiveTestState:
         return build_files_to_check
 
 
-def create_test_dir(tmpdir_factory: TempdirFactory, state: ActiveTestState) -> None:
-    state.proj_path = tmpdir_factory.mktemp(state.proj_name)
-    os.makedirs(f"{state.proj_path}/{state.proj_name}", exist_ok=True)
-    os.chdir(f"{state.proj_path}/{state.proj_name}")
-
-
 @pytest.fixture
-def active_state_x86_bin(tmpdir_factory: TempdirFactory) -> ActiveTestState:
+def active_state_x86_bin() -> ActiveTestState:
     state = ActiveTestState(
         target_id=ScargoTarget.x86,
         proj_name="new_bin_project_x86",
@@ -124,7 +118,7 @@ def active_state_x86_bin(tmpdir_factory: TempdirFactory) -> ActiveTestState:
 
 
 @pytest.fixture
-def active_state_stm32_bin(tmpdir_factory: TempdirFactory) -> ActiveTestState:
+def active_state_stm32_bin() -> ActiveTestState:
     state = ActiveTestState(
         target_id=ScargoTarget.stm32,
         proj_name="new_bin_project_stm32",
@@ -136,7 +130,7 @@ def active_state_stm32_bin(tmpdir_factory: TempdirFactory) -> ActiveTestState:
 
 
 @pytest.fixture
-def active_state_esp32_bin(tmpdir_factory: TempdirFactory) -> ActiveTestState:
+def active_state_esp32_bin() -> ActiveTestState:
     state = ActiveTestState(
         target_id=ScargoTarget.esp32,
         proj_name="new_bin_project_esp32",
@@ -148,7 +142,7 @@ def active_state_esp32_bin(tmpdir_factory: TempdirFactory) -> ActiveTestState:
 
 
 @pytest.fixture
-def active_state_x86_path(tmpdir_factory: TempdirFactory) -> ActiveTestState:
+def active_state_x86_path() -> ActiveTestState:
     state = ActiveTestState(
         target_id=ScargoTarget.x86,
         proj_name=TEST_PROJECT_x86_NAME,
@@ -160,7 +154,7 @@ def active_state_x86_path(tmpdir_factory: TempdirFactory) -> ActiveTestState:
 
 
 @pytest.fixture
-def active_state_esp32_path(tmpdir_factory: TempdirFactory) -> ActiveTestState:
+def active_state_esp32_path() -> ActiveTestState:
     state = ActiveTestState(
         target_id=ScargoTarget.esp32,
         proj_name=TEST_PROJECT_ESP32_NAME,
@@ -172,7 +166,7 @@ def active_state_esp32_path(tmpdir_factory: TempdirFactory) -> ActiveTestState:
 
 
 @pytest.fixture
-def active_state_stm32_path(tmpdir_factory: TempdirFactory) -> ActiveTestState:
+def active_state_stm32_path() -> ActiveTestState:
     state = ActiveTestState(
         target_id=ScargoTarget.stm32,
         proj_name=TEST_PROJECT_STM32_NAME,
@@ -185,28 +179,39 @@ def active_state_stm32_path(tmpdir_factory: TempdirFactory) -> ActiveTestState:
 
 @pytest.fixture
 def test_state(
-    request: FixtureRequest, tmpdir_factory: TempdirFactory, use_local_scargo: None
+    request: FixtureRequest, tmp_path_factory: TempPathFactory, use_local_scargo: None
 ) -> Any:
     test_state = request.param
-    test_state.proj_path = tmpdir_factory.mktemp(test_state.proj_name)
+    test_state.proj_path = tmp_path_factory.mktemp(test_state.proj_name)
+    os.chdir(str(test_state.proj_path))
     return test_state
 
 
 @pytest.fixture
-def copy_project_and_update(test_state: ActiveTestState) -> None:
-    if test_state.proj_to_copy_path is None:
-        return  # Test of new project - no copying needed
-    os.makedirs(f"{test_state.proj_path}/{test_state.proj_name}", exist_ok=True)
-    os.chdir(f"{test_state.proj_path}/{test_state.proj_name}")
-    copytree(test_state.proj_to_copy_path, os.getcwd(), dirs_exist_ok=True)
+def setup_project(test_state: ActiveTestState) -> None:
+    if test_state.proj_to_copy_path:
+        # Copy existing project, backward compatibility tests
+        copytree(test_state.proj_to_copy_path, test_state.proj_name, dirs_exist_ok=True)
+    else:
+        # Create new project
+        result = test_state.runner.invoke(
+            cli,
+            [
+                "new",
+                test_state.proj_name,
+                f"--target={test_state.target_id.value}",
+                f"--bin={test_state.bin_name}",
+            ],
+        )
+        assert result.exit_code == 0
+
+    os.chdir(test_state.proj_name)
     result = test_state.runner.invoke(cli, ["update"])
     assert result.exit_code == 0
 
 
 @pytest.fixture
-def build_project(test_state: ActiveTestState, copy_project_and_update: None) -> None:
-    os.makedirs(f"{test_state.proj_path}/{test_state.proj_name}", exist_ok=True)
-    os.chdir(f"{test_state.proj_path}/{test_state.proj_name}")
+def build_project(test_state: ActiveTestState, setup_project: None) -> None:
     result = test_state.runner.invoke(cli, ["build"])
     assert (
         result.exit_code == 0
@@ -216,11 +221,7 @@ def build_project(test_state: ActiveTestState, copy_project_and_update: None) ->
 
 
 @pytest.fixture
-def build_project_debug(
-    test_state: ActiveTestState, copy_project_and_update: None
-) -> None:
-    os.makedirs(f"{test_state.proj_path}/{test_state.proj_name}", exist_ok=True)
-    os.chdir(f"{test_state.proj_path}/{test_state.proj_name}")
+def build_project_debug(test_state: ActiveTestState, setup_project: None) -> None:
     result = test_state.runner.invoke(cli, ["build", "--profile", "Debug"])
     assert (
         result.exit_code == 0
@@ -230,11 +231,7 @@ def build_project_debug(
 
 
 @pytest.fixture
-def build_project_release(
-    test_state: ActiveTestState, copy_project_and_update: None
-) -> None:
-    os.makedirs(f"{test_state.proj_path}/{test_state.proj_name}", exist_ok=True)
-    os.chdir(f"{test_state.proj_path}/{test_state.proj_name}")
+def build_project_release(test_state: ActiveTestState, setup_project: None) -> None:
     result = test_state.runner.invoke(cli, ["build", "--profile", "Release"])
     assert (
         result.exit_code == 0
@@ -247,8 +244,6 @@ def build_project_release(
 def build_project_release_fix(
     test_state: ActiveTestState, build_project_release: None
 ) -> None:
-    os.makedirs(f"{test_state.proj_path}/{test_state.proj_name}", exist_ok=True)
-    os.chdir(f"{test_state.proj_path}/{test_state.proj_name}")
     result = test_state.runner.invoke(cli, ["fix"])
     assert (
         result.exit_code == 0
@@ -256,11 +251,7 @@ def build_project_release_fix(
 
 
 @pytest.fixture
-def new_profile_project(
-    test_state: ActiveTestState, copy_project_and_update: None
-) -> None:
-    os.makedirs(f"{test_state.proj_path}/{test_state.proj_name}", exist_ok=True)
-    os.chdir(f"{test_state.proj_path}/{test_state.proj_name}")
+def new_profile_project(test_state: ActiveTestState, setup_project: None) -> None:
     add_profile_to_toml(
         NEW_PROFILE_NAME,
         "cflags",
@@ -274,8 +265,6 @@ def new_profile_project(
 def new_profile_project_updated(
     test_state: ActiveTestState, new_profile_project: None
 ) -> None:
-    os.makedirs(f"{test_state.proj_path}/{test_state.proj_name}", exist_ok=True)
-    os.chdir(f"{test_state.proj_path}/{test_state.proj_name}")
     add_profile_to_toml(
         NEW_PROFILE_NAME,
         "cflags",
@@ -293,8 +282,6 @@ def new_profile_project_updated(
 def new_profile_project_build(
     test_state: ActiveTestState, new_profile_project_updated: None
 ) -> None:
-    os.makedirs(f"{test_state.proj_path}/{test_state.proj_name}", exist_ok=True)
-    os.chdir(f"{test_state.proj_path}/{test_state.proj_name}")
     result = test_state.runner.invoke(cli, ["build", "--profile", NEW_PROFILE_NAME])
     assert (
         result.exit_code == 0
@@ -305,8 +292,6 @@ def new_profile_project_build(
 def new_project_build_fix(
     test_state: ActiveTestState, new_profile_project_build: None
 ) -> None:
-    os.makedirs(f"{test_state.proj_path}/{test_state.proj_name}", exist_ok=True)
-    os.chdir(f"{test_state.proj_path}/{test_state.proj_name}")
     result = test_state.runner.invoke(cli, ["fix"])
     assert (
         result.exit_code == 0
@@ -317,8 +302,6 @@ def new_project_build_fix(
 def new_profile_project_build_fix_check(
     test_state: ActiveTestState, new_profile_project_build: None
 ) -> None:
-    os.makedirs(f"{test_state.proj_path}/{test_state.proj_name}", exist_ok=True)
-    os.chdir(f"{test_state.proj_path}/{test_state.proj_name}")
     config = get_scargo_config_or_exit()
     Path(config.source_dir_path, TEST_DUMMY_LIB_H_FILE).touch()
     result = test_state.runner.invoke(cli, ["fix"])
@@ -335,8 +318,6 @@ def new_profile_project_build_fix_check(
 def new_profile_project_build_copied_files(
     test_state: ActiveTestState, new_profile_project_build: None
 ) -> None:
-    os.makedirs(f"{test_state.proj_path}/{test_state.proj_name}", exist_ok=True)
-    os.chdir(f"{test_state.proj_path}/{test_state.proj_name}")
     config = get_scargo_config_or_exit()
     copytree(
         FIX_TEST_FILES_PATH,
@@ -349,8 +330,6 @@ def new_profile_project_build_copied_files(
 def new_profile_project_build_copied_files_fix(
     test_state: ActiveTestState, new_profile_project_build: None
 ) -> None:
-    os.makedirs(f"{test_state.proj_path}/{test_state.proj_name}", exist_ok=True)
-    os.chdir(f"{test_state.proj_path}/{test_state.proj_name}")
     result = test_state.runner.invoke(cli, ["fix"])
     assert (
         result.exit_code == 0
@@ -361,8 +340,6 @@ def new_profile_project_build_copied_files_fix(
 def new_project_gen_u(
     test_state: ActiveTestState, new_profile_project_build_fix_check: None
 ) -> None:
-    os.makedirs(f"{test_state.proj_path}/{test_state.proj_name}", exist_ok=True)
-    os.chdir(f"{test_state.proj_path}/{test_state.proj_name}")
     config = get_scargo_config_or_exit()
     result = test_state.runner.invoke(cli, ["gen", "-u", config.source_dir_path.name])
     assert (
@@ -374,8 +351,6 @@ def new_project_gen_u(
 def new_project_gen_c(
     test_state: ActiveTestState, new_profile_project_build_fix_check: None
 ) -> None:
-    os.makedirs(f"{test_state.proj_path}/{test_state.proj_name}", exist_ok=True)
-    os.chdir(f"{test_state.proj_path}/{test_state.proj_name}")
     result = test_state.runner.invoke(cli, ["gen", "-c", TEST_DEVICE_ID])
     assert (
         result.exit_code == 0
@@ -405,51 +380,20 @@ def new_project_gen_c(
 )
 @pytest.mark.xdist_group(name="TestBinProjectFlow")
 class TestBinProjectFlow:
-    def test_cli_new(self, test_state: ActiveTestState) -> None:
-        """This test invoking scargo new command with binary file and checking if command was executed without error
-        and expected project structure and files were generated without checking correctness of those generated files
-        content"""
-        if test_state.proj_to_copy_path is not None:
-            pytest.skip(
-                "Test of copied project to check backward compatibility, no need to create new project"
-            )
-        os.chdir(str(test_state.proj_path))
-        # New
-        result = test_state.runner.invoke(
-            cli,
-            [
-                "new",
-                test_state.proj_name,
-                f"--target={test_state.target_id.value}",
-                f"--bin={test_state.bin_name}",
-            ],
-        )
-        os.chdir(test_state.proj_name)
-        assert (
-            result.exit_code == 0
-        ), f"Command 'new' end with non zero exit code: {result.exit_code}"
-
     def test_cli_docker_run(
-        self, test_state: ActiveTestState, copy_project_and_update: None
+        self, test_state: ActiveTestState, setup_project: None
     ) -> None:
         """This test check if call of scargo docker run command will finish without error"""
         # Docker Run
-        os.makedirs(f"{test_state.proj_path}/{test_state.proj_name}", exist_ok=True)
-        os.chdir(f"{test_state.proj_path}/{test_state.proj_name}")
-
         result = test_state.runner.invoke(cli, ["docker", "run"])
         assert (
             result.exit_code == 0
         ), f"Command 'docker run' end with non zero exit code: {result.exit_code}"
 
-    def test_cli_build(
-        self, test_state: ActiveTestState, copy_project_and_update: None
-    ) -> None:
+    def test_cli_build(self, test_state: ActiveTestState, setup_project: None) -> None:
         """This test check if call of scargo build command will finish without error and if under default profile in
         build folder bin file is present"""
         # Build
-        os.makedirs(f"{test_state.proj_path}/{test_state.proj_name}", exist_ok=True)
-        os.chdir(f"{test_state.proj_path}/{test_state.proj_name}")
         result = test_state.runner.invoke(cli, ["build"])
         assert (
             result.exit_code == 0
@@ -458,12 +402,11 @@ class TestBinProjectFlow:
             assert file.is_file(), f"Expected file: {file} not exist"
 
     def test_cli_build_profile_debug(
-        self, test_state: ActiveTestState, copy_project_and_update: None
+        self, test_state: ActiveTestState, setup_project: None
     ) -> None:
         """This test check if call of scargo build --profile=Debug command will finish without error and if under Debug
         profile in build folder bin file is present"""
         # Build
-        os.chdir(f"{test_state.proj_path}/{test_state.proj_name}")
         result = test_state.runner.invoke(cli, ["build", "--profile", "Debug"])
         assert (
             result.exit_code == 0
@@ -477,14 +420,11 @@ class TestBinProjectFlow:
         """This test checks if bin file has expected file format by running objdump on this file"""
         # objdump
         config = get_scargo_config_or_exit()
-        bin__dir_file_path = Path(
-            config.project.default_target.get_bin_dir_path("Debug")
-        )
-        os.chdir(bin__dir_file_path)
-        config = get_scargo_config_or_exit()
+        target = config.project.default_target
+        bin_path = target.get_bin_path(test_state.bin_name, profile="Debug")
         # run command in docker
         output = run_custom_command_in_docker(
-            [str(test_state.obj_dump_path), test_state.bin_name, "-a"],
+            [str(test_state.obj_dump_path), bin_path, "-a"],
             config.project,
             config.project_root,
         )
@@ -493,12 +433,11 @@ class TestBinProjectFlow:
         ), f"Objdump results: {output} did not contain expected bin file format: {test_state.expected_bin_file_format}"
 
     def test_cli_build_profile_release(
-        self, test_state: ActiveTestState, copy_project_and_update: None
+        self, test_state: ActiveTestState, setup_project: None
     ) -> None:
         """This test check if call of scargo build --profile=Release command will finish without error and if under
         Release profile in build folder bin file is present"""
         # Build
-        os.chdir(f"{test_state.proj_path}/{test_state.proj_name}")
         result = test_state.runner.invoke(cli, ["build", "--profile", "Release"])
         assert (
             result.exit_code == 0
@@ -531,7 +470,6 @@ class TestBinProjectFlow:
         """This test check if call of scargo fix command will finish without error and if no problems to fix
         will be found for newly created project"""
         # Fix
-        os.chdir(f"{test_state.proj_path}/{test_state.proj_name}")
         result = test_state.runner.invoke(cli, ["fix"])
         assert (
             result.exit_code == 0
@@ -552,7 +490,6 @@ class TestBinProjectFlow:
     ) -> None:
         """This test check if call of scargo check command will finish without error and if no problems will be found
         for newly created project"""
-        os.chdir(f"{test_state.proj_path}/{test_state.proj_name}")
         result = test_state.runner.invoke(cli, ["check"])
         assert (
             result.exit_code == 0
@@ -561,12 +498,9 @@ class TestBinProjectFlow:
             "No problems found!" in result.output
         ), f"String 'No problems found!' not found in check command output {result.output}"
 
-    def test_cli_test(
-        self, test_state: ActiveTestState, copy_project_and_update: None
-    ) -> None:
+    def test_cli_test(self, test_state: ActiveTestState, setup_project: None) -> None:
         """This test check if call of scargo test command will finish without error and if no tests were found
         for newly created project"""
-        os.chdir(f"{test_state.proj_path}/{test_state.proj_name}")
         result = test_state.runner.invoke(cli, ["test"])
         assert (
             result.exit_code == 0
@@ -576,11 +510,10 @@ class TestBinProjectFlow:
         ), f"String 'No tests were found!!!' not found in test command output {result.output}"
 
     def test_precondition_add_new_profile(
-        self, test_state: ActiveTestState, copy_project_and_update: None
+        self, test_state: ActiveTestState, setup_project: None
     ) -> None:
         """This test can be treated as a precondition it's just adding new profile settings to scargo.toml file"""
         # add new profile
-        os.chdir(f"{test_state.proj_path}/{test_state.proj_name}")
         add_profile_to_toml(
             NEW_PROFILE_NAME,
             "cflags",
@@ -595,7 +528,6 @@ class TestBinProjectFlow:
         """This test check if call of scargo update command invoked after new adding profile settings to scargo.toml
         file will finish without error"""
         # Update command
-        os.chdir(f"{test_state.proj_path}/{test_state.proj_name}")
         add_profile_to_toml(
             NEW_PROFILE_NAME,
             "cflags",
@@ -604,7 +536,6 @@ class TestBinProjectFlow:
             NEW_PROFILE_CXXFLAGS,
         )
 
-        os.chdir(f"{test_state.proj_path}/{test_state.proj_name}")
         result = test_state.runner.invoke(cli, ["update"])
         assert (
             result.exit_code == 0
@@ -648,7 +579,6 @@ class TestBinProjectFlow:
         """This test check if call of scargo build command for newly added profile will finish without error and
         if under this new profile in build folder bin file is present"""
         # Build
-        os.chdir(f"{test_state.proj_path}/{test_state.proj_name}")
         result = test_state.runner.invoke(cli, ["build", "--profile", NEW_PROFILE_NAME])
         assert (
             result.exit_code == 0
@@ -662,7 +592,6 @@ class TestBinProjectFlow:
         """This test check if created under new profile in build folder compile_commands.json file contains project
         flags and flags added with newly created profile, also check if c++ standard is set according to definition
         in scargo.toml file"""
-        os.chdir(f"{test_state.proj_path}/{test_state.proj_name}")
         # get expected c++ standard from scargo.toml file
         with open("scargo.toml") as f:
             toml_data = toml.load(f)
@@ -710,7 +639,6 @@ class TestBinProjectFlow:
         """
         if test_state.proj_to_copy_path is not None:
             pytest.skip("This test is only for new project")
-        os.chdir(f"{test_state.proj_path}/{test_state.proj_name}")
         config = get_scargo_config_or_exit()
         result = test_state.runner.invoke(
             cli, ["gen", "-u", config.source_dir_path.name]
@@ -728,7 +656,6 @@ class TestBinProjectFlow:
     ) -> None:
         """This test adding dummy .h file to source project dir fit it by scargo fix command and check if file was
         fixed by scargo check command"""
-        os.chdir(f"{test_state.proj_path}/{test_state.proj_name}")
         config = get_scargo_config_or_exit()
         Path(config.source_dir_path, TEST_DUMMY_LIB_H_FILE).touch()
         result = test_state.runner.invoke(cli, ["fix"])
@@ -747,7 +674,6 @@ class TestBinProjectFlow:
         """This test check if call of scargo gen -u  "path_to_source_dir" command will finish without error and
         if unit test for added dummy .h file with prefix 'ut_' was created under tests/ut path
         """
-        os.chdir(f"{test_state.proj_path}/{test_state.proj_name}")
         config = get_scargo_config_or_exit()
         result = test_state.runner.invoke(
             cli, ["gen", "-u", config.source_dir_path.name]
@@ -766,7 +692,6 @@ class TestBinProjectFlow:
     ) -> None:
         """This test check if call of scargo test command will finish without error and if one generated dummy unit
         test was found end executed without error"""
-        os.chdir(f"{test_state.proj_path}/{test_state.proj_name}")
         result = test_state.runner.invoke(cli, ["test"])
         assert (
             result.exit_code == 0
@@ -779,7 +704,6 @@ class TestBinProjectFlow:
         """This test check if call of scargo gen -m "path_to_added_test_h_file" command will finish without error and
         if expected files under tests/mocks were created"""
         # Gen -m
-        os.chdir(f"{test_state.proj_path}/{test_state.proj_name}")
         config = get_scargo_config_or_exit()
         path_to_h_file = Path(config.source_dir_path.name, TEST_DUMMY_LIB_H_FILE)
         result = test_state.runner.invoke(cli, ["gen", "-m", str(path_to_h_file)])
@@ -800,7 +724,6 @@ class TestBinProjectFlow:
         """This test check if call of scargo gen -c "device_id" command will finish without error and
         if expected cert files under build/fs and build/cert directories were created"""
         # Gen -c
-        os.chdir(f"{test_state.proj_path}/{test_state.proj_name}")
         result = test_state.runner.invoke(cli, ["gen", "-c", TEST_DEVICE_ID])
         assert (
             result.exit_code == 0
@@ -823,7 +746,6 @@ class TestBinProjectFlow:
         directory and if already existing cert files will be still available under build/fs
         """
         # Gen --fs
-        os.chdir(f"{test_state.proj_path}/{test_state.proj_name}")
         config = get_scargo_config_or_exit()
         if test_state.target_id == ScargoTarget.esp32:
             Path(config.source_dir_path, "fs", TEST_DUMMY_FS_FILE).touch()
@@ -859,7 +781,6 @@ class TestBinProjectFlow:
     ) -> None:
         """This test check if after all generations made by scargo gen command call of scargo check command will finish
         without error and if no problems will be found"""
-        os.chdir(f"{test_state.proj_path}/{test_state.proj_name}")
         result = test_state.runner.invoke(cli, ["check"])
         assert (
             result.exit_code == 0
@@ -874,7 +795,6 @@ class TestBinProjectFlow:
         """This test check if call of scargo run command will finish without error and with output 'Hello World!'
         for x86 target, for other targets error should be returned with output "Run project on x86 architecture is
         not implemented for {test_state.target_id.value} yet"""
-        os.chdir(f"{test_state.proj_path}/{test_state.proj_name}")
         result = test_state.runner.invoke(cli, ["run"])
         if test_state.target_id == ScargoTarget.x86:
             assert (
@@ -902,7 +822,6 @@ class TestBinProjectFlow:
         check if for copied files which contains some static code issues call of scargo check command will finish with
         error and if expected errors were mentioned in output"""
         # Check fail
-        os.chdir(f"{test_state.proj_path}/{test_state.proj_name}")
         config = get_scargo_config_or_exit()
         copytree(
             FIX_TEST_FILES_PATH,
@@ -931,7 +850,6 @@ class TestBinProjectFlow:
         finally if files contain expected fixes (only if clang-format issues were fixed is not verified)
         """
         # Fix
-        os.chdir(f"{test_state.proj_path}/{test_state.proj_name}")
         result = test_state.runner.invoke(cli, ["fix"])
         assert (
             result.exit_code == 0
@@ -962,7 +880,6 @@ class TestBinProjectFlow:
         """This test check if call of scargo check command will finish without error and if no problems will be found
         after applying scargo fix command in previous step"""
         # Check
-        os.chdir(f"{test_state.proj_path}/{test_state.proj_name}")
         result = test_state.runner.invoke(cli, ["check"])
         assert (
             result.exit_code == 0
@@ -977,7 +894,6 @@ class TestBinProjectFlow:
         """This test check if call of scargo doc command will finish without error and if documentation was generated
         unfortunately without checking correctness of documentation"""
         # doc
-        os.chdir(f"{test_state.proj_path}/{test_state.proj_name}")
         result = test_state.runner.invoke(cli, ["doc"])
         assert (
             result.exit_code == 0
