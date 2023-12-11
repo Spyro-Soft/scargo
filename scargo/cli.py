@@ -28,7 +28,6 @@ from scargo.commands.test import scargo_test
 from scargo.commands.update import scargo_update
 from scargo.commands.version import scargo_version
 from scargo.config import ScargoTarget
-from scargo.config_utils import prepare_config
 from scargo.global_values import DESCRIPTION, SCARGO_DEFAULT_CONFIG_FILE
 from scargo.logger import get_logger
 from scargo.path_utils import get_config_file_path
@@ -428,19 +427,10 @@ def run(
     bin_params: List[str] = Argument(None),
     base_dir: Optional[Path] = BASE_DIR_OPTION,
 ) -> None:
-    """Build and run project"""
-    config = prepare_config()
-    if not config.project.is_x86():
-        logger.info(
-            "Running non x86 projects on x86 architecture is not implemented yet."
-        )
-        sys.exit(1)
-
+    """Run project bin file"""
     if base_dir:
         os.chdir(base_dir)
-    if not skip_build:
-        scargo_build(profile, ScargoTarget.x86)
-    scargo_run(bin_path, profile, bin_params)
+    scargo_run(bin_path, profile, bin_params, skip_build)
 
 
 ###############################################################################

@@ -30,7 +30,7 @@ void app_main(void)  // NOLINT(readability-identifier-naming): name required by 
         vTaskDelay(pdMS_TO_TICKS(50));
     }
 }
-#endif // ESP32
+#endif  // ESP32
 {% endif %}
 {% if project.is_x86() or project.is_atsam() or project.is_stm32() %}
 #ifndef ESP32

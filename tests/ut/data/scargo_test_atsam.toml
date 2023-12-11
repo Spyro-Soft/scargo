@@ -1,0 +1,100 @@
+[project]
+name = "atsamproj"
+version = "0.1.0"
+description = "Project description."
+homepage-url = "www.hello-world.com"
+
+bin_name = "atsamproj"
+target = "atsam"
+build-env = "native"
+docker-file = ".devcontainer/Dockerfile-custom"
+docker-image-tag = "atsamproj-dev:1.0"
+
+cxxstandard = "17"
+
+cflags   = "-Wall -Wextra"
+cxxflags = "-Wall -Wextra"
+
+in-repo-conan-cache = false
+
+[profile.Debug]
+cflags   = "-g"
+cxxflags = "-g"
+
+[profile.Release]
+cflags   = "-O3 -DNDEBUG"
+cxxflags = "-O3 -DNDEBUG"
+
+[profile.RelWithDebInfo]
+cflags   = "-O2 -g -DNDEBUG"
+cxxflags = "-O2 -g -DNDEBUG"
+
+[profile.MinSizeRel]
+cflags   = "-Os -DNDEBUG"
+cxxflags = "-Os -DNDEBUG"
+
+[check]
+exclude = []
+
+[check.pragma]
+exclude = []
+
+[check.copyright]
+description = "Copyright"
+exclude = []
+
+[check.todo]
+keywords = ["tbd", "todo", "TODO", "fixme"]
+exclude = []
+
+[check.clang-format]
+exclude = []
+
+[check.clang-tidy]
+exclude = []
+
+[check.cyclomatic]
+exclude = []
+
+[tests]
+cc  = "gcc"
+cxx = "g++"
+
+cflags   = "-Wall -Wextra -Og --coverage -fkeep-inline-functions -fkeep-static-consts"
+cxxflags = "-Wall -Wextra -Og --coverage -fkeep-inline-functions -fkeep-static-consts"
+
+gcov-executable = "" # Empty string -> use default gcov executable
+
+# Underhood scargo use conan. All string valid for conan tool are valid here. eg "gtest/1.13.0"
+[dependencies]
+#general -> public conan dependencies of project they will be added to package info (eg. bianry dynamic linkage libary) they will be added also to scargo test.
+general = [
+]
+#build -> private conan dependencies usedn only during build process(eg. private static linkage library)
+build = [
+]
+#tool -> special conan "not library" dependencies like cmake/3.22.
+tool = [
+]
+#test-> conan dependencies used only for testing targets
+test = [
+    "gtest/1.13.0"
+]
+
+[conan.repo]
+#Passing conancenter here is not nessary as scargo adds it by default
+#Below example of private binary artifacts repository
+#gitlab = "https://git.my_extra_gitlab_server.com"
+
+[atsam]
+chip = "ATSAML10E16A"
+cpu = "cortex-m23"
+
+
+[scargo]
+console-log-level = "INFO"
+file-log-level = "WARNING"
+update-exclude = []
+
+[docker-compose]
+ports = []

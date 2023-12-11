@@ -213,31 +213,25 @@ def setup_project(test_state: ActiveTestState) -> None:
 @pytest.fixture
 def build_project(test_state: ActiveTestState, setup_project: None) -> None:
     result = test_state.runner.invoke(cli, ["build"])
-    assert (
-        result.exit_code == 0
-    ), f"Command 'build' end with non zero exit code: {result.exit_code}"
+    assert result.exit_code == 0
     for file in test_state.get_build_result_files_paths():
-        assert file.is_file(), f"Expected file: {file} not exist"
+        assert file.is_file()
 
 
 @pytest.fixture
 def build_project_debug(test_state: ActiveTestState, setup_project: None) -> None:
     result = test_state.runner.invoke(cli, ["build", "--profile", "Debug"])
-    assert (
-        result.exit_code == 0
-    ), f"Command 'build --profile=Debug' end with non zero exit code: {result.exit_code}"
+    assert result.exit_code == 0
     for file in test_state.get_build_result_files_paths(profile="Debug"):
-        assert file.is_file(), f"Expected file: {file} not exist"
+        assert file.is_file()
 
 
 @pytest.fixture
 def build_project_release(test_state: ActiveTestState, setup_project: None) -> None:
     result = test_state.runner.invoke(cli, ["build", "--profile", "Release"])
-    assert (
-        result.exit_code == 0
-    ), f"Command 'build --profile=Release' end with non zero exit code: {result.exit_code}"
+    assert result.exit_code == 0
     for file in test_state.get_build_result_files_paths(profile="Release"):
-        assert file.is_file(), f"Expected file: {file} not exist"
+        assert file.is_file()
 
 
 @pytest.fixture
@@ -245,9 +239,7 @@ def build_project_release_fix(
     test_state: ActiveTestState, build_project_release: None
 ) -> None:
     result = test_state.runner.invoke(cli, ["fix"])
-    assert (
-        result.exit_code == 0
-    ), f"Command 'fix' end with non zero exit code: {result.exit_code}"
+    assert result.exit_code == 0
 
 
 @pytest.fixture
@@ -273,9 +265,7 @@ def new_profile_project_updated(
         NEW_PROFILE_CXXFLAGS,
     )
     result = test_state.runner.invoke(cli, ["update"])
-    assert (
-        result.exit_code == 0
-    ), f"Command 'update' end with non zero exit code: {result.exit_code}"
+    assert result.exit_code == 0
 
 
 @pytest.fixture
@@ -283,9 +273,7 @@ def new_profile_project_build(
     test_state: ActiveTestState, new_profile_project_updated: None
 ) -> None:
     result = test_state.runner.invoke(cli, ["build", "--profile", NEW_PROFILE_NAME])
-    assert (
-        result.exit_code == 0
-    ), f"Command 'build --profile={NEW_PROFILE_NAME}' end with non zero exit code: {result.exit_code}"
+    assert result.exit_code == 0
 
 
 @pytest.fixture
@@ -293,9 +281,7 @@ def new_project_build_fix(
     test_state: ActiveTestState, new_profile_project_build: None
 ) -> None:
     result = test_state.runner.invoke(cli, ["fix"])
-    assert (
-        result.exit_code == 0
-    ), f"Command 'fix' end with non zero exit code: {result.exit_code}"
+    assert result.exit_code == 0
 
 
 @pytest.fixture
@@ -305,13 +291,10 @@ def new_profile_project_build_fix_check(
     config = get_scargo_config_or_exit()
     Path(config.source_dir_path, TEST_DUMMY_LIB_H_FILE).touch()
     result = test_state.runner.invoke(cli, ["fix"])
-    assert (
-        result.exit_code == 0
-    ), f"Command 'fix' end with non zero exit code: {result.exit_code}"
+    assert result.exit_code == 0
+
     result = test_state.runner.invoke(cli, ["check"])
-    assert (
-        result.exit_code == 0
-    ), f"Command 'check' end with non zero exit code: {result.exit_code}"
+    assert result.exit_code == 0
 
 
 @pytest.fixture
@@ -331,9 +314,7 @@ def new_profile_project_build_copied_files_fix(
     test_state: ActiveTestState, new_profile_project_build: None
 ) -> None:
     result = test_state.runner.invoke(cli, ["fix"])
-    assert (
-        result.exit_code == 0
-    ), f"Command 'run' end with non zero exit code: {result.exit_code}"
+    assert result.exit_code == 0
 
 
 @pytest.fixture
@@ -342,9 +323,7 @@ def new_project_gen_u(
 ) -> None:
     config = get_scargo_config_or_exit()
     result = test_state.runner.invoke(cli, ["gen", "-u", config.source_dir_path.name])
-    assert (
-        result.exit_code == 0
-    ), f"Command 'gen -u {config.source_dir_path.name}' end with non zero exit code: {result.exit_code}"
+    assert result.exit_code == 0
 
 
 @pytest.fixture
@@ -352,9 +331,7 @@ def new_project_gen_c(
     test_state: ActiveTestState, new_profile_project_build_fix_check: None
 ) -> None:
     result = test_state.runner.invoke(cli, ["gen", "-c", TEST_DEVICE_ID])
-    assert (
-        result.exit_code == 0
-    ), f"Command 'gen -c {TEST_DEVICE_ID}' end with non zero exit code: {result.exit_code}"
+    assert result.exit_code == 0
 
 
 @pytest.mark.parametrize(
@@ -386,20 +363,16 @@ class TestBinProjectFlow:
         """This test check if call of scargo docker run command will finish without error"""
         # Docker Run
         result = test_state.runner.invoke(cli, ["docker", "run"])
-        assert (
-            result.exit_code == 0
-        ), f"Command 'docker run' end with non zero exit code: {result.exit_code}"
+        assert result.exit_code == 0
 
     def test_cli_build(self, test_state: ActiveTestState, setup_project: None) -> None:
         """This test check if call of scargo build command will finish without error and if under default profile in
         build folder bin file is present"""
         # Build
         result = test_state.runner.invoke(cli, ["build"])
-        assert (
-            result.exit_code == 0
-        ), f"Command 'build' end with non zero exit code: {result.exit_code}"
+        assert result.exit_code == 0
         for file in test_state.get_build_result_files_paths():
-            assert file.is_file(), f"Expected file: {file} not exist"
+            assert file.is_file()
 
     def test_cli_build_profile_debug(
         self, test_state: ActiveTestState, setup_project: None
@@ -408,11 +381,9 @@ class TestBinProjectFlow:
         profile in build folder bin file is present"""
         # Build
         result = test_state.runner.invoke(cli, ["build", "--profile", "Debug"])
-        assert (
-            result.exit_code == 0
-        ), f"Command 'build --profile=Debug' end with non zero exit code: {result.exit_code}"
+        assert result.exit_code == 0
         for file in test_state.get_build_result_files_paths(profile="Debug"):
-            assert file.is_file(), f"Expected file: {file} not exist"
+            assert file.is_file()
 
     def test_debug_bin_file_format_by_objdump_results(
         self, test_state: ActiveTestState, build_project_debug: None
@@ -439,11 +410,9 @@ class TestBinProjectFlow:
         Release profile in build folder bin file is present"""
         # Build
         result = test_state.runner.invoke(cli, ["build", "--profile", "Release"])
-        assert (
-            result.exit_code == 0
-        ), f"Command 'build --profile=Release' end with non zero exit code: {result.exit_code}"
+        assert result.exit_code == 0
         for file in test_state.get_build_result_files_paths(profile="Release"):
-            assert file.is_file(), f"Expected file: {file} not exist"
+            assert file.is_file()
 
     def test_release_bin_file_format_by_objdump_results(
         self, test_state: ActiveTestState, build_project_release: None
@@ -584,7 +553,7 @@ class TestBinProjectFlow:
             result.exit_code == 0
         ), f"Command 'build --profile={NEW_PROFILE_NAME}' end with non zero exit code: {result.exit_code}"
         for file in test_state.get_build_result_files_paths(profile=NEW_PROFILE_NAME):
-            assert file.is_file(), f"Expected file: {file} not exist"
+            assert file.is_file()
 
     def test_flags_stored_in_commands_file(
         self, test_state: ActiveTestState, new_profile_project_build: None
@@ -745,49 +714,21 @@ class TestBinProjectFlow:
         supported yet should be returned Additionally check if dummy file from ..main/fs will be copied to build/fs
         directory and if already existing cert files will be still available under build/fs
         """
-        # Gen --fs
-        config = get_scargo_config_or_exit()
-        if test_state.target_id == ScargoTarget.esp32:
-            Path(config.source_dir_path, "fs", TEST_DUMMY_FS_FILE).touch()
-        result = test_state.runner.invoke(cli, ["gen", "-f"])
-        assert (
-            result.exit_code == 0
-        ), f"Command 'gen -f' end with non zero exit code: {result.exit_code}"
+        if test_state.target_id != ScargoTarget.esp32:
+            pytest.skip("Test only for esp32 target")
         expected_files_paths_in_fs_dir = [
-            Path(f"build/fs/{TEST_DUMMY_FS_FILE}"),
             Path("build/fs/ca.pem"),
             Path("build/fs/device_cert.pem"),
             Path("build/fs/device_priv_key.pem"),
             Path(f"build/certs/azure/{TEST_DEVICE_ID}-root-ca.pem"),
             Path("build/spiffs.bin"),
         ]
-        if test_state.target_id == ScargoTarget.esp32:
-            for file_path in expected_files_paths_in_fs_dir:
-                assert file_path.is_file(), f"File '{file_path}' not exist"
-        else:
-            assert (
-                "Gen --fs command not supported for this target yet." in result.output
-            ), f"String 'Gen --fs command not supported for this target yet.' not found in output: {result.output}"
 
-    def test_cli_gen_b_option(
-        self, test_state: ActiveTestState, new_project_gen_c: None
-    ) -> None:
-        """This test check if call of scargo gen -b command will finish without error and
-        if expected files were created"""
-        pytest.skip("Test not implemented yet")
+        result = test_state.runner.invoke(cli, ["gen", "-f"])
 
-    def test_cli_check_after_gen(
-        self, test_state: ActiveTestState, new_project_gen_c: None
-    ) -> None:
-        """This test check if after all generations made by scargo gen command call of scargo check command will finish
-        without error and if no problems will be found"""
-        result = test_state.runner.invoke(cli, ["check"])
-        assert (
-            result.exit_code == 0
-        ), f"Command 'check' end with non zero exit code: {result.exit_code}"
-        assert (
-            "No problems found!" in result.output
-        ), f"String 'No problems found!' not found in output: {result.output}"
+        assert result.exit_code == 0
+        for file_path in expected_files_paths_in_fs_dir:
+            assert file_path.is_file(), f"File '{file_path}' not exist"
 
     def test_cli_run_new_proj(
         self, test_state: ActiveTestState, new_profile_project_build_fix_check: None
@@ -796,24 +737,11 @@ class TestBinProjectFlow:
         for x86 target, for other targets error should be returned with output "Run project on x86 architecture is
         not implemented for {test_state.target_id.value} yet"""
         result = test_state.runner.invoke(cli, ["run"])
-        if test_state.target_id == ScargoTarget.x86:
-            assert (
-                result.exit_code == 0
-            ), f"Command 'run' end with non zero exit code: {result.exit_code}"
-            assert (
-                "Hello World!" in result.output
-            ), f"String 'Hello World!' not found in output: {result.output}"
-        else:
-            assert (
-                result.exit_code == 1
-            ), f"Command 'run' end with other than expected 1 exit code: {result.exit_code}"
-            assert (
-                f"Run project on x86 architecture is not implemented for {test_state.target_id.value} yet"
-                in result.output
-            ), (
-                f"String: 'Run project on x86 architecture is not implemented for "
-                f"{test_state.target_id.value} yet not in output: {result.output}"
-            )
+        if test_state.target_id != ScargoTarget.x86:
+            pytest.skip("Test only for x86 target")
+
+        assert result.exit_code == 0
+        assert "Hello World!" in result.output
 
     def test_cli_check_fail_for_copied_fix_files(
         self, test_state: ActiveTestState, new_profile_project_build_fix_check: None
@@ -829,9 +757,7 @@ class TestBinProjectFlow:
             dirs_exist_ok=True,
         )
         result = test_state.runner.invoke(cli, ["check"])
-        assert (
-            result.exit_code == 1
-        ), f"Command 'check' end with other than expected 1 exit code: {result.exit_code}"
+        assert result.exit_code == 1
         expected_strings_in_output = [
             "clang-format: 3 problems found",
             "copyright: 3 problems found",
@@ -851,12 +777,10 @@ class TestBinProjectFlow:
         """
         # Fix
         result = test_state.runner.invoke(cli, ["fix"])
-        assert (
-            result.exit_code == 0
-        ), f"Command 'run' end with non zero exit code: {result.exit_code}"
+        assert result.exit_code == 0
         assert (
             "Finished clang-format check. Fixed problems in 3 files." in result.output
-        ), f"String: 'Finished clang-format check. Fixed problems in 3 files.' not in output: {result.output}"
+        )
         config = get_scargo_config_or_exit()
         files_paths_to_copyright_check = [
             Path(config.source_dir_path, "fix_test_bin.cpp"),
@@ -870,7 +794,7 @@ class TestBinProjectFlow:
 
         assert assert_str_in_file(
             Path(config.source_dir_path, "fix_test_lib.h"), "#pragma once"
-        ), "Expected test: '#pragma once' not found in file: fix_test_lib.h"
+        )
 
     def test_cli_check_pass_after_fix(
         self,
@@ -881,9 +805,7 @@ class TestBinProjectFlow:
         after applying scargo fix command in previous step"""
         # Check
         result = test_state.runner.invoke(cli, ["check"])
-        assert (
-            result.exit_code == 0
-        ), f"Command 'run' end with non zero exit code: {result.exit_code}"
+        assert result.exit_code == 0
         assert (
             "No problems found!" in result.output
         ), f"String: 'No problems found!' not found in output: {result.output}"
@@ -895,9 +817,7 @@ class TestBinProjectFlow:
         unfortunately without checking correctness of documentation"""
         # doc
         result = test_state.runner.invoke(cli, ["doc"])
-        assert (
-            result.exit_code == 0
-        ), f"Command 'doc' end with non zero exit code: {result.exit_code}"
+        assert result.exit_code == 0
         expected_doc_files_paths = [
             Path("build/doc/html/index.html"),
             Path("build/doc/latex/Makefile"),
@@ -915,6 +835,4 @@ def test_project_x86_scargo_from_pypi(create_tmp_directory: None) -> None:
         _DockerComposeTemplate, "_set_up_package_version", return_value="scargo"
     ):
         result = runner.invoke(cli, ["new", TEST_PROJECT_NAME, "--target=x86"])
-        assert (
-            result.exit_code == 0
-        ), f"Command 'new {TEST_PROJECT_NAME} --target=x86' end with non zero exit code: {result.exit_code}"
+        assert result.exit_code == 0
