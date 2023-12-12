@@ -1,15 +1,11 @@
 import os
 from pathlib import Path
-from shutil import copytree
-from typing import Generator, Optional
+from typing import Generator
 from unittest.mock import MagicMock, patch
 
 import pytest
 from pyfakefs.fake_filesystem import FakeFilesystem
-from pytest import TempdirFactory
 
-from scargo.commands.new import scargo_new
-from scargo.commands.update import scargo_update
 from scargo.config import (
     CheckConfig,
     ChecksConfig,
@@ -24,8 +20,6 @@ from scargo.config import (
     TestConfig,
     TodoCheckConfig,
 )
-from scargo.path_utils import get_project_root_or_none
-from tests.it.utils import get_bin_name
 
 TARGET_X86 = ScargoTarget.x86
 TARGET_ESP32 = ScargoTarget.esp32
@@ -115,108 +109,3 @@ def config(fs: FakeFilesystem) -> Config:
 def mock_subprocess_run() -> Generator[MagicMock, None, None]:
     with patch("subprocess.run") as mock_subprocess_run:
         yield mock_subprocess_run
-
-
-@pytest.fixture(scope="session")
-def copy_test_project(tmpdir_factory: TempdirFactory) -> Path:
-    """This fixture just copying test project to test backward compatibility"""
-    tmp_dir = tmpdir_factory.mktemp("copy_test_project")
-    os.chdir(tmp_dir)
-    copytree(TEST_PROJECT_PATH, os.getcwd(), dirs_exist_ok=True)
-    project_path = get_project_root_or_none()
-    assert project_path is not None
-    return project_path
-
-
-@pytest.fixture(scope="session")
-def copy_test_project_esp32(tmpdir_factory: TempdirFactory) -> Path:
-    """This fixture just copying esp32 test project to test backward compatibility"""
-    tmp_dir = tmpdir_factory.mktemp("copy_test_project_esp32")
-    os.chdir(tmp_dir)
-    copytree(TEST_PROJECT_ESP32_PATH, os.getcwd(), dirs_exist_ok=True)
-    project_path = get_project_root_or_none()
-    assert project_path is not None
-    return project_path
-
-
-@pytest.fixture(scope="session")
-def copy_test_project_stm32(tmpdir_factory: TempdirFactory) -> Path:
-    """This fixture just copying stm32 test project to test backward compatibility"""
-    tmp_dir = tmpdir_factory.mktemp("copy_test_project_stm32")
-    os.chdir(tmp_dir)
-    copytree(TEST_PROJECT_STM32_PATH, os.getcwd(), dirs_exist_ok=True)
-    project_path = get_project_root_or_none()
-    assert project_path is not None
-    return project_path
-
-
-@pytest.fixture(scope="session")
-def new_project_x86(tmpdir_factory: TempdirFactory) -> Optional[Path]:
-    tmp_path = tmpdir_factory.mktemp("new_test_project_x86")
-    os.chdir(tmp_path)
-    project_name = "test_project"
-    scargo_new(
-        project_name,
-        bin_name="main",
-        lib_name="test_lib",
-        target=[TARGET_X86],
-        create_docker=False,
-        git=False,
-        chip=[],
-    )
-    os.chdir(project_name)
-    # h file for gen tests added
-    Path("src/test_lib.h").touch()
-    scargo_update(Path(os.getcwd(), "scargo.toml"))
-    bin_name = get_bin_name()
-    expected_bin_file_path = Path("src", f"{bin_name.lower()}.cpp")
-    assert expected_bin_file_path.is_file()
-    return get_project_root_or_none()
-
-
-@pytest.fixture(scope="session")
-def new_project_esp32(tmpdir_factory: TempdirFactory) -> Optional[Path]:
-    tmp_path = tmpdir_factory.mktemp("new_test_project_esp32")
-    os.chdir(tmp_path)
-    project_name = "test_project"
-    scargo_new(
-        project_name,
-        bin_name="test_bin",
-        lib_name="test_lib",
-        target=[TARGET_ESP32],
-        create_docker=False,
-        git=False,
-        chip=[],
-    )
-    os.chdir(project_name)
-    # h file for gen tests added
-    Path("main/test_lib.h").touch()
-    scargo_update(Path(os.getcwd(), "scargo.toml"))
-    bin_name = get_bin_name()
-    expected_bin_file_path = Path("main", f"{bin_name.lower()}.cpp")
-    assert expected_bin_file_path.is_file()
-    return get_project_root_or_none()
-
-
-@pytest.fixture(scope="session")
-def new_project_stm32(tmpdir_factory: TempdirFactory) -> Optional[Path]:
-    tmp_path = tmpdir_factory.mktemp("new_test_project_stm32")
-    os.chdir(tmp_path)
-    project_name = "test_project"
-    scargo_new(
-        project_name,
-        bin_name="test_bin",
-        lib_name="test_lib",
-        target=[TARGET_STM32],
-        create_docker=False,
-        git=False,
-        chip=[],
-    )
-    os.chdir(project_name)
-    # h file for gen tests added
-    Path("src/test_lib.h").touch()
-    scargo_update(Path(os.getcwd(), "scargo.toml"))
-    bin_name = get_bin_name()
-    expected_bin_file_path = Path("src", f"{bin_name.lower()}.cpp")
-    assert expected_bin_file_path.is_file()
-    return get_project_root_or_none()

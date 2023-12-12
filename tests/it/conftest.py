@@ -1,16 +1,10 @@
 import os
 import re
 import subprocess
-from pathlib import Path
 
 import pytest
 
 from scargo.global_values import SCARGO_PKG_PATH
-
-
-@pytest.fixture()
-def create_tmp_directory(tmp_path: Path) -> None:
-    os.chdir(tmp_path)
 
 
 @pytest.fixture(scope="session")
