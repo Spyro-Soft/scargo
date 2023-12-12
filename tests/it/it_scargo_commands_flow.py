@@ -1,8 +1,3 @@
-"""
-Detailed description for below tests is present under:
-https://github.com/Spyro-Soft/scargo/issues/290
-"""
-
 import json
 import os
 from dataclasses import dataclass
@@ -24,40 +19,19 @@ from tests.it.utils import (
     run_custom_command_in_docker,
 )
 
-TEST_PROJECT_x86_NAME = "common_scargo_project"
-TEST_PROJECT_ESP32_NAME = "common_scargo_project_esp32"
-TEST_PROJECT_STM32_NAME = "common_scargo_project_stm32"
-
-TEST_DATA_PATH = Path(os.path.dirname(os.path.realpath(__file__))).parent.joinpath(
-    "test_data"
-)
-
-TEST_PROJECT_x86_PATH = Path(TEST_DATA_PATH, "test_projects", TEST_PROJECT_x86_NAME)
-TEST_PROJECT_ESP32_PATH = Path(TEST_DATA_PATH, "test_projects", TEST_PROJECT_ESP32_NAME)
-TEST_PROJECT_STM32_PATH = Path(TEST_DATA_PATH, "test_projects", TEST_PROJECT_STM32_NAME)
-
-FIX_TEST_FILES_PATH = Path(
-    TEST_DATA_PATH, "test_projects", "test_files", "fix_test_files"
-)
-
-TEST_BIN_NAME = "test_bin_name"
-TEST_PROJECT_NAME = "test_proj"
-TEST_DUMMY_LIB_H_FILE = "lib_for_gen_test.h"
-TEST_DUMMY_FS_FILE = "dummy_fs_file.txt"
+TEST_DATA_PATH = Path(__file__).parent.parent / "test_data"
+FIX_TEST_FILES_PATH = TEST_DATA_PATH / "test_projects/test_files/fix_test_files"
 
 
 @dataclass
 class ActiveTestState:
     target_id: ScargoTarget
     proj_name: str
-    bin_name: str
-    proj_to_copy_path: Optional[Path]
+    proj_to_copy_path: Optional[Path] = None
     proj_path: Optional[Path] = None
-    lib_name: Optional[str] = None
 
     def __post_init__(self) -> None:
-        if self.proj_to_copy_path is None:
-            self.bin_name = self.proj_name
+        self.runner = ScargoTestRunner()
 
         if self.target_id == ScargoTarget.x86:
             self.obj_dump_path = "objdump"
@@ -73,12 +47,11 @@ class ActiveTestState:
                 f"Objdump path not defined for target id {self.target_id.value}"
             )
 
-        self.target = Target.get_target_by_id(self.target_id.value)
-        self.runner = ScargoTestRunner()
-
     def assert_bin_file_format_is_correct(self, profile: str) -> None:
         config = get_scargo_config_or_exit()
-        bin_path = self.target.get_bin_path(self.bin_name, profile)
+        target = Target.get_target_by_id(self.target_id.value)
+        bin_name = config.project.name.lower()
+        bin_path = target.get_bin_path(bin_name, profile)
 
         objdump_command = [self.obj_dump_path, bin_path, "-a"]
         output = run_custom_command_in_docker(objdump_command, config)
@@ -87,7 +60,10 @@ class ActiveTestState:
         ), f"Objdump results: {output} did not contain expected bin file format: {self.expected_bin_file_format}"
 
     def assert_build_result_files_paths(self, profile: str = "Debug") -> None:
-        elf_path = Path(self.target.get_bin_path(self.bin_name, profile))
+        config = get_scargo_config_or_exit()
+        bin_name = config.project.name.lower()
+        target = Target.get_target_by_id(self.target_id.value)
+        elf_path = Path(target.get_bin_path(bin_name, profile))
         assert elf_path.is_file(), f"File {elf_path} does not exist"
 
         if self.target_id == ScargoTarget.stm32:
@@ -132,8 +108,6 @@ def active_state_x86_bin() -> ActiveTestState:
     return ActiveTestState(
         target_id=ScargoTarget.x86,
         proj_name="new_bin_project_x86",
-        bin_name=TEST_BIN_NAME,
-        proj_to_copy_path=None,
     )
 
 
@@ -142,8 +116,6 @@ def active_state_stm32_bin() -> ActiveTestState:
     return ActiveTestState(
         target_id=ScargoTarget.stm32,
         proj_name="new_bin_project_stm32",
-        bin_name=TEST_BIN_NAME,
-        proj_to_copy_path=None,
     )
 
 
@@ -152,38 +124,36 @@ def active_state_esp32_bin() -> ActiveTestState:
     return ActiveTestState(
         target_id=ScargoTarget.esp32,
         proj_name="new_bin_project_esp32",
-        bin_name=TEST_BIN_NAME,
-        proj_to_copy_path=None,
     )
 
 
 @pytest.fixture
 def active_state_x86_path() -> ActiveTestState:
+    project_path = TEST_DATA_PATH / "test_projects/common_scargo_project"
     return ActiveTestState(
         target_id=ScargoTarget.x86,
-        proj_name=TEST_PROJECT_x86_NAME,
-        bin_name="common_scargo_project_path",
-        proj_to_copy_path=TEST_PROJECT_x86_PATH,
+        proj_name=project_path.name,
+        proj_to_copy_path=project_path,
     )
 
 
 @pytest.fixture
 def active_state_esp32_path() -> ActiveTestState:
+    project_path = TEST_DATA_PATH / "test_projects/common_scargo_project_esp32"
     return ActiveTestState(
         target_id=ScargoTarget.esp32,
-        proj_name=TEST_PROJECT_ESP32_NAME,
-        bin_name="esp32project",
-        proj_to_copy_path=TEST_PROJECT_ESP32_PATH,
+        proj_name=project_path.name,
+        proj_to_copy_path=project_path,
     )
 
 
 @pytest.fixture
 def active_state_stm32_path() -> ActiveTestState:
+    project_path = TEST_DATA_PATH / "test_projects/common_scargo_project_stm32"
     return ActiveTestState(
         target_id=ScargoTarget.stm32,
-        proj_name=TEST_PROJECT_STM32_NAME,
-        bin_name="common_scargo_project_stm32",
-        proj_to_copy_path=TEST_PROJECT_STM32_PATH,
+        proj_name=project_path.name,
+        proj_to_copy_path=project_path,
     )
 
 
@@ -206,13 +176,7 @@ def setup_project(test_state: ActiveTestState) -> None:
     else:
         # Create new project
         result = test_state.runner.invoke(
-            cli,
-            [
-                "new",
-                test_state.proj_name,
-                f"--target={test_state.target_id.value}",
-                f"--bin={test_state.bin_name}",
-            ],
+            cli, ["new", test_state.proj_name, f"--target={test_state.target_id.value}"]
         )
         assert result.exit_code == 0
 
@@ -253,7 +217,7 @@ def setup_project_new_profile(test_state: ActiveTestState, setup_project: None) 
 @pytest.fixture
 def dummy_lib_h() -> Path:
     config = get_scargo_config_or_exit()
-    dummy_file_path = config.source_dir_path / TEST_DUMMY_LIB_H_FILE
+    dummy_file_path = config.source_dir_path / "lib_for_gen_test.h"
     dummy_file_path.touch()
     return dummy_file_path.relative_to(config.project_root)
 
@@ -487,5 +451,5 @@ def test_project_x86_scargo_from_pypi(tmp_path: Path) -> None:
     with patch.object(
         _DockerComposeTemplate, "_set_up_package_version", return_value="scargo"
     ):
-        result = runner.invoke(cli, ["new", TEST_PROJECT_NAME, "--target=x86"])
+        result = runner.invoke(cli, ["new", "test_proj", "--target=x86"])
         assert result.exit_code == 0
