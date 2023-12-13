@@ -23,9 +23,15 @@ Options
 
 ::
 
---all
+--clang-format
 
-Perform all available fixes. This option is the default if no other options are specified.
+Fix formatting reported by clang-format.
+
+::
+
+--copyright
+
+Fix if there is no copyright info at the top of each file.
 
 ::
 
@@ -35,19 +41,6 @@ Fix if there is no #pragma once at the top of each header file.
 
 ::
 
---copyright
-
-Fix if there is no copyright info at the top of each file.
-
-
-::
-
---clang-format
-
-Fix formatting reported by clang-format.
-
-::
-
--B, --base-dir Arg
+-B, --base-dir DIRECTORY
 
 Specify the base project path. Allows running scargo commands from any directory.

@@ -24,24 +24,6 @@ Options
 
 ::
 
---pragma
-
-Check if there is #pragma once at the top of each header file.
-
-::
-
---copyright
-
-Check if there is copyright info at the top of each file.
-
-::
-
---todo
-
-Check if there is TODO in any file.
-
-::
-
 --clang-format
 
 Run clang-format.
@@ -54,9 +36,9 @@ Run clang-tidy.
 
 ::
 
---cyclomatic
+--copyright
 
-Run python-lizard.
+Check if there is copyright info at the top of each file.
 
 ::
 
@@ -66,13 +48,31 @@ Run cppcheck.
 
 ::
 
+--cyclomatic
+
+Run python-lizard.
+
+::
+
+--pragma
+
+Check if there is #pragma once at the top of each header file.
+
+::
+
+--todo
+
+Check if there is TODO in any file.
+
+::
+
 --silent
 
 Show less output.
 
 ::
 
--B, --base-dir Arg
+-B, --base-dir DIRECTORY
 
 Specify the base project path. Allows running scargo commands from any directory.
 

@@ -18,7 +18,7 @@ This section describes possible options which can be set in the scargo.toml file
 
 **homepage-url** = (string) <project www as url e.g. "https://example.com">
 
-**target** = (string) <target to build the project e.g. "esp32" or "x86">
+**target** = (string or list of targets) <target to build the project e.g. "esp32", "x86" or ["atsam", "stm32"]>
 
 **build-env** = (string) <"docker" or "native">
 
