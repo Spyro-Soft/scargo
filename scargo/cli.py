@@ -363,8 +363,8 @@ def new(
         prompt=True,
         prompt_required=False,
     ),
-    target: List[ScargoTarget] = Option(
-        ["x86"], "-t", "--target", help="Specify targets for a project."
+    targets: List[ScargoTarget] = Option(
+        [], "-t", "--target", help="Specify targets for a project."
     ),
     chip: List[str] = Option(
         [],
@@ -389,7 +389,7 @@ def new(
         project_name,
         bin_name,
         lib_name,
-        target,
+        targets,
         create_docker,
         git,
         chip,

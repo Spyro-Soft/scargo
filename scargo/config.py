@@ -24,6 +24,9 @@ class ScargoTarget(Enum):
             return self.value == other.value
         return False
 
+    def __hash__(self) -> int:
+        return super().__hash__()
+
 
 CHIP_DEFAULTS = {
     "x86": "",

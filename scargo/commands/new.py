@@ -57,7 +57,7 @@ def scargo_new(
     name: str,
     bin_name: Optional[str],
     lib_name: Optional[str],
-    target: List[ScargoTarget],
+    targets: List[ScargoTarget],
     create_docker: bool,
     git: bool,
     chip: List[str],
@@ -68,7 +68,7 @@ def scargo_new(
     :param str name: name of project
     :param Optional[str] bin_name: name of bin file
     :param Optional[str] lib_name: name of lib file
-    :param List[Target] target: target types for a project
+    :param List[Target] targets: target types for a project
     :param bool create_docker: initialize docker environment
     :param bool git: initialize git repository
     :param List[str] chip: list of chips for targets
@@ -82,7 +82,11 @@ def scargo_new(
         )
         sys.exit(1)
 
-    targets_chips: Dict[str, str] = process_chips(chip, target)
+    targets_chips: Dict[str, str] = process_chips(chip, targets)
+
+    targets.extend([ScargoTarget(key) for key in targets_chips if key not in targets])
+    if len(targets) == 0:
+        targets = [ScargoTarget.x86]
 
     # If neither binary target nor library target is specified then create a
     # binary target named same as the project name.
@@ -97,16 +101,16 @@ def scargo_new(
         sys.exit(1)
 
     build_env = get_build_env(create_docker)
-    targets = ", ".join([f'"{t.name}"' for t in target])
-    if len(target) > 1:
-        targets = f"[{targets}]"
+    targets_ids = ", ".join([f'"{t.name}"' for t in targets])
+    if len(targets_ids) > 1:
+        targets_ids = f"[{targets_ids}]"
 
     toml_path = project_dir / SCARGO_DEFAULT_CONFIG_FILE
     generate_toml(
         toml_path,
         project_name=name,
-        project_targets=targets,
-        target=[Target.get_target_by_id(t.value) for t in target],
+        targets_ids=targets_ids,
+        target=[Target.get_target_by_id(t.value) for t in targets],
         build_env=build_env,
         version=__version__,
         docker_image_tag=f"{name.lower()}-dev:1.0",

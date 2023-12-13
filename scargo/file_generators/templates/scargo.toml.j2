@@ -10,7 +10,7 @@ bin_name = "{{ bin_name }}"
 {% if lib_name %}
 lib_name = "{{ lib_name }}"
 {% endif %}
-target = {{ project_targets }}
+target = {{ targets_ids }}
 build-env = "{{ build_env }}"
 docker-file = ".devcontainer/Dockerfile-custom"
 docker-image-tag = "{{ docker_image_tag }}"
