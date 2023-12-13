@@ -298,22 +298,17 @@ class ClangTidyChecker(CheckerFixer):
     build_path: Optional[Path] = None
 
     def check_file(self, file_path: Path) -> CheckResult:
-        try:
-            bf_list = os.listdir(Path(self._config.project_root, "build"))
-        except FileNotFoundError:
-            logger.error("Build folder does not exist.")
-            logger.info("Did you run `scargo build`?")
-            sys.exit(1)
-
-        for bf in bf_list:
-            if bf in self._config.profiles.keys():
-                self.build_path = Path(self._config.project_root, "build", bf)
+        target = self._config.project.default_target
+        for profile in self._config.profiles:
+            profile_build_dir = (
+                self._config.project_root / target.get_profile_build_dir(profile)
+            )
+            if profile_build_dir.is_dir():
+                self.build_path = profile_build_dir
                 break
 
         if not self.build_path:
-            logger.error(
-                "Build folder for any of supported build types does not exist."
-            )
+            logger.error("Build folder does not exist.")
             logger.info("Did you run `scargo build`?")
             sys.exit(1)
 
@@ -324,11 +319,11 @@ class ClangTidyChecker(CheckerFixer):
             logger.info("Did you run `scargo build`?")
             sys.exit(1)
 
-        if self._config.project.target.family == "esp32":
+        if self._config.project.is_esp32():
             cmd = self.__get_cmd_esp32(file_path)
-        elif self._config.project.target.family == "stm32":
+        elif self._config.project.is_stm32():
             cmd = self.__get_cmd_stm32(file_path)
-        elif self._config.project.target.family == "x86":
+        elif self._config.project.is_x86():
             cmd = self.__get_cmd_x86(file_path)
 
         try:

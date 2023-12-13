@@ -11,7 +11,7 @@ from scargo.commands.doc import scargo_doc
 from scargo.config import Config
 
 
-def test_doc_create(  # type: ignore[no-any-unimported]
+def test_doc_create(
     fp: FakeProcess,
     fs: FakeFilesystem,
     mock_prepare_config: MagicMock,
@@ -24,7 +24,7 @@ def test_doc_create(  # type: ignore[no-any-unimported]
     assert fp.call_count("doxygen") == 1
 
 
-def test_doc_open_with_doxyfile(  # type: ignore[no-any-unimported]
+def test_doc_open_with_doxyfile(
     fs: FakeFilesystem,
     mock_prepare_config: MagicMock,
     mock_find_program_path: MagicMock,
@@ -40,7 +40,7 @@ def test_doc_open_with_doxyfile(  # type: ignore[no-any-unimported]
     assert mock_typer_launch.mock_calls == [call("build/doc/html/index.html")]
 
 
-def test_doc_open_without_doxyfile(  # type: ignore[no-any-unimported]
+def test_doc_open_without_doxyfile(
     caplog: LogCaptureFixture,
     fp: FakeProcess,
     fs: FakeFilesystem,
@@ -58,10 +58,9 @@ def test_doc_without_doxygen(
     mock_prepare_config: MagicMock,
     mock_find_program_path: MagicMock,
 ) -> None:
-    mock_find_program_path.return_value = None
+    mock_find_program_path.side_effect = SystemExit(1)
     with pytest.raises(SystemExit) as e:
         scargo_doc(False)
-    assert "Doxygen not installed or not in PATH environment variable" in caplog.text
     assert e.type == SystemExit
     assert e.value.code == 1
 

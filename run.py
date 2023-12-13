@@ -235,13 +235,6 @@ def run_all_code_checkers() -> bool:
             "Mypy check failed run: " + " ".join(command) + "\n"
         )
 
-    # try:
-    #     run_flake8()
-    # except subprocess.CalledProcessError:
-    #     checker_exception_message += (
-    #         "Flake8 check failed run: " + " ".join(command) + "\n"
-    #     )
-
     if checker_exception_message:
         print("Check exception message:\n" + checker_exception_message)
         return False

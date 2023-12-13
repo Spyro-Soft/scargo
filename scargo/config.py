@@ -3,12 +3,27 @@
 # #
 from enum import Enum
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, Union
 
 import toml
 from pydantic import BaseModel, Extra, Field, root_validator
 
 from scargo.global_values import SCARGO_DEFAULT_BUILD_ENV, SCARGO_DOCKER_ENV
+
+
+class ScargoTarget(Enum):
+    atsam = "atsam"
+    esp32 = "esp32"
+    stm32 = "stm32"
+    x86 = "x86"
+
+    def __eq__(self, other: Any) -> bool:
+        if isinstance(other, str):
+            return self.value == other
+        if isinstance(other, ScargoTarget):
+            return self.value == other.value
+        return False
+
 
 CHIP_DEFAULTS = {
     "x86": "",
@@ -16,6 +31,15 @@ CHIP_DEFAULTS = {
     "atsam": "ATSAML10E16A",
     "stm32": "STM32L496AG",
 }
+
+ESP32_DEFAULT_PARTITIONS = [
+    "nvs,      data, nvs,     0x9000,  0x4000,",
+    "otadata,  data, ota,     0xd000,  0x2000,",
+    "phy_init, data, phy,     0xf000,  0x1000,",
+    "ota_0,    app,  ota_0,   0x10000, 0x180000,",
+    "ota_1,    app,  ota_1,   0x190000,0x180000,",
+    "spiffs,   data, spiffs,  0x310000,0x6000,",
+]
 
 
 class ConfigError(Exception):
@@ -46,11 +70,16 @@ class Config(BaseModel):
 
     @property
     def source_dir_path(self) -> Path:
-        return self.project_root / self.project.target.source_dir
+        if self.project.is_esp32():
+            # Backwards compatibility for main dir
+            main_dir = self.project_root / COMPATIBILITY_ESP32_SRC_DIR
+            if main_dir.is_dir():
+                return main_dir
+        return self.project_root / DEFAULT_SRC_DIR
 
     @property
     def include_dir_path(self) -> Path:
-        return self.source_dir_path / self.project.target.include_dir
+        return self.source_dir_path / DEFAULT_INCLUDE_DIR
 
     def get_atsam_config(self) -> "ATSAMConfig":
         if not self.atsam:
@@ -73,12 +102,14 @@ class Config(BaseModel):
     ) -> Dict[str, Any]:
         if "project" in values:
             target_id = values["project"].target_id
-            if target_id == "stm32" and not values.get("stm32"):
-                raise ConfigError("No [stm32] section in config")
-            if target_id == "esp32" and not values.get("esp32"):
-                raise ConfigError("No [esp32] section in config")
-            if target_id == "atsam" and not values.get("atsam"):
-                raise ConfigError("No [atsam] section in config")
+            targets_for_validation = [
+                ScargoTarget.stm32.value,
+                ScargoTarget.esp32.value,
+                ScargoTarget.atsam.value,
+            ]
+            for target in targets_for_validation:
+                if target in target_id and not values.get(target):
+                    raise ConfigError(f"No [{target}] section in config")
 
         # Set default value of cmake_build_type - Debug for non-stanard profiles,
         # If profile is on standard_profiles list, use it's name instead
@@ -106,7 +137,7 @@ class ProjectConfig(BaseModel):
 
     bin_name: Optional[str]
     lib_name: Optional[str]
-    target_id: str = Field(..., alias="target")
+    target_id: Union[str, List[str]] = Field(..., alias="target")
     build_env: str = Field(SCARGO_DEFAULT_BUILD_ENV, alias="build-env")
     docker_file: Path = Field(..., alias="docker-file")
     docker_image_tag: str = Field(..., alias="docker-image-tag")
@@ -120,61 +151,90 @@ class ProjectConfig(BaseModel):
     cxxflags: str
 
     max_build_jobs: Optional[int] = Field(default=None, alias="max-build-jobs")
-
-    cmake_variables: Dict[str, str] = Field(
-        default_factory=dict, alias="cmake-variables"
-    )
+    cmake_variables: Dict[str, str] = Field(default={}, alias="cmake-variables")
 
     @property
-    def target(self) -> "Target":
-        return Target.get_target_by_id(self.target_id)
+    def target(self) -> List["Target"]:
+        if isinstance(self.target_id, str):
+            return Target.get_targets_by_id([self.target_id])
+        return Target.get_targets_by_id(self.target_id)
 
-    def get_compiler_warning(self) -> Optional[str]:
-        if (self.cc and not self.target.cc) or (self.cxx and not self.target.cxx):
-            return "Compiler settings are ignored for this target"
-        return None
+    @property
+    def default_target(self) -> "Target":
+        if isinstance(self.target_id, str):
+            return Target.get_target_by_id(self.target_id)
+        return Target.get_target_by_id(self.target_id[0])
 
     def is_docker_buildenv(self) -> bool:
         return self.build_env == SCARGO_DOCKER_ENV
 
+    def is_x86(self) -> bool:
+        return "x86" in self.target_id
+
+    def is_stm32(self) -> bool:
+        return "stm32" in self.target_id
+
+    def is_esp32(self) -> bool:
+        return "esp32" in self.target_id
+
+    def is_atsam(self) -> bool:
+        return "atsam" in self.target_id
+
+    def is_multitarget(self) -> bool:
+        return isinstance(self.target_id, list) and len(self.target_id) > 1
+
 
 class Target(BaseModel):
     id: str
-    family: str
-    source_dir: str
-    include_dir: str
+    elf_file_extension: str
     cc: Optional[str] = None
     cxx: Optional[str] = None
+
+    def get_profile_build_dir(self, profile: str = "Debug") -> str:
+        return f"build/{self.id}/{profile}"
+
+    def get_conan_profile_name(self, profile: str = "Debug") -> str:
+        return f"{self.id}_{profile}"
+
+    def get_bin_dir_path(self, profile: str = "Debug") -> str:
+        build_dir = self.get_profile_build_dir(profile)
+        if self.id == ScargoTarget.esp32:
+            return build_dir
+        return f"{build_dir}/bin"
+
+    def get_bin_path(self, bin_name: str, profile: str = "Debug") -> str:
+        bin_dir = self.get_bin_dir_path(profile)
+        return f"{bin_dir}/{bin_name}{self.elf_file_extension}"
 
     @classmethod
     def get_target_by_id(cls, target_id: str) -> "Target":
         return TARGETS[target_id]
 
+    @classmethod
+    def get_targets_by_id(cls, target_ids: List[str]) -> List["Target"]:
+        return [TARGETS[id] for id in target_ids]
 
+
+DEFAULT_SRC_DIR = "src"
+COMPATIBILITY_ESP32_SRC_DIR = "main"
+DEFAULT_INCLUDE_DIR = "include"
 TARGETS = {
-    "x86": Target(
-        id="x86",
-        family="x86",
-        source_dir="src",
-        include_dir="include",
+    ScargoTarget.x86.value: Target(
+        id=ScargoTarget.x86.value,
+        elf_file_extension="",
         cc="gcc",
         cxx="g++",
     ),
-    "stm32": Target(
-        id="stm32", family="stm32", source_dir="src", include_dir="include"
+    ScargoTarget.stm32.value: Target(
+        id=ScargoTarget.stm32.value, elf_file_extension=".elf"
     ),
-    "esp32": Target(
-        id="esp32", family="esp32", source_dir="main", include_dir="include"
+    ScargoTarget.esp32.value: Target(
+        id=ScargoTarget.esp32.value, elf_file_extension=".elf"
     ),
-    "atsam": Target(
-        id="atsam", family="atsam", source_dir="src", include_dir="include"
+    ScargoTarget.atsam.value: Target(
+        id=ScargoTarget.atsam.value, elf_file_extension=""
     ),
 }
-
-# for typer
-ScargoTargets = Enum(  # type: ignore[misc]
-    "ScargoTargets", {target.id: target.id for target in TARGETS.values()}
-)
 
 
 class ProfileConfig(BaseModel, extra=Extra.allow):
@@ -247,12 +307,12 @@ class ConanConfig(BaseModel):
 
 class Stm32Config(BaseModel):
     chip: str = Field(default=CHIP_DEFAULTS.get("stm32"))
-    flash_start: int = Field(alias="flash-start")
+    flash_start: int = Field(default=0x08000000, alias="flash-start")
 
 
 class ATSAMConfig(BaseModel):
     chip: str = Field(default=CHIP_DEFAULTS.get("atsam"))
-    cpu: str
+    cpu: str = Field()
 
     @property
     def chip_series(self) -> str:
@@ -261,8 +321,8 @@ class ATSAMConfig(BaseModel):
 
 class Esp32Config(BaseModel):
     chip: str = Field(default=CHIP_DEFAULTS.get("esp32"))
-    extra_component_dirs: List[Path] = Field(default_factory=list)
-    partitions: List[str] = Field(default_factory=list)
+    extra_component_dirs: List[Path] = Field(default=["src"])
+    partitions: List[str] = Field(default=ESP32_DEFAULT_PARTITIONS)
 
 
 class ScargoConfig(BaseModel):

@@ -30,7 +30,7 @@ def scargo_docker_test_setup(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) ->
     return test_project_config
 
 
-def test_docker_fails_when_inside_docker(  # type: ignore[no-any-unimported]
+def test_docker_fails_when_inside_docker(
     caplog: pytest.LogCaptureFixture,
     mock_subprocess_run: MagicMock,
     scargo_docker_test_setup: Config,

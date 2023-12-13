@@ -16,7 +16,7 @@ def prepare_docker(project_config: ProjectConfig, project_path: Path) -> Dict[st
     path_in_docker = PurePosixPath("/workspace", relative_path)
 
     entrypoint = ""
-    if project_config.target.family == "esp32":
+    if project_config.is_esp32():
         entrypoint = "/opt/esp/entrypoint.sh"
 
     docker_tag = project_config.docker_image_tag

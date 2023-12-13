@@ -13,7 +13,7 @@ import typer
 from scargo.config import Config
 from scargo.config_utils import prepare_config
 from scargo.logger import get_logger
-from scargo.path_utils import find_program_path
+from scargo.sys_utils import find_program_path
 
 logger = get_logger()
 
@@ -21,13 +21,14 @@ logger = get_logger()
 class _ScargoGenDoc:
     EXCLUDE_LIST = ["build"]
 
-    def __init__(self, config: Config, doc_dir_path: Path):
+    def __init__(self, config: Config, doc_dir_path: Path, doxygen_path: Path):
         self._config = config
         self._doc_dir_path = doc_dir_path
+        self._doxygen_path = doxygen_path
 
     def create_default_doxyfile(self) -> None:
         """Create default doxyfile"""
-        subprocess.check_call("doxygen -g", shell=True, cwd=self._doc_dir_path)
+        subprocess.run([self._doxygen_path, "-g"], cwd=self._doc_dir_path, check=True)
 
     def update_doxyfile(self) -> None:
         """Update Doxyfile configuration according specified values"""
@@ -61,7 +62,7 @@ class _ScargoGenDoc:
 
     def generate_doxygen(self) -> None:
         """Generate doxygen according to doxyfile"""
-        subprocess.check_call("doxygen", shell=True, cwd=self._doc_dir_path)
+        subprocess.run([self._doxygen_path], cwd=self._doc_dir_path, check=True)
 
 
 def _open_doc(doc_dir_path: Path) -> None:
@@ -90,14 +91,11 @@ def scargo_doc(open_doc: bool) -> None:
         _open_doc(doc_dir_path)
         sys.exit(0)
 
-    if not find_program_path("doxygen"):
-        logger.error("Doxygen not installed or not in PATH environment variable")
-        sys.exit(1)
-
+    doxygen_path = find_program_path("doxygen")
     doc_dir_path.mkdir(parents=True, exist_ok=True)
 
     try:
-        scargo_doc_gen = _ScargoGenDoc(config, doc_dir_path)
+        scargo_doc_gen = _ScargoGenDoc(config, doc_dir_path, doxygen_path)
         scargo_doc_gen.create_default_doxyfile()
         scargo_doc_gen.update_doxyfile()
         scargo_doc_gen.generate_doxygen()
