@@ -16,6 +16,7 @@ from scargo.config import CheckConfig, Config, TodoCheckConfig
 from scargo.config_utils import prepare_config
 from scargo.logger import get_logger
 from scargo.utils.clang_utils import get_comment_lines
+from scargo.utils.file_utils import extract_comment_sections
 
 logger = get_logger()
 
@@ -202,28 +203,20 @@ class CopyrightChecker(CheckerFixer):
             return 0
         return super().check()
 
-    def __get_copyright_lines(self) -> List[str]:
-        return (
-            ["//\n"]
-            + [f"// {el}\n" for el in self.copyright_desc.split("\n")]
-            + ["//\n"]
-        )
+    def __get_copyright_lines(self) -> str:
+        if self.copyright_desc.startswith(("//", "/*")):
+            return self.copyright_desc
+        return f"//\n// {self.copyright_desc}\n//\n"
 
     def check_file(self, file_path: Path) -> CheckResult:
-        copyright_lines = self.__get_copyright_lines()
+        comment_sections = extract_comment_sections(file_path)
+        for comment_section in comment_sections:
+            if self.copyright_desc in comment_section:
+                return CheckResult(problems_found=0)
 
-        with open(file_path, encoding="utf-8") as file:
-            file_lines = file.readlines()
-
-            for line_no, line in enumerate(file_lines[: -(len(copyright_lines) - 1)]):
-                if line == copyright_lines[0]:
-                    if all(
-                        line_from_file == line_from_copyrights
-                        for line_from_file, line_from_copyrights in zip(
-                            file_lines[line_no:], copyright_lines
-                        )
-                    ):
-                        return CheckResult(problems_found=0)
+            result = re.search(self.copyright_desc, comment_section, re.MULTILINE)
+            if result:
+                return CheckResult(problems_found=0)
 
         logger.warning("Missing copyright line in %s.", file_path)
         return CheckResult(problems_found=1)
@@ -233,9 +226,7 @@ class CopyrightChecker(CheckerFixer):
             old = file.read()
 
         with open(file_path, "w", encoding="utf-8") as file:
-            for line in self.__get_copyright_lines():
-                file.write(line)
-            file.write("\n")
+            file.write(self.__get_copyright_lines())
             file.write(old)
 
 
