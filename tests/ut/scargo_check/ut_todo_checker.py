@@ -3,9 +3,9 @@ from unittest.mock import MagicMock
 import pytest
 from pytest_mock import MockerFixture
 
-from scargo.clang_utils import get_comment_lines
 from scargo.commands.check import TodoChecker
 from scargo.config import Config
+from scargo.utils.clang_utils import get_comment_lines
 from tests.ut.utils import get_log_data
 
 COMMENT_LINES_WITHOUT_TODO = [
