@@ -83,7 +83,7 @@ def test_update_project_content(target: ScargoTarget, tmp_path: Path) -> None:
         TEST_PROJECT_NAME,
         bin_name=None,
         lib_name=None,
-        target=[target],
+        targets=[target],
         create_docker=False,
         git=False,
         chip=[],
@@ -100,7 +100,7 @@ def test_update_project_content(target: ScargoTarget, tmp_path: Path) -> None:
 
 def test_update_multitarget_project_content(tmp_path: Path) -> None:
     os.chdir(tmp_path)
-    target = [
+    targets = [
         ScargoTarget.x86,
         ScargoTarget.esp32,
         ScargoTarget.stm32,
@@ -110,7 +110,7 @@ def test_update_multitarget_project_content(tmp_path: Path) -> None:
         TEST_PROJECT_NAME,
         bin_name=None,
         lib_name=None,
-        target=target,
+        targets=targets,
         create_docker=False,
         git=False,
         chip=[],
@@ -120,7 +120,7 @@ def test_update_multitarget_project_content(tmp_path: Path) -> None:
     scargo_update(Path(SCARGO_DEFAULT_CONFIG_FILE))
 
     all_files = get_all_files_recursively()
-    expected_files = get_expected_files(target)
+    expected_files = get_expected_files(targets)
     assert all_files - expected_files == set()
     assert expected_files - all_files == set()
 

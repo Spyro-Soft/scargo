@@ -15,14 +15,14 @@ Usage
 Description
 ^^^^^^^^^^^
 
-Remove directory build.
+Clean build directory. Keeps cmake fetched content in build/.cmake_fetch_cache.
 
 Options
 ^^^^^^^
 
 ::
 
--B, --base-dir Arg
+-B, --base-dir DIRECTORY
 
 Specify the base project path. Allows running scargo commands from any directory.
 
@@ -36,6 +36,6 @@ Command:
 
 **Effects:**
 
-Removes directory build
+Cleans directory build
 
-Removes directory test/build
+Cleans directory test/build

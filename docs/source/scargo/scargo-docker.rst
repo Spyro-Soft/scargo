@@ -7,7 +7,7 @@ Usage
 ^^^^^
 ::
 
-    scargo docker [SUBCOMMAND] [OPTIONS]
+    scargo docker [OPTIONS] COMMAND [ARGS]...
 
 Description
 ^^^^^^^^^^^
@@ -18,7 +18,7 @@ Common Options
 
 ::
 
--B, --base-dir Arg
+-B, --base-dir DIRECTORY
 
 Specify the base project path. Allows running scargo commands from any directory.
 
@@ -29,6 +29,12 @@ Subcommands
     build
 
 Build the docker environment for the chosen architecture
+
+::
+
+    exec
+
+Attach to existing docker environment
 
 ::
 

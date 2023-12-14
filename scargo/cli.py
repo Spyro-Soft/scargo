@@ -55,14 +55,14 @@ BASE_DIR_OPTION = Option(
 
 @cli.command()
 def build(
-    profile: str = Option("Debug", "--profile"),
-    base_dir: Optional[Path] = BASE_DIR_OPTION,
+    profile: str = Option("Debug", "-p", "--profile", metavar="PROFILE"),
     target: Optional[ScargoTarget] = Option(
         None,
         "-t",
         "--target",
         help="Target device. Defaults to first one from toml if not specified.",
     ),
+    base_dir: Optional[Path] = BASE_DIR_OPTION,
 ) -> None:
     """Compile sources."""
     if base_dir:
@@ -229,10 +229,12 @@ def fix(
 
 @cli.command()
 def flash(
-    app: bool = Option(False, "--app", help="Flash app only"),
-    file_system: bool = Option(False, "--fs", help="Flash filesystem only"),
     flash_profile: str = Option(
-        "Debug", "--profile", help="Flash base on previously built profile"
+        "Debug",
+        "-p",
+        "--profile",
+        metavar="PROFILE",
+        help="Flash base on previously built profile",
     ),
     port: Optional[str] = Option(
         None,
@@ -245,6 +247,8 @@ def flash(
         "--target",
         help="Target device. Defaults to first one from toml if not specified.",
     ),
+    app: bool = Option(False, "--app", help="Flash app only"),
+    file_system: bool = Option(False, "--fs", help="Flash filesystem only"),
     no_erase: bool = Option(False, help="(stm32 only) Don't erase target memory"),
     base_dir: Optional[Path] = BASE_DIR_OPTION,
 ) -> None:
@@ -359,8 +363,8 @@ def new(
         prompt=True,
         prompt_required=False,
     ),
-    target: List[ScargoTarget] = Option(
-        ["x86"], "-t", "--target", help="Specify targets for a project."
+    targets: List[ScargoTarget] = Option(
+        [], "-t", "--target", help="Specify targets for a project."
     ),
     chip: List[str] = Option(
         [],
@@ -385,7 +389,7 @@ def new(
         project_name,
         bin_name,
         lib_name,
-        target,
+        targets,
         create_docker,
         git,
         chip,
@@ -398,8 +402,8 @@ def new(
 
 @cli.command()
 def publish(
-    repo: str = Option("", "--repo", "-r", help="Repo name"),
-    profile: str = Option("Release", "--profile", "-p"),
+    repo: str = Option("", "-r", "--repo", metavar="CONAN_REPO_NAME", help="Repo name"),
+    profile: str = Option("Release", "-p", "--profile", metavar="PROFILE"),
     base_dir: Optional[Path] = BASE_DIR_OPTION,
 ) -> None:
     """Upload conan pkg to repo"""
@@ -422,7 +426,7 @@ def run(
         resolve_path=True,
         help="Path to bin file",
     ),
-    profile: str = Option("Debug", "--profile", "-p"),
+    profile: str = Option("Debug", "-p", "--profile", metavar="PROFILE"),
     skip_build: bool = Option(False, "--skip-build", help="Skip calling scargo build"),
     bin_params: List[str] = Argument(None),
     base_dir: Optional[Path] = BASE_DIR_OPTION,
@@ -439,7 +443,9 @@ def run(
 @cli.command()
 def test(
     verbose: bool = Option(False, "--verbose", "-v", help="Verbose mode."),
-    profile: str = Option("Debug", "--profile", help="CMake profile to use"),
+    profile: str = Option(
+        "Debug", "-p", "--profile", metavar="PROFILE", help="CMake profile to use"
+    ),
     detailed_coverage: bool = Option(
         False, help="Generate detailed coverage HTML files"
     ),
@@ -458,8 +464,8 @@ def test(
 def update(
     config_file_path: Optional[Path] = Option(
         None,
-        "--config-file",
         "-c",
+        "--config-file",
         exists=True,
         dir_okay=False,
         resolve_path=True,
@@ -467,7 +473,7 @@ def update(
     ),
     base_dir: Optional[Path] = BASE_DIR_OPTION,
 ) -> None:
-    """Read .toml config file and generate `CMakeLists.txt`."""
+    """Read config file and update project files"""
     if base_dir:
         os.chdir(base_dir)
     if config_file_path is None:

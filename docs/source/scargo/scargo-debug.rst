@@ -18,9 +18,8 @@ Description
 
 Use gdb cli to debug binary file. If path to bin is not provided in arguments
 scargo will look in lockfile for bin_name under project section and look for
-binary on path ``build/debug/bin/<bin_name>``.
+binary on path ``build/Debug/bin/<bin_name>``.
 
-Scargo currently supports debug for x86 and stm32 targets.
 
 Options
 ^^^^^^^
@@ -33,6 +32,11 @@ Path to a binary file
 
 ::
 
--B, --base-dir Arg
+-t, --target [atsam|esp32|stm32|x86]
+
+Build project for specified target. Releavant only for multitarget projects.
+::
+
+-B, --base-dir DIRECTORY
 
 Specify the base project path. Allows running scargo commands from any directory.

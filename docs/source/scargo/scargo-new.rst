@@ -10,7 +10,7 @@ Usage
 ^^^^^
 ::
 
-    scargo new PROJECT_NAME [OPTIONS]
+    scargo new [OPTIONS] PROJECT_NAME
 
 Description
 ^^^^^^^^^^^
@@ -21,36 +21,30 @@ Options
 ^^^^^^^^
 ::
 
-    --bin TEXT
+    --bin BIN_NAME
 
-Creates template of the binary target. The target name is TEXT. Creates template file "[TEXT].cpp" in directory "src".
+
+::
+Creates binary target template project with "[BIN_NAME].cpp" in directory "src".
+
+    --lib LIB_NAME
+
+Creates library target template project file "[LIB_NAME].cpp" in directory "src"
+and "[LIB_NAME].h" in directory "include".
 
 ::
 
-    --lib TEXT
+    -t, --target [atsam|esp32|stm32|x86]           [default: x86]
 
-Creates template of library target. The target name is TEXT.  Creates template file "[TEXT].cpp" in directory "src".
 
-::
+Chose the target on which you would like to build and manage the project.
+ - ESP32 support: Presently following models are supported 'esp32'. Specify chip using --chip or use default (esp32).
+ - STM32 support: Specify chip using --chip or use default (STM32L496AG).
+ - Atmel SAM series support: Presently scargo supports Atmel SAM series. Specify chip using --chip or use default (ATSAML10E16A).
 
-    --docker
 
-Create docker environment.
-
-::
-
-    --no-git
-
-Do not initialize git repository.
-
-::
-
-    --target
-
-Chose the target on which you would like to build and manage the project ['x86', 'esp32', 'stm32', 'atsam'].
-ESP32 support: Presently following models are supported 'esp32'. Specify chip using --chip or use default (esp32).
-STM32 support: Presently there is support for stm32l4 only. Specify chip using --chip or use default (STM32L496AG).
-Atmel SAM series support: Presently scargo supports Atmel SAM series. Specify chip using --chip or use default (ATSAML10E16A).
+This options can be specified multiple times to create mulittarget project.
+e.g. ``scargo new -t esp32 --t stm32 -t atsam hello_world``
 
 ::
 
@@ -65,7 +59,19 @@ Defaults:
 
 ::
 
-    -B, --base-dir Arg
+    -d, --docker / -nd, --no-docker           [default: docker]
+
+Initialize docker environment (default true).
+
+::
+
+    --git / --no-git           [default: git]
+
+Initialize git repository (default true).
+
+::
+
+    -B, --base-dir DIRECTORY
 
 Specify the base project path. Allows running scargo commands from any directory.
 

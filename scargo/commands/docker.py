@@ -1,7 +1,6 @@
 # #
 # @copyright Copyright (C) 2023 SpyroSoft Solutions S.A. All rights reserved.
 # #
-
 """Handle docker for project"""
 import shutil
 import subprocess
@@ -24,7 +23,7 @@ def scargo_docker_build(
     Build docker
 
     :param docker_opts: additional docker options
-    :param project_root
+    :param project_root: scargo project root path
     :raises CalledProcessError: if docker build fail
     """
     logger.debug("Build docker environment.")

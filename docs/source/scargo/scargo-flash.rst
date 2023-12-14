@@ -17,21 +17,11 @@ Flash what is available to be flashed. This option is the default if no other op
 
 Options
 ^^^^^^^
-::
-
---app
-
-Flash app only
 
 ::
 
---fs
+-p, --profile PROFILE           [default: Debug]
 
-Flash filesystem only
-
-::
-
---profile TEXT
 
 Flash base on previously built profile  [default: Debug]
 
@@ -43,12 +33,30 @@ Flash base on previously built profile  [default: Debug]
 
 ::
 
---no-erase
+-t, --target [atsam|esp32|stm32|x86]
 
-(stm32 only) Don't erase target memory
+Flash specified target. Releavant only for multitarget projects.
 
 ::
 
--B, --base-dir Arg
+--app           [default: false]
+
+Flash app only. Releavant only for esp32 projects.
+
+::
+
+--fs           [default: false]
+
+Flash filesystem only. Releavant only for esp32 projects
+
+::
+
+--no-erase           [default: false]
+
+Don't erase target memory. Releavant only for stm32 projects
+
+::
+
+-B, --base-dir DIRECTORY
 
 Specify the base project path. Allows running scargo commands from any directory.

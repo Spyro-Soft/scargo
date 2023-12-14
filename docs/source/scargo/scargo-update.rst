@@ -21,15 +21,15 @@ Options
 ^^^^^^^
 ::
 
-    --config-file TEXT
+    --c, --config-file FILE
 
-Path to scargo.toml file.
+Path to configuration toml file (usually scargo.toml) file.
 
 If the option is not specified, the default value is scargo.toml in the project root directory.
 
 ::
 
--B, --base-dir Arg
+-B, --base-dir DIRECTORY
 
 Specify the base project path. Allows running scargo commands from any directory.
 
