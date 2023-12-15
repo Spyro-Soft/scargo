@@ -21,14 +21,14 @@ add_executable(${PROJECT_NAME}
 )
 {% elif config.project.lib_name%}
 add_library(${PROJECT_NAME} STATIC
-    ${CMAKE_CURRENT_SOURCE_DIR}/{{ config.project.target.source_dir }}/{{ config.project.lib_name|lower }}.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/{{ config.source_dir_path.name }}/{{ config.project.lib_name|lower }}.cpp
 )
 
 target_include_directories(${PROJECT_NAME}
     PUBLIC
-        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>/{{ config.project.target.include_dir }}
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>/{{ config.include_dir_path.name }}
     PRIVATE
-        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>/{{ config.project.target.source_dir }}
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>/{{ config.source_dir_path.name }}
 )
 {% endif %}
 
@@ -58,22 +58,23 @@ add_custom_target(${PROJECT_NAME}_always_display_size
 
 {% if  config.project.bin_name %}
 add_custom_command(
-    TARGET ${PROJECT_NAME}
-    POST_BUILD
-    COMMAND ${CMAKE_OBJCOPY} -O binary $<TARGET_FILE:${PROJECT_NAME}> ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${PROJECT_NAME}.bin
-    BYPRODUCTS ${PROJECT_NAME}.bin
-    COMMENT "Generating binary file ${CMAKE_PROJECT_NAME}.bin"
-)
+  TARGET ${PROJECT_NAME}
+  POST_BUILD
+  COMMAND ${CMAKE_OBJCOPY} -O binary $<TARGET_FILE:${PROJECT_NAME}>
+          ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${PROJECT_NAME}.bin
+  BYPRODUCTS ${PROJECT_NAME}.bin
+  COMMENT "Generating binary file ${PROJECT_NAME}.bin")
 
 add_custom_command(
-    TARGET ${PROJECT_NAME}
-    POST_BUILD
-    COMMAND ${CMAKE_OBJCOPY} -O ihex $<TARGET_FILE:${PROJECT_NAME}> ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${PROJECT_NAME}.hex
-    BYPRODUCTS ${PROJECT_NAME}.hex
-    COMMENT "Generating hex file ${CMAKE_PROJECT_NAME}.hex"
-)
+  TARGET ${PROJECT_NAME}
+  POST_BUILD
+  COMMAND ${CMAKE_OBJCOPY} -O ihex $<TARGET_FILE:${PROJECT_NAME}>
+          ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${PROJECT_NAME}.hex
+  BYPRODUCTS ${PROJECT_NAME}.hex
+  COMMENT "Generating hex file ${PROJECT_NAME}.hex")
+
 {% endif %}
 {% if config.project.lib_name %}
 install(TARGETS ${PROJECT_NAME} DESTINATION lib)
-install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/{{ config.project.target.include_dir }}/ DESTINATION {{ config.project.target.include_dir }})
+install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/{{ config.include_dir_path.name }}/ DESTINATION {{ config.include_dir_path.name }})
 {% endif %}

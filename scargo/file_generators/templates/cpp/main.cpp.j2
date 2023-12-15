@@ -3,10 +3,13 @@
 //
 
 #include <cstdio>
-{% if target.family == "atsam" %}
+{% if project.is_atsam() %}
+#if ATSAM
 #include <sam.h>
+#endif  // ATSAM
 {% endif %}
-{% if target.family == "esp32" %}
+{% if project.is_esp32() %}
+#if ESP32
 #include <freertos/FreeRTOS.h>
 #include <freertos/task.h>
 #include <esp_log.h>
@@ -27,7 +30,10 @@ void app_main(void)  // NOLINT(readability-identifier-naming): name required by 
         vTaskDelay(pdMS_TO_TICKS(50));
     }
 }
-{% else %}
+#endif  // ESP32
+{% endif %}
+{% if project.is_x86() or project.is_atsam() or project.is_stm32() %}
+#ifndef ESP32
 /**
  * @brief This is example function doc
  *
@@ -35,13 +41,18 @@ void app_main(void)  // NOLINT(readability-identifier-naming): name required by 
  */
 int main()
 {
-    {% if target.family != "x86" %}
+    {% if project.is_x86() %}
+#ifdef X86
+    printf("Hello World!\n");
+#endif  // X86
+    {% else %}
+#if defined STM32 || defined ATSAM
     while (true)
     {
     }
-    {% else %}
-    printf("Hello World!\n");
-    return 0;
+#endif  // STM32 || ATSAM
     {% endif %}
+    return 0;
 }
+#endif  // !ESP32
 {% endif %}

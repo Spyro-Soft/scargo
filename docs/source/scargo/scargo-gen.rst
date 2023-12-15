@@ -37,9 +37,27 @@ Generate mock of the chosen file. The .h or .hpp file shall be used. It will the
 
 ::
 
-    -c, --certs TEXT
+    -c, --certs <DEVICE ID>
 
-Generate certs for azure IoTHub. TEXT shall be the device id.
+Generate certs for azure IoTHub.
+
+::
+
+    -t, --type [all, device]
+
+Mode for generating certificates.
+
+::
+
+    -i, --in PATH
+
+Directory with root and intermediate certificates.
+
+::
+
+    -p, --passwd <PASSWORD>
+
+ Password to be set for generated certificates.
 
 ::
 
@@ -58,6 +76,6 @@ For esp32 file, the system will generate build/flash_image.bin file
 
 ::
 
-    -B, --base-dir Arg
+    -B, --base-dir DIRECTORY
 
 Specify the base project path. Allows running scargo commands from any directory.

@@ -21,6 +21,9 @@ def _case_insensitive_find_dir(source_dir: Path, dirname: str) -> Optional[Path]
     return None
 
 
+EXCLUDE_FROM_CLEAN = [".cmake_fetch_cache"]
+
+
 def scargo_clean() -> None:
     """Clean project dir from unnecessary files"""
 
@@ -33,5 +36,9 @@ def scargo_clean() -> None:
         if source_dir:
             build_dir = _case_insensitive_find_dir(source_dir, "build")
             if build_dir and build_dir.exists():
-                shutil.rmtree(build_dir)
-                logger.info("Removed %s", build_dir)
+                for item in build_dir.iterdir():
+                    if item.name in EXCLUDE_FROM_CLEAN:
+                        logger.info("Skipping clean of: %s", item)
+                        continue
+                    shutil.rmtree(item)
+                logger.info("Cleaned build directory: %s", build_dir)

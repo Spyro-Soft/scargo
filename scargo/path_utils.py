@@ -2,21 +2,10 @@
 # @copyright Copyright (C) 2023 SpyroSoft Solutions S.A. All rights reserved.
 # #
 
-import platform
-import subprocess
 from pathlib import Path
 from typing import Optional
 
 from scargo.global_values import SCARGO_DEFAULT_CONFIG_FILE, SCARGO_LOCK_FILE
-
-
-def find_program_path(program_name: str) -> Optional[Path]:
-    cmd = "where" if platform.system() == "Windows" else "/usr/bin/which"
-    try:
-        cmd_output = subprocess.check_output([cmd, program_name])
-    except subprocess.CalledProcessError:
-        return None
-    return Path(cmd_output.decode("utf-8").strip())
 
 
 def get_config_file_path(config_file_name: str) -> Optional[Path]:

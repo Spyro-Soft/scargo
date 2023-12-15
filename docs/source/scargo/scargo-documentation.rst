@@ -18,7 +18,7 @@ Options
 
 ::
 
--B, --base-dir Arg
+-B, --base-dir DIRECTORY
 
 Specify the base project path. Allows running scargo commands from any directory.
 

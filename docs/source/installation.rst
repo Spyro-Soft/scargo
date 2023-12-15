@@ -3,7 +3,7 @@
 Installation and Dependencies
 =============================
 
-You will need `Python 3.7 or newer <https://www.python.org/downloads/>`_ installed on your system to use the latest version of ``scargo``.
+You will need `Python 3.8 or newer <https://www.python.org/downloads/>`_ installed on your system to use the latest version of ``scargo``.
 
 The latest stable scargo release can be installed from `PyPI <https://pypi.org/project/scargo/>`_ via pip:
 

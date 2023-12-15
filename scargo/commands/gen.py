@@ -125,16 +125,14 @@ def generate_certs(
 
 
 def generate_fs(config: Config) -> None:
-    target = config.project.target
-    if target.family == "esp32":
+    if config.project.is_esp32():
         gen_fs_esp32(config)
     else:
         logger.warning("Gen --fs command not supported for this target yet.")
 
 
 def gen_single_binary(build_profile: str, config: Config) -> None:
-    target = config.project.target
-    if target.family == "esp32":
+    if config.project.is_esp32():
         gen_single_binary_esp32(build_profile, config)
     else:
         logger.warning("Gen --bin command not supported for this target yet.")

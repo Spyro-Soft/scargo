@@ -9,7 +9,7 @@ from scargo.file_generators.base_gen import create_file_from_template
 from scargo.file_generators.cpp_gen import generate_cpp
 
 
-def test_generate_cpp__bin_only(
+def test_generate_cpp_bin_only(
     config: Config, mock_create_file_from_template: MagicMock
 ) -> None:
     config.project.bin_name = "test_bin"
@@ -21,7 +21,7 @@ def test_generate_cpp__bin_only(
         call(
             "cpp/main.cpp.j2",
             Path("src/test_bin.cpp"),
-            template_params={"target": config.project.target, "bin_name": "test_bin"},
+            template_params={"project": config.project, "bin_name": "test_bin"},
             config=config,
         ),
         call(
@@ -33,7 +33,7 @@ def test_generate_cpp__bin_only(
     ]
 
 
-def test_generate_cpp__lib_only(
+def test_generate_cpp_lib_only(
     config: Config, mock_create_file_from_template: MagicMock
 ) -> None:
     config.project.bin_name = None
@@ -81,7 +81,7 @@ def test_generate_cpp__lib_only(
     ]
 
 
-def test_generate_cpp__bin_and_lib(
+def test_generate_cpp_bin_and_lib(
     config: Config, mock_create_file_from_template: MagicMock
 ) -> None:
     config.project.bin_name = "test_bin"
@@ -123,7 +123,7 @@ def test_generate_cpp__bin_and_lib(
         call(
             "cpp/main.cpp.j2",
             Path("src/test_bin.cpp"),
-            template_params={"target": config.project.target, "bin_name": "test_bin"},
+            template_params={"project": config.project, "bin_name": "test_bin"},
             config=config,
         ),
         call(

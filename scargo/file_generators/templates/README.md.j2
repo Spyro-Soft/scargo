@@ -102,7 +102,7 @@ scargo gen #Generate certificate and other artifacts for chosen targets
 ```
 
 
-{% if project.target.family == "esp32" %}
+{% if project.is_esp32() %}
 # ESP32 configure
 At the beginning of a project is strongly recommended to configure the project using `idf.py menuconfig`
 In the console please run `idf.py menuconfig` and configure at least the following options:
@@ -221,7 +221,8 @@ idf.py flash monitor openocd gdbgui
 - run `idf.py openocd` or `openocd -c \"set ESP_RTOS none\" -f board/esp32-wrover-kit-3.3v.cfg`
 - run debug in vscode
 
-{% elif project.target.family == "stm32" %}
+{% endif %}
+{% if project.is_stm32() %}
 # STM32 configure
 The model of the microcontroller is taken from the model set in scargo.toml file e.g.:
 `[stm32] -> chip = "STM32L496AGI6"`

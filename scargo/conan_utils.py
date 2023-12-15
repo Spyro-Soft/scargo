@@ -53,14 +53,7 @@ def conan_remote_login(remote: str) -> None:
 
 def conan_source(project_dir: Path) -> None:
     try:
-        subprocess.check_call(
-            [
-                "conan",
-                "source",
-                ".",
-            ],
-            cwd=project_dir,
-        )
+        subprocess.run(["conan", "source", "."], cwd=project_dir, check=True)
     except subprocess.CalledProcessError:
         logger.error("Unable to source")
 

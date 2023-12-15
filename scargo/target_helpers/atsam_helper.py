@@ -3,11 +3,13 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Optional
 
-from scargo.config import Config
+from scargo.config import ATSAMConfig, Config
 from scargo.file_generators.base_gen import write_template
+from scargo.logger import get_logger
 
 script_dir = Path(__file__).parent
 atmel_arxml_path = script_dir / "atmel.xml"
+logger = get_logger()
 
 ADDITIONAL_CPU_DATA = {"cortex-m23": ["atsaml10e16a"]}
 
@@ -16,6 +18,17 @@ ADDITIONAL_CPU_DATA = {"cortex-m23": ["atsaml10e16a"]}
 class AtsamScrips:
     openocd_cfg = "openocd-script.cfg"
     gdb_flash = "atsam-gdb.script"
+
+
+def create_atsam_config(chip: Optional[str]) -> Optional[ATSAMConfig]:
+    if chip is None:
+        return None
+    cpu = get_atsam_cpu(chip)
+    if cpu is None:
+        logger.warning("Could not find cpu for %s chip", chip)
+        logger.info("Update scargo.toml with correct cpu and run scargo update.")
+        cpu = "Not found"
+    return ATSAMConfig(chip=chip, cpu=cpu)
 
 
 def get_atsam_cpu(chip_label: str) -> Optional[str]:

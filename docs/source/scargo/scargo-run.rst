@@ -31,7 +31,7 @@ Relative path to a binary file to run.
 
 ::
 
--p, --profile TEXT
+-p, --profile PROFILE     [default: Debug]
 
 Profile to run  [default: Debug]
 This option specifies which profile binary should be built and run.
@@ -44,6 +44,6 @@ Skip running scargo build.
 
 ::
 
--B, --base-dir Arg
+-B, --base-dir DIRECTORY
 
 Specify the base project path. Allows running scargo commands from any directory.

@@ -27,7 +27,7 @@ from scargo.commands.run import scargo_run
 from scargo.commands.test import scargo_test
 from scargo.commands.update import scargo_update
 from scargo.commands.version import scargo_version
-from scargo.config import ScargoTargets, Target
+from scargo.config import ScargoTarget
 from scargo.global_values import DESCRIPTION, SCARGO_DEFAULT_CONFIG_FILE
 from scargo.logger import get_logger
 from scargo.path_utils import get_config_file_path
@@ -55,13 +55,19 @@ BASE_DIR_OPTION = Option(
 
 @cli.command()
 def build(
-    profile: str = Option("Debug", "--profile"),
+    profile: str = Option("Debug", "-p", "--profile", metavar="PROFILE"),
+    target: Optional[ScargoTarget] = Option(
+        None,
+        "-t",
+        "--target",
+        help="Target device. Defaults to first one from toml if not specified.",
+    ),
     base_dir: Optional[Path] = BASE_DIR_OPTION,
 ) -> None:
     """Compile sources."""
     if base_dir:
         os.chdir(base_dir)
-    scargo_build(profile)
+    scargo_build(profile, target)
 
 
 ###############################################################################
@@ -119,12 +125,18 @@ def debug(
         resolve_path=True,
         help="Path to bin file",
     ),
+    target: Optional[ScargoTarget] = Option(
+        None,
+        "-t",
+        "--target",
+        help="Target device. Defaults to first one from toml if not specified.",
+    ),
     base_dir: Optional[Path] = BASE_DIR_OPTION,
 ) -> None:
     """Use gdb cli to debug"""
     if base_dir:
         os.chdir(base_dir)
-    scargo_debug(bin_path)
+    scargo_debug(bin_path, target)
 
 
 ###############################################################################
@@ -217,23 +229,33 @@ def fix(
 
 @cli.command()
 def flash(
-    app: bool = Option(False, "--app", help="Flash app only"),
-    file_system: bool = Option(False, "--fs", help="Flash filesystem only"),
     flash_profile: str = Option(
-        "Debug", "--profile", help="Flash base on previously built profile"
+        "Debug",
+        "-p",
+        "--profile",
+        metavar="PROFILE",
+        help="Flash base on previously built profile",
     ),
     port: Optional[str] = Option(
         None,
         help="(esp32 only) port where the target device of the command is"
         " connected to, e.g. /dev/ttyUSB0",
     ),
+    target: Optional[ScargoTarget] = Option(
+        None,
+        "-t",
+        "--target",
+        help="Target device. Defaults to first one from toml if not specified.",
+    ),
+    app: bool = Option(False, "--app", help="Flash app only"),
+    file_system: bool = Option(False, "--fs", help="Flash filesystem only"),
     no_erase: bool = Option(False, help="(stm32 only) Don't erase target memory"),
     base_dir: Optional[Path] = BASE_DIR_OPTION,
 ) -> None:
     """Flash the target."""
     if base_dir:
         os.chdir(base_dir)
-    scargo_flash(app, file_system, flash_profile, port, not no_erase)
+    scargo_flash(flash_profile, port, target, app, file_system, not no_erase)
 
 
 ###############################################################################
@@ -324,7 +346,7 @@ def gen(
 
 @cli.command()
 def new(
-    name: str,
+    project_name: str,
     bin_name: Optional[str] = Option(
         None,
         "--bin",
@@ -341,17 +363,20 @@ def new(
         prompt=True,
         prompt_required=False,
     ),
-    target: ScargoTargets = Option("x86", help="Target device."),
-    chip: Optional[str] = Option(
-        None,
+    targets: List[ScargoTarget] = Option(
+        [], "-t", "--target", help="Specify targets for a project."
+    ),
+    chip: List[str] = Option(
+        [],
+        "-c",
         "--chip",
         help="Specify full chip label for a target (Uses default if not specified)",
-        metavar="CHIP_LABEL",
+        metavar="[stm32...|atsam...|esp32...]",
         prompt=True,
         prompt_required=False,
     ),
     create_docker: bool = Option(
-        True, "--docker/--no-docker", help="Initialize docker environment."
+        True, "-d/-nd", "--docker/--no-docker", help="Initialize docker environment."
     ),
     git: bool = Option(True, "--git/--no-git", help="Initialize git repository."),
     base_dir: Optional[Path] = BASE_DIR_OPTION,
@@ -359,16 +384,17 @@ def new(
     """Create new project template."""
     if base_dir:
         os.chdir(base_dir)
+
     scargo_new(
-        name,
+        project_name,
         bin_name,
         lib_name,
-        Target.get_target_by_id(target.value),
+        targets,
         create_docker,
         git,
         chip,
     )
-    scargo_update(Path(name, SCARGO_DEFAULT_CONFIG_FILE).absolute())
+    scargo_update(Path(project_name, SCARGO_DEFAULT_CONFIG_FILE).absolute())
 
 
 ###############################################################################
@@ -376,8 +402,8 @@ def new(
 
 @cli.command()
 def publish(
-    repo: str = Option("", "--repo", "-r", help="Repo name"),
-    profile: str = Option("Release", "--profile", "-p"),
+    repo: str = Option("", "-r", "--repo", metavar="CONAN_REPO_NAME", help="Repo name"),
+    profile: str = Option("Release", "-p", "--profile", metavar="PROFILE"),
     base_dir: Optional[Path] = BASE_DIR_OPTION,
 ) -> None:
     """Upload conan pkg to repo"""
@@ -400,17 +426,15 @@ def run(
         resolve_path=True,
         help="Path to bin file",
     ),
-    profile: str = Option("Debug", "--profile", "-p"),
+    profile: str = Option("Debug", "-p", "--profile", metavar="PROFILE"),
     skip_build: bool = Option(False, "--skip-build", help="Skip calling scargo build"),
     bin_params: List[str] = Argument(None),
     base_dir: Optional[Path] = BASE_DIR_OPTION,
 ) -> None:
-    """Build and run project"""
+    """Run project bin file"""
     if base_dir:
         os.chdir(base_dir)
-    if not skip_build:
-        scargo_build(profile)
-    scargo_run(bin_path, profile, bin_params)
+    scargo_run(bin_path, profile, bin_params, skip_build)
 
 
 ###############################################################################
@@ -419,7 +443,9 @@ def run(
 @cli.command()
 def test(
     verbose: bool = Option(False, "--verbose", "-v", help="Verbose mode."),
-    profile: str = Option("Debug", "--profile", help="CMake profile to use"),
+    profile: str = Option(
+        "Debug", "-p", "--profile", metavar="PROFILE", help="CMake profile to use"
+    ),
     detailed_coverage: bool = Option(
         False, help="Generate detailed coverage HTML files"
     ),
@@ -438,8 +464,8 @@ def test(
 def update(
     config_file_path: Optional[Path] = Option(
         None,
-        "--config-file",
         "-c",
+        "--config-file",
         exists=True,
         dir_okay=False,
         resolve_path=True,
@@ -447,7 +473,7 @@ def update(
     ),
     base_dir: Optional[Path] = BASE_DIR_OPTION,
 ) -> None:
-    """Read .toml config file and generate `CMakeLists.txt`."""
+    """Read config file and update project files"""
     if base_dir:
         os.chdir(base_dir)
     if config_file_path is None:

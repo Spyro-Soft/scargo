@@ -41,9 +41,9 @@ class _DockerComposeTemplate:
             "devcontainer.json",
             template_params={"project": self._config.project},
         )
-        if self._config.project.target.family == "stm32":
+        if self._config.project.is_stm32():
             stm32_helper.generate_openocd_script(self.docker_path, self._config)
-        if self._config.project.target.family == "atsam":
+        if self._config.project.is_atsam():
             atsam_helper.generate_openocd_script(self.docker_path, self._config)
 
         custom_docker = self._get_dockerfile_custom_content()

@@ -1,26 +1,15 @@
 [project]
-name = "{{ project_name }}"
+name = "atsamproj"
 version = "0.1.0"
 description = "Project description."
 homepage-url = "www.hello-world.com"
 
-{% if bin_name %}
-bin_name = "{{ bin_name }}"
-{% endif %}
-{% if lib_name %}
-lib_name = "{{ lib_name }}"
-{% endif %}
-target = {{ targets_ids }}
-build-env = "{{ build_env }}"
+bin_name = "atsamproj"
+target = "atsam"
+build-env = "native"
 docker-file = ".devcontainer/Dockerfile-custom"
-docker-image-tag = "{{ docker_image_tag }}"
+docker-image-tag = "atsamproj-dev:1.0"
 
-{% if target.cc %}
-cc  = "{{ target.cc }}"
-{% endif %}
-{% if target.cxx %}
-cxx = "{{ target.cxx }}"
-{% endif %}
 cxxstandard = "17"
 
 cflags   = "-Wall -Wextra"
@@ -95,31 +84,12 @@ test = [
 [conan.repo]
 #Passing conancenter here is not nessary as scargo adds it by default
 #Below example of private binary artifacts repository
-#my_artifactory = "https://my_artifactory/api/conan/conanlocal"
+#gitlab = "https://git.my_extra_gitlab_server.com"
 
-{% if esp32_config %}
-[esp32]
-chip = "{{ esp32_config.chip }}"
-extra_component_dirs = {{ esp32_config.extra_component_dirs }}
-partitions = [
-{% for partition in esp32_config.partitions %}
-    "{{ partition }}",
-{% endfor %}
-]
-
-{% endif %}
-{% if stm32_config %}
-[stm32]
-chip = "{{ stm32_config.chip|upper }}"
-flash-start = 0x{{ "%08x" % stm32_config.flash_start }}
-
-{% endif %}
-{% if atsam_config %}
 [atsam]
-chip = "{{ atsam_config.chip }}"
-cpu = "{{ atsam_config.cpu }}"
+chip = "ATSAML10E16A"
+cpu = "cortex-m23"
 
-{% endif %}
 
 [scargo]
 console-log-level = "INFO"

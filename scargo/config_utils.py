@@ -6,7 +6,7 @@ from typing import Optional
 import tomlkit
 
 from scargo import __version__
-from scargo.config import Config, ConfigError, parse_config
+from scargo.config import Config, ConfigError, ScargoTarget, Target, parse_config
 from scargo.docker_utils import run_scargo_again_in_docker
 from scargo.global_values import SCARGO_LOCK_FILE
 from scargo.logger import get_logger
@@ -40,9 +40,10 @@ def get_scargo_config_or_exit(
     except ConfigError as e:
         logger.error(e.args[0])
         sys.exit(1)
+    except Exception as e:  # pylint: disable=W0718
+        logger.error("Error while parsing config file %s: %s", config_file_path, e)
+        sys.exit(1)
 
-    if compiler_warning := config.project.get_compiler_warning():
-        logger.warning(compiler_warning)
     return config
 
 
@@ -83,3 +84,12 @@ def add_version_to_scargo_lock(scargo_lock: Path) -> None:
     config.setdefault("scargo", tomlkit.table())["version"] = __version__
     with open(scargo_lock, "w", encoding="utf-8") as scargo_lock_file:
         tomlkit.dump(config, scargo_lock_file)
+
+
+def get_target_or_default(config: Config, target: Optional[ScargoTarget]) -> Target:
+    if target:
+        if target.value not in config.project.target_id:
+            logger.error("Target %s not defined in scargo toml", target.value)
+            sys.exit(1)
+        return Target.get_target_by_id(target.value)
+    return config.project.default_target

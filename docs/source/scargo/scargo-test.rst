@@ -21,7 +21,7 @@ Options
 ^^^^^^^
 ::
 
-    --verbose
+    -v, --verbose
 
 Verbose output.
 
@@ -31,18 +31,18 @@ This should run
     ctest --verbose.
 
 ::
-    --profile Arg
+    -p, --profile PROFILE
 
 CMake profile to use. Default: Debug
 
 ::
-    --detailed-coverage
+    --detailed-coverage / --no-detailed-coverage        [default: no-detailed-coverage]
 
-Generate detailed coverage HTML files
+Generate detailed coverage HTML files.
 
 ::
 
-    -B, --base-dir Arg
+    -B, --base-dir DIRECTORY
 
 Specify the base project path. Allows running scargo commands from any directory.
 
