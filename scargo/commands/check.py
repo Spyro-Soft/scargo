@@ -194,6 +194,7 @@ class CopyrightChecker(CheckerFixer):
     def __init__(self, config: Config, fix_errors: bool = False, verbose: bool = False):
         super().__init__(config, fix_errors, verbose)
         self.copyright_desc = self.get_check_config().description or ""
+        self.copyright_fix_desc = self._config.fix.copyright.description
 
     def check(self) -> int:
         if not self.copyright_desc:
@@ -203,10 +204,12 @@ class CopyrightChecker(CheckerFixer):
             return 0
         return super().check()
 
-    def __get_copyright_lines(self) -> str:
-        if self.copyright_desc.startswith(("//", "/*")):
-            return self.copyright_desc
-        return f"//\n// {self.copyright_desc}\n//\n"
+    def _get_fix_copyright_description(self) -> str:
+        if self.copyright_fix_desc:
+            return self.copyright_fix_desc.strip() + "\n"
+        if self.copyright_desc:
+            return f"//\n// {self.copyright_desc.strip()}\n//\n"
+        return ""
 
     def check_file(self, file_path: Path) -> CheckResult:
         comment_sections = extract_comment_sections(file_path)
@@ -214,9 +217,12 @@ class CopyrightChecker(CheckerFixer):
             if self.copyright_desc in comment_section:
                 return CheckResult(problems_found=0)
 
-            result = re.search(self.copyright_desc, comment_section, re.MULTILINE)
-            if result:
-                return CheckResult(problems_found=0)
+            try:
+                result = re.search(self.copyright_desc, comment_section, re.MULTILINE)
+                if result:
+                    return CheckResult(problems_found=0)
+            except re.error as e:
+                logger.debug("Invalid regex in config file: %s", e.msg)
 
         logger.warning("Missing copyright line in %s.", file_path)
         return CheckResult(problems_found=1)
@@ -226,7 +232,7 @@ class CopyrightChecker(CheckerFixer):
             old = file.read()
 
         with open(file_path, "w", encoding="utf-8") as file:
-            file.write(self.__get_copyright_lines())
+            file.write(self._get_fix_copyright_description())
             file.write(old)
 
 

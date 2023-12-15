@@ -51,8 +51,15 @@ exclude = []
 exclude = []
 
 [check.copyright]
-description = "Copyright"
+description = '@copyright Copyright \(C\) \d{4} .* All rights reserved.'
 exclude = []
+
+[fix.copyright]
+description = '''
+/**
+ * @copyright Copyright (C) 2023 <Company-Name>. All rights reserved.
+ */
+'''
 
 [check.todo]
 keywords = ["tbd", "todo", "TODO", "fixme"]

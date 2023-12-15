@@ -4,8 +4,8 @@ from typing import Iterable, List, Tuple
 
 
 def finditer_with_line_numbers(
-    pattern: re.Pattern[str], string: str, flags: int = 0
-) -> Iterable[Tuple[re.Match[str], int]]:
+    pattern: re.Pattern, string: str, flags: int = 0  # type: ignore[type-arg]
+) -> Iterable[Tuple[re.Match, int]]:  # type: ignore[type-arg]
     """
     Version of re.finditer that additionally returns the line number for each match.
 
