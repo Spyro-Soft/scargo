@@ -38,7 +38,7 @@ Run clang-tidy.
 
 --copyright
 
-Check if there is copyright info at the top of each file.
+Check if there is copyright info at the top of each file. Uses description filed from [check.copyright] section from the project config file.
 
 ::
 

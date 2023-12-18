@@ -31,7 +31,7 @@ Fix formatting reported by clang-format.
 
 --copyright
 
-Fix if there is no copyright info at the top of each file.
+Fix if there is no copyright info at the top of each file. You can define your own copyright info in the config file in [fix.copyright] section.
 
 ::
 
