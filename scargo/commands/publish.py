@@ -8,9 +8,9 @@ import subprocess
 import sys
 from pathlib import Path
 
-from scargo.conan_utils import conan_add_remote, conan_source
 from scargo.config_utils import prepare_config
 from scargo.logger import get_logger
+from scargo.utils.conan_utils import conan_add_remote, conan_source
 
 logger = get_logger()
 

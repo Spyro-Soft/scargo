@@ -8,11 +8,11 @@ import sys
 from pathlib import Path
 from typing import Optional
 
-from scargo.conan_utils import conan_add_remote, conan_source
 from scargo.config import ScargoTarget
 from scargo.config_utils import get_target_or_default, prepare_config
 from scargo.file_generators.conan_gen import conan_add_default_profile_if_missing
 from scargo.logger import get_logger
+from scargo.utils.conan_utils import conan_add_remote, conan_source
 
 logger = get_logger()
 

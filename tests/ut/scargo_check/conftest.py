@@ -23,3 +23,19 @@ def mock_file_contents(
         f"{CheckerFixer.__module__}.open",
         mock_open(read_data="\n".join(request.param)),
     )
+
+
+@pytest.fixture
+def test_on_tempfile(
+    request: pytest.FixtureRequest, tmp_path: Path, mocker: MockerFixture
+) -> Path:
+    tmp_file = tmp_path / "temp_source_file.h"
+    content = (
+        "\n".join(request.param) if isinstance(request.param, list) else request.param
+    )
+    tmp_file.write_text(content)
+    mocker.patch(
+        f"{CheckerFixer.__module__}.{find_files.__name__}",
+        return_value=[tmp_file],
+    )
+    return tmp_file
