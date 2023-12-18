@@ -13,8 +13,8 @@ from scargo.config import ScargoTarget, Target
 from scargo.config_utils import prepare_config
 from scargo.file_generators.vscode_gen import generate_launch_json
 from scargo.logger import get_logger
-from scargo.sys_utils import find_program_path
 from scargo.target_helpers import atsam_helper, stm32_helper
+from scargo.utils.sys_utils import find_program_path
 
 if platform.system() == "Windows":
     from subprocess import DETACHED_PROCESS  # type: ignore[attr-defined]

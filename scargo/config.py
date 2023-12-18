@@ -53,6 +53,9 @@ class Config(BaseModel):
     project: "ProjectConfig"
     profiles: Dict[str, "ProfileConfig"] = Field(..., alias="profile")
     check: "ChecksConfig"
+    fix: "FixesConfig" = Field(
+        default_factory=lambda: FixesConfig()  # pylint: disable=unnecessary-lambda
+    )
     doc: "DocConfig" = Field(
         default_factory=lambda: DocConfig()  # pylint: disable=unnecessary-lambda
     )
@@ -266,9 +269,19 @@ class ChecksConfig(BaseModel):
     cyclomatic: "CheckConfig"
 
 
+class FixesConfig(BaseModel):
+    copyright: "FixConfig" = Field(
+        default_factory=lambda: FixConfig()  # pylint: disable=unnecessary-lambda
+    )
+
+
 class CheckConfig(BaseModel):
     description: Optional[str] = None
     exclude: List[str] = Field(default_factory=list)
+
+
+class FixConfig(BaseModel):
+    description: Optional[str] = None
 
 
 class TodoCheckConfig(CheckConfig):
@@ -342,6 +355,8 @@ class DockerComposeConfig(BaseModel):
 Config.update_forward_refs()
 ProjectConfig.update_forward_refs()
 ChecksConfig.update_forward_refs()
+FixesConfig.update_forward_refs()
+FixConfig.update_forward_refs()
 Stm32Config.update_forward_refs()
 Esp32Config.update_forward_refs()
 

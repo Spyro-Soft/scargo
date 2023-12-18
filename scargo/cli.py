@@ -30,7 +30,7 @@ from scargo.commands.version import scargo_version
 from scargo.config import ScargoTarget
 from scargo.global_values import DESCRIPTION, SCARGO_DEFAULT_CONFIG_FILE
 from scargo.logger import get_logger
-from scargo.path_utils import get_config_file_path
+from scargo.utils.path_utils import get_config_file_path
 
 logger = get_logger()
 

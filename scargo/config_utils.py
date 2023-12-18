@@ -7,10 +7,10 @@ import tomlkit
 
 from scargo import __version__
 from scargo.config import Config, ConfigError, ScargoTarget, Target, parse_config
-from scargo.docker_utils import run_scargo_again_in_docker
 from scargo.global_values import SCARGO_LOCK_FILE
 from scargo.logger import get_logger
-from scargo.path_utils import get_config_file_path
+from scargo.utils.docker_utils import run_scargo_again_in_docker
+from scargo.utils.path_utils import get_config_file_path
 
 logger = get_logger()
 

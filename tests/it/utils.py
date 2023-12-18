@@ -8,8 +8,8 @@ from typer import Typer
 from typer.testing import CliRunner
 
 from scargo.config import Config
-from scargo.docker_utils import prepare_docker
 from scargo.logger import get_logger
+from scargo.utils.docker_utils import prepare_docker
 
 logger = get_logger()
 
