@@ -81,7 +81,10 @@ This section describes possible options which can be set in the scargo.toml file
 -----------------
 **exclude** = (string list)(path to excluded dirs e.g. [])
 
-**description** = (string)(copyright information to be included in source files)
+**description** = (string)(copyright information to be included in source files, can be regex)
+
+[fix.copyright]
+**description** = (string)(copyright  string to use to fix missing copyrights, if not defined description from check.copyright is used)
 
 [check.todo]
 ------------
