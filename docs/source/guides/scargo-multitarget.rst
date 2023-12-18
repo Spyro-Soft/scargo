@@ -38,8 +38,8 @@ e.g.
 
 ::
 
-target = ["stm32", "atsam"] # default target is stm32
-target = ["x86", "atsam", "stm32"] # default target is x86
+    target = ["stm32", "atsam"] # default target is stm32
+    target = ["x86", "atsam", "stm32"] # default target is x86
 
 
 Building a project
@@ -58,7 +58,7 @@ If you want to build a project for a specific target, you can do it by specifyin
     scargo build --target atsam --profile --Release
 
 Flashing and debugging a project
--------------------
+--------------------------------
 As with building the project, if --target option is not specified, default target will be used.
 To flash a target you can run the following command:
 
