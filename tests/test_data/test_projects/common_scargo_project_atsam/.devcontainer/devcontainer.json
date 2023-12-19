@@ -1,0 +1,36 @@
+{
+    "name": "common_scargo_project_atsam_dev",
+    "dockerComposeFile": "docker-compose.yaml",
+    "service": "common_scargo_project_atsam_dev",
+    "workspaceFolder": "/workspace",
+    "customizations": {
+        "vscode": {
+            "settings": {
+                "files.insertFinalNewline": true,
+                "editor.formatOnSave": true,
+                "C_Cpp.default.includePath": [
+                    "${workspaceFolder}/**"
+                ],
+                "cSpell.words": [
+                    "spyro",
+                    "spyrosoft",
+                    "cppcheck",
+                    "lvgl",
+                    "gpio",
+                    "scargo",
+                    "devcontainer",
+                    "usbip",
+                    "cyclomatic",
+                    "microcontroller"
+                ]
+            },
+            "extensions": [
+                "xaver.clang-format",
+                "ms-vscode.cpptools-extension-pack",
+                "streetsidesoftware.code-spell-checker",
+                "ciarant.vscode-structurizr",
+                "coolchyni.beyond-debug"
+            ]
+        }
+    }
+}
