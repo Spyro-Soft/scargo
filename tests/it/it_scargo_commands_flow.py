@@ -36,7 +36,7 @@ class ActiveTestState:
         if self.target_id == ScargoTarget.x86:
             self.obj_dump_path = "objdump"
             self.expected_bin_file_format = "elf64-x86-64"
-        elif self.target_id == ScargoTarget.stm32:
+        elif self.target_id in (ScargoTarget.stm32, ScargoTarget.atsam):
             self.obj_dump_path = "arm-none-eabi-objdump"
             self.expected_bin_file_format = "elf32-littlearm"
         elif self.target_id == ScargoTarget.esp32:
@@ -66,7 +66,7 @@ class ActiveTestState:
         elf_path = Path(target.get_bin_path(bin_name, profile))
         assert elf_path.is_file(), f"File {elf_path} does not exist"
 
-        if self.target_id == ScargoTarget.stm32:
+        if self.target_id in (ScargoTarget.stm32, ScargoTarget.atsam):
             hex_file = elf_path.with_suffix(".hex")
             assert hex_file.is_file(), f"File {hex_file} does not exist"
             bin_file = elf_path.with_suffix(".bin")
@@ -124,6 +124,14 @@ def active_state_esp32_bin() -> ActiveTestState:
     return ActiveTestState(
         target_id=ScargoTarget.esp32,
         proj_name="new_bin_project_esp32",
+    )
+
+
+@pytest.fixture
+def active_state_atsam_bin() -> ActiveTestState:
+    return ActiveTestState(
+        target_id=ScargoTarget.atsam,
+        proj_name="new_bin_project_atsam",
     )
 
 
@@ -228,6 +236,7 @@ def dummy_lib_h() -> Path:
         pytest.lazy_fixture("active_state_x86_bin"),  # type: ignore
         pytest.lazy_fixture("active_state_stm32_bin"),  # type: ignore
         pytest.lazy_fixture("active_state_esp32_bin"),  # type: ignore
+        pytest.lazy_fixture("active_state_atsam_bin"),  # type: ignore
         pytest.lazy_fixture("active_state_x86_path"),  # type: ignore
         pytest.lazy_fixture("active_state_stm32_path"),  # type: ignore
         pytest.lazy_fixture("active_state_esp32_path"),  # type: ignore
@@ -236,6 +245,7 @@ def dummy_lib_h() -> Path:
         "new_bin_project_x86",
         "new_bin_project_stm32",
         "new_bin_project_esp32",
+        "new_bin_project_atsam",
         "copy_project_x86",
         "copy_project_stm32",
         "copy_project_esp32",
@@ -305,8 +315,38 @@ class TestBinProjectFlow:
         if test_state.proj_to_copy_path:
             pytest.skip("This test is only for new project")
 
+        if test_state.target_id == ScargoTarget.atsam:
+            pytest.skip("This test is not for atsam target. See test bellow.")
+
         result = test_state.runner.invoke(cli, ["check"])
         assert result.exit_code == 0
+
+        result = test_state.runner.invoke(cli, ["fix"])
+        assert result.exit_code == 0
+
+    def test_cli_check_and_fix_new_atmel_sam_project(
+        self, test_state: ActiveTestState, setup_project_build_release: None
+    ) -> None:
+        """This test check if call of scargo fix command  for atsam project specifically, the reason is that
+        clang tidy fails on atsam projects because of errors in board support libraries (DFP, CMSIS).
+        """
+        if test_state.proj_to_copy_path and test_state.target_id != ScargoTarget.atsam:
+            pytest.skip("Only for new atsam project")
+
+        result = test_state.runner.invoke(cli, ["check"])
+        assert result.exit_code == 1
+
+        expected_issues = [
+            "clang-format: 0 problems found",
+            "clang-tidy: 1 problems found",
+            "copyright: 0 problems found",
+            "cppcheck: 0 problems found",
+            "cyclomatic: 0 problems found",
+            "pragma: 0 problems found",
+            "todo: 0 problems found",
+        ]
+        for expected_issue in expected_issues:
+            assert expected_issue in result.output
 
         result = test_state.runner.invoke(cli, ["fix"])
         assert result.exit_code == 0
@@ -317,6 +357,9 @@ class TestBinProjectFlow:
         """This test copy files with some format issues from tests/test_data/test_projects/test_files/fix_test_files
         check if for copied files which contains some static code issues call of scargo check command will finish with
         error and if expected errors were mentioned in output"""
+        if test_state.target_id == ScargoTarget.atsam:
+            pytest.skip("Skipping because of clang tidy issues for atsam target")
+
         # Fix everything before copying problematic files
         result = test_state.runner.invoke(cli, ["fix"])
         assert result.exit_code == 0
