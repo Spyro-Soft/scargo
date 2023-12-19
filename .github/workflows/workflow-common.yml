@@ -126,6 +126,7 @@ jobs:
           - esp32
           - x86
           - stm32
+          - atsam
           # optional target, should be added for new tests in case of introducing markers
           # - not esp32 and not x86 and not stm32
     steps:
