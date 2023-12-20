@@ -116,6 +116,7 @@ jobs:
           path: build/test_doc
 
   integration_tests:
+    name: Integration Test - ${{ matrix.target }}
     runs-on: ubuntu-latest
     needs: prepare_matrix
     strategy:

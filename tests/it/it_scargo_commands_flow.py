@@ -342,7 +342,7 @@ class TestBinProjectFlow:
         """This test check if call of scargo fix command  for atsam project specifically, the reason is that
         clang tidy fails on atsam projects because of errors in board support libraries (DFP, CMSIS).
         """
-        if test_state.proj_to_copy_path and test_state.target_id != ScargoTarget.atsam:
+        if test_state.proj_to_copy_path or test_state.target_id != ScargoTarget.atsam:
             pytest.skip("Only for new atsam project")
 
         result = test_state.runner.invoke(cli, ["check"])
