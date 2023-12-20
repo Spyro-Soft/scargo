@@ -328,37 +328,10 @@ class TestBinProjectFlow:
             pytest.skip("This test is only for new project")
 
         if test_state.target_id == ScargoTarget.atsam:
-            pytest.skip("This test is not for atsam target. See test bellow.")
+            pytest.xfail("Clang errors in board support libraries (DFP, CMSIS)")
 
         result = test_state.runner.invoke(cli, ["check"])
         assert result.exit_code == 0
-
-        result = test_state.runner.invoke(cli, ["fix"])
-        assert result.exit_code == 0
-
-    def test_cli_check_and_fix_new_atmel_sam_project(
-        self, test_state: ActiveTestState, setup_project_build_release: None
-    ) -> None:
-        """This test check if call of scargo fix command  for atsam project specifically, the reason is that
-        clang tidy fails on atsam projects because of errors in board support libraries (DFP, CMSIS).
-        """
-        if test_state.proj_to_copy_path or test_state.target_id != ScargoTarget.atsam:
-            pytest.skip("Only for new atsam project")
-
-        result = test_state.runner.invoke(cli, ["check"])
-        assert result.exit_code == 1
-
-        expected_issues = [
-            "clang-format: 0 problems found",
-            "clang-tidy: 1 problems found",
-            "copyright: 0 problems found",
-            "cppcheck: 0 problems found",
-            "cyclomatic: 0 problems found",
-            "pragma: 0 problems found",
-            "todo: 0 problems found",
-        ]
-        for expected_issue in expected_issues:
-            assert expected_issue in result.output
 
         result = test_state.runner.invoke(cli, ["fix"])
         assert result.exit_code == 0
@@ -370,7 +343,7 @@ class TestBinProjectFlow:
         check if for copied files which contains some static code issues call of scargo check command will finish with
         error and if expected errors were mentioned in output"""
         if test_state.target_id == ScargoTarget.atsam:
-            pytest.skip("Skipping because of clang tidy issues for atsam target")
+            pytest.xfail("Clang errors in board support libraries (DFP, CMSIS)")
 
         # Fix everything before copying problematic files
         result = test_state.runner.invoke(cli, ["fix"])

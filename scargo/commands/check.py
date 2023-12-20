@@ -381,10 +381,6 @@ class ClangTidyChecker(CheckerFixer):
         cmd.extend(["--extra-arg", f"-I{path}"])
         path = Path(path, "arm-none-eabi")
         cmd.extend(["--extra-arg", f"-I{path}"])
-        cmd.extend(["-header-filter", "/home/fku/atsam_temp_scargo/atsamproj/src/.*"])
-        print("*********************************************")
-        print(cmd)
-        print("*********************************************")
         return cmd
 
 
