@@ -6,7 +6,7 @@ homepage-url = "www.hello-world.com"
 
 bin_name = "esp32proj"
 target = "esp32"
-build-env = "docker"
+build-env = "native"
 docker-file = ".devcontainer/Dockerfile-custom"
 docker-image-tag = "esp32proj-dev:1.0"
 

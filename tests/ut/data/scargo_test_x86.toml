@@ -6,7 +6,7 @@ homepage-url = "www.hello-world.com"
 
 bin_name = "testproject"
 target = "x86"
-build-env = "docker"
+build-env = "native"
 docker-file = ".devcontainer/Dockerfile-custom"
 docker-image-tag = "testproject-dev:1.0"
 
