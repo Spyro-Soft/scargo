@@ -14,7 +14,6 @@ from typing import List, Optional
 from scargo.config import CHIP_DEFAULTS, Config, ScargoTarget
 from scargo.config_utils import get_target_or_default, prepare_config
 from scargo.logger import get_logger
-from scargo.utils.docker_utils import run_scargo_again_in_docker
 from scargo.utils.sys_utils import find_program_path
 
 logger = get_logger()
@@ -110,8 +109,6 @@ class _ScargoDebug:
 
 
 def scargo_debug(bin_path: Optional[Path], target: Optional[ScargoTarget]) -> None:
-    config = prepare_config(run_in_docker=False)
-    if config.project.is_x86():
-        run_scargo_again_in_docker(config.project, config.project_root)
+    config = prepare_config()
     debug = _ScargoDebug(config, bin_path, target)
     debug.run_debugger()
