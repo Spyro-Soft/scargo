@@ -65,7 +65,7 @@ class _ScargoFlash:
             sys.exit(1)
 
     def _validate_erase_memory(self) -> None:
-        if not self._erase_memory and self._target.id != ScargoTarget.stm32:
+        if self._erase_memory and self._target.id != ScargoTarget.stm32:
             logger.error("--no-erase option is only supported for stm32 projects.")
             sys.exit(1)
 
@@ -107,6 +107,7 @@ class _ScargoFlash:
         gdb_multiarch_path = find_program_path("gdb-multiarch")
 
         bin_path, elf_path = self._get_binary_and_elf_paths()
+        self._check_bin_path(elf_path)
         self._check_bin_path(bin_path)
 
         atsam_helper.generate_gdb_script(Path(".devcontainer"), self._config, bin_path)
@@ -143,13 +144,9 @@ class _ScargoFlash:
 
     def _flash_stm32(self) -> None:
         bin_path, elf_path = self._get_binary_and_elf_paths()
+        self._check_bin_path(elf_path)
         self._check_bin_path(bin_path)
-
         flash_start = hex(self._config.get_stm32_config().flash_start)
-        if not flash_start:
-            logger.error("Flash start address not found in lock file")
-            logger.info("Define flash-start in scargo.toml under stm32 section")
-            sys.exit(1)
 
         if self._erase_memory:
             command = ["sudo", "st-flash"]
