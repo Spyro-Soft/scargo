@@ -6,7 +6,7 @@ import pytest
 from pytest_mock import MockerFixture
 from pytest_subprocess import FakeProcess
 
-from scargo.commands.debug import scargo_debug
+from scargo.commands.debug import EMEDDED_GDB_SETTINGS, scargo_debug
 from tests.ut.utils import get_log_data, get_test_project_config
 
 
@@ -55,7 +55,7 @@ def test_debug_stm32(mock_debug_config: MagicMock, fp: FakeProcess) -> None:
         [
             "gdb-multiarch",
             bin_path.absolute(),
-            "--eval-command=target extended-remote localhost:3333",
+            EMEDDED_GDB_SETTINGS,
         ]
     )
 
@@ -86,7 +86,7 @@ def test_debug_esp32(mock_debug_config: MagicMock, fp: FakeProcess) -> None:
         [
             "xtensa-esp32-elf-gdb",
             bin_path.absolute(),
-            "--eval-command=target extended-remote localhost:3333",
+            EMEDDED_GDB_SETTINGS,
         ]
     )
 
