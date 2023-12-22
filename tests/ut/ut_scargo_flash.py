@@ -356,12 +356,15 @@ def test_flash_esp32_fs(mock_debug_config: MagicMock, fp: FakeProcess) -> None:
 
 @pytest.mark.parametrize("mock_debug_config", ["stm32", "atsam"], indirect=True)
 def test_flash_elf_path_does_not_exist(
-    mock_debug_config: MagicMock, caplog: pytest.LogCaptureFixture
+    mock_debug_config: MagicMock, fp: FakeProcess, caplog: pytest.LogCaptureFixture
 ) -> None:
     profile = "Debug"
     config = mock_debug_config.return_value
     target = config.project.default_target
     elf_path = Path(target.get_bin_path(config.project.name.lower(), profile))
+
+    fp.register(["/usr/bin/which", "openocd"], stdout="openocd")
+    fp.register(["/usr/bin/which", "gdb-multiarch"], stdout="gdb-multiarch")
 
     with pytest.raises(SystemExit):
         scargo_flash(
@@ -378,7 +381,7 @@ def test_flash_elf_path_does_not_exist(
 
 @pytest.mark.parametrize("mock_debug_config", ["stm32", "atsam"], indirect=True)
 def test_flash_bin_path_does_not_exist(
-    mock_debug_config: MagicMock, caplog: pytest.LogCaptureFixture
+    mock_debug_config: MagicMock, fp: FakeProcess, caplog: pytest.LogCaptureFixture
 ) -> None:
     profile = "Debug"
     config = mock_debug_config.return_value
@@ -388,6 +391,9 @@ def test_flash_bin_path_does_not_exist(
 
     elf_path.parent.mkdir(parents=True)
     elf_path.touch()
+
+    fp.register(["/usr/bin/which", "openocd"], stdout="openocd")
+    fp.register(["/usr/bin/which", "gdb-multiarch"], stdout="gdb-multiarch")
 
     with pytest.raises(SystemExit):
         scargo_flash(
