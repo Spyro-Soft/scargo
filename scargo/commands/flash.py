@@ -206,7 +206,10 @@ class _ScargoFlash:
         command = self._build_esp32_flash_command(
             "esptool.py", "write_flash", "@flash_args"
         )
-        subprocess.run(command, check=True)
+        bin_dir = self._config.project_root / self._target.get_bin_dir_path(
+            self._flash_profile
+        )
+        subprocess.run(command, cwd=bin_dir, check=True)
 
     def _build_esp32_flash_command(
         self, tool: str, partition_name: str, extra_args: str
