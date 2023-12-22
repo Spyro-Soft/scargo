@@ -192,19 +192,19 @@ class _ScargoFlash:
         bin_dir_path = self._target.get_bin_dir_path(self._flash_profile)
         bin_path = Path(bin_dir_path, f"{self._config.project.name}.bin")
         command = self._build_esp32_flash_command(
-            "parttool.py", "ota_0", f"--input={bin_path}"
+            "parttool.py", "ota_0", [f"--input={bin_path}"]
         )
         subprocess.run(command, cwd=self._config.project_root, check=True)
 
     def _flash_esp32_fs(self) -> None:
         command = self._build_esp32_flash_command(
-            "parttool.py", "spiffs", "--input=build/spiffs.bin"
+            "parttool.py", "spiffs", ["--input=build/spiffs.bin"]
         )
         subprocess.run(command, cwd=self._config.project_root, check=True)
 
     def _flash_esp32_default(self) -> None:
         command = self._build_esp32_flash_command(
-            "esptool.py", "write_flash", "@flash_args"
+            "esptool.py", None, ["write_flash", "@flash_args"]
         )
         bin_dir = self._config.project_root / self._target.get_bin_dir_path(
             self._flash_profile
@@ -212,7 +212,7 @@ class _ScargoFlash:
         subprocess.run(command, cwd=bin_dir, check=True)
 
     def _build_esp32_flash_command(
-        self, tool: str, partition_name: str, extra_args: str
+        self, tool: str, partition_name: Optional[str], extra_args: List[str]
     ) -> List[str]:
         command = [tool]
         if self._port:
@@ -222,9 +222,9 @@ class _ScargoFlash:
             chip = self._config.get_esp32_config().chip
             command.extend(["--chip", chip])
 
-        command.extend(
-            ["write_partition", f"--partition-name={partition_name}", extra_args]
-        )
+        if partition_name:
+            command.extend(["write_partition", f"--partition-name={partition_name}"])
+        command.extend(extra_args)
         return command
 
 
