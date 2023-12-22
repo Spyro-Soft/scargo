@@ -62,12 +62,13 @@ def build(
         "--target",
         help="Target device. Defaults to first one from toml if not specified.",
     ),
+    all_targets: bool = Option(False, "-a", "--all", help="Build all targets."),
     base_dir: Optional[Path] = BASE_DIR_OPTION,
 ) -> None:
     """Compile sources."""
     if base_dir:
         os.chdir(base_dir)
-    scargo_build(profile, target)
+    scargo_build(profile, target, all_targets)
 
 
 ###############################################################################

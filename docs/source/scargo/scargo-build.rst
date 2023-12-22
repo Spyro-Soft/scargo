@@ -33,6 +33,14 @@ If this option is not used, then the default profile is Debug.
 
 Build project for specified target. Releavant only for multitarget projects.
 
+
+::
+
+-a, --all                      [default: False]
+
+Build project for all targets.
+
+
 ::
 
 -B, --base-dir DIRECTORY
