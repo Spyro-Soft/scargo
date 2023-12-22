@@ -1,0 +1,177 @@
+image: common_scargo_project_atsam-dev:1.0
+stages:
+  - build
+  - test
+  - check
+  - docu
+  - publish
+
+variables:
+  GIT_SUBMODULE_STRATEGY: recursive
+
+.merge_request:
+  rules:
+    - if: $CI_COMMIT_MESSAGE =~ /(?i)^(WIP|Draft:)/
+      when: never
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event" && $CI_MERGE_REQUEST_TITLE =~ /^(WIP|Draft:)/'
+      when: never
+    - when: always
+
+.merge_request_main:
+  rules:
+    - if: $CI_COMMIT_MESSAGE =~ /(?i)^(WIP|Draft:)/
+      when: never
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event" && $CI_MERGE_REQUEST_TITLE =~ /^(WIP|Draft:)/'
+      when: never
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event" && $CI_MERGE_REQUEST_TARGET_BRANCH_NAME =~ /^(master|main)$/'
+      when: always
+    - when: never
+
+workflow:
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+    - if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH'
+#______________________________________________________________________________________________BUILD
+debug:
+  stage: build
+  extends: .merge_request
+  script:
+    - CONAN_LOGIN_USERNAME=ci_user
+    - CONAN_PASSWORD=${CI_JOB_TOKEN}
+    - scargo build --profile Debug
+  artifacts:
+    paths:
+      - build/Debug/bin
+      - build/Debug/lib
+    when: always
+
+#_______________________________________________________________________________________________TEST
+tests:
+  stage: test
+  extends: .merge_request
+  allow_failure: true
+  script:
+    - CONAN_LOGIN_USERNAME=ci_user
+    - CONAN_PASSWORD=${CI_JOB_TOKEN}
+    - scargo test
+  artifacts:
+    paths:
+      - build/tests/ut-coverage.html
+
+#______________________________________________________________________________________________CLANG_FORMAT
+clang format:
+  stage: check
+  extends: .merge_request
+  allow_failure: false
+  script:
+    - scargo check --clang-format
+  artifacts:
+    paths:
+      - build/clang_format.log
+    when: always
+
+#______________________________________________________________________________________________CPPCHECK
+cpp check:
+  stage: check
+  extends: .merge_request
+  allow_failure: false
+  script:
+    - scargo check --cppcheck
+  artifacts:
+    paths:
+      - build/cpp_check.log
+    when: always
+
+#______________________________________________________________________________________________CLANG_TIDY
+clang tidy:
+   stage: check
+   extends: .merge_request
+   allow_failure: true
+   script:
+    - scargo check --clang-tidy
+   artifacts:
+     paths:
+       - build/filtered_compile_commands
+
+#______________________________________________________________________________________________TODO
+todo:
+  stage: check
+  extends: .merge_request
+  allow_failure: true
+  script:
+    - scargo check --todo
+  artifacts:
+    paths:
+      - build/todo.log
+    when: always
+
+#______________________________________________________________________________________________CYCLOMATIC
+cyclomatic:
+  stage: check
+  extends: .merge_request
+  allow_failure: true
+  script:
+    - scargo check --cyclomatic
+  artifacts:
+    paths:
+      - build/cyclomatic.log
+    when: always
+
+#______________________________________________________________________________________________PRAGMA_CHECK
+pragma once:
+  stage: check
+  extends: .merge_request
+  allow_failure: false
+  script:
+    - scargo check --pragma
+  artifacts:
+    paths:
+      - build/pragma_once.log
+    when: always
+
+#______________________________________________________________________________________________COPYRIGHTS
+copy rights:
+  stage: check
+  extends: .merge_request
+  allow_failure: true
+  script:
+    - scargo check --copyright
+  artifacts:
+    paths:
+      - build/copy_rights.log
+    when: always
+
+#______________________________________________________________________________________________DOCU
+docu:
+  stage: docu
+  extends: .merge_request
+  allow_failure: true
+  script:
+    - scargo doc
+  artifacts:
+    paths:
+      - build/doc
+    when: always
+
+#______________________________________________________________________________________________CHECK_TAG
+check_tag:
+  stage: publish
+  extends: .merge_request_main
+  script:
+    - git config --global --add safe.directory "${CI_PROJECT_DIR}"
+    - git fetch --tags
+    - tag=release_$(grep -w "project" scargo.lock -A 3 | grep version | grep -Eo "[[:digit:]]+\.[[:digit:]]+\.[[:digit:]]+")
+    - if [[ $(git tag -l "$tag") ]]; then echo "tag $tag exist"; exit 1; else echo "tag $tag does not exist "; fi
+
+#______________________________________________________________________________________________RELEASING
+releasing:
+  stage: publish
+  image: registry.gitlab.com/gitlab-org/release-cli:latest
+  only:
+    - master
+    - main
+  script:
+    - tag=release_$(grep -w "project" scargo.lock -A 3 | grep version | grep -Eo "[[:digit:]]+\.[[:digit:]]+\.[[:digit:]]+")
+    - echo "this is release"
+    - echo $tag
+    - release-cli create --name "${tag}" --description "${CI_COMMIT_TAG_MESSAGE:-No release notes.}" --tag-name "${tag}"

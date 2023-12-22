@@ -318,8 +318,8 @@ class ClangTidyChecker(CheckerFixer):
 
         if self._config.project.is_esp32():
             cmd = self.__get_cmd_esp32(file_path)
-        elif self._config.project.is_stm32():
-            cmd = self.__get_cmd_stm32(file_path)
+        elif self._config.project.is_stm32() or self._config.project.is_atsam():
+            cmd = self.__get_cmd_arm(file_path)
         elif self._config.project.is_x86():
             cmd = self.__get_cmd_x86(file_path)
 
@@ -369,7 +369,7 @@ class ClangTidyChecker(CheckerFixer):
     def __get_cmd_x86(self, file_path: Path) -> List[str]:
         return ["clang-tidy", str(file_path), "-p", str(self.build_path)]
 
-    def __get_cmd_stm32(self, file_path: Path) -> List[str]:
+    def __get_cmd_arm(self, file_path: Path) -> List[str]:
         cmd = self.__get_cmd_x86(file_path)
         arm_none_eabi_includes = "/opt/gcc-arm-none-eabi/arm-none-eabi/include"
 
@@ -381,7 +381,6 @@ class ClangTidyChecker(CheckerFixer):
         cmd.extend(["--extra-arg", f"-I{path}"])
         path = Path(path, "arm-none-eabi")
         cmd.extend(["--extra-arg", f"-I{path}"])
-
         return cmd
 
 

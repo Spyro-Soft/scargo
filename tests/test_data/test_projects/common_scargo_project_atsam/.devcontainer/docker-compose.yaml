@@ -1,0 +1,26 @@
+###
+# @copyright Copyright (C) 2022 Spyrosoft Solutions. All rights reserved.
+# THIS FILE WAS GENERATED AUTOMATICALLY. DO NOT CHANGE IT.
+###
+version: '3.9'
+
+services:
+  common_scargo_project_atsam_dev:
+    image: common_scargo_project_atsam-dev:1.0
+    platform: linux/amd64
+    build:
+      context: .
+      # in case of missing .env file (eg. CI/CD) system will use default values
+      args:
+        USER_NAME: ${USER_NAME:-user}
+        USER_PASSWORD: ${USER_PASSWORD:-user}
+        GID_NUMBER: ${GID_NUMBER:-1000}
+        UID_NUMBER: ${UID_NUMBER:-1000}
+        DOCKER_IMAGE_ROOT: ${DOCKER_IMAGE_ROOT:-ubuntu:20.04}
+        CONAN_LOGIN_USERNAME: ${CONAN_LOGIN_USERNAME:-""}
+        CONAN_PASSWORD: ${CONAN_PASSWORD:-""}
+    privileged: true
+    volumes:
+      - ..:/workspace
+      - /dev:/dev
+    command: sleep infinity

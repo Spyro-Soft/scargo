@@ -25,6 +25,7 @@ jobs:
           echo "matrix=$envs" >> $GITHUB_OUTPUT
 
   check:
+    name: Checks
     runs-on: ubuntu-latest
     needs: prepare_matrix
     strategy:
@@ -65,6 +66,7 @@ jobs:
         - name: Check typing with mypy
           run: mypy scargo tests common_dev run.py clean.py
   unit_tests:
+    name: Unit Tests
     runs-on: ubuntu-latest
     needs: prepare_matrix
     strategy:
@@ -116,6 +118,7 @@ jobs:
           path: build/test_doc
 
   integration_tests:
+    name: Integration Tests - ${{ matrix.target }}
     runs-on: ubuntu-latest
     needs: prepare_matrix
     strategy:
@@ -126,6 +129,7 @@ jobs:
           - esp32
           - x86
           - stm32
+          - atsam
           # optional target, should be added for new tests in case of introducing markers
           # - not esp32 and not x86 and not stm32
     steps:
@@ -181,6 +185,7 @@ jobs:
           name: $report_file_name
           path: build/test_doc
   documentation:
+    name: Generate documentation
     runs-on: ubuntu-latest
     needs: prepare_matrix
     strategy:

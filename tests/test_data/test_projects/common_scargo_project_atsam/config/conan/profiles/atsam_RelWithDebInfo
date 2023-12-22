@@ -1,0 +1,19 @@
+[settings]
+os=baremetal
+arch=armv6
+compiler=gcc
+compiler.version=10
+compiler.libcxx=libstdc++
+compiler.cppstd=17
+build_type=RelWithDebInfo
+
+[buildenv]
+SCARGO_BUILD_TARGET=atsam
+CONAN_CMAKE_FIND_ROOT_PATH=/opt/gcc-arm-none-eabi/lib/
+CC=arm-none-eabi-gcc
+CXX=arm-none-eabi-g++
+
+[conf]
+tools.build:cflags=["-Wall -Wextra -O2 -g -DNDEBUG"]
+tools.build:cxxflags=["-Wall -Wextra -O2 -g -DNDEBUG"]
+tools.cmake.cmaketoolchain:user_toolchain=["{{ os.path.join(profile_dir, "arm_gcc_toolchain.cmake") }}"]

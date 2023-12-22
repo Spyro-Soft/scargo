@@ -1,0 +1,2 @@
+# user can add his docker code below which will be integrated with
+# main docker file and not overwritten by scargo update

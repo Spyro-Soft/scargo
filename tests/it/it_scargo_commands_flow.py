@@ -36,7 +36,7 @@ class ActiveTestState:
         if self.target_id == ScargoTarget.x86:
             self.obj_dump_path = "objdump"
             self.expected_bin_file_format = "elf64-x86-64"
-        elif self.target_id == ScargoTarget.stm32:
+        elif self.target_id in (ScargoTarget.stm32, ScargoTarget.atsam):
             self.obj_dump_path = "arm-none-eabi-objdump"
             self.expected_bin_file_format = "elf32-littlearm"
         elif self.target_id == ScargoTarget.esp32:
@@ -66,7 +66,7 @@ class ActiveTestState:
         elf_path = Path(target.get_bin_path(bin_name, profile))
         assert elf_path.is_file(), f"File {elf_path} does not exist"
 
-        if self.target_id == ScargoTarget.stm32:
+        if self.target_id in (ScargoTarget.stm32, ScargoTarget.atsam):
             hex_file = elf_path.with_suffix(".hex")
             assert hex_file.is_file(), f"File {hex_file} does not exist"
             bin_file = elf_path.with_suffix(".bin")
@@ -128,6 +128,14 @@ def active_state_esp32_bin() -> ActiveTestState:
 
 
 @pytest.fixture
+def active_state_atsam_bin() -> ActiveTestState:
+    return ActiveTestState(
+        target_id=ScargoTarget.atsam,
+        proj_name="new_bin_project_atsam",
+    )
+
+
+@pytest.fixture
 def active_state_x86_path() -> ActiveTestState:
     project_path = TEST_DATA_PATH / "test_projects/common_scargo_project"
     return ActiveTestState(
@@ -152,6 +160,16 @@ def active_state_stm32_path() -> ActiveTestState:
     project_path = TEST_DATA_PATH / "test_projects/common_scargo_project_stm32"
     return ActiveTestState(
         target_id=ScargoTarget.stm32,
+        proj_name=project_path.name,
+        proj_to_copy_path=project_path,
+    )
+
+
+@pytest.fixture
+def active_state_atsam_path() -> ActiveTestState:
+    project_path = TEST_DATA_PATH / "test_projects/common_scargo_project_atsam"
+    return ActiveTestState(
+        target_id=ScargoTarget.atsam,
         proj_name=project_path.name,
         proj_to_copy_path=project_path,
     )
@@ -228,17 +246,21 @@ def dummy_lib_h() -> Path:
         pytest.lazy_fixture("active_state_x86_bin"),  # type: ignore
         pytest.lazy_fixture("active_state_stm32_bin"),  # type: ignore
         pytest.lazy_fixture("active_state_esp32_bin"),  # type: ignore
+        pytest.lazy_fixture("active_state_atsam_bin"),  # type: ignore
         pytest.lazy_fixture("active_state_x86_path"),  # type: ignore
         pytest.lazy_fixture("active_state_stm32_path"),  # type: ignore
         pytest.lazy_fixture("active_state_esp32_path"),  # type: ignore
+        pytest.lazy_fixture("active_state_atsam_path"),  # type: ignore
     ],
     ids=[
         "new_bin_project_x86",
         "new_bin_project_stm32",
         "new_bin_project_esp32",
+        "new_bin_project_atsam",
         "copy_project_x86",
         "copy_project_stm32",
         "copy_project_esp32",
+        "copy_project_atsam",
     ],
     scope="session",
     indirect=True,
@@ -305,6 +327,9 @@ class TestBinProjectFlow:
         if test_state.proj_to_copy_path:
             pytest.skip("This test is only for new project")
 
+        if test_state.target_id == ScargoTarget.atsam:
+            pytest.xfail("Clang errors in board support libraries (DFP, CMSIS)")
+
         result = test_state.runner.invoke(cli, ["check"])
         assert result.exit_code == 0
 
@@ -317,6 +342,9 @@ class TestBinProjectFlow:
         """This test copy files with some format issues from tests/test_data/test_projects/test_files/fix_test_files
         check if for copied files which contains some static code issues call of scargo check command will finish with
         error and if expected errors were mentioned in output"""
+        if test_state.target_id == ScargoTarget.atsam:
+            pytest.xfail("Clang errors in board support libraries (DFP, CMSIS)")
+
         # Fix everything before copying problematic files
         result = test_state.runner.invoke(cli, ["fix"])
         assert result.exit_code == 0
