@@ -9,6 +9,7 @@ from pytest_subprocess import FakeProcess
 
 from scargo.commands.build import scargo_build
 from scargo.config import Config, Target
+from scargo.utils.conan_utils import DEFAULT_PROFILES
 from tests.ut.utils import get_log_data, get_test_project_config
 
 
@@ -49,9 +50,7 @@ def register_build_cmds(
     fp.register(["cp", "-r", "-l", "-f", f"{copy_dir_path}/*", "."])
 
 
-@pytest.mark.parametrize(
-    "profile", ["Debug", "Release", "MinSizeRel", "RelWithDebInfo"]
-)
+@pytest.mark.parametrize("profile", DEFAULT_PROFILES)
 def test_scargo_build_dir_exist(
     profile: str, fp: FakeProcess, fs: FakeFilesystem, mock_prepare_config: MagicMock
 ) -> None:

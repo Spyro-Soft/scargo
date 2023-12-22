@@ -10,6 +10,7 @@ from scargo.commands.new import scargo_new
 from scargo.commands.update import scargo_update
 from scargo.config import ScargoTarget
 from scargo.global_values import SCARGO_DEFAULT_CONFIG_FILE
+from scargo.utils.conan_utils import DEFAULT_PROFILES
 from tests.ut.utils import get_all_files_recursively
 
 TEST_PROJECT_NAME = "test_project"
@@ -48,7 +49,7 @@ def get_expected_files(target: List[ScargoTarget]) -> Set[str]:
     for t in target:
         if len(target) > 1:
             project_files.add(f"src/{t.value}-src.cmake")
-        for profile in ["Debug", "MinSizeRel", "Release", "RelWithDebInfo"]:
+        for profile in DEFAULT_PROFILES:
             project_files.add(f"config/conan/profiles/{t.value}_{profile}")
 
     if ScargoTarget.atsam in target:

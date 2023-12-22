@@ -41,7 +41,7 @@ def test_debug_x86(mock_debug_config: MagicMock, fp: FakeProcess) -> None:
 
 
 @pytest.mark.parametrize("mock_debug_config", ["atsam", "stm32"], indirect=True)
-def test_debug_stm32(mock_debug_config: MagicMock, fp: FakeProcess) -> None:
+def test_debug_arm(mock_debug_config: MagicMock, fp: FakeProcess) -> None:
     config = mock_debug_config.return_value
     target = config.project.default_target
     bin_path = Path(target.get_bin_path(config.project.name.lower()))
