@@ -6,7 +6,7 @@ homepage-url = "www.hello-world.com"
 
 bin_name = "all_targets"
 target = ["atsam", "stm32", "x86", "esp32"]
-build-env = "docker"
+build-env = "native"
 docker-file = ".devcontainer/Dockerfile-custom"
 docker-image-tag = "all_targets-dev:1.0"
 

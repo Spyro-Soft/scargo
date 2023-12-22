@@ -19,6 +19,9 @@ from scargo.utils.sys_utils import find_program_path
 logger = get_logger()
 
 
+EMEDDED_GDB_SETTINGS = "--eval-command=target extended-remote localhost:3333"
+
+
 class _ScargoDebug:
     SUPPORTED_TARGETS = ["x86", "stm32", "esp32", "atsam"]
 
@@ -72,7 +75,7 @@ class _ScargoDebug:
                 [
                     gdb_bin,
                     self._bin_path,
-                    "--eval-command=target extended-remote localhost:3333",
+                    EMEDDED_GDB_SETTINGS,
                 ],
                 check=True,
             )
