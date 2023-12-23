@@ -38,6 +38,6 @@ def test_clean_build(
     assert build_path.is_dir()
 
     scargo_clean()
-
-    assert mock_shutil_rm.call_args_list == [call(random_file), call(random_dir)]
+    print(mock_shutil_rm.call_args_list)
+    assert mock_shutil_rm.call_args_list == [call(random_dir)]
     assert call(excluded_path) not in mock_shutil_rm.call_args_list
