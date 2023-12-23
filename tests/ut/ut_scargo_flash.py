@@ -207,25 +207,6 @@ def test_flash_stm32_erase_memory_port_defined(
     )
 
 
-@pytest.mark.parametrize("mock_debug_config", ["atsam", "esp32"], indirect=True)
-def test_flash_erase_memory_not_stm32(
-    mock_debug_config: MagicMock, fp: FakeProcess, caplog: pytest.LogCaptureFixture
-) -> None:
-    with pytest.raises(SystemExit):
-        scargo_flash(
-            "Debug",
-            port=None,
-            target=None,
-            app=False,
-            file_system=False,
-            erase_memory=True,
-        )
-    assert (
-        "ERROR",
-        "--no-erase option is only supported for stm32 projects.",
-    ) in get_log_data(caplog.records)
-
-
 @pytest.mark.parametrize("mock_debug_config", ["atsam"], indirect=True)
 @pytest.mark.parametrize("profile", DEFAULT_PROFILES)
 def test_flash_atsam(
