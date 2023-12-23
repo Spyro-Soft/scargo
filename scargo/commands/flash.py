@@ -65,7 +65,7 @@ class _ScargoFlash:
             sys.exit(1)
 
     def _validate_erase_memory(self) -> None:
-        if self._erase_memory and self._target.id != ScargoTarget.stm32:
+        if not self._erase_memory and self._target.id != ScargoTarget.stm32:
             logger.error("--no-erase option is only supported for stm32 projects.")
             sys.exit(1)
 
