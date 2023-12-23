@@ -65,7 +65,7 @@ class _ScargoFlash:
             sys.exit(1)
 
     def _validate_erase_memory(self) -> None:
-        if not self._erase_memory and self._target.id != ScargoTarget.stm32:
+        if self._erase_memory and self._target.id != ScargoTarget.stm32:
             logger.info(f"--no-erase has not effect on {self._target.id}")
 
     def _get_first_supported_target(self) -> Target:
