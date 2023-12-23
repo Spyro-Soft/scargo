@@ -250,7 +250,7 @@ def flash(
     ),
     app: bool = Option(False, "--app", help="Flash app only"),
     file_system: bool = Option(False, "--fs", help="Flash filesystem only"),
-    no_erase: bool = Option(True, help="(stm32 only) Don't erase target memory"),
+    no_erase: bool = Option(False, help="(stm32 only) Don't erase target memory"),
     base_dir: Optional[Path] = BASE_DIR_OPTION,
 ) -> None:
     """Flash the target."""
