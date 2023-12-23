@@ -95,7 +95,7 @@ ORGANIZATION_NAME="My Organization"
 key_bits_length="4096"
 root_ca_password=${CUSTOM_PASSWD:="1234"}
 intermediate_ca_password=${CUSTOM_PASSWD:="1234"}
-days_till_expire=365
+days_till_expire=36500
 ca_chain_prefix="azure-iot-test-only.chain.ca"
 intermediate_ca_dir="."
 openssl_root_config_file="${SCRIPT_DIR}/openssl_root_ca.cnf"
