@@ -8,6 +8,9 @@ from scargo.logger import get_logger
 logger = get_logger()
 
 
+DEFAULT_PROFILES = ["Debug", "Release", "RelWithDebInfo", "MinSizeRel"]
+
+
 def conan_add_remote(project_path: Path, config: Config) -> None:
     """
     Add conan remote repository

@@ -65,9 +65,8 @@ class _ScargoFlash:
             sys.exit(1)
 
     def _validate_erase_memory(self) -> None:
-        if not self._erase_memory and self._target.id != ScargoTarget.stm32:
-            logger.error("--no-erase option is only supported for stm32 projects.")
-            sys.exit(1)
+        if self._erase_memory and self._target.id != ScargoTarget.stm32:
+            logger.info(f"--no-erase has not effect on {self._target.id}")
 
     def _get_first_supported_target(self) -> Target:
         for target in self._config.project.target:
@@ -107,6 +106,7 @@ class _ScargoFlash:
         gdb_multiarch_path = find_program_path("gdb-multiarch")
 
         bin_path, elf_path = self._get_binary_and_elf_paths()
+        self._check_bin_path(elf_path)
         self._check_bin_path(bin_path)
 
         atsam_helper.generate_gdb_script(Path(".devcontainer"), self._config, bin_path)
@@ -143,13 +143,9 @@ class _ScargoFlash:
 
     def _flash_stm32(self) -> None:
         bin_path, elf_path = self._get_binary_and_elf_paths()
+        self._check_bin_path(elf_path)
         self._check_bin_path(bin_path)
-
         flash_start = hex(self._config.get_stm32_config().flash_start)
-        if not flash_start:
-            logger.error("Flash start address not found in lock file")
-            logger.info("Define flash-start in scargo.toml under stm32 section")
-            sys.exit(1)
 
         if self._erase_memory:
             command = ["sudo", "st-flash"]
@@ -192,24 +188,27 @@ class _ScargoFlash:
         bin_dir_path = self._target.get_bin_dir_path(self._flash_profile)
         bin_path = Path(bin_dir_path, f"{self._config.project.name}.bin")
         command = self._build_esp32_flash_command(
-            "parttool.py", "ota_0", f"--input={bin_path}"
+            "parttool.py", "ota_0", [f"--input={bin_path}"]
         )
         subprocess.run(command, cwd=self._config.project_root, check=True)
 
     def _flash_esp32_fs(self) -> None:
         command = self._build_esp32_flash_command(
-            "parttool.py", "spiffs", "--input=build/spiffs.bin"
+            "parttool.py", "spiffs", ["--input=build/spiffs.bin"]
         )
         subprocess.run(command, cwd=self._config.project_root, check=True)
 
     def _flash_esp32_default(self) -> None:
         command = self._build_esp32_flash_command(
-            "esptool.py", "write_flash", "@flash_args"
+            "esptool.py", None, ["write_flash", "@flash_args"]
         )
-        subprocess.run(command, check=True)
+        bin_dir = self._config.project_root / self._target.get_bin_dir_path(
+            self._flash_profile
+        )
+        subprocess.run(command, cwd=bin_dir, check=True)
 
     def _build_esp32_flash_command(
-        self, tool: str, partition_name: str, extra_args: str
+        self, tool: str, partition_name: Optional[str], extra_args: List[str]
     ) -> List[str]:
         command = [tool]
         if self._port:
@@ -219,9 +218,9 @@ class _ScargoFlash:
             chip = self._config.get_esp32_config().chip
             command.extend(["--chip", chip])
 
-        command.extend(
-            ["write_partition", f"--partition-name={partition_name}", extra_args]
-        )
+        if partition_name:
+            command.extend(["write_partition", f"--partition-name={partition_name}"])
+        command.extend(extra_args)
         return command
 
 

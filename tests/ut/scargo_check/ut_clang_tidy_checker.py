@@ -7,6 +7,7 @@ from pytest_subprocess import FakeProcess
 
 from scargo.commands.check import ClangTidyChecker
 from scargo.config import Config
+from scargo.utils.conan_utils import DEFAULT_PROFILES
 from tests.ut.utils import get_log_data
 
 CLANG_TIDY_COMMAND = ["clang-tidy", "foo/bar.hpp"]
@@ -15,29 +16,21 @@ CLANG_TIDY_NORMAL_OUTPUT = "everything is tidy!"
 CLANG_TIDY_ERROR_OUTPUT = "error: something is not tidy!"
 
 
-@pytest.mark.parametrize(
-    "build_path_str",
-    [
-        "build/x86/Debug",
-        "build/x86/Release",
-        "build/x86/RelWithDebInfo",
-        "build/x86/MinSizeRel",
-    ],
-)
+@pytest.mark.parametrize("profile", DEFAULT_PROFILES)
 def test_check_clang_tidy_pass(
-    build_path_str: str,
+    profile: str,
     caplog: pytest.LogCaptureFixture,
     config: Config,
     mock_find_files: MagicMock,
     fake_process: FakeProcess,
 ) -> None:
-    build_path = Path(build_path_str)
+    build_path = Path("build/x86", profile)
     build_path.mkdir(parents=True)
     compilation_db_path = Path(build_path, "compile_commands.json")
     compilation_db_path.touch(exist_ok=True)
 
     fake_process.register(
-        CLANG_TIDY_COMMAND + ["-p", build_path_str], stdout=CLANG_TIDY_NORMAL_OUTPUT
+        CLANG_TIDY_COMMAND + ["-p", build_path], stdout=CLANG_TIDY_NORMAL_OUTPUT
     )
     result = ClangTidyChecker(config).check()
     assert result == 0
