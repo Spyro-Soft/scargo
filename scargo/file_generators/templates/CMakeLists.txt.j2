@@ -19,7 +19,8 @@ string(TOUPPER $ENV{SCARGO_BUILD_TARGET} SCARGO_BUILD_TARGET)
 add_definitions(-D${SCARGO_BUILD_TARGET})
 
 {% if config.project.is_esp32()  %}
-if(${SCARGO_BUILD_TARGET} STREQUAL ESP32)
+string(FIND "${SCARGO_BUILD_TARGET}" "ESP32" position)
+if(NOT position EQUAL -1)
   include($ENV{IDF_PATH}/tools/cmake/project.cmake)
   set(CMAKE_CXX_STANDARD {{ config.project.cxxstandard }})
   set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} $ENV{WORKAROUND_FOR_ESP32_C_FLAGS}")
