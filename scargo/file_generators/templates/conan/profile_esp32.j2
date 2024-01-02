@@ -14,6 +14,7 @@ WORKAROUND_FOR_ESP32_CXX_FLAGS={{ config.project.cxxflags if config.project.cxxf
 
 [conf]
 tools.cmake.cmaketoolchain:generator=Ninja
+tools.cmake.cmaketoolchain:toolchain_file=${IDF_PATH}/tools/cmake/toolchain-{{ config.esp32.chip|lower }}.cmake
 {% if config.project.max_build_jobs != None %}
 tools.build:jobs={{config.project.max_build_jobs}}
 {% endif %}
