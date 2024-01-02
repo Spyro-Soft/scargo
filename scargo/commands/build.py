@@ -6,6 +6,7 @@
 import subprocess
 import sys
 from pathlib import Path
+from shutil import copytree
 from typing import List, Optional
 
 from scargo.config import Config, ScargoTarget, Target
@@ -95,11 +96,10 @@ def _scargo_build_targets(config: Config, profile: str, targets: List[Target]) -
             logger.info("Copying artifacts...")
             # This is a workaround so that different profiles can work together with conan
             # Conan always calls CMake with '
-            subprocess.run(
-                f"cp -r -l -f {build_dir}/build/{config.profiles[profile].cmake_build_type}/* .",
-                cwd=build_dir,
-                shell=True,
-                check=True,
+            copytree(
+                f"{build_dir}/build/{config.profiles[profile].cmake_build_type}",
+                build_dir,
+                dirs_exist_ok=True,
             )
             logger.info("Artifacts copied")
 

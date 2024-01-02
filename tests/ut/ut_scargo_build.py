@@ -29,7 +29,6 @@ def register_build_cmds(
 ) -> None:
     profile_name = f"{target.id}_{profile}"
     profile_path = f"./config/conan/profiles/{profile_name}"
-    copy_dir_path = Path(build_dir, "build", profile)
     fp.register(
         [
             "conan",
@@ -47,7 +46,6 @@ def register_build_cmds(
         ["conan", "build", ".", "-pr", profile_path, "-of", build_dir],
         returncode=int(build_fails),
     )
-    fp.register(["cp", "-r", "-l", "-f", f"{copy_dir_path}/*", "."])
 
 
 @pytest.mark.parametrize("profile", DEFAULT_PROFILES)
@@ -58,6 +56,8 @@ def test_scargo_build_dir_exist(
     target = config.project.default_target
     build_dir = Path(target.get_profile_build_dir(profile))
     Path("CMakeLists.txt").touch()
+    conan_build_dir = Path(build_dir, "build", profile)
+    conan_build_dir.mkdir(parents=True)
 
     register_common_commands(fp)
     register_build_cmds(fp, target, profile, build_dir)
@@ -116,6 +116,8 @@ def test_scargo_build_all_targets(
         build_dir = Path.cwd() / target.get_profile_build_dir(profile)
         build_dirs.append(build_dir)
         register_build_cmds(fp, target, profile, build_dir)
+        conan_build_dir = Path(build_dir, "build", profile)
+        conan_build_dir.mkdir(parents=True)
 
     scargo_build(profile, None, all_targets=True)
     for build_dir in build_dirs:
