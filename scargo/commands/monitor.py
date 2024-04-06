@@ -92,7 +92,6 @@ class SerialReadThread(threading.Thread):
                 print(s.decode())
         except Exception as e:  # pylint: disable=broad-except
             logger.error("Unexpected error: %s", e)
-            self.stop()
 
     def stop(self) -> None:
         """Stop the infinit loop"""
