@@ -248,7 +248,7 @@ def scargo_flash(
     app: bool,
     file_system: bool,
     erase_memory: bool,
-    bank: Optional[int],
+    bank: Optional[int] = None,
 ) -> None:
     flasher = _ScargoFlash(
         flash_profile, port, target, app, file_system, erase_memory, bank
