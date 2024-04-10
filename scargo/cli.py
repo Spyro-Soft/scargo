@@ -21,6 +21,7 @@ from scargo.commands.docker import (
 from scargo.commands.fix import scargo_fix
 from scargo.commands.flash import scargo_flash
 from scargo.commands.gen import scargo_gen
+from scargo.commands.monitor import scargo_monitor
 from scargo.commands.new import scargo_new
 from scargo.commands.publish import scargo_publish
 from scargo.commands.run import scargo_run
@@ -267,6 +268,30 @@ def flash(
 ###############################################################################
 
 
+@cli.command()
+def monitor(
+    port: Optional[str] = Option(
+        None,
+        "-p",
+        "--port",
+        help="port where the serial monitor will be run"
+        " connected to, e.g. /dev/ttyUSB0",
+    ),
+    baudrate: Optional[int] = Option(
+        None,
+        "-b",
+        "--baudrate",
+        help="baudrate, default is 115200",
+    ),
+    base_dir: Optional[Path] = BASE_DIR_OPTION,
+) -> None:
+    """Monitor the target over serial port"""
+    if base_dir:
+        os.chdir(base_dir)
+    scargo_monitor(port, baudrate)
+
+
+###############################################################################
 @cli.command()
 def gen(
     profile: str = Option("Debug", "--profile", "-p"),
