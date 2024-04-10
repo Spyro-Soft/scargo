@@ -28,6 +28,7 @@ To see all options for a particular command, append ``-h`` to the command name. 
    docker              Manage the docker environment for the project
    fix                 Fix violations reported by the command `check`.
    flash               Flash the target.
+   monitor             Connect and monitor the serial interface.
    gen                 Manage the auto file generator
    new                 Create a new project template.
    publish             Upload conan pkg to repo
@@ -52,6 +53,7 @@ Scargo commands reference
    Docker command <scargo-docker>
    Fix command <scargo-fix>
    Flash command <scargo-flash>
+   Monitor command <scargo-monitor>
    Gen command <scargo-gen>
    New command <scargo-new>
    Publish command <scargo-publish>
