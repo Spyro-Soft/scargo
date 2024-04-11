@@ -21,6 +21,7 @@ from scargo.commands.docker import (
 from scargo.commands.fix import scargo_fix
 from scargo.commands.flash import scargo_flash
 from scargo.commands.gen import scargo_gen
+from scargo.commands.monitor import scargo_monitor
 from scargo.commands.new import scargo_new
 from scargo.commands.publish import scargo_publish
 from scargo.commands.run import scargo_run
@@ -251,17 +252,46 @@ def flash(
     app: bool = Option(False, "--app", help="Flash app only"),
     file_system: bool = Option(False, "--fs", help="Flash filesystem only"),
     no_erase: bool = Option(False, help="(stm32 only) Don't erase target memory"),
+    bank: Optional[int] = Option(
+        None,
+        "--bank",
+        help="(esp32 only) Provide app flasg bank number for chosen target e.g. --bank 0",
+    ),
     base_dir: Optional[Path] = BASE_DIR_OPTION,
 ) -> None:
     """Flash the target."""
     if base_dir:
         os.chdir(base_dir)
-    scargo_flash(flash_profile, port, target, app, file_system, not no_erase)
+    scargo_flash(flash_profile, port, target, app, file_system, not no_erase, bank)
 
 
 ###############################################################################
 
 
+@cli.command()
+def monitor(
+    port: Optional[str] = Option(
+        None,
+        "-p",
+        "--port",
+        help="port where the serial monitor will be run"
+        " connected to, e.g. /dev/ttyUSB0",
+    ),
+    baudrate: Optional[int] = Option(
+        None,
+        "-b",
+        "--baudrate",
+        help="baudrate, default is 115200",
+    ),
+    base_dir: Optional[Path] = BASE_DIR_OPTION,
+) -> None:
+    """Monitor the target over serial port"""
+    if base_dir:
+        os.chdir(base_dir)
+    scargo_monitor(port, baudrate)
+
+
+###############################################################################
 @cli.command()
 def gen(
     profile: str = Option("Debug", "--profile", "-p"),

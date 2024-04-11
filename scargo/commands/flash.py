@@ -39,12 +39,14 @@ class _ScargoFlash:
         app: bool,
         file_system: bool,
         erase_memory: bool,
+        bank: Optional[int],
     ):
         self._flash_profile = flash_profile
         self._port = port
         self._app = app
         self._file_system = file_system
         self._erase_memory = erase_memory
+        self._bank = bank
 
         self._config = prepare_config()
         self._target = self._initialize_target(target)
@@ -137,6 +139,10 @@ class _ScargoFlash:
                 self._flash_esp32_fs()
             else:
                 self._flash_esp32_default()
+
+            if self._bank is not None:
+                self._switch_bank_esp32()
+
         except subprocess.CalledProcessError as e:
             logger.error("Failed to flash esp32 target: %s", e.stderr)
             sys.exit(1)
@@ -223,6 +229,17 @@ class _ScargoFlash:
         command.extend(extra_args)
         return command
 
+    def _switch_bank_esp32(self) -> None:
+        command = ["otatool.py", "switch_ota_partition", "--slot", str(self._bank)]
+
+        try:
+            logger.info("Bank switching to: [%d]", self._bank)
+            subprocess.run(command, cwd=self._config.project_root, check=True)
+        except subprocess.CalledProcessError as e:
+            logger.error("Command failed with return code %s", str(e.returncode))
+        except Exception as e:  # pylint: disable=broad-except
+            logger.error("An error occurred: %s", str(e))
+
 
 def scargo_flash(
     flash_profile: str,
@@ -231,6 +248,9 @@ def scargo_flash(
     app: bool,
     file_system: bool,
     erase_memory: bool,
+    bank: Optional[int] = None,
 ) -> None:
-    flasher = _ScargoFlash(flash_profile, port, target, app, file_system, erase_memory)
+    flasher = _ScargoFlash(
+        flash_profile, port, target, app, file_system, erase_memory, bank
+    )
     flasher.flash_target()

@@ -310,7 +310,7 @@ def run_mypy() -> None:
 
 def main() -> None:  # pylint: disable=R0912
     args = get_cmdline_arguments()
-    if not len(sys.argv) > 1:
+    if len(sys.argv) <= 1:
         args.run_all = True
 
     if args.run_all:
