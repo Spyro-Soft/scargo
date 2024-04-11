@@ -47,13 +47,20 @@ Flash app only. Releavant only for esp32 projects.
 
 --fs           [default: false]
 
-Flash filesystem only. Releavant only for esp32 projects
+Flash filesystem only. Relevant only for esp32 projects
 
 ::
 
 --no-erase           [default: false]
 
-Don't erase target memory. Releavant only for stm32 projects
+Don't erase target memory. Relevant only for stm32 projects
+
+::
+
+--bank
+
+Switch between app flash banks. If the bank is not defined then no switch action will be done. Relevant only for stm32 projects
+Example usage:  scargo flash --bank 0
 
 ::
 

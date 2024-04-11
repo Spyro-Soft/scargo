@@ -32,7 +32,7 @@ def test_flash_project_unsupported_target(
     mock_debug_config: MagicMock, caplog: pytest.LogCaptureFixture
 ) -> None:
     with pytest.raises(SystemExit):
-        scargo_flash("Debug", None, None, False, False, False)
+        scargo_flash("Debug", None, None, False, False, False, None)
     assert (
         "ERROR",
         "Project does not contain target that supports flashing",
@@ -43,7 +43,7 @@ def test_flash_unsupported_target_argument(
     mock_debug_config: MagicMock, caplog: pytest.LogCaptureFixture
 ) -> None:
     with pytest.raises(SystemExit):
-        scargo_flash("Debug", None, ScargoTarget.x86, False, False, False)
+        scargo_flash("Debug", None, ScargoTarget.x86, False, False, False, None)
     assert (
         "ERROR",
         "Flash command not supported for this target yet.",
@@ -54,7 +54,7 @@ def test_flash_target_argument_not_in_config(
     mock_debug_config: MagicMock, caplog: pytest.LogCaptureFixture
 ) -> None:
     with pytest.raises(SystemExit):
-        scargo_flash("Debug", None, ScargoTarget.stm32, False, False, False)
+        scargo_flash("Debug", None, ScargoTarget.stm32, False, False, False, None)
     assert (
         "ERROR",
         "Target stm32 not defined in scargo toml",
@@ -93,6 +93,7 @@ def test_flash_stm32(
         app=False,
         file_system=False,
         erase_memory=False,
+        bank=None,
     )
 
 
@@ -130,6 +131,7 @@ def test_flash_stm32_port_defined(
         app=False,
         file_system=False,
         erase_memory=False,
+        bank=None,
     )
 
 
@@ -166,6 +168,7 @@ def test_flash_stm32_erase_memory(
         app=False,
         file_system=False,
         erase_memory=True,
+        bank=None,
     )
 
 
@@ -204,6 +207,7 @@ def test_flash_stm32_erase_memory_port_defined(
         app=False,
         file_system=False,
         erase_memory=True,
+        bank=None,
     )
 
 
@@ -258,6 +262,7 @@ def test_flash_esp32_default(
         app=False,
         file_system=False,
         erase_memory=False,
+        bank=None,
     )
 
 
@@ -284,6 +289,7 @@ def test_flash_esp32_port_defined(
         app=False,
         file_system=False,
         erase_memory=False,
+        bank=None,
     )
 
 
@@ -311,6 +317,7 @@ def test_flash_esp32_app(mock_debug_config: MagicMock, fp: FakeProcess) -> None:
         app=True,
         file_system=False,
         erase_memory=False,
+        bank=None,
     )
 
 
@@ -332,6 +339,7 @@ def test_flash_esp32_fs(mock_debug_config: MagicMock, fp: FakeProcess) -> None:
         app=False,
         file_system=True,
         erase_memory=False,
+        bank=None,
     )
 
 
@@ -355,6 +363,7 @@ def test_flash_elf_path_does_not_exist(
             app=False,
             file_system=False,
             erase_memory=False,
+            bank=None,
         )
     log_data = get_log_data(caplog.records)
     assert ("ERROR", f"{elf_path.absolute()} does not exist") in log_data
@@ -384,6 +393,7 @@ def test_flash_bin_path_does_not_exist(
             app=False,
             file_system=False,
             erase_memory=False,
+            bank=None,
         )
     log_data = get_log_data(caplog.records)
     assert ("ERROR", f"{bin_path.absolute()} does not exist") in log_data

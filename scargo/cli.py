@@ -252,12 +252,17 @@ def flash(
     app: bool = Option(False, "--app", help="Flash app only"),
     file_system: bool = Option(False, "--fs", help="Flash filesystem only"),
     no_erase: bool = Option(False, help="(stm32 only) Don't erase target memory"),
+    bank: Optional[int] = Option(
+        None,
+        "--bank",
+        help="(esp32 only) Provide app flasg bank number for chosen target e.g. --bank 0",
+    ),
     base_dir: Optional[Path] = BASE_DIR_OPTION,
 ) -> None:
     """Flash the target."""
     if base_dir:
         os.chdir(base_dir)
-    scargo_flash(flash_profile, port, target, app, file_system, not no_erase)
+    scargo_flash(flash_profile, port, target, app, file_system, not no_erase, bank)
 
 
 ###############################################################################
