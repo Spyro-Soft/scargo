@@ -3,6 +3,7 @@
 # #
 
 import atexit
+import os
 import signal
 import sys
 import threading
@@ -11,7 +12,6 @@ from typing import Optional
 
 import serial  # type: ignore
 
-from scargo.config_utils import prepare_config
 from scargo.logger import get_logger
 
 logger = get_logger()
@@ -91,7 +91,11 @@ class SerialReadThread(threading.Thread):
             if s:
                 print(s.decode())
         except Exception as e:  # pylint: disable=broad-except
-            logger.error("Unexpected error: %s", e)
+            if "Attempting to use a port that is not open" in str(e):
+                logger.error("Unexpected error: %s", e)
+                os._exit(1)
+            else:
+                logger.error("Unexpected error: %s", e)
 
     def stop(self) -> None:
         """Stop the infinit loop"""
@@ -108,7 +112,6 @@ class _ScargoMonitor:
     ) -> None:
         self._port = port
         self._baudrate = baudrate or self.DEFAULT_BAUDRATE
-        self._config = prepare_config()
         self.read_thread: Optional[SerialReadThread] = None
         self.cmd_loop: Optional[CmdLoop] = None
         self.ser = None

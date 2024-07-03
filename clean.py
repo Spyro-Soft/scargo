@@ -59,7 +59,11 @@ def list_files(path: str) -> Optional[List[str]]:
 
 def clean(output_file_names: Sequence[str]) -> None:
     try:
-        command = ["py3clean", "."]
+        command = (
+            ["pyclean", ".", "--debris", "--erase"]
+            + list(output_file_names)
+            + ["--verbose", "--dry-run"]
+        )
         subprocess.check_call(command)
     except subprocess.CalledProcessError:
         print("Pyclean fail")
