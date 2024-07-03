@@ -270,8 +270,8 @@ def flash(
 
 @cli.command()
 def monitor(
-    port: Optional[str] = Option(
-        None,
+    port: str = Option(
+        ...,
         "-p",
         "--port",
         help="port where the serial monitor will be run"
