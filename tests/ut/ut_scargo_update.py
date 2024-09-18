@@ -42,6 +42,7 @@ def get_expected_files(target: List[ScargoTarget]) -> Set[str]:
         ".devcontainer/docker-compose.yaml",
         ".devcontainer/devcontainer.json",
         ".devcontainer/Dockerfile-custom",
+        ".devcontainer/requirements.txt",
         "src/CMakeLists.txt",
         "src/test_project.cpp",
     }
@@ -135,6 +136,7 @@ def test_update_project_with_docker(tmp_path: Path, fp: FakeProcess) -> None:
     fp.register(called_subprocess_cmd)
     fp.register(["conan", "profile", "list"])
     fp.register(["conan", "profile", "detect"])
+    fp.register(["pip", "show", "scargo"])
 
     scargo_update(Path(SCARGO_DEFAULT_CONFIG_FILE))
 
@@ -150,6 +152,8 @@ def test_update_project_docker_pull_fails(tmp_path: Path, fp: FakeProcess) -> No
     cmd_build = get_docker_compose_command()
     fp.register(["conan", "profile", "list"])
     fp.register(["conan", "profile", "detect"])
+    fp.register(["pip", "show", "scargo"])
+
     cmd_build.extend(["build"])
     fp.register(cmd_build)
     scargo_update(Path(SCARGO_DEFAULT_CONFIG_FILE))
