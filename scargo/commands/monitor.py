@@ -60,6 +60,8 @@ class CmdLoop:
 
 
 class SerialReadThread(threading.Thread):
+    TOO_MANY_ERROR_MESSAGE = "Too many consecutive errors, stopping monitor."
+
     def __init__(self, ser: serial.Serial, read_block_size: int = 1000) -> None:  # type: ignore[no-any-unimported]
         """Init the serial data
 
@@ -74,6 +76,7 @@ class SerialReadThread(threading.Thread):
         self.ser = ser
         self.read_block_size = read_block_size
         self.running = True
+        self.error_count = 0
 
     def run(self) -> None:
         """Infinite serial read/write loop"""
@@ -90,12 +93,31 @@ class SerialReadThread(threading.Thread):
             s = self.ser.read(self.read_block_size)
             if s:
                 print(s.decode())
-        except Exception as e:  # pylint: disable=broad-except
-            if "Attempting to use a port that is not open" in str(e):
-                logger.error("Unexpected error: %s", e)
+            self.error_count = 0
+        except serial.SerialTimeoutException as e:
+            # Handle timeout specifically
+            logger.error("Serial timeout: %s", e)
+            self.error_count += 1
+
+            if self.error_count >= 5:
+                logger.error(self.TOO_MANY_ERROR_MESSAGE)
                 os._exit(1)
-            else:
-                logger.error("Unexpected error: %s", e)
+        except serial.SerialException as e:
+            # Handle device disconnection or multiple access on port
+            logger.error("Serial exception: %s", e)
+            self.error_count += 1  # Increment error count for these errors
+
+            if self.error_count >= 5:
+                logger.error(self.TOO_MANY_ERROR_MESSAGE)
+                os._exit(1)
+        except Exception as e:  # pylint: disable=broad-except
+            # General exception for any other unknown error
+            logger.error("Unexpected error: %s", e)
+            self.error_count += 1
+
+            if self.error_count >= 5:
+                logger.error(self.TOO_MANY_ERROR_MESSAGE)
+                os._exit(1)
 
     def stop(self) -> None:
         """Stop the infinit loop"""
