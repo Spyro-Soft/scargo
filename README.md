@@ -74,6 +74,7 @@ From version 2.3.2 the scargo is install in docker but overload by docker compos
 During deployment the requirements file is created using following command
 
  - `pip-compile --all-extras --output-file=ci/requirements.txt pyproject.toml`
+ - `pip-compile --output-file=scargo/file_generators/templates/docker/requirements.txt.j2 pyproject.toml`
 
 to have all newest dependencies. This solutions allow as to have scargo install in docker for ci/cd and be able to use newest features without official releases.  
 
