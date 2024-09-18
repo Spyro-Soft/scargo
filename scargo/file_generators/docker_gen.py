@@ -4,6 +4,7 @@
 
 import os
 import shutil
+import subprocess
 from pathlib import Path
 from typing import Any, Dict
 
@@ -23,6 +24,26 @@ class _DockerComposeTemplate:
         self.docker_path = docker_path
         self._config = config
 
+    def get_scargo_path(self) -> Path:
+        try:
+            result = subprocess.run(
+                ["pip", "show", "scargo"], capture_output=True, text=True, check=True
+            )
+            for line in result.stdout.splitlines():
+                if line.startswith("Location:"):
+                    scargo_path = Path(line.split("Location:")[1].strip()) / "scargo"
+                    if scargo_path.exists():
+                        return scargo_path
+                    print(f"Error: The scargo path {scargo_path} does not exist.")
+        except subprocess.CalledProcessError as e:
+            print(f"Subprocess error while retrieving scargo path: {e}")
+        except FileNotFoundError as e:
+            print(f"File not found: {e}")
+        except OSError as e:
+            print(f"OS error occurred: {e}")
+
+        return Path()
+
     def generate_docker_env(self) -> None:
         """Generate dirs and files"""
         self._create_file_from_template(
@@ -31,10 +52,15 @@ class _DockerComposeTemplate:
             template_params={"project": self._config.project},
             overwrite=False,
         )
+
+        scargo_path = self.get_scargo_path()
         self._create_file_from_template(
             "docker/docker-compose.yaml.j2",
             "docker-compose.yaml",
-            template_params={"config": self._config},
+            template_params={
+                "config": self._config,
+                "scargo_path": scargo_path,
+            },
         )
         self._create_file_from_template(
             "docker/devcontainer.json.j2",
@@ -48,6 +74,13 @@ class _DockerComposeTemplate:
 
         custom_docker = self._get_dockerfile_custom_content()
         scargo_package_version = self._set_up_package_version()
+
+        self._create_file_from_template(
+            "docker/requirements.txt.j2",
+            "requirements.txt",
+            template_params={},
+            overwrite=True,
+        )
 
         self._create_file_from_template(
             "docker/Dockerfile.j2",

@@ -24,9 +24,9 @@ Scargo is available on [pypi](https://pypi.org/project/scargo/), so you can inst
 
 If system does not find 'scargo' command after installing, add the installation directory to your env paths. On Ubuntu you can find installation directory by running:
 
-```$ find / -name "scargo"```
+```$ pip show "scargo"```
 
-Then add to  PATH:
+Then add to PATH e.g.:
 
 ```$ export PATH=~/.local/bin:${PATH}```
 
@@ -69,6 +69,15 @@ Run scargo commands as you would do natively.
 ## Working natively
 1) Create a project with --no-docker flag (`scargo new <my_proj> --no-docker ...`).
 
+## Create the requirements for docker env
+From version 2.3.2 the scargo is install in docker but overload by docker compose volume data, to get present version from your native env.
+During deployment the requirements file is created using following command
+
+ - `pip-compile --all-extras --output-file=ci/requirements.txt pyproject.toml`
+ - `pip-compile --output-file=scargo/file_generators/templates/docker/requirements.txt.j2 pyproject.toml`
+
+to have all newest dependencies. This solutions allow as to have scargo install in docker for ci/cd and be able to use newest features without official releases.  
+
 ## Testing custom scargo generated project locally
 You can make changes in scargo and install it locally using ```pip install .``` command when you are in the main project folder.
 To test the custom scargo version and have this custom scargo available also inside the docker (crucial for testing), in created project update  docker-compose.yaml:
@@ -84,6 +93,17 @@ Where ```~/.local/lib/python3.10/site-packages/scargo``` is a path to scargo on 
 To keep this setup between ```scargo update``` commands, in scargo.toml file update also ```update-exclude``` as in following example:
 
     update-exclude = [".devcontainer/docker-compose.yaml"]
+
+# Known Issues
+
+## MacOs with ARM processors
+- On macOS devices with ARM processors (such as M1 and M3), USB device passthrough to Docker containers is not supported. While most development tasks can be performed within the Docker container, actions that involve direct interaction with USB devices, such as flashing firmware or monitoring hardware, must be executed natively on the host system.
+
+## Windows
+
+- On Windows devices, USB device passthrough is not supported in Docker containers when using Docker Desktop. To work around this limitation, you can use WSL2 (Windows Subsystem for Linux) or run a virtual machine with a Linux distribution like Ubuntu 22.04 to enable USB device access.
+
+
 # Contributing
 
 See contributing guide on https://spyro-soft.github.io/scargo/contributing.html
