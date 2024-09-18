@@ -149,7 +149,7 @@ packaging==23.0
     #   matplotlib
     #   pytest
     #   sphinx
-paramiko==3.3.1
+paramiko==3.5.0
     # via scargo (pyproject.toml)
 patch-ng==1.17.4
     # via conan
@@ -166,7 +166,7 @@ pluggy==1.0.0
     # via pytest
 pre-commit==3.1.1
     # via scargo (pyproject.toml)
-pyclean==3.0.0
+pyclean==2.2.0
     # via scargo (pyproject.toml)
 pycodestyle==2.11.1
     # via flake8

@@ -23,6 +23,9 @@ services:
     volumes:
       - ..:/workspace
       - /dev:/dev
+    {% if scargo_path %}
+      - {{ scargo_path }}:/usr/local/lib/python3.8/dist-packages/scargo
+    {% endif%}
     command: sleep infinity
   {% if config.docker_compose.ports %}
     ports:
