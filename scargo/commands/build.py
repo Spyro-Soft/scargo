@@ -96,7 +96,7 @@ def _scargo_build_targets(config: Config, profile: str, targets: List[Target]) -
             # This is a workaround so that different profiles can work together with conan
             # Conan always calls CMake with '
             subprocess.run(
-                f"cp -r -l -f {build_dir}/build/{config.profiles[profile].cmake_build_type}/* .",
+                f"cp -r -f {build_dir}/build/{config.profiles[profile].cmake_build_type}/* .",
                 cwd=build_dir,
                 shell=True,
                 check=True,
