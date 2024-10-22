@@ -27,11 +27,11 @@ dynamic = ["version"]
 keywords = ["scargo", "Package manager", "C++"]
 dependencies = [
     "clang==16.0.1.1",
-    "cmake==3.25.2",
+    "cmake==3.30.5",
     "coloredlogs==15.0.1",
     "conan==2.0.13",
     "docker==6.0.1",
-    "esptool==4.5.1",
+    "esptool==4.8.1",
     "jinja2==3.1.2",
     "libclang==16.0.0",
     "lizard==1.17.10",
