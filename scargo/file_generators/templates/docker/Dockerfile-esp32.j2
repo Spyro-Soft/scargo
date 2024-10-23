@@ -29,6 +29,6 @@ set -e\n\
 \n\
 exec "$@"' >  /opt/esp/entrypoint.sh && chmod 775 /opt/esp/entrypoint.sh
 
-RUN umask 0002 && /opt/esp-idf/python_env/idf5.2_py3.8_env/bin/pip install pyclang
+RUN umask 0002 && /opt/esp-idf/python_env/idf5.2_py3.10_env/bin/pip install pyclang
 RUN umask 0002 &&  curl -o /usr/bin/run-clang-tidy.py  ${RUN_CLANG_TIDY_SCRIPT_URL} && \
 chmod 775 /usr/bin/run-clang-tidy.py

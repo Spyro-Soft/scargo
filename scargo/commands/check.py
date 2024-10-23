@@ -339,6 +339,7 @@ class ClangTidyChecker(CheckerFixer):
             "-mlongcalls",
             "-fno-tree-switch-conversion",
             "-fstrict-volatile-bitfields",
+            "-fno-shrink-wrap",
         ]
 
         with open(

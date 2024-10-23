@@ -26,28 +26,28 @@ classifiers = [
 dynamic = ["version"]
 keywords = ["scargo", "Package manager", "C++"]
 dependencies = [
-    "clang==16.0.1.1",
+    "clang==17.0.6",
     "cmake==3.30.5",
     "coloredlogs==15.0.1",
-    "conan==2.0.13",
-    "docker==6.0.1",
-    "esptool==4.8.1",
-    "jinja2==3.1.2",
-    "libclang==16.0.0",
+    "conan==2.8.1",
+    "docker==7.1.0",
+    "esptool==4.7.0",
+    "jinja2==3.1.4",
+    "libclang==18.1.1",
     "lizard==1.17.10",
     "pydantic==1.10.6",
     "toml==0.10.2",
-    "tomlkit==0.11.6",
-    "typer==0.9.0",
+    "tomlkit==0.13.2",
+    "typer==0.12.5",
     "typing-extensions==4.6.0",
     "paramiko==3.5.0",
-    "pyyaml==6.0",
+    "pyyaml==6.0.2",
 ]
 
 [project.optional-dependencies]
 dev = [
-    "black==23.1.0",
-    "coverage~=6.0",
+    "black==24.10.0",
+    "coverage~=7.6.4",
     "flake8>=6.1.0",
     "flit==3.8.0",
     "gcovr>=5.2",
