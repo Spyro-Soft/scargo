@@ -426,15 +426,96 @@ class CppcheckChecker(CheckerFixer):
     check_name = "cppcheck"
 
     def check_files(self) -> int:
-        cmd = "cppcheck --enable=all --suppress=missingIncludeSystem --inline-suppr src/ main/"
+        """
+        Run cppcheck with the configured suppressions and directories and collect all issues.
+        """
+        cmd = [
+            "cppcheck",
+            "--enable=all",
+            "--inline-suppr",
+            "--language=c++",
+            "--std=c++17",
+        ]
+
+        # Add suppression rules
+        for suppress in self.get_suppression_rules():
+            cmd.append(f"--suppress={suppress}")
+
+        # Add directories to check
+        directories = self.get_directories_to_check()
+        cmd.extend(directories)
+
+        all_issues = []
+
         try:
-            subprocess.check_call(cmd, shell=True)
+            result = subprocess.run(cmd, capture_output=True, text=True, check=True)
+            if result.returncode != 0 or result.stderr:
+                all_issues = self._collect_cppcheck_issues(result.stderr)
         except subprocess.CalledProcessError:
-            logger.error(f"{self.check_name} fail!")
-        return 0
+            logger.error(f"{self.check_name} check failed!")
+
+        # Return the total number of issues found
+        issue_len = len(all_issues)
+        if issue_len:
+            logger.info(all_issues)
+        return issue_len
+
+    def _collect_cppcheck_issues(self, output: str) -> List[str]:
+        """
+        Collect cppcheck issues and return a list of all problems found.
+        """
+        issues = []
+        issue_pattern = re.compile(r"(.+):(\d+):\d+: (.+) \[(.+)\]")
+
+        for line in output.splitlines():
+            match = issue_pattern.match(line)
+            if match:
+                file_path = match.group(1)
+                line_number = match.group(2)
+                message = match.group(3)
+                category = match.group(4)
+                formatted_issue = f"{file_path}:{line_number}: {message} [{category}]"
+                issues.append(formatted_issue)
+
+        return issues
 
     def report(self, count: int) -> None:
-        logger.info(f"Finished {self.check_name} check.")
+        """
+        Report the check status, providing a summary of all issues found.
+        """
+        if count > 0:
+            logger.info(
+                f"Finished {self.check_name} check. Found problems in {count} files."
+            )
+            logger.error(f"{self.check_name} check fail!")
+        else:
+            logger.info(f"Finished {self.check_name} check. No problems found.")
+
+    def get_suppression_rules(self) -> List[str]:
+        """
+        Retrieve the suppression rules from the config.
+        """
+        cppcheck_config = self._config.check.cppcheck
+        return (
+            cppcheck_config.suppress
+        )  # Ensure this attribute exists and is a List[str]
+
+    def get_directories_to_check(self) -> List[str]:
+        """
+        Retrieve the directories to check from the config.
+        """
+        cppcheck_config = self._config.check.cppcheck
+        return (
+            cppcheck_config.directories
+        )  # Ensure this attribute exists and is a List[str]
+
+    def _print_collected_issues(self, issues: List[str]) -> None:
+        """
+        Print all collected issues at once.
+        """
+        logger.info("cppcheck issues found:")
+        for issue in issues:
+            logger.warning(issue)
 
     def check_file(self, file_path: Path) -> CheckResult:
         raise NotImplementedError
