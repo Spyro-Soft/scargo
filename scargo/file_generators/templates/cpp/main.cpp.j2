@@ -4,7 +4,7 @@
 
 #include <cstdio>
 {% if project.is_atsam() %}
-#include <sam.h>  // NOLINT(readability-identifier-naming): name required by freertos
+#include <sam.h>
 {% endif %}
 {% if project.is_esp32() %}
 #include <freertos/FreeRTOS.h>
