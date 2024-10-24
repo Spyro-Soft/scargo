@@ -457,7 +457,9 @@ class CppcheckChecker(CheckerFixer):
         # Return the total number of issues found
         issue_len = len(all_issues)
         if issue_len:
-            logger.info(all_issues)
+            logger.info("Collected cppcheck issues:")
+            for issue in all_issues:
+                logger.warning(issue)
         return issue_len
 
     def _collect_cppcheck_issues(self, output: str) -> List[str]:
@@ -484,9 +486,6 @@ class CppcheckChecker(CheckerFixer):
         Report the check status, providing a summary of all issues found.
         """
         if count > 0:
-            logger.info(
-                f"Finished {self.check_name} check. Found problems in {count} files."
-            )
             logger.error(f"{self.check_name} check fail!")
         else:
             logger.info(f"Finished {self.check_name} check. No problems found.")
