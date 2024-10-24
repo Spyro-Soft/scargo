@@ -3,13 +3,13 @@
 # THIS FILE WAS GENERATED AUTOMATICALLY. DO NOT CHANGE IT.
 ###
 
-ARG DOCKER_IMAGE_ROOT=ubuntu:20.04
+ARG DOCKER_IMAGE_ROOT=ubuntu:22.04
 FROM ${DOCKER_IMAGE_ROOT} as base
 
 ENV DEBIAN_FRONTEND noninteractive
 
 RUN apt update --fix-missing && \
-    apt -y install --no-install-recommends python3 python3-pip \
+    apt -y install --no-install-recommends python3 python3-pip python3-venv\
     git build-essential pkg-config graphviz && \
     apt -y install sudo && \
     rm -rf /var/lib/apt/lists/* && \
@@ -19,7 +19,7 @@ FROM base AS cpp
 {% set previous_base = 'cpp' %}
 
 RUN apt update --fix-missing && apt -y --no-install-recommends install cppcheck lib32z1 \
-    make cmake clang clang-format clang-tidy gcovr doxygen libcmocka0 libcmocka-dev gdb screen wget && \
+    make cmake clang clang-format clang-tidy gcovr doxygen libcmocka0 libcmocka-dev gdb screen wget curl && \
     rm -rf /var/lib/apt/lists/*
 
 {% if project.is_esp32() %}

@@ -4,7 +4,7 @@ RUN apt update --fix-missing && apt -y --no-install-recommends install git wget 
     curl openocd && \
     rm -rf /var/lib/apt/lists/*
 
-ARG ESPRESSIF_IDF_TAG="v4.4.6"
+ARG ESPRESSIF_IDF_TAG="v5.3.1"
 ARG ESPRESSIF_IDF_VERSION="${ESPRESSIF_IDF_TAG}"
 ARG ESPRESSIF_IDF_PATH="/opt/esp-idf"
 ARG ESPRESSIF_IDF_REPO_URL="https://github.com/espressif/esp-idf.git"
@@ -17,7 +17,7 @@ WORKDIR /opt
 
 RUN umask 0002 && git clone --single-branch --branch ${ESPRESSIF_IDF_VERSION} --recursive --depth=1 --shallow-submodules ${ESPRESSIF_IDF_REPO_URL} ${ESPRESSIF_IDF_PATH}
 RUN umask 0002 && ${ESPRESSIF_IDF_PATH}/install.sh
-RUN umask 0002 && ${ESPRESSIF_IDF_PATH}/tools/idf_tools.py install xtensa-clang
+RUN umask 0002 && ${ESPRESSIF_IDF_PATH}/tools/idf_tools.py install esp-clang
 
 ENV LC_ALL=C
 
@@ -29,6 +29,6 @@ set -e\n\
 \n\
 exec "$@"' >  /opt/esp/entrypoint.sh && chmod 775 /opt/esp/entrypoint.sh
 
-RUN umask 0002 && /opt/esp-idf/python_env/idf4.4_py3.8_env/bin/pip install pyclang
+RUN umask 0002 && /opt/esp-idf/python_env/idf5.3_py3.10_env/bin/pip install pyclang
 RUN umask 0002 &&  curl -o /usr/bin/run-clang-tidy.py  ${RUN_CLANG_TIDY_SCRIPT_URL} && \
 chmod 775 /usr/bin/run-clang-tidy.py

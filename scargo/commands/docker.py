@@ -31,6 +31,9 @@ def scargo_docker_build(
         project_root = get_scargo_config_or_exit().project_root
     docker_path = _get_docker_path(project_root)
 
+    if docker_opts is None:
+        docker_opts = []
+
     cmd = get_docker_compose_command()
     cmd.extend(["build", *docker_opts])
 
@@ -58,6 +61,9 @@ def scargo_docker_run(
     config = get_scargo_config_or_exit()
     docker_path = _get_docker_path(config.project_root)
     project_config_name = config.project.name
+
+    if docker_opts is None:
+        docker_opts = []
 
     cmd = get_docker_compose_command()
     cmd.extend(
@@ -88,6 +94,9 @@ def scargo_docker_exec(docker_opts: List[str]) -> None:
 
     config = get_scargo_config_or_exit()
     image = config.project.docker_image_tag
+
+    if docker_opts is None:
+        docker_opts = []
 
     if not image:
         logger.error("docker-image-tag not defined in .toml under project section")

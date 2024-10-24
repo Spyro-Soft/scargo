@@ -264,6 +264,7 @@ class ChecksConfig(BaseModel):
     pragma: "CheckConfig"
     copyright: "CheckConfig"
     todo: "TodoCheckConfig"
+    cppcheck: "CppCheckConfig" = Field(..., alias="cppcheck")
     clang_format: "CheckConfig" = Field(..., alias="clang-format")
     clang_tidy: "CheckConfig" = Field(..., alias="clang-tidy")
     cyclomatic: "CheckConfig"
@@ -286,6 +287,13 @@ class FixConfig(BaseModel):
 
 class TodoCheckConfig(CheckConfig):
     keywords: List[str] = Field(default_factory=list)
+
+
+class CppCheckConfig(BaseModel):
+    description: Optional[str] = None
+    exclude: List[str] = Field(default_factory=list)
+    suppress: List[str] = []
+    directories: List[str] = []
 
 
 class DocConfig(BaseModel):

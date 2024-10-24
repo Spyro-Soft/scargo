@@ -47,7 +47,7 @@ def register_build_cmds(
         ["conan", "build", ".", "-pr", profile_path, "-of", build_dir],
         returncode=int(build_fails),
     )
-    fp.register(["cp", "-r", "-l", "-f", f"{copy_dir_path}/*", "."])
+    fp.register(["cp", "-r", "-f", f"{copy_dir_path}/*", "."])
 
 
 @pytest.mark.parametrize("profile", DEFAULT_PROFILES)

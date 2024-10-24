@@ -3,10 +3,7 @@
  */
 
 #include <cstdio>
-#if ATSAM
 #include <sam.h>
-#endif  // ATSAM
-#ifndef ESP32
 /**
  * @brief This is example function doc
  *
@@ -14,11 +11,8 @@
  */
 int main()
 {
-#if defined STM32 || defined ATSAM
     while (true)
     {
     }
-#endif  // STM32 || ATSAM
     return 0;
 }
-#endif  // !ESP32

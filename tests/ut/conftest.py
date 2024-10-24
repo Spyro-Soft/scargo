@@ -11,6 +11,7 @@ from scargo.config import (
     ChecksConfig,
     ConanConfig,
     Config,
+    CppCheckConfig,
     Dependencies,
     DocConfig,
     ProfileConfig,
@@ -72,6 +73,9 @@ def config(fs: FakeFilesystem) -> Config:
                 "copyright": CheckConfig(description="Copyright", exclude=[]),
                 "todo": TodoCheckConfig(
                     description=None, exclude=[], keywords=["TODO", "todo"]
+                ),
+                "cppcheck": CppCheckConfig(
+                    description=None, suppress=[], directories=[]
                 ),
                 "clang-format": CheckConfig(description=None, exclude=[]),
                 "clang-tidy": CheckConfig(description=None, exclude=[]),
