@@ -10,8 +10,8 @@ CPPCHECK_COMMAND = [
     "--enable=all",
     "--suppress=missingIncludeSystem",
     "--inline-suppr",
-    "src/",
-    "main/",
+    "--language=c++",
+    "--std=c++17",
 ]
 
 
