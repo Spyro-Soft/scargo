@@ -408,7 +408,7 @@ class CyclomaticChecker(CheckerFixer):
         cmd = ["lizard", str(self._config.source_dir_path), "-C", "25", "-w"]
 
         for exclude_pattern in self.get_exclude_patterns():
-            cmd.extend(["--exclude", exclude_pattern])
+            cmd.extend(["-x", exclude_pattern])
         try:
             subprocess.check_call(cmd)
         except subprocess.CalledProcessError:
