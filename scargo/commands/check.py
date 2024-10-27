@@ -275,6 +275,8 @@ class ClangFormatChecker(CheckerFixer):
             str(file_path),
         ]
         try:
+            log_cmd = " ".join(cmd)
+            logger.info(f"{log_cmd}")
             subprocess.check_output(cmd)
         except subprocess.CalledProcessError as e:
             if self._verbose:
@@ -324,6 +326,8 @@ class ClangTidyChecker(CheckerFixer):
             cmd = self.__get_cmd_x86(file_path)
 
         try:
+            log_cmd = " ".join(cmd)
+            logger.info(f"{log_cmd}")
             subprocess.check_output(cmd)
         except subprocess.CalledProcessError as e:
             if self._verbose:
@@ -410,6 +414,8 @@ class CyclomaticChecker(CheckerFixer):
         for exclude_pattern in self.get_exclude_patterns():
             cmd.extend(["-x", exclude_pattern])
         try:
+            log_cmd = " ".join(cmd)
+            logger.info(f"{log_cmd}")
             subprocess.check_call(cmd)
         except subprocess.CalledProcessError:
             logger.error(f"{self.check_name} fail!")
@@ -448,6 +454,8 @@ class CppcheckChecker(CheckerFixer):
         all_issues = []
 
         try:
+            log_cmd = " ".join(cmd)
+            logger.info(f"{log_cmd}")
             result = subprocess.run(cmd, capture_output=True, text=True, check=True)
             if result.returncode != 0 or result.stderr:
                 all_issues = self._collect_cppcheck_issues(result.stderr)
