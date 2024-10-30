@@ -330,6 +330,9 @@ class TestBinProjectFlow:
         if test_state.target_id == ScargoTarget.atsam:
             pytest.xfail("Clang errors in board support libraries (DFP, CMSIS)")
 
+        # need for clang-tidy
+        test_state.runner.invoke(cli, ["build"])
+
         result = test_state.runner.invoke(cli, ["check"])
         assert result.exit_code == 0
 

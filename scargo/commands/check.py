@@ -275,6 +275,8 @@ class ClangFormatChecker(CheckerFixer):
             str(file_path),
         ]
         try:
+            log_cmd = " ".join(cmd)
+            logger.info(f"{log_cmd}")
             subprocess.check_output(cmd)
         except subprocess.CalledProcessError as e:
             if self._verbose:
@@ -324,6 +326,8 @@ class ClangTidyChecker(CheckerFixer):
             cmd = self.__get_cmd_x86(file_path)
 
         try:
+            log_cmd = " ".join(cmd)
+            logger.info(f"{log_cmd}")
             subprocess.check_output(cmd)
         except subprocess.CalledProcessError as e:
             if self._verbose:
@@ -339,6 +343,7 @@ class ClangTidyChecker(CheckerFixer):
             "-mlongcalls",
             "-fno-tree-switch-conversion",
             "-fstrict-volatile-bitfields",
+            "-fno-shrink-wrap",
         ]
 
         with open(
@@ -404,18 +409,46 @@ class CyclomaticChecker(CheckerFixer):
     check_name = "cyclomatic"
 
     def check_files(self) -> int:
+        """
+        Run lizard with the configured parameters and collect all cyclomatic complexity issues.
+        """
         cmd = ["lizard", str(self._config.source_dir_path), "-C", "25", "-w"]
 
         for exclude_pattern in self.get_exclude_patterns():
-            cmd.extend(["--exclude", exclude_pattern])
+            cmd.extend(["-x", exclude_pattern])
+
+        all_issues = []
+
         try:
-            subprocess.check_call(cmd)
+            log_cmd = " ".join(cmd)
+            logger.info(f"{log_cmd}")
+            result = subprocess.run(cmd, capture_output=True, text=True, check=False)
+            all_issues = self._collect_lizard_issues(result.stdout)
+
         except subprocess.CalledProcessError:
-            logger.error(f"{self.check_name} fail!")
-        return 0
+            logger.error(f"{self.check_name} check failed!")
+
+        issue_len = len(all_issues)
+        if issue_len:
+            logger.info("Collected lizard issues:")
+            for issue in all_issues:
+                logger.warning(issue)
+        else:
+            logger.info("No issues found in lizard output.")
+        return issue_len
+
+    def _collect_lizard_issues(self, output: str) -> List[str]:
+        """
+        Parse lizard output and collect lines with warnings or errors.
+        """
+        issues = []
+        for line in output.splitlines():
+            if "warning:" in line or "error:" in line:
+                issues.append(line)
+        return issues
 
     def report(self, count: int) -> None:
-        logger.info(f"Finished {self.check_name} check.")
+        logger.info(f"Finished {self.check_name} check with {count} issues.")
 
     def check_file(self, file_path: Path) -> CheckResult:
         raise NotImplementedError
@@ -425,15 +458,89 @@ class CppcheckChecker(CheckerFixer):
     check_name = "cppcheck"
 
     def check_files(self) -> int:
-        cmd = "cppcheck --enable=all --suppress=missingIncludeSystem --inline-suppr src/ main/"
+        """
+        Run cppcheck with the configured suppressions and directories and collect all issues.
+        """
+        cmd = [
+            "cppcheck",
+            "--enable=all",
+            "--inline-suppr",
+            "--language=c++",
+            "--std=c++17",
+        ]
+
+        # Add suppression rules
+        for suppress in self.get_suppression_rules():
+            cmd.append(f"--suppress={suppress}")
+
+        # Add directories to check
+        directories = self.get_directories_to_check()
+        cmd.extend(directories)
+
+        all_issues = []
+
         try:
-            subprocess.check_call(cmd, shell=True)
+            log_cmd = " ".join(cmd)
+            logger.info(f"{log_cmd}")
+            result = subprocess.run(cmd, capture_output=True, text=True, check=True)
+            if result.returncode != 0 or result.stderr:
+                all_issues = self._collect_cppcheck_issues(result.stderr)
         except subprocess.CalledProcessError:
-            logger.error(f"{self.check_name} fail!")
-        return 0
+            logger.error(f"{self.check_name} check failed!")
+
+        # Return the total number of issues found
+        issue_len = len(all_issues)
+        if issue_len:
+            logger.info("Collected cppcheck issues:")
+            for issue in all_issues:
+                logger.warning(issue)
+        return issue_len
+
+    def _collect_cppcheck_issues(self, output: str) -> List[str]:
+        """
+        Collect cppcheck issues and return a list of all problems found.
+        """
+        issues = []
+        issue_pattern = re.compile(r"(.+):(\d+):\d+: (.+) \[(.+)\]")
+
+        for line in output.splitlines():
+            match = issue_pattern.match(line)
+            if match:
+                file_path = match.group(1)
+                line_number = match.group(2)
+                message = match.group(3)
+                category = match.group(4)
+                formatted_issue = f"{file_path}:{line_number}: {message} [{category}]"
+                issues.append(formatted_issue)
+
+        return issues
 
     def report(self, count: int) -> None:
-        logger.info(f"Finished {self.check_name} check.")
+        """
+        Report the check status, providing a summary of all issues found.
+        """
+        if count > 0:
+            logger.error(f"{self.check_name} check fail!")
+        else:
+            logger.info(f"Finished {self.check_name} check. No problems found.")
+
+    def get_suppression_rules(self) -> List[str]:
+        """
+        Retrieve the suppression rules from the config.
+        """
+        cppcheck_config = self._config.check.cppcheck
+        return (
+            cppcheck_config.suppress
+        )  # Ensure this attribute exists and is a List[str]
+
+    def get_directories_to_check(self) -> List[str]:
+        """
+        Retrieve the directories to check from the config.
+        """
+        cppcheck_config = self._config.check.cppcheck
+        return (
+            cppcheck_config.directories
+        )  # Ensure this attribute exists and is a List[str]
 
     def check_file(self, file_path: Path) -> CheckResult:
         raise NotImplementedError

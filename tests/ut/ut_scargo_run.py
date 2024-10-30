@@ -63,7 +63,7 @@ def test_scargo_run_with_build(
         ]
     )
     fp.register(["conan", "build", ".", "-pr", profile_path, "-of", build_path])
-    fp.register(["cp", "-r", "-l", "-f", "build/x86/Debug/build/Debug/*", "."])
+    fp.register(["cp", "-r", "-f", "build/x86/Debug/build/Debug/*", "."])
     scargo_run(bin_path, profile="Debug", params=[], skip_build=False)
 
     assert fp_bin.calls[0].returncode == 0
