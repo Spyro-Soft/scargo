@@ -37,6 +37,9 @@ def scargo_run(
         )
         sys.exit(1)
 
+    if params is None:
+        params = []
+
     if not skip_build:
         scargo_build(profile, ScargoTarget.x86)
 

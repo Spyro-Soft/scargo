@@ -54,6 +54,16 @@ description = '''
 keywords = ["tbd", "todo", "TODO", "fixme"]
 exclude = []
 
+[check.cppcheck]
+directories = [
+    "src/",
+    "main/",
+]
+suppress = [
+#    "unusedFunction",
+    "missingIncludeSystem"
+]
+
 [check.clang-format]
 exclude = []
 

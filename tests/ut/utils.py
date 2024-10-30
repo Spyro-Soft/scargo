@@ -16,6 +16,15 @@ def get_log_data(records: Iterable[LogRecord]) -> List[Tuple[str, str]]:
     return [(log_record.levelname, log_record.message) for log_record in records]
 
 
+def log_contains(log_data: List[Tuple[str, str]], expected_messages: List[str]) -> bool:
+    log_messages = [message for _, message in log_data]
+    # Check that each expected message is in the log messages
+    return all(
+        any(expected_message in log_message for log_message in log_messages)
+        for expected_message in expected_messages
+    )
+
+
 def get_all_files_recursively(path: Path = Path()) -> Set[str]:
     all_files = set()
     for root, _, files in os.walk(path):

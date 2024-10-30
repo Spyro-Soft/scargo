@@ -44,7 +44,6 @@ Checks:           '-*,
                   readability-const-return-type,
                   readability-container-size-empty,
                   readability-delete-null-pointer,
-                  readability-deleted-default,
                   readability-else-after-return,
                   readability-implicit-bool-conversion,
                   readability-inconsistent-declaration-parameter-name,
@@ -74,7 +73,6 @@ Checks:           '-*,
                   cppcoreguidelines-pro-type-reinterpret-cast,
                   cppcoreguidelines-pro-type-static-cast-downcast,
                   cppcoreguidelines-pro-type-union-access,
-                  # cppcoreguidelines-pro-type-vararg,
                   cppcoreguidelines-slicing,
                   cppcoreguidelines-special-member-functions,
                   hicpp-exception-baseclass,
@@ -144,29 +142,21 @@ CheckOptions:
       value:           lower_case
     - key:             readability-identifier-naming.ParameterPackCase
       value:           lower_case
-    - key:             readability-identifier-naming.PureFunctionCase
-      value:           camelBack
-    - key:             readability-identifier-naming.PureMethodCase
-      value:           camelBack
     - key:             readability-identifier-naming.StaticConstantCase
       value:           UPPER_CASE
     - key:             readability-identifier-naming.StaticVariableCase
       value:           lower_case
     - key:             readability-identifier-naming.StructCase
       value:           CamelCase
-    - key:             readability-identifier-naming.TemplateParameterCase
-      value:           CamelCase
-    - key:             readability-identifier-naming.TemplateUsingCase
-      value:           CamelCase
-    - key:             readability-identifier-naming.TypeTemplateParameterCase
-      value:           CamelCase
+#    - key:             readability-identifier-naming.TemplateParameterCase
+#      value:           CamelCase
+#    - key:             readability-identifier-naming.TypeTemplateParameterCase
+#      value:           CamelCase
     - key:             readability-identifier-naming.TypedefCase
       value:           CamelCase
-    - key:             readability-identifier-naming.UnionCase
-      value:           CamelCase
-    - key:             readability-identifier-naming.UsingCase
-      value:           CamelCase
     - key:             readability-identifier-naming.ValueTemplateParameterCase
+      value:           CamelCase
+    - key:             readability-identifier-naming.UnionCase
       value:           CamelCase
     - key:             readability-identifier-naming.VariableCase
       value:           lower_case

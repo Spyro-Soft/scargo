@@ -47,6 +47,10 @@ exclude = []
 keywords = ["tbd", "todo", "TODO", "fixme"]
 exclude = []
 
+[check.cppcheck]
+directories = []
+suppress = []
+
 [check.clang-format]
 exclude = []
 

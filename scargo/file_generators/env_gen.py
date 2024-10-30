@@ -19,7 +19,7 @@ class _EnvironmentDescriptor:
     user_gid: int = 1000 if os.name == "nt" else os.getgid()
     user_uid: int = 1000 if os.name == "nt" else os.getuid()
     ssh_port: int = 2000
-    base_docker_image: str = "ubuntu:20.04"
+    base_docker_image: str = "ubuntu:22.04"
     conan_username: str = ""
     conan_passwd: str = ""
 

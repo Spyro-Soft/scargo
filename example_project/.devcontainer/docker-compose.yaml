@@ -16,7 +16,7 @@ services:
         USER_PASSWORD: ${USER_PASSWORD:-user}
         GID_NUMBER: ${GID_NUMBER:-1000}
         UID_NUMBER: ${UID_NUMBER:-1000}
-        DOCKER_IMAGE_ROOT: ${DOCKER_IMAGE_ROOT:-ubuntu:20.04}
+        DOCKER_IMAGE_ROOT: ${DOCKER_IMAGE_ROOT:-ubuntu:22.04}
         CONAN_LOGIN_USERNAME: ${CONAN_LOGIN_USERNAME:-""}
         CONAN_PASSWORD: ${CONAN_PASSWORD:-""}
     privileged: true

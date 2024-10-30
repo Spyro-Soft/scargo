@@ -18,17 +18,17 @@ cffi==1.17.1
     #   pynacl
 charset-normalizer==3.3.2
     # via requests
-clang==16.0.1.1
+clang==17.0.6
     # via scargo (pyproject.toml)
 click==8.1.7
     # via typer
-cmake==3.25.2
+cmake==3.30.5
     # via scargo (pyproject.toml)
 colorama==0.4.6
     # via conan
 coloredlogs==15.0.1
     # via scargo (pyproject.toml)
-conan==2.0.13
+conan==2.8.1
     # via scargo (pyproject.toml)
 cryptography==43.0.1
     # via
@@ -36,11 +36,11 @@ cryptography==43.0.1
     #   paramiko
 distro==1.8.0
     # via conan
-docker==6.0.1
+docker==7.1.0
     # via scargo (pyproject.toml)
 ecdsa==0.19.0
     # via esptool
-esptool==4.5.1
+esptool==4.7.0
     # via scargo (pyproject.toml)
 fasteners==0.19
     # via conan
@@ -48,35 +48,42 @@ humanfriendly==10.0
     # via coloredlogs
 idna==3.10
     # via requests
-jinja2==3.1.2
+intelhex==2.3.0
+    # via esptool
+jinja2==3.1.4
     # via
     #   conan
     #   scargo (pyproject.toml)
-libclang==16.0.0
+libclang==18.1.1
     # via scargo (pyproject.toml)
 lizard==1.17.10
     # via scargo (pyproject.toml)
+markdown-it-py==3.0.0
+    # via rich
 markupsafe==2.1.5
     # via jinja2
-packaging==24.1
-    # via docker
+mdurl==0.1.2
+    # via markdown-it-py
 paramiko==3.5.0
     # via scargo (pyproject.toml)
-patch-ng==1.17.4
+patch-ng==1.18.0
     # via conan
 pycparser==2.22
     # via cffi
 pydantic==1.10.6
     # via scargo (pyproject.toml)
+pygments==2.18.0
+    # via rich
 pynacl==1.5.0
     # via paramiko
 pyserial==3.5
     # via esptool
 python-dateutil==2.9.0.post0
     # via conan
-pyyaml==6.0
+pyyaml==6.0.2
     # via
     #   conan
+    #   esptool
     #   scargo (pyproject.toml)
 reedsolo==1.6.0
     # via esptool
@@ -84,19 +91,24 @@ requests==2.32.3
     # via
     #   conan
     #   docker
+rich==13.9.3
+    # via typer
+shellingham==1.5.4
+    # via typer
 six==1.16.0
     # via
     #   ecdsa
     #   python-dateutil
 toml==0.10.2
     # via scargo (pyproject.toml)
-tomlkit==0.11.6
+tomlkit==0.13.2
     # via scargo (pyproject.toml)
-typer==0.9.0
+typer==0.12.5
     # via scargo (pyproject.toml)
 typing-extensions==4.6.0
     # via
     #   pydantic
+    #   rich
     #   scargo (pyproject.toml)
     #   typer
 urllib3==1.26.20
@@ -104,5 +116,3 @@ urllib3==1.26.20
     #   conan
     #   docker
     #   requests
-websocket-client==1.8.0
-    # via docker
