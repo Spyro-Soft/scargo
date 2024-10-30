@@ -409,20 +409,46 @@ class CyclomaticChecker(CheckerFixer):
     check_name = "cyclomatic"
 
     def check_files(self) -> int:
+        """
+        Run lizard with the configured parameters and collect all cyclomatic complexity issues.
+        """
         cmd = ["lizard", str(self._config.source_dir_path), "-C", "25", "-w"]
 
         for exclude_pattern in self.get_exclude_patterns():
             cmd.extend(["-x", exclude_pattern])
+
+        all_issues = []
+
         try:
             log_cmd = " ".join(cmd)
             logger.info(f"{log_cmd}")
-            subprocess.check_call(cmd)
+            result = subprocess.run(cmd, capture_output=True, text=True, check=False)
+            all_issues = self._collect_lizard_issues(result.stdout)
+
         except subprocess.CalledProcessError:
-            logger.error(f"{self.check_name} fail!")
-        return 0
+            logger.error(f"{self.check_name} check failed!")
+
+        issue_len = len(all_issues)
+        if issue_len:
+            logger.info("Collected lizard issues:")
+            for issue in all_issues:
+                logger.warning(issue)
+        else:
+            logger.info("No issues found in lizard output.")
+        return issue_len
+
+    def _collect_lizard_issues(self, output: str) -> List[str]:
+        """
+        Parse lizard output and collect lines with warnings or errors.
+        """
+        issues = []
+        for line in output.splitlines():
+            if "warning:" in line or "error:" in line:
+                issues.append(line)
+        return issues
 
     def report(self, count: int) -> None:
-        logger.info(f"Finished {self.check_name} check.")
+        logger.info(f"Finished {self.check_name} check with {count} issues.")
 
     def check_file(self, file_path: Path) -> CheckResult:
         raise NotImplementedError
@@ -515,14 +541,6 @@ class CppcheckChecker(CheckerFixer):
         return (
             cppcheck_config.directories
         )  # Ensure this attribute exists and is a List[str]
-
-    def _print_collected_issues(self, issues: List[str]) -> None:
-        """
-        Print all collected issues at once.
-        """
-        logger.info("cppcheck issues found:")
-        for issue in issues:
-            logger.warning(issue)
 
     def check_file(self, file_path: Path) -> CheckResult:
         raise NotImplementedError
