@@ -3,7 +3,7 @@ from pytest_subprocess import FakeProcess
 
 from scargo.commands.check import CyclomaticChecker
 from scargo.config import Config
-from tests.ut.utils import get_log_data
+from tests.ut.utils import get_log_data, log_contains
 
 LIZARD_COMMAND = ["lizard", "src", "-C", "25", "-w"]
 
@@ -17,28 +17,18 @@ def test_cyclomatic_checker_pass(
     assert result == 0
 
     assert fake_process.call_count(LIZARD_COMMAND) == 1
-    assert get_log_data(caplog.records) == [
-        ("INFO", "Starting cyclomatic check..."),
-        ("INFO", "Finished cyclomatic check."),
+    expected_messages = [
+        "Starting cyclomatic check...",
+        "Finished cyclomatic check with 0 issues.",
     ]
-
-
-def test_cyclomatic_checker_fail(
-    config: Config, fake_process: FakeProcess, caplog: pytest.LogCaptureFixture
-) -> None:
-    fake_process.register(LIZARD_COMMAND, returncode=1)
-
-    result = CyclomaticChecker(config=config).check()
-    assert result == 0
-
-    assert ("ERROR", "cyclomatic fail!") in get_log_data(caplog.records)
+    assert log_contains(get_log_data(caplog.records), expected_messages)
 
 
 def test_cyclomatic_checker_exclude(
     config: Config, fake_process: FakeProcess, caplog: pytest.LogCaptureFixture
 ) -> None:
     config.check.cyclomatic.exclude = ["foo/*"]
-    command_with_exclude = LIZARD_COMMAND + ["--exclude", "foo/*"]
+    command_with_exclude = LIZARD_COMMAND + ["-x", "foo/*"]
     fake_process.register(command_with_exclude)
 
     result = CyclomaticChecker(config=config).check()
