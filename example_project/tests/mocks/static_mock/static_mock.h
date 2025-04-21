@@ -19,6 +19,17 @@ public:
         }
         return *p_instance;
     }
+
+    static void setInstance(Mock* instance)
+    {
+        p_instance = instance;
+    }
+
+    static void releaseInstance()
+    {
+        p_instance = nullptr;
+    }
+
     StaticMock(const StaticMock&) = delete;
     StaticMock(StaticMock&&) = delete;
     StaticMock& operator=(const StaticMock&) = delete;
