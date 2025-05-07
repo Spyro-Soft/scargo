@@ -5,10 +5,12 @@
 cmake_minimum_required(VERSION 3.22)
 set(UTEST_NAME {{ utest_name }})
 
+file(GLOB_RECURSE SOURCES CONFIGURE_DEPENDS "${SOURCES_DIR}*.cpp")
+
+list(REMOVE_ITEM SOURCES "${SOURCES_DIR}{{main_cpp}}")
+
 set(TEST_SRCS
-{% for src in src_files %}
-    ${PROJECT_ROOT_DIR}/{{ src }}
-{% endfor %}
+    ${SOURCES}
 )
 
 set(UT_SRCS

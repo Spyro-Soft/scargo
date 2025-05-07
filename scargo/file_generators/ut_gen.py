@@ -90,6 +90,7 @@ class _UnitTestsGen:
             ut_dir_path / "CMakeLists.txt",
             overwrite=True,
             template_params={
+                "main_cpp": main_cpp,
                 "src_files": src_files,
                 "utest_name": ut_name,
                 "ut_files": ut_files,
