@@ -19,7 +19,7 @@ FROM base AS cpp
 {% set previous_base = 'cpp' %}
 
 RUN apt update --fix-missing && apt -y --no-install-recommends install cppcheck lib32z1 \
-    make cmake clang clang-format clang-tidy gcovr doxygen libcmocka0 libcmocka-dev gdb screen wget curl && \
+    make cmake clang clang-format clang-tidy doxygen libcmocka0 libcmocka-dev gdb screen wget curl && \
     rm -rf /var/lib/apt/lists/*
 
 {% if project.is_esp32() %}

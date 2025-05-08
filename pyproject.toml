@@ -50,7 +50,7 @@ dev = [
     "coverage~=7.6.4",
     "flake8>=6.1.0",
     "flit==3.8.0",
-    "gcovr>=5.2",
+    "gcovr==8.3",
     "isort==5.11.4",
     "matplotlib",
     "mypy==1.6.1",

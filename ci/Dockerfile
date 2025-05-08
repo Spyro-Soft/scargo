@@ -18,7 +18,7 @@ RUN chmod 755 /usr/local/share/plantuml-1.2022.13.jar /usr/local/bin/plantuml
 FROM base AS cpp
 
 RUN apt-get update && apt-get -y install cppcheck lib32z1 \
-    clang clang-format clang-tidy gcovr doxygen libcmocka0 libcmocka-dev
+    clang clang-format clang-tidy doxygen libcmocka0 libcmocka-dev
 
 WORKDIR /opt
 
