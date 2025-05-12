@@ -6,6 +6,8 @@
 #
 alabaster==0.7.13
     # via sphinx
+argcomplete==3.6.2
+    # via esptool
 astroid==3.0.1
     # via pylint
 babel==2.12.1
@@ -18,7 +20,7 @@ black==24.10.0
     # via scargo (pyproject.toml)
 certifi==2022.12.7
     # via requests
-cffi==1.15.1
+cffi==1.17.1
     # via
     #   cryptography
     #   pynacl
@@ -74,7 +76,7 @@ docutils==0.17.1
     #   sphinx-rtd-theme
 ecdsa==0.18.0
     # via esptool
-esptool==4.7.0
+esptool==4.8.1
     # via scargo (pyproject.toml)
 exceptiongroup==1.1.1
     # via pytest
@@ -128,9 +130,9 @@ lxml==5.4.0
     #   unittest-xml-reporting
 markdown-it-py==3.0.0
     # via rich
-markupsafe==2.1.2
+markupsafe==2.1.5
     # via jinja2
-matplotlib==3.7.1
+matplotlib==3.7.5
     # via scargo (pyproject.toml)
 mccabe==0.7.0
     # via
@@ -158,11 +160,11 @@ packaging==23.0
     #   sphinx
 paramiko==3.5.0
     # via scargo (pyproject.toml)
-patch-ng==1.18.0
+patch-ng==1.18.1
     # via conan
 pathspec==0.11.1
     # via black
-pillow==9.5.0
+pillow==10.4.0
     # via matplotlib
 platformdirs==4.3.8
     # via
@@ -235,7 +237,7 @@ pyyaml==6.0.2
     #   scargo (pyproject.toml)
 recommonmark==0.7.1
     # via scargo (pyproject.toml)
-reedsolo==1.6.0
+reedsolo==1.7.0
     # via esptool
 requests==2.28.2
     # via
