@@ -8,7 +8,7 @@ alabaster==0.7.13
     # via sphinx
 argcomplete==3.6.2
     # via esptool
-astroid==3.0.1
+astroid==3.2.4
     # via pylint
 babel==2.12.1
     # via sphinx
@@ -194,7 +194,7 @@ pygments==2.14.0
     #   gcovr
     #   rich
     #   sphinx
-pylint==3.0.2
+pylint==3.2.7
     # via scargo (pyproject.toml)
 pynacl==1.5.0
     # via paramiko
