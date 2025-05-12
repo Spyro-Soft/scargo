@@ -146,7 +146,7 @@ mypy-extensions==1.0.0
     #   mypy
 nodeenv==1.7.0
     # via pre-commit
-numpy>=1.26.0
+numpy==1.26.4
     # via
     #   contourpy
     #   matplotlib
