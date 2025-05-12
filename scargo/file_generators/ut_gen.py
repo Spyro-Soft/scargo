@@ -47,7 +47,8 @@ class _UnitTestsGen:
         :param Path output_file_path: Path to unit test file
         :param bool overwrite: overwrite if exists
         """
-        header_descriptor = parse_file(input_file_path)
+        header_descriptor = parse_file(input_file_path.absolute())
+        header_descriptor.trimPrefixName(str(self._config.project_root) + "/src/")
         create_file_from_template(
             "ut/ut.cpp.j2",
             output_file_path,
@@ -65,7 +66,7 @@ class _UnitTestsGen:
         cmake_dir_path = ut_dir_path
         while cmake_dir_path != self._ut_dir:
             add_ut_dir_to_parent_cmake(cmake_dir_path)
-            cmake_dir_path = cmake_dir_path.parent
+            cmake_dir_path = cmake_dir_path.parent            
 
         ut_name = self._get_cmake_tests_name(ut_dir_path)
         ut_files = [
@@ -90,13 +91,21 @@ class _UnitTestsGen:
             ut_dir_path / "CMakeLists.txt",
             overwrite=True,
             template_params={
-                "main_cpp": main_cpp,
                 "src_files": src_files,
                 "utest_name": ut_name,
                 "ut_files": ut_files,
             },
             config=self._config,
         )
+
+        cmake_dir_paths = [ut_dir_path.absolute()]
+            
+        while len(cmake_dir_paths)!=0:
+            current_dir = cmake_dir_paths.pop(0)
+            for containing_dir in current_dir.iterdir():
+                if containing_dir.is_dir():
+                    cmake_dir_paths.append(containing_dir.absolute())
+            add_ut_dir_to_parent_cmake(current_dir)
 
     def _get_unit_test_path(self, input_src_path: Path) -> Path:
         """Return output path for unit test
@@ -141,8 +150,7 @@ def add_ut_dir_to_parent_cmake(ut_dir_path: Path) -> None:
         cmake_text = file.read()
         add_subdirectory_clause = f"\nadd_subdirectory({ut_dir_path.name})"
         if add_subdirectory_clause not in cmake_text:
-            file.write(add_subdirectory_clause)
-
+            file.write(add_subdirectory_clause)    
 
 def generate_ut(input_path: Path, config: Config, force: bool = False) -> None:
     ut_gen = _UnitTestsGen(config)

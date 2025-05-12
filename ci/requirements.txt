@@ -92,7 +92,7 @@ flit-core==3.8.0
     # via flit
 fonttools==4.39.3
     # via matplotlib
-gcovr==8.3
+gcovr==8.2
     # via scargo (pyproject.toml)
 humanfriendly==10.0
     # via coloredlogs

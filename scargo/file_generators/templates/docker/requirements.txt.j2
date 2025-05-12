@@ -28,6 +28,8 @@ colorama==0.4.6
     # via conan
 coloredlogs==15.0.1
     # via scargo (pyproject.toml)
+colorlog==6.9.0
+    # via gcovr
 conan==2.8.1
     # via scargo (pyproject.toml)
 cryptography==41.0.7
@@ -44,7 +46,7 @@ esptool==4.7.0
     # via scargo (pyproject.toml)
 fasteners==0.19
     # via conan
-gcovr==8.3
+gcovr==8.2
     # via scargo (pyproject.toml)
 humanfriendly==10.0
     # via coloredlogs
@@ -55,11 +57,14 @@ intelhex==2.3.0
 jinja2==3.1.4
     # via
     #   conan
+    #   gcovr
     #   scargo (pyproject.toml)
 libclang==18.1.1
     # via scargo (pyproject.toml)
 lizard==1.17.10
     # via scargo (pyproject.toml)
+lxml==5.4.0
+    # via gcovr
 markdown-it-py==3.0.0
     # via rich
 markupsafe==2.1.5
@@ -75,7 +80,9 @@ pycparser==2.22
 pydantic==1.10.6
     # via scargo (pyproject.toml)
 pygments==2.18.0
-    # via rich
+    # via
+    #   gcovr
+    #   rich
 pynacl==1.5.0
     # via paramiko
 pyserial==3.5
@@ -103,6 +110,8 @@ six==1.16.0
     #   python-dateutil
 toml==0.10.2
     # via scargo (pyproject.toml)
+tomli==2.2.1
+    # via gcovr
 tomlkit==0.13.2
     # via scargo (pyproject.toml)
 typer==0.12.5

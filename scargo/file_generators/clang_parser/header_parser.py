@@ -26,5 +26,5 @@ def parse_file(file_path: Path) -> HeaderDescriptor:
     classes = extract_classes(translation_unit.cursor, str(file_path))
     includes = extract_includes(translation_unit.cursor, str(file_path))
     return HeaderDescriptor(
-        name=file_path.name, namespaces=namespaces, classes=classes, includes=includes
+        name=str(file_path), namespaces=namespaces, classes=classes, includes=includes
     )
