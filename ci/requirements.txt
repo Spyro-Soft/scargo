@@ -271,7 +271,7 @@ sphinxcontrib-htmlhelp==2.0.1
     # via sphinx
 sphinxcontrib-jsmath==1.0.1
     # via sphinx
-sphinxcontrib-plantuml==0.24.1
+sphinxcontrib-plantuml==0.30
     # via scargo (pyproject.toml)
 sphinxcontrib-qthelp==1.0.3
     # via sphinx

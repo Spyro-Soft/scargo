@@ -66,7 +66,7 @@ class _UnitTestsGen:
         cmake_dir_path = ut_dir_path
         while cmake_dir_path != self._ut_dir:
             add_ut_dir_to_parent_cmake(cmake_dir_path)
-            cmake_dir_path = cmake_dir_path.parent            
+            cmake_dir_path = cmake_dir_path.parent
 
         ut_name = self._get_cmake_tests_name(ut_dir_path)
         ut_files = [
@@ -99,8 +99,8 @@ class _UnitTestsGen:
         )
 
         cmake_dir_paths = [ut_dir_path.absolute()]
-            
-        while len(cmake_dir_paths)!=0:
+
+        while len(cmake_dir_paths) != 0:
             current_dir = cmake_dir_paths.pop(0)
             for containing_dir in current_dir.iterdir():
                 if containing_dir.is_dir():
@@ -150,7 +150,8 @@ def add_ut_dir_to_parent_cmake(ut_dir_path: Path) -> None:
         cmake_text = file.read()
         add_subdirectory_clause = f"\nadd_subdirectory({ut_dir_path.name})"
         if add_subdirectory_clause not in cmake_text:
-            file.write(add_subdirectory_clause)    
+            file.write(add_subdirectory_clause)
+
 
 def generate_ut(input_path: Path, config: Config, force: bool = False) -> None:
     ut_gen = _UnitTestsGen(config)
