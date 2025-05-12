@@ -167,7 +167,7 @@ class ProjectConfig(BaseModel):
 
     @property
     def default_target(self) -> "Target":
-        if isinstance(self.target_id, list):
+        if isinstance(self.target_id, List):
             return Target.get_target_by_id(self.target_id[0])
         return Target.get_target_by_id(self.target_id)
 
@@ -335,7 +335,7 @@ class Stm32Config(BaseModel):
 
 
 class ATSAMConfig(BaseModel):
-    chip: str = Field(default=CHIP_DEFAULTS.get("atsam"))
+    chip: str = Field(default_factory=lambda: CHIP_DEFAULTS.get("atsam"))
     cpu: str = Field()
 
     @property
