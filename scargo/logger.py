@@ -21,8 +21,12 @@ def __get_logging_config() -> Tuple[int, int]:
             return console_log_level, file_log_level
         config = parse_config(lock_file)
         scargo_config: ScargoConfig = config.scargo
-        console_log_level = logging.getLevelName(scargo_config.console_log_level)
-        file_log_level = logging.getLevelName(scargo_config.file_log_level)
+        console_log_level = logging.getLevelName(
+            scargo_config.console_log_level
+        )  # pylint: diable=no-member
+        file_log_level = logging.getLevelName(
+            scargo_config.file_log_level
+        )  # pylint: disable=no-member
     except Exception:  # pylint: disable=broad-except
         console_log_level = logging.INFO
         file_log_level = logging.WARNING
