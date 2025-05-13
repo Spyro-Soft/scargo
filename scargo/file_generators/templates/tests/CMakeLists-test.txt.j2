@@ -32,7 +32,7 @@ SET({{ key }} {{ value }})
 
 project(tests LANGUAGES C CXX ASM)
 
-find_package(GTest REQUIRED)
+find_package(GTest REQUIRED PATHS /usr/local)
 link_libraries(GTest::GTest GTest::Main)
 
 enable_testing()

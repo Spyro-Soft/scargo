@@ -22,6 +22,22 @@ RUN apt update --fix-missing && apt -y --no-install-recommends install cppcheck 
     make cmake clang clang-format clang-tidy gcovr doxygen libcmocka0 libcmocka-dev gdb screen wget curl && \
     rm -rf /var/lib/apt/lists/*
 
+# Clone and build GoogleTest 1.12.1
+ENV GTEST_VERSION="release-1.12.1"
+ENV GTEST_PATH="/opt/gtest"
+
+RUN umask 0002 && \
+    git clone --branch ${GTEST_VERSION} --depth 1 https://github.com/google/googletest.git ${GTEST_PATH} && \
+    cmake -S ${GTEST_PATH} -B ${GTEST_PATH}/build \
+          -G Ninja \
+          -DBUILD_GTEST=ON \
+          -DBUILD_GMOCK=ON \
+          -DCMAKE_INSTALL_PREFIX=/usr/local \
+          -DCMAKE_INSTALL_LIBDIR=lib \
+          -DCMAKE_POSITION_INDEPENDENT_CODE=ON && \
+    cmake --build ${GTEST_PATH}/build && \
+    cmake --install ${GTEST_PATH}/build
+
 {% if project.is_esp32() %}
 FROM {{ previous_base }} AS esp32
 {% set previous_base = 'esp32' %}
