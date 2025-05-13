@@ -169,8 +169,8 @@ class ProjectConfig(BaseModel):
     def default_target(self) -> "Target":
         if isinstance(self.target_id, List):
             return Target.get_target_by_id(
-                self.target_id[0]
-            )  # pylint: disable=unsubscriptable-object
+                self.target_id[0]  # pylint: disable=unsubscriptable-object
+            )
         return Target.get_target_by_id(self.target_id)
 
     def is_docker_buildenv(self) -> bool:
@@ -337,13 +337,12 @@ class Stm32Config(BaseModel):
 
 
 class ATSAMConfig(BaseModel):
-    chip: str = Field(default_factory=lambda: CHIP_DEFAULTS.get("atsam"))
+    chip: str = Field(default=CHIP_DEFAULTS.get("atsam"))
     cpu: str = Field()
 
     @property
     def chip_series(self) -> str:
-        chip_str: str = self.chip
-        return chip_str[2:8].upper()
+        return self.chip[2:8].upper()  # pylint: disable=unsubscriptable-object
 
 
 class Esp32Config(BaseModel):
