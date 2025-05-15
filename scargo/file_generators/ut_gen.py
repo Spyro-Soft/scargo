@@ -105,7 +105,9 @@ class _UnitTestsGen:
             for containing_dir in current_dir.iterdir():
                 if containing_dir.is_dir():
                     cmake_dir_paths.append(containing_dir.absolute())
-            add_ut_dir_to_parent_cmake(current_dir)
+            cmake_file = current_dir / "CMakeLists.txt"
+            if cmake_file.exists():
+                add_ut_dir_to_parent_cmake(current_dir)
 
     def _get_unit_test_path(self, input_src_path: Path) -> Path:
         """Return output path for unit test

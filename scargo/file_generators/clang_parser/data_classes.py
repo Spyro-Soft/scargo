@@ -85,4 +85,5 @@ class HeaderDescriptor:
         self.includes = includes
 
     def trimPrefixName(self, prefix: str) -> None:
-        self.name = self.name.removeprefix(prefix)
+        if self.name.startswith(prefix):
+            self.name = self.name[len(prefix) :]

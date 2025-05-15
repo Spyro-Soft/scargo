@@ -21,6 +21,9 @@ from tests.it.utils import (
 
 TEST_DATA_PATH = Path(__file__).parent.parent / "test_data"
 FIX_TEST_FILES_PATH = TEST_DATA_PATH / "test_projects/test_files/fix_test_files"
+SUBDIRECTORY_TEST_FILES_PATH = (
+    TEST_DATA_PATH / "test_projects/test_files/subdirectories_test_files"
+)
 
 
 @dataclass
@@ -410,6 +413,47 @@ class TestBinProjectFlow:
         assert result.exit_code == 0
         assert "100% tests passed, 0 tests failed out of 1" in result.output
 
+    def test_cli_gen_unit_test_subdirectories(
+        self, test_state: ActiveTestState, setup_project: None
+    ) -> None:
+        """Test generates first the unit test for a test subdirectory and then the root test directory to see, whether
+        the add_directory(x) statement is still available in the CMakeLists.txt file of the root test directory.
+        """
+        config = get_scargo_config_or_exit()
+        src_dir_name = config.source_dir_path.name
+        tests_path = config.project_root / "tests/ut"
+        copytree(
+            SUBDIRECTORY_TEST_FILES_PATH, config.source_dir_path, dirs_exist_ok=True
+        )
+        result = test_state.runner.invoke(
+            cli, ["gen", "-u", src_dir_name + "/fs2/test2/"]
+        )
+
+        assert result.exit_code == 0
+        assert checkCMakeListsContent(tests_path / "fs2", "add_subdirectory(test2)")
+        assert checkCMakeListsContent(tests_path, "add_subdirectory(fs2)")
+
+        new_dir = tests_path / "fs2/test1"
+        new_dir_cmake_file = new_dir / "CMakeLists.txt"
+
+        assert new_dir.exists() == False
+
+        new_dir.mkdir(exist_ok=True)
+
+        result = test_state.runner.invoke(cli, ["gen", "-u", src_dir_name])
+
+        assert result.exit_code == 0
+        assert (
+            checkCMakeListsContent(tests_path / "fs2", "add_subdirectory(test2)")
+            == True
+        )
+        assert checkCMakeListsContent(tests_path, "add_subdirectory(fs2)") == True
+        assert new_dir_cmake_file.exists() == False
+        assert (
+            checkCMakeListsContent(tests_path / "fs2", "add_subdirectory(test1)")
+            == False
+        )
+
     def test_cli_gen_mock(
         self, test_state: ActiveTestState, setup_project: None, dummy_lib_h: Path
     ) -> None:
@@ -472,6 +516,20 @@ class TestBinProjectFlow:
         assert result.exit_code == 0
         for file_path in expected_doc_files_paths:
             assert file_path.is_file(), f"File '{file_path}' not exist"
+
+
+def checkCMakeListsContent(dir_path: Path, text: str) -> bool:
+    if not str(dir_path).endswith("CMakeLists.txt"):
+        file_path = dir_path / "CMakeLists.txt"
+    else:
+        file_path = dir_path
+
+    if file_path.exists():
+        with file_path.open("r", encoding="utf-8") as file:
+            cmake_text = file.read()
+            if text in cmake_text:
+                return True
+    return False
 
 
 def test_project_x86_scargo_from_pypi(tmp_path: Path) -> None:
