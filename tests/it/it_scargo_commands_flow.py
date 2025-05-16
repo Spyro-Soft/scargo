@@ -13,6 +13,7 @@ from scargo.cli import cli
 from scargo.config import ScargoTarget, Target
 from scargo.config_utils import get_scargo_config_or_exit
 from scargo.file_generators.docker_gen import _DockerComposeTemplate
+from scargo.utils.sys_utils import text_in_file
 from tests.it.utils import (
     ScargoTestRunner,
     add_profile_to_toml,
@@ -520,16 +521,9 @@ class TestBinProjectFlow:
 
 def checkCMakeListsContent(dir_path: Path, text: str) -> bool:
     if not str(dir_path).endswith("CMakeLists.txt"):
-        file_path = dir_path / "CMakeLists.txt"
-    else:
-        file_path = dir_path
+        dir_path = dir_path / "CMakeLists.txt"
 
-    if file_path.exists():
-        with file_path.open("r", encoding="utf-8") as file:
-            cmake_text = file.read()
-            if text in cmake_text:
-                return True
-    return False
+    return text_in_file(dir_path, text)
 
 
 def test_project_x86_scargo_from_pypi(tmp_path: Path) -> None:

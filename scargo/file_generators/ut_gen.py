@@ -7,6 +7,7 @@ from typing import List, Sequence
 from scargo.config import Config
 from scargo.file_generators.base_gen import create_file_from_template
 from scargo.file_generators.clang_parser.header_parser import parse_file
+from scargo.utils.sys_utils import removeprefix
 
 HEADER_EXTENSIONS = (".h", ".hpp")
 SRC_EXTENSIONS = (".c", ".cpp")
@@ -47,8 +48,7 @@ class _UnitTestsGen:
         :param Path output_file_path: Path to unit test file
         :param bool overwrite: overwrite if exists
         """
-        header_descriptor = parse_file(input_file_path.absolute())
-        header_descriptor.trimPrefixName(str(self._config.project_root) + "/src/")
+        header_descriptor = parse_file(input_file_path)
         create_file_from_template(
             "ut/ut.cpp.j2",
             output_file_path,
@@ -73,6 +73,11 @@ class _UnitTestsGen:
             p.name for p in self._get_paths_with_ext(ut_dir_path, SRC_EXTENSIONS)
         ]
 
+        src_path = removeprefix(
+            str(src_dir_path.absolute()),
+            str(self._config.project_root.absolute()) + "/",
+        )
+
         # Exclude main from srcs to test
         main_cpp = (
             f"{self._config.project.bin_name}.cpp"
@@ -92,6 +97,7 @@ class _UnitTestsGen:
             overwrite=True,
             template_params={
                 "src_files": src_files,
+                "src_path": src_path,
                 "utest_name": ut_name,
                 "ut_files": ut_files,
             },

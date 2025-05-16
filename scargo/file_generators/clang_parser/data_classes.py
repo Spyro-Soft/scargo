@@ -83,7 +83,3 @@ class HeaderDescriptor:
         self.classes = classes
         self.namespaces = namespaces
         self.includes = includes
-
-    def trimPrefixName(self, prefix: str) -> None:
-        if self.name.startswith(prefix):
-            self.name = self.name[len(prefix) :]
