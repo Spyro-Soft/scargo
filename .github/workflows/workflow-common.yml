@@ -104,11 +104,7 @@ jobs:
 
       - name: Define artifacts file name
         run: |
-          if [ "$branch" == develop ] || [ "$branch" == main ]; then
-            echo "report_file_name=unit-${{ matrix.branch }}-test-report" >> $GITHUB_ENV
-          else
-            echo "report_file_name=unit-test-report" >> $GITHUB_ENV
-          fi
+          echo "report_file_name=unit-${{ matrix.target }}-${{ matrix.branch }}-${{ github.run_id }}-test-report" >> $GITHUB_ENV
 
       - name: Archive unit-tests results
         uses: actions/upload-artifact@v4
@@ -116,6 +112,7 @@ jobs:
         with:
           name: $report_file_name
           path: build/test_doc
+          overwrite: true
 
   integration_tests:
     name: Integration Tests - ${{ matrix.target }}
@@ -172,11 +169,7 @@ jobs:
 
       - name: Define artifacts file name
         run: |
-          if [ "$branch" == develop ] || [ "$branch" == main ]; then
-            echo "report_file_name=integration-${{ matrix.target }}-${{ matrix.branch }}-test-report" >> $GITHUB_ENV
-          else
-            echo "report_file_name=integration-${{ matrix.target }}-test-report" >> $GITHUB_ENV
-          fi
+          echo "report_file_name=integration-${{ matrix.target }}-${{ matrix.branch }}-${{ github.run_id }}-test-report" >> $GITHUB_ENV
 
       - name: Archive integration-tests results
         uses: actions/upload-artifact@v4
@@ -184,6 +177,7 @@ jobs:
         with:
           name: $report_file_name
           path: build/test_doc
+          overwrite: true
   documentation:
     name: Generate documentation
     runs-on: ubuntu-22.04
