@@ -352,7 +352,12 @@ def gen(
     """Manage the auto file generator"""
     if base_dir:
         os.chdir(base_dir)
-    if (gen_ut is gen_mock is certs is None) and not (file_system or single_bin):
+    if (
+        gen_ut is None
+        and gen_mock is None
+        and certs is None
+        and not (file_system or single_bin)
+    ):
         logger.warning(
             "Please add one of the following options to the command:"
             "\n--unit-test\n--mock\n--certs\n--fs\n--bin"

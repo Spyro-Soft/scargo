@@ -167,24 +167,26 @@ class ProjectConfig(BaseModel):
 
     @property
     def default_target(self) -> "Target":
-        if isinstance(self.target_id, str):
-            return Target.get_target_by_id(self.target_id)
-        return Target.get_target_by_id(self.target_id[0])
+        if isinstance(self.target_id, List):
+            return Target.get_target_by_id(
+                self.target_id[0]  # pylint: disable=unsubscriptable-object
+            )
+        return Target.get_target_by_id(self.target_id)
 
     def is_docker_buildenv(self) -> bool:
         return self.build_env == SCARGO_DOCKER_ENV
 
     def is_x86(self) -> bool:
-        return "x86" in self.target_id
+        return "x86" in self.target_id  # pylint: disable=unsupported-membership-test
 
     def is_stm32(self) -> bool:
-        return "stm32" in self.target_id
+        return "stm32" in self.target_id  # pylint: disable=unsupported-membership-test
 
     def is_esp32(self) -> bool:
-        return "esp32" in self.target_id
+        return "esp32" in self.target_id  # pylint: disable=unsupported-membership-test
 
     def is_atsam(self) -> bool:
-        return "atsam" in self.target_id
+        return "atsam" in self.target_id  # pylint: disable=unsupported-membership-test
 
     def is_multitarget(self) -> bool:
         return isinstance(self.target_id, list) and len(self.target_id) > 1
@@ -340,7 +342,7 @@ class ATSAMConfig(BaseModel):
 
     @property
     def chip_series(self) -> str:
-        return self.chip[2:8].upper()
+        return self.chip[2:8].upper()  # pylint: disable=unsubscriptable-object
 
 
 class Esp32Config(BaseModel):

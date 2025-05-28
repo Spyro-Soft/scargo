@@ -22,7 +22,7 @@ jobs:
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     container:
         image: spyrosoftsa/scargo-dev:1.4
         options: --user root
@@ -43,7 +43,7 @@ jobs:
         uses: actions/deploy-pages@v1
 
   create-release:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     permissions:
       contents: write
 
@@ -69,7 +69,7 @@ jobs:
 
   release-to-pypi:
     needs: create-release
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     container:
         image: spyrosoftsa/scargo-dev:1.4
         options: --user root

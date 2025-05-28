@@ -36,29 +36,20 @@ You can find all information on how to work with scargo on official documentatio
 
 # Project dependencies
 ## Working with docker (recommended)
-- docker
-- docker-compose
+- docker with docker-compose - https://docs.docker.com/engine/install/ubuntu/
 - pip
-- python3
-
-## Working natively (not recommended, a lot of env setup)
-Base:
-
-- python >= 3.8
-- cmake >= 3.24.2
-- cppcheck lib32z1 clang clang-format clang-tidy gcovr doxygen libcmocka0 libcmocka-dev
-- lizard
-
-Depending on the architecture:
-
-- compiler (e.g. gcc-arm-none-eabi-9-2020-q2-update gcc-arm-none-eabi)
-- flashing tools
-- uC HAL and dependent files
-- much more....
+- python3 - `sudo apt install python3.10-venv python3.10-distutils -y`
 
 # Work environment
 You can always change work environment between docker or native after project is created.
 Just edit the scargo.toml file ([project] -> build-env = "docker" or build-env = "native").
+For it may be needed dependencies manually which are included in `.devcontainer/Dockerfile`
+
+Its recommended to work in virtual environment (venv) or conda environment e.g.:
+- pip install virtualenv
+- virtualenv -p /usr/bin/python3.10 venv
+- source venv/bin/activate
+
 
 ## Working in docker
 1) If you create a new project, run `docker compose run scargo-dev` to run project development image depending on chosen architecture. All dependencies should be already there.
@@ -103,6 +94,15 @@ To keep this setup between ```scargo update``` commands, in scargo.toml file upd
 
 - On Windows devices, USB device passthrough is not supported in Docker containers when using Docker Desktop. To work around this limitation, you can use WSL2 (Windows Subsystem for Linux) or run a virtual machine with a Linux distribution like Ubuntu 22.04 to enable USB device access.
 
+# Potential issues
+
+## Docker permissions on Ubuntu
+
+When using the `docker-compose` command, you may encounter permission errors due to insufficient permissions for accessing the Docker daemon socket. To resolve this issue, ensure that your user has the necessary permissions by adding your user to the `docker` group or granting appropriate access rights to the Docker daemon socket.
+To add your user to the `docker` group, run the following command:
+- `newgroup docker`
+- `sudo usermod -aG docker $USER`
+- `sudo systemctl restart docker`
 
 # Contributing
 

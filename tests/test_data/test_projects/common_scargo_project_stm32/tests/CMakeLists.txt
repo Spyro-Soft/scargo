@@ -20,7 +20,6 @@ endif()
 enable_testing()
 
 set(PROJECT_ROOT_DIR "${PROJECT_SOURCE_DIR}/..")
-set(SOURCES_DIR "${PROJECT_ROOT_DIR}/src/")
 
 add_subdirectory(mocks)
 add_subdirectory(ut)

@@ -73,7 +73,6 @@ More Information
    Installation <installation>
    Guides <guides/index>
    Reference <scargo/index>
-   Modules <modules/modules>
    Troubleshooting <troubleshooting>
    Versions <versions>
    Architecture model <arch/index>
