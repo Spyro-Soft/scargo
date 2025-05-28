@@ -111,7 +111,7 @@ jobs:
           fi
 
       - name: Archive unit-tests results
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         if: always()
         with:
           name: $report_file_name
@@ -179,7 +179,7 @@ jobs:
           fi
 
       - name: Archive integration-tests results
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         if: always()
         with:
           name: $report_file_name
