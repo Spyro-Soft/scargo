@@ -7,7 +7,7 @@
 {% for inc in header.includes %}
 #include "{{inc.name}}"
 {% endfor %}
-#include "{{header.name}}"
+#include <{{header.name}}>
 
 {% if header.namespaces %}
 {% for namespace in header.namespaces %}

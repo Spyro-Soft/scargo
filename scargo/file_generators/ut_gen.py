@@ -7,6 +7,7 @@ from typing import List, Sequence
 from scargo.config import Config
 from scargo.file_generators.base_gen import create_file_from_template
 from scargo.file_generators.clang_parser.header_parser import parse_file
+from scargo.utils.sys_utils import removeprefix
 
 HEADER_EXTENSIONS = (".h", ".hpp")
 SRC_EXTENSIONS = (".c", ".cpp")
@@ -72,6 +73,11 @@ class _UnitTestsGen:
             p.name for p in self._get_paths_with_ext(ut_dir_path, SRC_EXTENSIONS)
         ]
 
+        src_path = removeprefix(
+            str(src_dir_path.absolute()),
+            str(self._config.project_root.absolute()) + "/",
+        )
+
         # Exclude main from srcs to test
         main_cpp = (
             f"{self._config.project.bin_name}.cpp"
@@ -91,11 +97,23 @@ class _UnitTestsGen:
             overwrite=True,
             template_params={
                 "src_files": src_files,
+                "src_path": src_path,
                 "utest_name": ut_name,
                 "ut_files": ut_files,
             },
             config=self._config,
         )
+
+        cmake_dir_paths = [ut_dir_path.absolute()]
+
+        while len(cmake_dir_paths) != 0:
+            current_dir = cmake_dir_paths.pop(0)
+            for containing_dir in current_dir.iterdir():
+                if containing_dir.is_dir():
+                    cmake_dir_paths.append(containing_dir.absolute())
+            cmake_file = current_dir / "CMakeLists.txt"
+            if cmake_file.exists():
+                add_ut_dir_to_parent_cmake(current_dir)
 
     def _get_unit_test_path(self, input_src_path: Path) -> Path:
         """Return output path for unit test

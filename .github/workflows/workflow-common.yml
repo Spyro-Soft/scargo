@@ -8,7 +8,7 @@ on:
 
 jobs:
   prepare_matrix:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     outputs:
       matrix: ${{ steps.set-matrix.outputs.matrix }}
     steps:
@@ -26,7 +26,7 @@ jobs:
 
   check:
     name: Checks
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     needs: prepare_matrix
     strategy:
       matrix:
@@ -67,7 +67,7 @@ jobs:
           run: mypy scargo tests common_dev run.py clean.py
   unit_tests:
     name: Unit Tests
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     needs: prepare_matrix
     strategy:
       matrix:
@@ -104,22 +104,19 @@ jobs:
 
       - name: Define artifacts file name
         run: |
-          if [ "$branch" == develop ] || [ "$branch" == main ]; then
-            echo "report_file_name=unit-${{ matrix.branch }}-test-report" >> $GITHUB_ENV
-          else
-            echo "report_file_name=unit-test-report" >> $GITHUB_ENV
-          fi
+          echo "report_file_name=unit-${{ matrix.target }}-${{ matrix.branch }}-${{ github.run_id }}-test-report" >> $GITHUB_ENV
 
       - name: Archive unit-tests results
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         if: always()
         with:
           name: $report_file_name
           path: build/test_doc
+          overwrite: true
 
   integration_tests:
     name: Integration Tests - ${{ matrix.target }}
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     needs: prepare_matrix
     strategy:
       fail-fast: false
@@ -172,21 +169,18 @@ jobs:
 
       - name: Define artifacts file name
         run: |
-          if [ "$branch" == develop ] || [ "$branch" == main ]; then
-            echo "report_file_name=integration-${{ matrix.target }}-${{ matrix.branch }}-test-report" >> $GITHUB_ENV
-          else
-            echo "report_file_name=integration-${{ matrix.target }}-test-report" >> $GITHUB_ENV
-          fi
+          echo "report_file_name=integration-${{ matrix.target }}-${{ matrix.branch }}-${{ github.run_id }}-test-report" >> $GITHUB_ENV
 
       - name: Archive integration-tests results
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         if: always()
         with:
           name: $report_file_name
           path: build/test_doc
+          overwrite: true
   documentation:
     name: Generate documentation
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     needs: prepare_matrix
     strategy:
       matrix:

@@ -7,7 +7,7 @@ from typing import Tuple
 
 import coloredlogs
 
-from scargo.config import parse_config
+from scargo.config import ScargoConfig, parse_config
 from scargo.global_values import SCARGO_LOCK_FILE
 from scargo.utils.path_utils import get_config_file_path, get_project_root_or_none
 
@@ -20,9 +20,13 @@ def __get_logging_config() -> Tuple[int, int]:
         if not lock_file:
             return console_log_level, file_log_level
         config = parse_config(lock_file)
-        scargo_config = config.scargo
-        console_log_level = logging.getLevelName(scargo_config.console_log_level)
-        file_log_level = logging.getLevelName(scargo_config.file_log_level)
+        scargo_config: ScargoConfig = config.scargo
+        console_log_level = logging.getLevelName(
+            scargo_config.console_log_level  # pylint: disable=no-member
+        )
+        file_log_level = logging.getLevelName(
+            scargo_config.file_log_level  # pylint: disable=no-member
+        )
     except Exception:  # pylint: disable=broad-except
         console_log_level = logging.INFO
         file_log_level = logging.WARNING

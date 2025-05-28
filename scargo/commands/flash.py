@@ -178,9 +178,9 @@ class _ScargoFlash:
             )
         return subprocess.Popen(
             ["sudo", str(openocd_path), "-f", str(openocd_script)],
-            stdin=PIPE,
-            stdout=PIPE,
-            stderr=PIPE,
+            stdin=PIPE,  # pylint: disable=possibly-used-before-assignment
+            stdout=PIPE,  # pylint: disable=possibly-used-before-assignment
+            stderr=PIPE,  # pylint: disable=possibly-used-before-assignment
         )
 
     def _cleanup_openocd(self, openocd_process: Optional[subprocess.Popen]) -> None:  # type: ignore[type-arg]
