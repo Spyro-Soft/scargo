@@ -20,8 +20,10 @@ charset-normalizer==3.3.2
     # via requests
 clang==17.0.6
     # via scargo (pyproject.toml)
-click==8.1.8
-    # via typer
+click==8.1.3
+    # via
+    #   scargo (pyproject.toml)
+    #   typer
 cmake==3.30.5
     # via scargo (pyproject.toml)
 colorama==0.4.6
@@ -65,12 +67,8 @@ lizard==1.17.10
     # via scargo (pyproject.toml)
 lxml==5.4.0
     # via gcovr
-markdown-it-py==3.0.0
-    # via rich
 markupsafe==2.1.5
     # via jinja2
-mdurl==0.1.2
-    # via markdown-it-py
 paramiko==3.5.0
     # via scargo (pyproject.toml)
 patch-ng==1.18.0
@@ -80,9 +78,7 @@ pycparser==2.22
 pydantic==1.10.6
     # via scargo (pyproject.toml)
 pygments==2.18.0
-    # via
-    #   gcovr
-    #   rich
+    # via gcovr
 pynacl==1.5.0
     # via paramiko
 pyserial==3.5
@@ -100,10 +96,6 @@ requests==2.32.3
     # via
     #   conan
     #   docker
-rich==13.9.3
-    # via typer
-shellingham==1.5.4
-    # via typer
 six==1.16.0
     # via
     #   ecdsa
@@ -114,12 +106,11 @@ tomli==2.2.1
     # via gcovr
 tomlkit==0.13.2
     # via scargo (pyproject.toml)
-typer==0.15.3
+typer==0.9.0
     # via scargo (pyproject.toml)
 typing-extensions==4.6.0
     # via
     #   pydantic
-    #   rich
     #   scargo (pyproject.toml)
     #   typer
 urllib3==1.26.20

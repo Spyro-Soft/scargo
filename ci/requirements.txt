@@ -28,9 +28,10 @@ charset-normalizer==3.1.0
     # via requests
 clang==17.0.6
     # via scargo (pyproject.toml)
-click==8.1.8
+click==8.1.3
     # via
     #   black
+    #   scargo (pyproject.toml)
     #   typer
 cmake==3.30.5
     # via scargo (pyproject.toml)
@@ -126,8 +127,6 @@ lxml==5.4.0
     # via
     #   gcovr
     #   unittest-xml-reporting
-markdown-it-py==3.0.0
-    # via rich
 markupsafe==2.1.5
     # via jinja2
 matplotlib==3.7.5
@@ -136,8 +135,6 @@ mccabe==0.7.0
     # via
     #   flake8
     #   pylint
-mdurl==0.1.2
-    # via markdown-it-py
 mypy==1.14.1
     # via scargo (pyproject.toml)
 mypy-extensions==1.0.0
@@ -190,7 +187,6 @@ pyflakes==3.2.0
 pygments==2.14.0
     # via
     #   gcovr
-    #   rich
     #   sphinx
 pylint==3.2.7
     # via scargo (pyproject.toml)
@@ -243,10 +239,6 @@ requests==2.28.2
     #   docker
     #   flit
     #   sphinx
-rich==13.9.3
-    # via typer
-shellingham==1.5.4
-    # via typer
 six==1.16.0
     # via
     #   ecdsa
@@ -291,7 +283,7 @@ tomlkit==0.13.2
     # via
     #   pylint
     #   scargo (pyproject.toml)
-typer==0.15.3
+typer==0.9.0
     # via scargo (pyproject.toml)
 types-clang==0.14.3
     # via scargo (pyproject.toml)
@@ -307,7 +299,6 @@ typing-extensions==4.6.0
     #   black
     #   mypy
     #   pydantic
-    #   rich
     #   scargo (pyproject.toml)
     #   typer
 unittest-xml-reporting==3.2.0
