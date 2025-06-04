@@ -1,7 +1,7 @@
 .. _scargo_monitor:
 
 Connect and monitor the serial interface.
------------------------------------
+-----------------------------------------
 
 Usage
 ^^^^^
