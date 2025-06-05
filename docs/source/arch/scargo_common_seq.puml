@@ -12,8 +12,5 @@ participant sc_build #Application
 participant conan #Implementation
 participant cmake #Implementation
 participant esp_idf #Implementation
-participant storage #Physical [
-    <<local storage>>
-    my_project_1
-]
+participant "my_project_1" as storage  << (S,#ADD1B2) local storage >> #Physical
 participant "package repository" as pkg_repo #Strategy
