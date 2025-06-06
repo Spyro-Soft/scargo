@@ -5,7 +5,7 @@ description = "Project description."
 homepage-url = "www.hello-world.com"
 
 bin_name = "example_project"
-target = "x86"
+target = ["x86"]
 build-env = "docker"
 docker-file = ".devcontainer/Dockerfile-custom"
 docker-image-tag = "example_project-dev:1.0"
@@ -45,9 +45,26 @@ exclude = []
 description = "Copyright"
 exclude = []
 
+[fix.copyright]
+description = '''
+/**
+ * @copyright Copyright (C) 2023 <Company-Name>. All rights reserved.
+ */
+'''
+
 [check.todo]
 keywords = ["tbd", "todo", "TODO", "fixme"]
 exclude = []
+
+[check.cppcheck]
+directories = [
+    "src/",
+    "main/",
+]
+suppress = [
+#    "unusedFunction",
+    "missingIncludeSystem"
+]
 
 [check.clang-format]
 exclude = []
@@ -67,19 +84,30 @@ cxxflags = "-Wall -Wextra -Og --coverage -fkeep-inline-functions -fkeep-static-c
 
 gcov-executable = "" # Empty string -> use default gcov executable
 
-# conan dependencies "lib_name/version"
+# Underhood scargo use conan. All string valid for conan tool are valid here. eg "gtest/1.13.0"
 [dependencies]
-general = []
-build = []
-tool = []
-test = ["gtest/1.13.0"]
+#general -> public conan dependencies of project they will be added to package info (eg. bianry dynamic linkage libary) they will be added also to scargo test.
+general = [
+]
+#build -> private conan dependencies usedn only during build process(eg. private static linkage library)
+build = [
+]
+#tool -> special conan "not library" dependencies like cmake/3.22.
+tool = [
+]
+#test-> conan dependencies used only for testing targets
+test = [
+    "gtest/1.13.0"
+]
 
 [conan.repo]
-# conancenter = "https://center.conan.io"
+#Passing conancenter here is not nessary as scargo adds it by default
+#Below example of private binary artifacts repository
+#my_artifactory = "https://my_artifactory/api/conan/conanlocal"
 
 
 [scargo]
 console-log-level = "INFO"
 file-log-level = "WARNING"
 update-exclude = []
-version = "1.8.0"
+version = "3.1.0"
