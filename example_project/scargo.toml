@@ -5,7 +5,7 @@ description = "Project description."
 homepage-url = "www.hello-world.com"
 
 bin_name = "example_project"
-target = "x86"
+target = ["x86"]
 build-env = "docker"
 docker-file = ".devcontainer/Dockerfile-custom"
 docker-image-tag = "example_project-dev:1.0"
@@ -49,6 +49,16 @@ exclude = []
 keywords = ["tbd", "todo", "TODO", "fixme"]
 exclude = []
 
+[check.cppcheck]
+directories = [
+    "src/",
+    "main/",
+]
+suppress = [
+#    "unusedFunction",
+    "missingIncludeSystem"
+]
+
 [check.clang-format]
 exclude = []
 
@@ -69,10 +79,18 @@ gcov-executable = "" # Empty string -> use default gcov executable
 
 # conan dependencies "lib_name/version"
 [dependencies]
-general = []
-build = []
-tool = []
-test = ["gtest/1.13.0"]
+general = [
+]
+
+build = [
+]
+
+tool = [
+]
+
+test = [
+	"gtest/1.13.0"
+]
 
 [conan.repo]
 # conancenter = "https://center.conan.io"
@@ -82,3 +100,6 @@ test = ["gtest/1.13.0"]
 console-log-level = "INFO"
 file-log-level = "WARNING"
 update-exclude = []
+
+[docker-compose]
+ports = []
