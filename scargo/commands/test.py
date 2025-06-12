@@ -5,6 +5,8 @@
 """Run test from project"""
 import subprocess
 import sys
+import json
+
 from pathlib import Path
 from typing import List, Union
 
@@ -86,6 +88,18 @@ def scargo_test(
     run_ut(config, verbose, test_build_dir, detailed_coverage)
 
 
+def _gcov_json_create_empty_record(fpath: Path) -> dict | None:
+    if not fpath.exists():
+        return None
+
+    record = {
+        "file": str(fpath),
+        "lines": [{"line_number": 1, "count": 0, "branches":[]}],
+        "functions": []
+    }
+    return record
+
+
 def run_ut(config: Config, verbose: bool, cwd: Path, detailed_coverage: bool) -> None:
     # Run tests.
     cmd: List[Union[str, Path]] = ["ctest"]
@@ -102,6 +116,7 @@ def run_ut(config: Config, verbose: bool, cwd: Path, detailed_coverage: bool) ->
             if detailed_coverage
             else "--html=ut-coverage.html"
         )
+        output_json_filename = "ut-coverage.json"
 
         # Run code coverage.
         cmd = [
@@ -130,10 +145,58 @@ def run_ut(config: Config, verbose: bool, cwd: Path, detailed_coverage: bool) ->
             "--exclude-unreachable-branches",
             "--gcov-ignore-parse-errors",
         ]
+
+        if detailed_coverage:
+            cmd.append("--json")
+            cmd.append(output_json_filename)
+
         print(cmd)
 
         gcov_executable = config.tests.gcov_executable
+        if gcov_executable != "":
+            cmd.extend(["--gcov-executable", gcov_executable])
 
+        subprocess.check_call(cmd, cwd=cwd)
+
+        if not detailed_coverage:
+            return
+
+        # GCOV does not generate any summary for files not used in the unit tests.
+        # To generate full coverage including all source files, the output JSON file
+        # has to be updated with empty records per each uncovered source file.
+        output_json_fpath = cwd / Path(output_json_filename)
+        with open(output_json_fpath, 'r') as ff:
+            output_json = json.load(ff)
+
+        covered_src_files = []
+        for ff in output_json['files']:
+            covered_src_files.append(Path(config.source_dir_path) / Path(ff['file']).name)
+
+        uncovered_src_files = [ff for ff in config.source_dir_path.rglob('*.cpp') if not ff in covered_src_files]
+        if not uncovered_src_files:
+            return
+
+        # Create empty record per each uncovered source file
+        for ff in uncovered_src_files:
+            output_json['files'].append(_gcov_json_create_empty_record(ff))
+
+        with open(output_json_fpath, 'w') as ff:
+            json.dump(output_json, ff)
+
+        # Run coverage once again to generate records with 0.0% coverage, based on the modified JSON.
+        cmd = [
+            "gcovr",
+            "-r",
+            str(config.project_root),
+            "--filter",
+            str(config.source_dir_path),
+            *output_option.split("="),
+            "--json-add-tracefile",
+            str(output_json_fpath)
+        ]
+        print(cmd)
+
+        gcov_executable = config.tests.gcov_executable
         if gcov_executable != "":
             cmd.extend(["--gcov-executable", gcov_executable])
 
