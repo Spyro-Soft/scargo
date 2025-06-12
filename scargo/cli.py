@@ -21,6 +21,7 @@ from scargo.commands.docker import (
 from scargo.commands.fix import scargo_fix
 from scargo.commands.flash import scargo_flash
 from scargo.commands.gen import scargo_gen
+from scargo.commands.license_check import scargo_license_check
 from scargo.commands.monitor import scargo_monitor
 from scargo.commands.new import scargo_new
 from scargo.commands.publish import scargo_publish
@@ -518,6 +519,28 @@ def update(
             logger.error("Config file not found.")
             sys.exit(1)
     scargo_update(config_file_path)
+
+
+###############################################################################
+
+
+@cli.command()
+def license_check(
+    path: Optional[Path] = Option(
+        None,
+        "--path",
+        "-p",
+        exists=True,
+        resolve_path=True,
+        help="Optional path to scan (default: src/ or main/).",
+    ),
+    base_dir: Optional[Path] = BASE_DIR_OPTION,
+) -> None:
+    """Check project licenses against license policy."""
+    if base_dir:
+        os.chdir(base_dir)
+
+    scargo_license_check(path)
 
 
 ###############################################################################
