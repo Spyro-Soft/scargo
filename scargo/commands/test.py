@@ -3,16 +3,16 @@
 # #
 
 """Run test from project"""
+import json
 import subprocess
 import sys
-import json
-
 from pathlib import Path
-from typing import List, Union
+from typing import Any, Dict, List, Union
 
 from scargo.config import Config
 from scargo.config_utils import prepare_config
 from scargo.file_generators.conan_gen import conan_add_default_profile_if_missing
+from scargo.global_values import SCARGO_SRC_EXTENSIONS
 from scargo.logger import get_logger
 from scargo.utils.conan_utils import conan_add_remote, conan_source
 
@@ -88,16 +88,37 @@ def scargo_test(
     run_ut(config, verbose, test_build_dir, detailed_coverage)
 
 
-def _gcov_json_create_empty_record(fpath: Path) -> dict | None:
+def _gcov_json_create_empty_record(fpath: Path) -> Union[Dict[str, Any], None]:
     if not fpath.exists():
         return None
 
     record = {
         "file": str(fpath),
-        "lines": [{"line_number": 1, "count": 0, "branches":[]}],
-        "functions": []
+        "lines": [{"line_number": 1, "count": 0, "branches": []}],
+        "functions": [],
     }
     return record
+
+
+def _gcov_get_uncovered_src_files(
+    config: Config, output_json: Dict[str, Any]
+) -> List[Any]:
+    covered_files: List[Path] = []
+    for ff in output_json["files"]:
+        covered_files.append(Path(config.source_dir_path) / Path(ff["file"]).name)
+
+    uncovered_files: List[Path] = []
+    for ff in config.source_dir_path.rglob("*"):
+        if not ff.is_file():
+            continue
+        if ff.suffix not in SCARGO_SRC_EXTENSIONS:
+            continue
+        if ff in covered_files:
+            continue
+
+        uncovered_files.append(ff)
+
+    return uncovered_files
 
 
 def run_ut(config: Config, verbose: bool, cwd: Path, detailed_coverage: bool) -> None:
@@ -165,23 +186,16 @@ def run_ut(config: Config, verbose: bool, cwd: Path, detailed_coverage: bool) ->
         # To generate full coverage including all source files, the output JSON file
         # has to be updated with empty records per each uncovered source file.
         output_json_fpath = cwd / Path(output_json_filename)
-        with open(output_json_fpath, 'r') as ff:
-            output_json = json.load(ff)
-
-        covered_src_files = []
-        for ff in output_json['files']:
-            covered_src_files.append(Path(config.source_dir_path) / Path(ff['file']).name)
-
-        uncovered_src_files = [ff for ff in config.source_dir_path.rglob('*.cpp') if not ff in covered_src_files]
-        if not uncovered_src_files:
-            return
+        with open(output_json_fpath, encoding="utf-8") as f:
+            output_json = json.load(f)
 
         # Create empty record per each uncovered source file
+        uncovered_src_files = _gcov_get_uncovered_src_files(config, output_json)
         for ff in uncovered_src_files:
-            output_json['files'].append(_gcov_json_create_empty_record(ff))
+            output_json["files"].append(_gcov_json_create_empty_record(ff))
 
-        with open(output_json_fpath, 'w') as ff:
-            json.dump(output_json, ff)
+        with open(output_json_fpath, "w", encoding="utf-8") as f:
+            json.dump(output_json, f)
 
         # Run coverage once again to generate records with 0.0% coverage, based on the modified JSON.
         cmd = [
@@ -192,7 +206,7 @@ def run_ut(config: Config, verbose: bool, cwd: Path, detailed_coverage: bool) ->
             str(config.source_dir_path),
             *output_option.split("="),
             "--json-add-tracefile",
-            str(output_json_fpath)
+            str(output_json_fpath),
         ]
         print(cmd)
 
