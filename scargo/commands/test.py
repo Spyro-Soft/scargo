@@ -107,11 +107,21 @@ def _gcov_get_uncovered_src_files(
     for ff in output_json["files"]:
         covered_files.append(Path(config.source_dir_path) / Path(ff["file"]).name)
 
+    accepted_extensions = config.project.src_extensions
+    if not accepted_extensions:
+        accepted_extensions = SCARGO_SRC_EXTENSIONS_DEFAULT
+        logger.warning(
+            "scargo: test: source file extensions not defined in the config file 'scargo.toml'."
+        )
+        logger.warning(
+            f"scargo: test: default extensions in use: '{SCARGO_SRC_EXTENSIONS_DEFAULT}'"
+        )
+
     uncovered_files: List[Path] = []
     for ff in config.source_dir_path.rglob("*"):
         if not ff.is_file():
             continue
-        if ff.suffix not in SCARGO_SRC_EXTENSIONS_DEFAULT:
+        if ff.suffix not in accepted_extensions:
             continue
         if ff in covered_files:
             continue
