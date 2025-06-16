@@ -26,6 +26,9 @@ cxxstandard = "17"
 cflags   = "-Wall -Wextra"
 cxxflags = "-Wall -Wextra"
 
+src_extensions = {{ src_extensions | tojson }}
+header_extensions = {{ header_extensions | tojson }}
+
 in-repo-conan-cache = false
 
 [profile.Debug]

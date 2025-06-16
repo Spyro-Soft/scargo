@@ -3,12 +3,17 @@
 # #
 from enum import Enum
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Union
+from typing import Any, Dict, List, Optional, Sequence, Union
 
 import toml
 from pydantic import BaseModel, Extra, Field, root_validator
 
-from scargo.global_values import SCARGO_DEFAULT_BUILD_ENV, SCARGO_DOCKER_ENV
+from scargo.global_values import (
+    SCARGO_DEFAULT_BUILD_ENV,
+    SCARGO_DOCKER_ENV,
+    SCARGO_HEADER_EXTENSIONS_DEFAULT,
+    SCARGO_SRC_EXTENSIONS_DEFAULT,
+)
 
 
 class ScargoTarget(Enum):
@@ -155,6 +160,9 @@ class ProjectConfig(BaseModel):
 
     cflags: str
     cxxflags: str
+
+    src_extensions: Optional[Sequence[str]] = SCARGO_SRC_EXTENSIONS_DEFAULT
+    header_extensions: Optional[Sequence[str]] = SCARGO_HEADER_EXTENSIONS_DEFAULT
 
     max_build_jobs: Optional[int] = Field(default=None, alias="max-build-jobs")
     cmake_variables: Dict[str, str] = Field(default={}, alias="cmake-variables")
