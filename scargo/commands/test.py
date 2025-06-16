@@ -12,7 +12,7 @@ from typing import Any, Dict, List, Union
 from scargo.config import Config
 from scargo.config_utils import prepare_config
 from scargo.file_generators.conan_gen import conan_add_default_profile_if_missing
-from scargo.global_values import SCARGO_SRC_EXTENSIONS
+from scargo.global_values import SCARGO_SRC_EXTENSIONS_DEFAULT
 from scargo.logger import get_logger
 from scargo.utils.conan_utils import conan_add_remote, conan_source
 
@@ -111,7 +111,7 @@ def _gcov_get_uncovered_src_files(
     for ff in config.source_dir_path.rglob("*"):
         if not ff.is_file():
             continue
-        if ff.suffix not in SCARGO_SRC_EXTENSIONS:
+        if ff.suffix not in SCARGO_SRC_EXTENSIONS_DEFAULT:
             continue
         if ff in covered_files:
             continue
