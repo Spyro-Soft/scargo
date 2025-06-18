@@ -1,11 +1,9 @@
-#define DOCTEST_CONFIG_IMPLEMENT_WITH_MAIN
-#include "doctest.h"
+#include <gtest/gtest.h>
+#include <pow3.hpp>
 
-#include "pow3.hpp"
-
-TEST_CASE("testing function pow3")
+TEST(Pow3TestCase, BasicAssertion)
 {
-    CHECK(pow3(1) == 1);
-    CHECK(pow3(2) == 8);
-    CHECK(pow3(3) == 27);
+    EXPECT_TRUE(pow3(1) == 1);
+    EXPECT_TRUE(pow3(2) == 8);
+    EXPECT_TRUE(pow3(3) == 27);
 }
