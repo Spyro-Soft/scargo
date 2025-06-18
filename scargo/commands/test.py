@@ -108,7 +108,7 @@ def _gcov_get_uncovered_src_files(
 ) -> List[Any]:
     covered_files: List[Path] = []
     for ff in output_json["files"]:
-        covered_files.append(Path(config.source_dir_path) / Path(ff["file"]).name)
+        covered_files.append(config.project_root / ff["file"])
 
     accepted_extensions = config.project.src_extensions
     if not accepted_extensions:
@@ -129,7 +129,7 @@ def _gcov_get_uncovered_src_files(
         if ff in covered_files:
             continue
 
-        uncovered_files.append(ff)
+        uncovered_files.append(ff.relative_to(config.project_root))
 
     return uncovered_files
 
