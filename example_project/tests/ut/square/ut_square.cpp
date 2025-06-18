@@ -1,16 +1,14 @@
-#define DOCTEST_CONFIG_IMPLEMENT_WITH_MAIN
-#include "doctest.h"
+#include <gtest/gtest.h>
+#include <square.hpp>
 
-#include "square.hpp"
-
-TEST_CASE("testing function square (part 1)")
+TEST(SquareTestCase, BasicAssertion1)
 {
-    CHECK(square(1) == 1);
-    CHECK(square(2) == 4);
+    EXPECT_TRUE(square(1) == 1);
+    EXPECT_TRUE(square(2) == 4);
 }
 
-TEST_CASE("testing function square (part 2)")
+TEST(SquareTestCase, BasicAssertion2)
 {
-    CHECK(square(3) == 9);
-    CHECK(square(4) == 16);
+    EXPECT_TRUE(square(3) == 9);
+    EXPECT_TRUE(square(4) == 16);
 }

@@ -1,12 +1,10 @@
-#define DOCTEST_CONFIG_IMPLEMENT_WITH_MAIN
-#include "doctest.h"
+#include <gtest/gtest.h>
+#include <twice.hpp>
 
-#include "twice.hpp"
-
-TEST_CASE("testing function twice")
+TEST(TwiceTestCase, BasicAssertion)
 {
-    CHECK(twice(1) == 2);
-    CHECK(twice(2) == 4);
-    CHECK(twice(3) == 6);
-    CHECK(twice(4) == 8);
+    EXPECT_TRUE(twice(1) == 2);
+    EXPECT_TRUE(twice(2) == 4);
+    EXPECT_TRUE(twice(3) == 6);
+    EXPECT_TRUE(twice(4) == 8);
 }
