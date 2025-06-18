@@ -117,7 +117,9 @@ def active_state_x86_path() -> ScargoCommandTestFlow:
 
 
 @pytest.fixture
-def test_state(request: FixtureRequest, tmp_path_factory: TempPathFactory) -> Any:
+def test_state(
+    request: FixtureRequest, tmp_path_factory: TempPathFactory, use_local_scargo: None
+) -> Any:
     test_state = request.param
     test_state.proj_path = tmp_path_factory.mktemp(test_state.proj_name)
     os.chdir(test_state.proj_path)
