@@ -6,6 +6,7 @@ from pathlib import Path
 from typing import Any, List, Optional, Sequence
 
 import pytest
+import tomlkit
 from pytest import FixtureRequest, TempPathFactory
 
 from scargo.cli import cli
@@ -105,6 +106,17 @@ class ScargoCommandTestFlow:
             dummy_file_path.parent.mkdir(parents=True, exist_ok=True)
             dummy_file_path.touch()
 
+    def set_config_src_extensions(self, ext: List[str]) -> None:
+        config = get_scargo_config_or_exit()
+        config_path = config.project_root / "scargo.toml"
+
+        with open(config_path, encoding="utf-8") as scargo_config_file:
+            config_data = tomlkit.load(scargo_config_file)
+
+        config_data["project"]["src_extensions"] = ext  # type: ignore
+        with open(config_path, "w", encoding="utf-8") as scargo_lock_file:
+            tomlkit.dump(config_data, scargo_lock_file)
+
 
 @pytest.fixture
 def active_state_x86_path() -> ScargoCommandTestFlow:
@@ -176,6 +188,18 @@ def setup_project(test_state: ScargoCommandTestFlow) -> None:
 )
 @pytest.mark.xdist_group(name="TestCommandTestFlow")
 class TestCommandTestFlow:
+    def _get_fake_src_files(self) -> List[str]:
+        expected_files = [
+            "src/echo.c",
+            "src/test/test.cpp",
+            "src/assembly.s",
+            "src/assembly/capital_assembly.S",
+            "src/assembly/asm.asm",
+            "src/cc/cctest.cc",
+            "src/cc/cxxtest.cxx",
+        ]
+        return expected_files
+
     def test_cli_basic(
         self, test_state: ScargoCommandTestFlow, setup_project: None
     ) -> None:
@@ -208,18 +232,33 @@ class TestCommandTestFlow:
         test_state.assert_gcov_detailed_coverage(EXPECTED_UT_COVERED_SRC_FILES)
 
         # create dummy fake files and re-run tests
-        expected_files = [
-            "src/echo.c",
-            "src/test/test.cpp",
-            "src/assembly.s",
-            "src/assembly/capital_assembly.S",
-            "src/assembly/asm.asm",
-            "src/cc/cctest.cc",
-            "src/cc/cxxtest.cxx",
-        ]
-
+        expected_files = self._get_fake_src_files()
         test_state.create_dummy_src_files(expected_files)
         test_state.runner.invoke(cli, ["test", "--detailed-coverage"])
 
         expected_files.extend(EXPECTED_UT_COVERED_SRC_FILES)
         test_state.assert_gcov_detailed_coverage(expected_files)
+
+    def test_cli_detailed_coverage_filtering(
+        self, test_state: ScargoCommandTestFlow, setup_project: None
+    ) -> None:
+        expected_extensions = [".s", ".cxx"]
+        test_state.set_config_src_extensions(expected_extensions)
+
+        result = test_state.runner.invoke(cli, ["update"])
+        assert result.exit_code == 0
+
+        # create dummy fake files and re-run tests
+        expected_files = self._get_fake_src_files()
+        test_state.create_dummy_src_files(expected_files)
+        test_state.runner.invoke(cli, ["test", "--detailed-coverage"])
+
+        filtered = []
+        for ff in expected_files:
+            valid = any([ff.endswith(ext) for ext in expected_extensions])
+            if not valid:
+                continue
+            filtered.append(ff)
+
+        filtered.extend(EXPECTED_UT_COVERED_SRC_FILES)
+        test_state.assert_gcov_detailed_coverage(filtered)
