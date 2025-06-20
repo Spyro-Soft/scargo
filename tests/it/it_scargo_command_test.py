@@ -13,15 +13,8 @@ from scargo.cli import cli
 from scargo.config import ScargoTarget
 from scargo.config_utils import get_scargo_config_or_exit
 from scargo.global_values import SCARGO_UT_COV_FILES_PREFIX
+from tests.it.conftest import TEST_DATA_PATH, UT_FILES_PATH
 from tests.it.utils import ScargoTestRunner
-
-TEST_DATA_PATH = Path(__file__).parent.parent / "test_data"
-FIX_TEST_FILES_PATH = TEST_DATA_PATH / "test_projects/test_files/fix_test_files"
-SUBDIRECTORY_TEST_FILES_PATH = (
-    TEST_DATA_PATH / "test_projects/test_files/subdirectories_test_files"
-)
-
-UT_FILES_PATH = TEST_DATA_PATH / "test_projects/test_files/ut_files"
 
 # List of expected covered files with defined units tests from UT_FILES_PATH
 # in relation to source directory
