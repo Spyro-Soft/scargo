@@ -143,6 +143,16 @@ def active_state_esp32_path() -> ScargoCommandTestFlow:
 
 
 @pytest.fixture
+def active_state_atsam_path() -> ScargoCommandTestFlow:
+    project_path = TEST_DATA_PATH / "test_projects/common_scargo_project_atsam"
+    return ScargoCommandTestFlow(
+        target_id=ScargoTarget.atsam,
+        proj_name=project_path.name,
+        proj_to_copy_path=project_path,
+    )
+
+
+@pytest.fixture
 def test_state(
     request: FixtureRequest, tmp_path_factory: TempPathFactory, use_local_scargo: None
 ) -> Any:
@@ -196,8 +206,9 @@ def setup_project(test_state: ScargoCommandTestFlow) -> None:
     [
         pytest.lazy_fixture("active_state_x86_path"),  # type: ignore
         pytest.lazy_fixture("active_state_esp32_path"),  # type: ignore
+        pytest.lazy_fixture("active_state_atsam_path"),  # type: ignore
     ],
-    ids=["copy_project_x86", "copy_project_esp32"],
+    ids=["copy_project_x86", "copy_project_esp32", "copy_project_atsam"],
     scope="session",
     indirect=True,
 )
