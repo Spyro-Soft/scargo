@@ -12,7 +12,10 @@ from typing import Any, Dict, List, Union
 from scargo.config import Config
 from scargo.config_utils import prepare_config
 from scargo.file_generators.conan_gen import conan_add_default_profile_if_missing
-from scargo.global_values import SCARGO_SRC_EXTENSIONS_DEFAULT
+from scargo.global_values import (
+    SCARGO_SRC_EXTENSIONS_DEFAULT,
+    SCARGO_UT_COV_FILES_PREFIX,
+)
 from scargo.logger import get_logger
 from scargo.utils.conan_utils import conan_add_remote, conan_source
 
@@ -105,7 +108,7 @@ def _gcov_get_uncovered_src_files(
 ) -> List[Any]:
     covered_files: List[Path] = []
     for ff in output_json["files"]:
-        covered_files.append(Path(config.source_dir_path) / Path(ff["file"]).name)
+        covered_files.append(config.project_root / ff["file"])
 
     accepted_extensions = config.project.src_extensions
     if not accepted_extensions:
@@ -126,7 +129,7 @@ def _gcov_get_uncovered_src_files(
         if ff in covered_files:
             continue
 
-        uncovered_files.append(ff)
+        uncovered_files.append(ff.relative_to(config.project_root))
 
     return uncovered_files
 
@@ -143,11 +146,11 @@ def run_ut(config: Config, verbose: bool, cwd: Path, detailed_coverage: bool) ->
         subprocess.run(cmd, cwd=cwd, check=False)
 
         output_option = (
-            "--html-details=ut-coverage.details.html"
+            f"--html-details={SCARGO_UT_COV_FILES_PREFIX}.details.html"
             if detailed_coverage
-            else "--html=ut-coverage.html"
+            else f"--html={SCARGO_UT_COV_FILES_PREFIX}.html"
         )
-        output_json_filename = "ut-coverage.json"
+        output_json_filename = f"{SCARGO_UT_COV_FILES_PREFIX}.json"
 
         # Run code coverage.
         cmd = [

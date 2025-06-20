@@ -21,3 +21,5 @@ ENV_DEFAULT_NAME = ".env"
 
 SCARGO_HEADER_EXTENSIONS_DEFAULT = (".h", ".hpp", ".hxx", ".hh", ".inc", ".inl")
 SCARGO_SRC_EXTENSIONS_DEFAULT = (".c", ".cpp", ".cxx", ".cc", ".s", ".S", ".asm")
+
+SCARGO_UT_COV_FILES_PREFIX = "ut-coverage"
