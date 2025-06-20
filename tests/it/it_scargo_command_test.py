@@ -25,9 +25,9 @@ UT_FILES_PATH = TEST_DATA_PATH / "test_projects/test_files/ut_files"
 # List of expected covered files with defined units tests from UT_FILES_PATH
 # in relation to source directory
 EXPECTED_UT_COVERED_SRC_FILES: Sequence[str] = (
-    "src/pow3.hpp",
-    "src/twice.hpp",
-    "src/square.hpp",
+    "pow3.hpp",
+    "twice.hpp",
+    "square.hpp",
 )
 
 
@@ -37,9 +37,13 @@ class ScargoCommandTestFlow:
     proj_name: str
     proj_to_copy_path: Optional[Path] = None
     proj_path: Optional[Path] = None
+    src_dir_name: str = "src"
 
     def __post_init__(self) -> None:
         self.runner = ScargoTestRunner()
+
+        if self.target_id == ScargoTarget.esp32:
+            self.src_dir_name = "main"
 
     def assert_gcov_output_files(self, detailed_coverage: bool = False) -> None:
         config = get_scargo_config_or_exit()
@@ -94,7 +98,7 @@ class ScargoCommandTestFlow:
         ), "GCOV coverage: output json file list cannot be empty - expected records for covered files"
 
         for expected in expected_files:
-            expected_file = config.project_root / expected
+            expected_file = config.project_root / Path(self.src_dir_name) / expected
             assert (
                 expected_file in covered_files
             ), f"GCOV coverage: expected file '{expected_file}' not found in GCOV covered files in JSON"
@@ -102,7 +106,7 @@ class ScargoCommandTestFlow:
     def create_dummy_src_files(self, fpaths: Sequence[str]) -> None:
         config = get_scargo_config_or_exit()
         for path in fpaths:
-            dummy_file_path = config.project_root / path
+            dummy_file_path = config.project_root / Path(self.src_dir_name) / path
             dummy_file_path.parent.mkdir(parents=True, exist_ok=True)
             dummy_file_path.touch()
 
@@ -167,7 +171,7 @@ def setup_project(test_state: ScargoCommandTestFlow) -> None:
     # Copy fake sources
     shutil.copytree(
         src=UT_FILES_PATH / "src",
-        dst=Path(test_state.proj_name) / "src",
+        dst=Path(test_state.proj_name) / test_state.src_dir_name,
         dirs_exist_ok=True,
     )
     shutil.copy(src=UT_FILES_PATH / "CMakeLists.txt", dst=dest_test_dir)
@@ -190,13 +194,13 @@ def setup_project(test_state: ScargoCommandTestFlow) -> None:
 class TestCommandTestFlow:
     def _get_fake_src_files(self) -> List[str]:
         expected_files = [
-            "src/echo.c",
-            "src/test/test.cpp",
-            "src/assembly.s",
-            "src/assembly/capital_assembly.S",
-            "src/assembly/asm.asm",
-            "src/cc/cctest.cc",
-            "src/cc/cxxtest.cxx",
+            "echo.c",
+            "test/test.cpp",
+            "assembly.s",
+            "assembly/capital_assembly.S",
+            "assembly/asm.asm",
+            "cc/cctest.cc",
+            "cc/cxxtest.cxx",
         ]
         return expected_files
 
