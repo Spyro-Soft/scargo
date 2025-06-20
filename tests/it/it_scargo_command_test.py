@@ -20,6 +20,7 @@ FIX_TEST_FILES_PATH = TEST_DATA_PATH / "test_projects/test_files/fix_test_files"
 SUBDIRECTORY_TEST_FILES_PATH = (
     TEST_DATA_PATH / "test_projects/test_files/subdirectories_test_files"
 )
+
 UT_FILES_PATH = TEST_DATA_PATH / "test_projects/test_files/ut_files"
 
 # List of expected covered files with defined units tests from UT_FILES_PATH
@@ -32,7 +33,7 @@ EXPECTED_UT_COVERED_SRC_FILES: Sequence[str] = (
 
 
 @dataclass
-class ScargoCommandTestFlow:
+class ScargoCommandTestState:
     target_id: ScargoTarget
     proj_name: str
     proj_to_copy_path: Optional[Path] = None
@@ -51,16 +52,16 @@ class ScargoCommandTestFlow:
         project_dir = config.project_root
 
         test_build_dir = project_dir / "build" / test_dir_name
-        assert (
-            test_build_dir.is_dir()
-        ), f"Build directory '{test_build_dir}' does not exist"
+
+        errmsg = f"Build directory '{test_build_dir}' does not exist"
+        assert test_build_dir.is_dir(), errmsg
 
         gcov_report_htmlfile = test_build_dir / Path(
             f"{SCARGO_UT_COV_FILES_PREFIX}.html"
         )
-        assert (
-            gcov_report_htmlfile.is_file()
-        ), f"File '{gcov_report_htmlfile}' does not exist"
+
+        errmsg = f"File '{gcov_report_htmlfile}' does not exist"
+        assert gcov_report_htmlfile.is_file(), errmsg
 
         if not detailed_coverage:
             return
@@ -68,16 +69,16 @@ class ScargoCommandTestFlow:
         gcov_report_htmlfile = test_build_dir / Path(
             f"{SCARGO_UT_COV_FILES_PREFIX}.details.html"
         )
-        assert (
-            gcov_report_htmlfile.is_file()
-        ), f"File '{gcov_report_htmlfile}' does not exist"
+
+        errmsg = f"File '{gcov_report_htmlfile}' does not exist"
+        assert gcov_report_htmlfile.is_file(), errmsg
 
         gcov_report_jsonfile = test_build_dir / Path(
             f"{SCARGO_UT_COV_FILES_PREFIX}.json"
         )
-        assert (
-            gcov_report_jsonfile.is_file()
-        ), f"File '{gcov_report_jsonfile}' does not exist"
+
+        errmsg = f"File '{gcov_report_jsonfile}' does not exist"
+        assert gcov_report_jsonfile.is_file(), errmsg
 
     def assert_gcov_detailed_coverage(self, expected_files: Sequence[str]) -> None:
         config = get_scargo_config_or_exit()
@@ -93,15 +94,16 @@ class ScargoCommandTestFlow:
         for ff in gcov_data["files"]:
             covered_files.append(config.project_root / ff["file"])
 
-        assert bool(
-            covered_files
-        ), "GCOV coverage: output json file list cannot be empty - expected records for covered files"
+        errmsg = "GCOV coverage: output json file list cannot be empty"
+        errmsg += " - expected records for covered files"
+        assert bool(covered_files), errmsg
 
         for expected in expected_files:
             expected_file = config.project_root / Path(self.src_dir_name) / expected
-            assert (
-                expected_file in covered_files
-            ), f"GCOV coverage: expected file '{expected_file}' not found in GCOV covered files in JSON"
+
+            errmsg = f"GCOV coverage: expected file '{expected_file}' not found"
+            errmsg += " in GCOV covered files in JSON"
+            assert expected_file in covered_files, errmsg
 
     def create_dummy_src_files(self, fpaths: Sequence[str]) -> None:
         config = get_scargo_config_or_exit()
@@ -123,9 +125,9 @@ class ScargoCommandTestFlow:
 
 
 @pytest.fixture
-def active_state_x86_path() -> ScargoCommandTestFlow:
+def active_state_x86_path() -> ScargoCommandTestState:
     project_path = TEST_DATA_PATH / "test_projects/common_scargo_project"
-    return ScargoCommandTestFlow(
+    return ScargoCommandTestState(
         target_id=ScargoTarget.x86,
         proj_name=project_path.name,
         proj_to_copy_path=project_path,
@@ -133,9 +135,9 @@ def active_state_x86_path() -> ScargoCommandTestFlow:
 
 
 @pytest.fixture
-def active_state_esp32_path() -> ScargoCommandTestFlow:
+def active_state_esp32_path() -> ScargoCommandTestState:
     project_path = TEST_DATA_PATH / "test_projects/common_scargo_project_esp32"
-    return ScargoCommandTestFlow(
+    return ScargoCommandTestState(
         target_id=ScargoTarget.esp32,
         proj_name=project_path.name,
         proj_to_copy_path=project_path,
@@ -143,9 +145,9 @@ def active_state_esp32_path() -> ScargoCommandTestFlow:
 
 
 @pytest.fixture
-def active_state_atsam_path() -> ScargoCommandTestFlow:
+def active_state_atsam_path() -> ScargoCommandTestState:
     project_path = TEST_DATA_PATH / "test_projects/common_scargo_project_atsam"
-    return ScargoCommandTestFlow(
+    return ScargoCommandTestState(
         target_id=ScargoTarget.atsam,
         proj_name=project_path.name,
         proj_to_copy_path=project_path,
@@ -163,17 +165,22 @@ def test_state(
 
 
 @pytest.fixture
-def setup_project(test_state: ScargoCommandTestFlow) -> None:
+def setup_project(test_state: ScargoCommandTestState) -> None:
     """
     Setup new project or copy existing project, chdir into it and run scargo update
     """
-    assert (
-        test_state.proj_to_copy_path and test_state.proj_to_copy_path.exists()
-    ), f"setup_project(): project in '{test_state.proj_to_copy_path}' does not exists - accepted only existing projects"
+    errmsg = f"setup_project(): project in '{test_state.proj_to_copy_path}' "
+    errmsg += "does not exists - accepted only existing projects"
+    is_valid = (
+        test_state.proj_to_copy_path and Path(test_state.proj_to_copy_path).exists()
+    )
+    assert is_valid, errmsg
 
     # Copy existing project, backward compatibility tests
     shutil.copytree(
-        src=test_state.proj_to_copy_path, dst=test_state.proj_name, dirs_exist_ok=True
+        src=str(test_state.proj_to_copy_path),
+        dst=test_state.proj_name,
+        dirs_exist_ok=True,
     )
 
     # Copy fake tests to check GCOV coverage
@@ -212,8 +219,8 @@ def setup_project(test_state: ScargoCommandTestFlow) -> None:
     scope="session",
     indirect=True,
 )
-@pytest.mark.xdist_group(name="TestCommandTestFlow")
-class TestCommandTestFlow:
+@pytest.mark.xdist_group(name="TestFlowScargoCommandTest")
+class TestFlowScargoCommandTest:
     def _get_fake_src_files(self) -> List[str]:
         expected_files = [
             "echo.c",
@@ -227,7 +234,7 @@ class TestCommandTestFlow:
         return expected_files
 
     def test_cli_basic(
-        self, test_state: ScargoCommandTestFlow, setup_project: None
+        self, test_state: ScargoCommandTestState, setup_project: None
     ) -> None:
         result = test_state.runner.invoke(cli, ["update"])
         assert result.exit_code == 0
@@ -245,7 +252,7 @@ class TestCommandTestFlow:
         test_state.assert_gcov_output_files(detailed_coverage=True)
 
     def test_cli_detailed_coverage(
-        self, test_state: ScargoCommandTestFlow, setup_project: None
+        self, test_state: ScargoCommandTestState, setup_project: None
     ) -> None:
         result = test_state.runner.invoke(cli, ["update"])
         assert result.exit_code == 0
@@ -266,7 +273,7 @@ class TestCommandTestFlow:
         test_state.assert_gcov_detailed_coverage(expected_files)
 
     def test_cli_detailed_coverage_filtering(
-        self, test_state: ScargoCommandTestFlow, setup_project: None
+        self, test_state: ScargoCommandTestState, setup_project: None
     ) -> None:
         expected_extensions = [".s", ".cxx"]
         test_state.set_config_src_extensions(expected_extensions)
