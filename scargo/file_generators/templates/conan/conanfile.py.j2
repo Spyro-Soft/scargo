@@ -82,27 +82,34 @@ class {{ config.project.name|capitalize|replace("-", "") }}Conan(ConanFile):  # 
         import requests
         import re
         from pathlib import Path
+        from conan.errors import ConanException
+        from conan.tools.files import get
 
         chip_series = "{{ config.atsam.chip_series }}"
         dfp_outdir = Path(f"{chip_series}_DFP")
         cmsis_outdir = Path("CMSIS")
+        packs_url = "http://packs.download.atmel.com"
+
         if dfp_outdir.is_dir() and cmsis_outdir.is_dir():
             return
 
-        self.output.info("Sourcing for atsam")
-        packs_url = "http://packs.download.atmel.com"
+        self.output.info("Sourcing for ATSAM")
 
         if not dfp_outdir.is_dir():
-            packs_web_content = requests.get(packs_url).text
-            match_atpack = re.search(
-                f'data-link="(Atmel\.{chip_series}\\S*\\.atpack)"',
-                packs_web_content,
-                re.MULTILINE | re.DOTALL,
-            )
-            dfp_filename = match_atpack.group(1)
+            response = requests.get(packs_url)
+            if response.status_code != 200:
+                raise ConanException(f"Failed to fetch pack list from {packs_url}. Status: {response.status_code}")
+
+            matches = re.findall(rf'Atmel\.{chip_series}_DFP\.\d+\.\d+\.\d+\.atpack', response.text)
+            if not matches:
+                raise ConanException(f"No matching .atpack files found for {chip_series} on {packs_url}")
+
+            dfp_filename = sorted(matches)[-1]
+            self.output.info(f"Downloading {dfp_filename}")
             get(self, f"{packs_url}/{dfp_filename}", destination=dfp_outdir)
 
         if not cmsis_outdir.is_dir():
             cmsis_filename = "ARM.CMSIS.5.4.0.atpack"
+            self.output.info(f"Downloading CMSIS: {cmsis_filename}")
             get(self, f"{packs_url}/{cmsis_filename}", destination=cmsis_outdir)
     {% endif %}
