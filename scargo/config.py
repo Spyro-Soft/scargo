@@ -264,6 +264,14 @@ class ProfileConfig(BaseModel, extra=Extra.allow):
         }
 
 
+class LicenseCheckConfig(BaseModel):
+    blacklist: List[str] = Field(default_factory=list)
+    whitelist: List[str] = Field(default_factory=list)
+    allow_no_license_if_copyright_match: List[str] = Field(
+        default_factory=list, alias="allow-no-license-if-copyright-match"
+    )
+
+
 class ChecksConfig(BaseModel):
     exclude: List[str]
     pragma: "CheckConfig"
@@ -273,6 +281,7 @@ class ChecksConfig(BaseModel):
     clang_format: "CheckConfig" = Field(..., alias="clang-format")
     clang_tidy: "CheckConfig" = Field(..., alias="clang-tidy")
     cyclomatic: "CheckConfig"
+    license: Optional[LicenseCheckConfig] = None
 
 
 class FixesConfig(BaseModel):
@@ -372,6 +381,7 @@ FixesConfig.update_forward_refs()
 FixConfig.update_forward_refs()
 Stm32Config.update_forward_refs()
 Esp32Config.update_forward_refs()
+LicenseCheckConfig.update_forward_refs()
 
 
 def parse_config(config_file_path: Path) -> Config:

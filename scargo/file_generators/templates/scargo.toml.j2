@@ -87,6 +87,13 @@ exclude = []
 [check.cyclomatic]
 exclude = []
 
+[check.license]
+blacklist = ["GPL-3.0", "AGPL-3.0"]
+whitelist = ["MIT", "BSD-2-Clause", "Apache-2.0"]
+allow-no-license-if-copyright-match = [
+    "MyCompany"
+]
+
 [tests]
 cc  = "gcc"
 cxx = "g++"
