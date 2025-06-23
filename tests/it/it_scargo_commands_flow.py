@@ -14,16 +14,15 @@ from scargo.config import ScargoTarget, Target
 from scargo.config_utils import get_scargo_config_or_exit
 from scargo.file_generators.docker_gen import _DockerComposeTemplate
 from scargo.utils.sys_utils import text_in_file
+from tests.it.conftest import (
+    FIX_TEST_FILES_PATH,
+    SUBDIRECTORY_TEST_FILES_PATH,
+    TEST_DATA_PATH,
+)
 from tests.it.utils import (
     ScargoTestRunner,
     add_profile_to_toml,
     run_custom_command_in_docker,
-)
-
-TEST_DATA_PATH = Path(__file__).parent.parent / "test_data"
-FIX_TEST_FILES_PATH = TEST_DATA_PATH / "test_projects/test_files/fix_test_files"
-SUBDIRECTORY_TEST_FILES_PATH = (
-    TEST_DATA_PATH / "test_projects/test_files/subdirectories_test_files"
 )
 
 
@@ -437,23 +436,17 @@ class TestBinProjectFlow:
         new_dir = tests_path / "fs2/test1"
         new_dir_cmake_file = new_dir / "CMakeLists.txt"
 
-        assert new_dir.exists() == False
+        assert not new_dir.exists()
 
         new_dir.mkdir(exist_ok=True)
 
         result = test_state.runner.invoke(cli, ["gen", "-u", src_dir_name])
 
         assert result.exit_code == 0
-        assert (
-            checkCMakeListsContent(tests_path / "fs2", "add_subdirectory(test2)")
-            == True
-        )
-        assert checkCMakeListsContent(tests_path, "add_subdirectory(fs2)") == True
-        assert new_dir_cmake_file.exists() == False
-        assert (
-            checkCMakeListsContent(tests_path / "fs2", "add_subdirectory(test1)")
-            == False
-        )
+        assert checkCMakeListsContent(tests_path / "fs2", "add_subdirectory(test2)")
+        assert checkCMakeListsContent(tests_path, "add_subdirectory(fs2)")
+        assert not new_dir_cmake_file.exists()
+        assert not checkCMakeListsContent(tests_path / "fs2", "add_subdirectory(test1)")
 
     def test_cli_gen_mock(
         self, test_state: ActiveTestState, setup_project: None, dummy_lib_h: Path
