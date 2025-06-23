@@ -7,6 +7,7 @@ import shutil
 import subprocess
 from pathlib import Path
 
+from scargo.commands.clean import scargo_clean
 from scargo.commands.docker import get_docker_compose_command, scargo_docker_build
 from scargo.config_utils import add_version_to_scargo_lock, get_scargo_config_or_exit
 from scargo.file_generators.cicd_gen import generate_cicd
@@ -46,6 +47,10 @@ def scargo_update(config_file_path: Path) -> None:
     docker_path = Path(project_path, ".devcontainer")
     vscode_path = Path(project_path, ".vscode")
     config = get_scargo_config_or_exit(config_file_path)
+
+    # Always clean project before updating to avoid cache conflicts with artefacts
+    # from previous builds
+    scargo_clean()
 
     # Copy templates project files to repo directory
     copy_file_if_not_exists(project_path)
