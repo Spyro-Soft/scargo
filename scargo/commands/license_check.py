@@ -69,39 +69,39 @@ def license_scanner(
     scancode_repo_path: str, path: Path, report_json: Path, sbom_spdx: Path
 ) -> None:
     """Runs license check and generates report"""
-    print(f"Scanning: {path}, result: {report_json}, sbom: {sbom_spdx}")
-    result = subprocess.run(
-        [
-            scancode_repo_path,
-            "--license",
-            "--copyright",
-            "--spdx-tv",
-            str(sbom_spdx),
-            "--json-pp",
-            str(report_json),
-            str(path),
-        ],
-        capture_output=True,
-        check=False,
-    )
-
-    # Debugging output
-    if result.returncode != 0:
-        print("Error occurred during scancode execution:")
-        print(result.stderr.decode("utf-8"))
-    else:
-        print("Scancode execution completed successfully.")
+    logger.info(f"Scanning: {path}, result: {report_json}, sbom: {sbom_spdx}")
+    try:
+        subprocess.run(
+            [
+                scancode_repo_path,
+                "--license",
+                "--copyright",
+                "--spdx-tv",
+                str(sbom_spdx),
+                "--json-pp",
+                str(report_json),
+                str(path),
+            ],
+            check=True,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.STDOUT,
+            text=True,
+        )
+    except subprocess.CalledProcessError as e:
+        logger.error("Error occurred during scancode execution:")
+        logger.error(e.output)
+        sys.exit(1)
 
     # Check if the files were created
     if report_json.exists():
-        print(f"Report JSON file '{report_json}' created successfully.")
+        logger.info(f"Report JSON file '{report_json}' created successfully.")
     else:
-        print(f"Failed to create report JSON file '{report_json}'.")
+        logger.error(f"Failed to create report JSON file '{report_json}'.")
 
     if sbom_spdx.exists():
-        print(f"SBOM SPDX file '{sbom_spdx}' created successfully.")
+        logger.info(f"SBOM SPDX file '{sbom_spdx}' created successfully.")
     else:
-        print(f"Failed to create SBOM SPDX file '{sbom_spdx}'.")
+        logger.error(f"Failed to create SBOM SPDX file '{sbom_spdx}'.")
 
 
 def check_licenses(
@@ -163,8 +163,8 @@ def check_licenses(
             }
         )
 
-    print("License Checker Report:")
+    logger.info("License Checker Report:")
     for item in flagged_files:
-        print(
+        logger.info(
             f"{item['status']}: {item['path']} | Licenses: {', '.join(item['licenses_detected'])}"
         )
