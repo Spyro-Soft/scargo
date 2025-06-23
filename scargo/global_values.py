@@ -18,3 +18,6 @@ SCARGO_DOCKER_ENV = "docker"
 SCARGO_LOCK_FILE = "scargo.lock"
 SCARGO_DEFAULT_CONFIG_FILE = "scargo.toml"
 ENV_DEFAULT_NAME = ".env"
+
+SCARGO_HEADER_EXTENSIONS_DEFAULT = (".h", ".hpp", ".hxx", ".hh", ".inc", ".inl")
+SCARGO_SRC_EXTENSIONS_DEFAULT = (".c", ".cpp", ".cxx", ".cc", ".s", ".S", ".asm")

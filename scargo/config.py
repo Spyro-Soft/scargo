@@ -3,7 +3,7 @@
 # #
 from enum import Enum
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Union
+from typing import Any, Dict, List, Optional, Sequence, Union
 
 import toml
 from pydantic import BaseModel, Extra, Field, root_validator
@@ -155,6 +155,9 @@ class ProjectConfig(BaseModel):
 
     cflags: str
     cxxflags: str
+
+    src_extensions: Optional[Sequence[str]]
+    header_extensions: Optional[Sequence[str]]
 
     max_build_jobs: Optional[int] = Field(default=None, alias="max-build-jobs")
     cmake_variables: Dict[str, str] = Field(default={}, alias="cmake-variables")
