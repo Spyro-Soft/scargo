@@ -48,10 +48,6 @@ def scargo_update(config_file_path: Path) -> None:
     vscode_path = Path(project_path, ".vscode")
     config = get_scargo_config_or_exit(config_file_path)
 
-    # Always clean project before updating to avoid cache conflicts with artefacts
-    # from previous builds
-    scargo_clean()
-
     # Copy templates project files to repo directory
     copy_file_if_not_exists(project_path)
 
@@ -88,6 +84,10 @@ def scargo_update(config_file_path: Path) -> None:
     generate_cicd(config)
     generate_tests(config)
     generate_readme(config)
+
+    # Always clean project after updating to avoid cache conflicts with artefacts
+    # from previous builds
+    scargo_clean()
 
     # do not rebuild dockers in the docker
     if project_config.is_docker_buildenv():
