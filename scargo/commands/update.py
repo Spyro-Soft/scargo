@@ -92,6 +92,19 @@ def scargo_update(config_file_path: Path) -> None:
         else:
             logger.warning("Cannot run docker inside docker")
 
+    build_dir = config.project_root / "build"
+    if not build_dir.exists():
+        return
+
+    build_dir_empty = not any(build_dir.iterdir())
+    if build_dir_empty:
+        return
+
+    logger.warning("Project build folder was not empty before the update.")
+    logger.warning(
+        "Potential cache conflicts with the previous build - use 'clean' command in case of problems."
+    )
+
 
 def pull_docker_image(docker_path: Path) -> bool:
     logger.info("Pulling the image from docker registry...")
