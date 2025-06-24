@@ -88,13 +88,13 @@ def parse_cobertura(cubertura_path: Path) -> CoverageData:
     return CoverageData(float(root.attrib["line-rate"]), float(root.attrib["branch-rate"]))
 
 
-def add_test_info(ax: Axes, test_data: TestData) -> None:
+def add_test_info(ax: Axes, test_data: TestData) -> None:  # type: ignore[no-any-unimported]
     ax.set_axis_off()
     ax.text(0, 0.6, f"{test_data.tests} test cases", fontsize=20)
     ax.text(0, 0.2, f"Total duration: {test_data.total_duration_ms} ms", fontsize=13)
 
 
-def add_test_pie_chart(ax: Axes, test_data: TestData) -> None:
+def add_test_pie_chart(ax: Axes, test_data: TestData) -> None:  # type: ignore[no-any-unimported]
     ax.set_title("Test Case Status")
     marks = [test_data.passed, test_data.failures, test_data.errors, test_data.skipped]
     colors = ["green", "red", "yellow", "grey"]
@@ -107,7 +107,7 @@ def add_test_pie_chart(ax: Axes, test_data: TestData) -> None:
     Circle((0, 0), 0.7, color="white")
 
 
-def add_coverage_info(ax: Axes, coverage_data: CoverageData) -> None:
+def add_coverage_info(ax: Axes, coverage_data: CoverageData) -> None:  # type: ignore[no-any-unimported]
     ax.set_axis_off()
     fontsize = 9
     ax.text(0, 0.8, "Line coverage:", fontsize=fontsize)
@@ -116,7 +116,7 @@ def add_coverage_info(ax: Axes, coverage_data: CoverageData) -> None:
     ax.text(0.75, 0.65, f"{coverage_data.branch_coverage * 100:.1f}%", fontsize=fontsize)
 
 
-def add_test_duration_histogram(ax: Axes, test_data: TestData) -> None:
+def add_test_duration_histogram(ax: Axes, test_data: TestData) -> None:  # type: ignore[no-any-unimported]
     ax.set_title("Test Case Durations")
     ax.hist(test_data.test_case_durations_ms)
     ax.spines["top"].set_visible(False)
