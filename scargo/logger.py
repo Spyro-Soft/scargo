@@ -21,12 +21,8 @@ def __get_logging_config() -> Tuple[int, int]:
             return console_log_level, file_log_level
         config = parse_config(lock_file)
         scargo_config: ScargoConfig = config.scargo
-        console_log_level = logging.getLevelName(
-            scargo_config.console_log_level  # pylint: disable=no-member
-        )
-        file_log_level = logging.getLevelName(
-            scargo_config.file_log_level  # pylint: disable=no-member
-        )
+        console_log_level = logging.getLevelName(scargo_config.console_log_level)  # pylint: disable=no-member
+        file_log_level = logging.getLevelName(scargo_config.file_log_level)  # pylint: disable=no-member
     except Exception:  # pylint: disable=broad-except
         console_log_level = logging.INFO
         file_log_level = logging.WARNING
@@ -44,9 +40,7 @@ def get_logger(name: str = "scargo") -> logging.Logger:
 
     stream_handler = logging.StreamHandler()
     stream_handler.addFilter(coloredlogs.HostNameFilter())
-    stream_formatter = coloredlogs.ColoredFormatter(
-        fmt="%(name)s %(levelname)4s: %(message)s"
-    )
+    stream_formatter = coloredlogs.ColoredFormatter(fmt="%(name)s %(levelname)4s: %(message)s")
     stream_handler.setLevel(console_log_level)
     stream_handler.setFormatter(stream_formatter)
     logger.addHandler(stream_handler)

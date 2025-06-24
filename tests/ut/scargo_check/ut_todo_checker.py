@@ -18,9 +18,7 @@ COMMENT_LINES_WITH_TODO = [
 
 
 @pytest.fixture
-def mock_get_comment_lines(
-    request: pytest.FixtureRequest, mocker: MockerFixture
-) -> MagicMock:
+def mock_get_comment_lines(request: pytest.FixtureRequest, mocker: MockerFixture) -> MagicMock:
     return mocker.patch(
         f"{TodoChecker.__module__}.{get_comment_lines.__name__}",
         return_value=request.param,
@@ -40,9 +38,7 @@ def test_check_todo_pass(
 ) -> None:
     result = TodoChecker(config).check()
     assert result == 0
-    assert all(
-        level not in ("WARNING", "ERROR") for level, msg in get_log_data(caplog.records)
-    )
+    assert all(level not in ("WARNING", "ERROR") for level, msg in get_log_data(caplog.records))
 
 
 @pytest.mark.parametrize(
@@ -58,6 +54,4 @@ def test_check_todo_fail(
 ) -> None:
     result = TodoChecker(config).check()
     assert result == 1
-    assert ("WARNING", "Found TODO in foo/bar.hpp at line 1") in get_log_data(
-        caplog.records
-    )
+    assert ("WARNING", "Found TODO in foo/bar.hpp at line 1") in get_log_data(caplog.records)

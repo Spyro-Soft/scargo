@@ -29,9 +29,7 @@ def test_check_pragma_pass(
 ) -> None:
     result = PragmaChecker(config).check()
     assert result == 0
-    assert ("WARNING", "Missing pragma in foo/bar.hpp") not in get_log_data(
-        caplog.records
-    )
+    assert ("WARNING", "Missing pragma in foo/bar.hpp") not in get_log_data(caplog.records)
 
 
 @pytest.mark.parametrize(
@@ -47,9 +45,7 @@ def test_check_pragma_fail(
 ) -> None:
     result = PragmaChecker(config).check()
     assert result == 1
-    assert ("WARNING", "Missing '#pragma once' in foo/bar.hpp") in get_log_data(
-        caplog.records
-    )
+    assert ("WARNING", "Missing '#pragma once' in foo/bar.hpp") in get_log_data(caplog.records)
 
 
 @pytest.mark.parametrize(
@@ -57,9 +53,7 @@ def test_check_pragma_fail(
     [(FILE_CONTENTS_WITHOUT_PRAGMA,)],
     indirect=True,
 )
-def test_check_pragma_fix(
-    mock_file_contents: MagicMock, config: Config, mock_find_files: MagicMock
-) -> None:
+def test_check_pragma_fix(mock_file_contents: MagicMock, config: Config, mock_find_files: MagicMock) -> None:
     result = PragmaChecker(config, fix_errors=True).check()
     assert result == 1
     assert mock_file_contents().write.mock_calls == [

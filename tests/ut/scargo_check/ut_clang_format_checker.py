@@ -30,9 +30,7 @@ def test_check_clang_format_pass(
     fake_process.register(CLANG_FORMAT_COMMAND)
     result = ClangFormatChecker(config).check()
     assert result == 0
-    assert all(
-        level not in ("WARNING", "ERROR") for level, msg in get_log_data(caplog.records)
-    )
+    assert all(level not in ("WARNING", "ERROR") for level, msg in get_log_data(caplog.records))
 
 
 @pytest.mark.parametrize(
@@ -50,20 +48,14 @@ def test_check_clang_format_fail(
     mock_find_files: MagicMock,
     fake_process: FakeProcess,
 ) -> None:
-    fake_process.register(
-        CLANG_FORMAT_COMMAND, stdout=CLANG_FORMAT_ERROR_OUTPUT, returncode=1
-    )
+    fake_process.register(CLANG_FORMAT_COMMAND, stdout=CLANG_FORMAT_ERROR_OUTPUT, returncode=1)
     result = ClangFormatChecker(config, verbose=verbose).check()
     assert result == 1
     assert expected_message in get_log_data(caplog.records)
 
 
-def test_check_clang_format_fix(
-    config: Config, mock_find_files: MagicMock, fake_process: FakeProcess
-) -> None:
-    fake_process.register(
-        CLANG_FORMAT_COMMAND, stdout=CLANG_FORMAT_ERROR_OUTPUT, returncode=1
-    )
+def test_check_clang_format_fix(config: Config, mock_find_files: MagicMock, fake_process: FakeProcess) -> None:
+    fake_process.register(CLANG_FORMAT_COMMAND, stdout=CLANG_FORMAT_ERROR_OUTPUT, returncode=1)
     fake_process.register(CLANG_FORMAT_FIX_COMMAND)
     result = ClangFormatChecker(config, fix_errors=True).check()
     assert result == 1

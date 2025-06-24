@@ -74,25 +74,15 @@ class SpiffsBuildConfig:
 
         self.PAGES_PER_BLOCK = self.block_size // self.page_size
         self.OBJ_LU_PAGES_PER_BLOCK = int(
-            math.ceil(
-                self.block_size / self.page_size * self.obj_id_len / self.page_size
-            )
+            math.ceil(self.block_size / self.page_size * self.obj_id_len / self.page_size)
         )
-        self.OBJ_USABLE_PAGES_PER_BLOCK = (
-            self.PAGES_PER_BLOCK - self.OBJ_LU_PAGES_PER_BLOCK
-        )
+        self.OBJ_USABLE_PAGES_PER_BLOCK = self.PAGES_PER_BLOCK - self.OBJ_LU_PAGES_PER_BLOCK
 
         self.OBJ_LU_PAGES_OBJ_IDS_LIM = self.page_size // self.obj_id_len
 
-        self.OBJ_DATA_PAGE_HEADER_LEN = (
-            self.obj_id_len + self.span_ix_len + SPIFFS_PH_FLAG_LEN
-        )
+        self.OBJ_DATA_PAGE_HEADER_LEN = self.obj_id_len + self.span_ix_len + SPIFFS_PH_FLAG_LEN
 
-        pad = 4 - (
-            4
-            if self.OBJ_DATA_PAGE_HEADER_LEN % 4 == 0
-            else self.OBJ_DATA_PAGE_HEADER_LEN % 4
-        )
+        pad = 4 - (4 if self.OBJ_DATA_PAGE_HEADER_LEN % 4 == 0 else self.OBJ_DATA_PAGE_HEADER_LEN % 4)
 
         self.OBJ_DATA_PAGE_HEADER_LEN_ALIGNED = self.OBJ_DATA_PAGE_HEADER_LEN + pad
         self.OBJ_DATA_PAGE_HEADER_LEN_ALIGNED_PAD = pad
@@ -106,12 +96,11 @@ class SpiffsBuildConfig:
             + self.meta_len
         )
         if aligned_obj_ix_tables:
-            self.OBJ_INDEX_PAGES_HEADER_LEN_ALIGNED = (
-                self.OBJ_INDEX_PAGES_HEADER_LEN + SPIFFS_PAGE_IX_LEN - 1
-            ) & ~(SPIFFS_PAGE_IX_LEN - 1)
+            self.OBJ_INDEX_PAGES_HEADER_LEN_ALIGNED = (self.OBJ_INDEX_PAGES_HEADER_LEN + SPIFFS_PAGE_IX_LEN - 1) & ~(
+                SPIFFS_PAGE_IX_LEN - 1
+            )
             self.OBJ_INDEX_PAGES_HEADER_LEN_ALIGNED_PAD = (
-                self.OBJ_INDEX_PAGES_HEADER_LEN_ALIGNED
-                - self.OBJ_INDEX_PAGES_HEADER_LEN
+                self.OBJ_INDEX_PAGES_HEADER_LEN_ALIGNED - self.OBJ_INDEX_PAGES_HEADER_LEN
             )
         else:
             self.OBJ_INDEX_PAGES_HEADER_LEN_ALIGNED = self.OBJ_INDEX_PAGES_HEADER_LEN
@@ -120,9 +109,7 @@ class SpiffsBuildConfig:
         self.OBJ_INDEX_PAGES_OBJ_IDS_HEAD_LIM = (
             self.page_size - self.OBJ_INDEX_PAGES_HEADER_LEN_ALIGNED
         ) // self.block_ix_len
-        self.OBJ_INDEX_PAGES_OBJ_IDS_LIM = (
-            self.page_size - self.OBJ_DATA_PAGE_HEADER_LEN_ALIGNED
-        ) // self.block_ix_len
+        self.OBJ_INDEX_PAGES_OBJ_IDS_LIM = (self.page_size - self.OBJ_DATA_PAGE_HEADER_LEN_ALIGNED) // self.block_ix_len
 
 
 class SpiffsFullError(RuntimeError):
@@ -203,9 +190,7 @@ class SpiffsObjLuPage(SpiffsPage):
         if remaining >= 2:
             for i in range(remaining):
                 if i == remaining - 2:
-                    self.obj_ids.append(
-                        (self._calc_magic(blocks_lim), SpiffsObjDataPage)
-                    )
+                    self.obj_ids.append((self._calc_magic(blocks_lim), SpiffsObjDataPage))
                     break
                 else:
                     self.obj_ids.append(
@@ -360,9 +345,7 @@ class SpiffsBlock:
             except AttributeError:  # no next lookup page
                 # Since the amount of lookup pages is pre-computed at every block instance,
                 # this should never occur
-                raise RuntimeError(
-                    "invalid attempt to add page to a block when there is no more space in lookup"
-                )
+                raise RuntimeError("invalid attempt to add page to a block when there is no more space in lookup")
 
         self.pages.append(page)
 
@@ -377,9 +360,7 @@ class SpiffsBlock:
         self.cur_obj_index_span_ix = obj_index_span_ix
         self.cur_obj_data_span_ix = obj_data_span_ix
 
-        page = SpiffsObjIndexPage(
-            obj_id, self.cur_obj_index_span_ix, size, name, self.build_config
-        )
+        page = SpiffsObjIndexPage(obj_id, self.cur_obj_index_span_ix, size, name, self.build_config)
         self._register_page(page)
 
         self.cur_obj_idx_page = page
@@ -429,9 +410,7 @@ class SpiffsBlock:
 
 
 class SpiffsFS:
-    def __init__(
-        self, img_size, build_config
-    ):  # type: (int, SpiffsBuildConfig) -> None
+    def __init__(self, img_size, build_config):  # type: (int, SpiffsBuildConfig) -> None
         if img_size % build_config.block_size != 0:
             raise RuntimeError("image size should be a multiple of block size")
 
@@ -528,10 +507,7 @@ class SpiffsFS:
                 bix += 1
         else:
             # Just fill remaining spaces FF's
-            all_blocks.append(
-                b"\xFF"
-                * (self.img_size - len(all_blocks) * self.build_config.block_size)
-            )
+            all_blocks.append(b"\xFF" * (self.img_size - len(all_blocks) * self.build_config.block_size))
         img += b"".join([blk for blk in all_blocks])
         return img
 
@@ -556,15 +532,11 @@ class CustomHelpFormatter(argparse.HelpFormatter):
 
 
 def main():  # type: () -> None
-    parser = argparse.ArgumentParser(
-        description="SPIFFS Image Generator", formatter_class=CustomHelpFormatter
-    )
+    parser = argparse.ArgumentParser(description="SPIFFS Image Generator", formatter_class=CustomHelpFormatter)
 
     parser.add_argument("image_size", help="Size of the created image")
 
-    parser.add_argument(
-        "base_dir", help="Path to directory from which the image will be created"
-    )
+    parser.add_argument("base_dir", help="Path to directory from which the image will be created")
 
     parser.add_argument("output_file", help="Created image output file path")
 
@@ -671,9 +643,7 @@ def main():  # type: () -> None
 
         spiffs = SpiffsFS(image_size, spiffs_build_default)
 
-        for root, dirs, files in os.walk(
-            args.base_dir, followlinks=args.follow_symlinks
-        ):
+        for root, dirs, files in os.walk(args.base_dir, followlinks=args.follow_symlinks):
             for f in files:
                 full_path = os.path.join(root, f)
                 spiffs.create_file(

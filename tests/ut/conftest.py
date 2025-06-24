@@ -61,9 +61,7 @@ def config(fs: FakeFilesystem) -> Config:
         profile={
             "Debug": ProfileConfig(cflags="-g", cxxflags="-g"),
             "Release": ProfileConfig(cflags="-O3 -DNDEBUG", cxxflags="-O3 -DNDEBUG"),
-            "RelWithDebInfo": ProfileConfig(
-                cflags="-O2 -g -DNDEBUG", cxxflags="-O2 -g -DNDEBUG"
-            ),
+            "RelWithDebInfo": ProfileConfig(cflags="-O2 -g -DNDEBUG", cxxflags="-O2 -g -DNDEBUG"),
             "MinSizeRel": ProfileConfig(cflags="-Os -DNDEBUG", cxxflags="-Os -DNDEBUG"),
         },
         check=ChecksConfig(
@@ -71,12 +69,8 @@ def config(fs: FakeFilesystem) -> Config:
                 "exclude": [],
                 "pragma": CheckConfig(description=None, exclude=[]),
                 "copyright": CheckConfig(description="Copyright", exclude=[]),
-                "todo": TodoCheckConfig(
-                    description=None, exclude=[], keywords=["TODO", "todo"]
-                ),
-                "cppcheck": CppCheckConfig(
-                    description=None, suppress=[], directories=[]
-                ),
+                "todo": TodoCheckConfig(description=None, exclude=[], keywords=["TODO", "todo"]),
+                "cppcheck": CppCheckConfig(description=None, suppress=[], directories=[]),
                 "clang-format": CheckConfig(description=None, exclude=[]),
                 "clang-tidy": CheckConfig(description=None, exclude=[]),
                 "cyclomatic": CheckConfig(description=None, exclude=[]),
@@ -92,9 +86,7 @@ def config(fs: FakeFilesystem) -> Config:
                 "gcov-executable": "",
             }
         ),
-        dependencies=Dependencies(
-            general=[], build=[], tool=[], test=["gtest/cci.20210126"]
-        ),
+        dependencies=Dependencies(general=[], build=[], tool=[], test=["gtest/cci.20210126"]),
         conan=ConanConfig(repo={}),
         atsam=None,
         stm32=None,

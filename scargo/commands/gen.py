@@ -49,9 +49,7 @@ def scargo_gen(
             logger.info(f"Skipping: {gen_mock}")
 
     if certs:
-        generate_certs(
-            certs, certs_mode, certs_input, certs_passwd, config.project_root
-        )
+        generate_certs(certs, certs_mode, certs_input, certs_passwd, config.project_root)
 
     if fs:
         generate_fs(config)

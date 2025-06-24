@@ -74,9 +74,7 @@ def get_openocd_flash_driver_name(chip_label: str) -> Optional[str]:
 
 
 def generate_openocd_script(outdir: Path, config: Config) -> None:
-    openocd_script_name = get_openocd_script_name(
-        config.get_atsam_config().chip.lower()
-    )
+    openocd_script_name = get_openocd_script_name(config.get_atsam_config().chip.lower())
     flash_driver = get_openocd_flash_driver_name(config.get_atsam_config().chip.lower())
     if openocd_script_name and openocd_script_name:
         write_template(

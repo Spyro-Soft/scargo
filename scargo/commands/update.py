@@ -72,9 +72,7 @@ def scargo_update(config_file_path: Path) -> None:
         with open(Path(project_path, "version.txt"), "w", encoding="utf-8") as out:
             out.write(project_config.version)
         with open(Path(project_path, "partitions.csv"), "w", encoding="utf-8") as out:
-            out.write(
-                "# ESP-IDF Partition Table\n# Name,   Type, SubType, Offset,  Size, Flags\n"
-            )
+            out.write("# ESP-IDF Partition Table\n# Name,   Type, SubType, Offset,  Size, Flags\n")
             partitions = config.get_esp32_config().partitions
             for line in partitions:
                 out.write(line + "\n")
@@ -101,9 +99,7 @@ def scargo_update(config_file_path: Path) -> None:
         return
 
     logger.warning("Project build folder was not empty before the update.")
-    logger.warning(
-        "Potential cache conflicts with the previous build - use 'clean' command in case of problems."
-    )
+    logger.warning("Potential cache conflicts with the previous build - use 'clean' command in case of problems.")
 
 
 def pull_docker_image(docker_path: Path) -> bool:
@@ -118,15 +114,10 @@ def pull_docker_image(docker_path: Path) -> bool:
             check=True,
         )
     except subprocess.CalledProcessError:
-        logger.info(
-            "No docker image does exist yet in the registry or you are not login"
-        )
+        logger.info("No docker image does exist yet in the registry or you are not login")
     else:
         # happens for the default tag, like "myproject-dev:1.0"
-        if (
-            "Some service image(s) must be built from source"
-            not in result.stderr.decode()
-        ):
+        if "Some service image(s) must be built from source" not in result.stderr.decode():
             logger.info("Docker image pulled successfully")
             return True
     return False

@@ -22,9 +22,7 @@ CHECKERS = [
 @pytest.fixture
 def mock_checkers(mocker: MockerFixture) -> Dict[str, MagicMock]:
     checkers = {
-        checker_class.check_name: mocker.patch(
-            f"{scargo_check.__module__}.{checker_class.__name__}"
-        )
+        checker_class.check_name: mocker.patch(f"{scargo_check.__module__}.{checker_class.__name__}")
         for checker_class in CHECKERS
     }
     for name, checker in checkers.items():
@@ -35,9 +33,7 @@ def mock_checkers(mocker: MockerFixture) -> Dict[str, MagicMock]:
 
 @pytest.fixture
 def mock_prepare_config(mocker: MockerFixture, config: Config) -> MagicMock:
-    return mocker.patch(
-        f"{scargo_check.__module__}.prepare_config", return_value=config
-    )
+    return mocker.patch(f"{scargo_check.__module__}.prepare_config", return_value=config)
 
 
 def test_scargo_check_single(

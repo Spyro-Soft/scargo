@@ -8,9 +8,7 @@ from tests.ut.utils import get_log_data, log_contains
 LIZARD_COMMAND = ["lizard", "src", "-C", "25", "-w"]
 
 
-def test_cyclomatic_checker_pass(
-    config: Config, fake_process: FakeProcess, caplog: pytest.LogCaptureFixture
-) -> None:
+def test_cyclomatic_checker_pass(config: Config, fake_process: FakeProcess, caplog: pytest.LogCaptureFixture) -> None:
     fake_process.register(LIZARD_COMMAND)
 
     result = CyclomaticChecker(config=config).check()

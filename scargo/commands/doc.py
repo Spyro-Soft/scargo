@@ -42,10 +42,7 @@ class _ScargoGenDoc:
     def adjust_doxyfile_lines(self, lines: Iterable[str]) -> Iterable[str]:
         project_name = self._config.project.name
         project_path = self._config.project_root
-        exclude = " ".join(
-            f"{project_path}/{dir}"
-            for dir in self.EXCLUDE_LIST + self._config.doc.exclude
-        )
+        exclude = " ".join(f"{project_path}/{dir}" for dir in self.EXCLUDE_LIST + self._config.doc.exclude)
         doxy_values = {
             "PROJECT_NAME": f'"{project_name}"',
             "EXTRACT_ALL": "YES",

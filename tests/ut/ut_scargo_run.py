@@ -69,20 +69,13 @@ def test_scargo_run_with_build(
     assert fp_bin.calls[0].returncode == 0
 
 
-@pytest.mark.parametrize(
-    "target", [ScargoTarget.stm32, ScargoTarget.esp32, ScargoTarget.atsam]
-)
-def test_scargo_run_parametrized(
-    target: ScargoTarget, mocker: MockerFixture, caplog: pytest.LogCaptureFixture
-) -> None:
+@pytest.mark.parametrize("target", [ScargoTarget.stm32, ScargoTarget.esp32, ScargoTarget.atsam])
+def test_scargo_run_parametrized(target: ScargoTarget, mocker: MockerFixture, caplog: pytest.LogCaptureFixture) -> None:
     config = get_test_project_config(target.value)
     mocker.patch(f"{scargo_run.__module__}.prepare_config", return_value=config)
     with pytest.raises(SystemExit):
         scargo_run(None, profile="Debug", params=[], skip_build=True)
-    assert (
-        "Running non x86 projects on x86 architecture is not implemented yet"
-        in caplog.text
-    )
+    assert "Running non x86 projects on x86 architecture is not implemented yet" in caplog.text
 
 
 @pytest.fixture

@@ -39,9 +39,7 @@ class TestCheckerFixer:
         ["checker_class", "fix_errors", "expected_log"],
         [
             (
-                CheckerClassParams(
-                    name="passing", result=CheckResult(0), can_fix=False
-                ),
+                CheckerClassParams(name="passing", result=CheckResult(0), can_fix=False),
                 False,
                 [
                     ("INFO", "Starting passing check..."),
@@ -49,9 +47,7 @@ class TestCheckerFixer:
                 ],
             ),
             (
-                CheckerClassParams(
-                    name="passing-fixer", result=CheckResult(0), can_fix=True
-                ),
+                CheckerClassParams(name="passing-fixer", result=CheckResult(0), can_fix=True),
                 True,
                 [
                     ("INFO", "Starting passing-fixer check..."),
@@ -62,9 +58,7 @@ class TestCheckerFixer:
                 ],
             ),
             (
-                CheckerClassParams(
-                    name="failing-fixer", result=CheckResult(1), can_fix=True
-                ),
+                CheckerClassParams(name="failing-fixer", result=CheckResult(1), can_fix=True),
                 True,
                 [
                     ("INFO", "Starting failing-fixer check..."),

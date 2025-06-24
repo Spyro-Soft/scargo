@@ -42,9 +42,7 @@ def scargo_license_check(scan_path: Optional[Path]) -> None:
 
     blacklisted_licenses: Set[str] = set(config.check.license.blacklist)
     whitelisted_licenses: Set[str] = set(config.check.license.whitelist)
-    allowed_copyrights: Set[str] = set(
-        config.check.license.allow_no_license_if_copyright_match
-    )
+    allowed_copyrights: Set[str] = set(config.check.license.allow_no_license_if_copyright_match)
 
     logger.info(f"Blacklist: {blacklisted_licenses}")
     logger.info(f"Whitelist: {whitelisted_licenses}")
@@ -65,9 +63,7 @@ def scargo_license_check(scan_path: Optional[Path]) -> None:
     logger.info(f"SBOM saved to {sbom_spdx}")
 
 
-def license_scanner(
-    scancode_repo_path: str, path: Path, report_json: Path, sbom_spdx: Path
-) -> None:
+def license_scanner(scancode_repo_path: str, path: Path, report_json: Path, sbom_spdx: Path) -> None:
     """Runs license check and generates report"""
     logger.info(f"Scanning: {path}, result: {report_json}, sbom: {sbom_spdx}")
     try:
@@ -154,17 +150,11 @@ def check_licenses(
         flagged_files.append(
             {
                 "path": file_path,
-                "licenses_detected": (
-                    list(detected_licenses)
-                    if detected_licenses
-                    else ["NO LICENSE DETECTED"]
-                ),
+                "licenses_detected": (list(detected_licenses) if detected_licenses else ["NO LICENSE DETECTED"]),
                 "status": status,
             }
         )
 
     logger.info("License Checker Report:")
     for item in flagged_files:
-        logger.info(
-            f"{item['status']}: {item['path']} | Licenses: {', '.join(item['licenses_detected'])}"
-        )
+        logger.info(f"{item['status']}: {item['path']} | Licenses: {', '.join(item['licenses_detected'])}")

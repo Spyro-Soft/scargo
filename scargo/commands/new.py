@@ -81,10 +81,9 @@ def scargo_new(
     :raises FileExistsError: if project with provided name exist
     """
     if not re.match(r"[a-zA-Z][\w-]*$", name):
-        logger.error(
-            "Name must consist of letters, digits, dash and undescore only,"
-            " and the first character must be a letter"
-        )
+        _errmsg = "Name must consist of letters, digits, dash and undescore only,"
+        _errmsg += " and the first character must be a letter"
+        logger.error(_errmsg)
         sys.exit(1)
 
     targets_chips: Dict[str, str] = process_chips(chip, targets)
