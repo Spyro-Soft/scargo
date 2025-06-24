@@ -15,13 +15,9 @@ file_extensions = (".py", ".txt", ".sh", "Dockerfile")
 
 
 def option_parser_init() -> Tuple[Namespace, List[str]]:
-    parser = ArgumentParser(
-        epilog="The scripts checks if copyright info in files is correct."
-    )
+    parser = ArgumentParser(epilog="The scripts checks if copyright info in files is correct.")
 
-    parser.add_argument(
-        "-f", "--fix", action="store_true", dest="fix", help="Fix copyright info"
-    )
+    parser.add_argument("-f", "--fix", action="store_true", dest="fix", help="Fix copyright info")
 
     parser.add_argument(
         "-C",
@@ -47,43 +43,27 @@ COPYRIGHT_BEGIN_STRING = "Copyright (C) "
 # text after year
 COPYRIGHT_END_STRING = " SpyroSoft Solutions S.A. All rights reserved."
 # merged text with current year (default copyright that will be inserted in fix mode)
-COPYRIGHT_ADD_STRING = (
-    COPYRIGHT_BEGIN_STRING + str(datetime.datetime.now().year) + COPYRIGHT_END_STRING
-)
+COPYRIGHT_ADD_STRING = COPYRIGHT_BEGIN_STRING + str(datetime.datetime.now().year) + COPYRIGHT_END_STRING
 # with doxygen tag
 COPYRIGHT_ADD_STRING_DOXYGEN = COPYRIGHT_DOXYGEN + COPYRIGHT_ADD_STRING
 # regex that will verify if ours correct copyright is present for all files
-COPYRIGHT_CHECK_REGEX = (
-    re.escape(COPYRIGHT_BEGIN_STRING) + r"[0-9]{4}" + re.escape(COPYRIGHT_END_STRING)
-)
+COPYRIGHT_CHECK_REGEX = re.escape(COPYRIGHT_BEGIN_STRING) + r"[0-9]{4}" + re.escape(COPYRIGHT_END_STRING)
 # regex that will verify if ours correct copyright is present for all files
-COPYRIGHT_CHECK_WITH_DOXYGEN_REGEX = (
-    re.escape(COPYRIGHT_DOXYGEN) + COPYRIGHT_CHECK_REGEX
-)
+COPYRIGHT_CHECK_WITH_DOXYGEN_REGEX = re.escape(COPYRIGHT_DOXYGEN) + COPYRIGHT_CHECK_REGEX
 # regex that will verify if ours correct copyright is present for new or changed files
 COPYRIGHT_CHECK_REGEX_FOR_DIFF = (
-    re.escape(COPYRIGHT_BEGIN_STRING)
-    + str(datetime.datetime.now().year)
-    + re.escape(COPYRIGHT_END_STRING)
+    re.escape(COPYRIGHT_BEGIN_STRING) + str(datetime.datetime.now().year) + re.escape(COPYRIGHT_END_STRING)
 )
 # regex that will verify if ours correct copyright is present for new or changed files
-COPYRIGHT_CHECK_WITH_DOXYGEN_REGEX_FOR_DIFF = (
-    re.escape(COPYRIGHT_DOXYGEN) + COPYRIGHT_CHECK_REGEX_FOR_DIFF
-)
+COPYRIGHT_CHECK_WITH_DOXYGEN_REGEX_FOR_DIFF = re.escape(COPYRIGHT_DOXYGEN) + COPYRIGHT_CHECK_REGEX_FOR_DIFF
 # regex that will verify any copyright embedded (to reduce probability of placing ours copyright above others)
 COPYRIGHT_ANY_CHECK_REGEX = re.compile("copyright", re.IGNORECASE)
 # Lang C /**/-style comment copyright with doxygen tag
-COPYRIGHT_HEADER_LANG_C_STRING = (
-    "/**\n" + " * " + COPYRIGHT_ADD_STRING_DOXYGEN + "\n" + " */\n\n"
-)
+COPYRIGHT_HEADER_LANG_C_STRING = "/**\n" + " * " + COPYRIGHT_ADD_STRING_DOXYGEN + "\n" + " */\n\n"
 # CMAKE #-style comment with doxygen tag
-COPYRIGHT_HEADER_LANG_CMAKE_STRING = (
-    "# #\n" + "# " + COPYRIGHT_ADD_STRING + "\n" + "# #\n\n"
-)
+COPYRIGHT_HEADER_LANG_CMAKE_STRING = "# #\n" + "# " + COPYRIGHT_ADD_STRING + "\n" + "# #\n\n"
 # Python and SH #-style comment with doxygen tag
-COPYRIGHT_HEADER_LANG_PYTHON_STRING = (
-    "# #\n" + "# " + COPYRIGHT_ADD_STRING_DOXYGEN + "\n" + "# #\n\n"
-)
+COPYRIGHT_HEADER_LANG_PYTHON_STRING = "# #\n" + "# " + COPYRIGHT_ADD_STRING_DOXYGEN + "\n" + "# #\n\n"
 COPYRIGHT_HEADER_LANG_SH_STRING = COPYRIGHT_HEADER_LANG_PYTHON_STRING
 # Files with extension "data"
 COPYRIGHT_HEADER_LANG_DATA_STRING = "\n//" + COPYRIGHT_ADD_STRING + "\n\n"
@@ -101,9 +81,7 @@ class FilesToCheck:
     lang_data: List[str] = []
     lang_other: List[str] = []
 
-    def add_file_to_check(  # pylint: disable=too-many-return-statements
-        self, file: str, repo_path: str
-    ) -> int:
+    def add_file_to_check(self, file: str, repo_path: str) -> int:  # pylint: disable=too-many-return-statements
         if os.path.islink(file):
             # ignore symbolic links (they are likely to be found as file again)
             return 0
@@ -134,9 +112,7 @@ class FilesToCheck:
         if file.endswith(".sh"):
             self.lang_sh.append(file)
             return 0
-        if re.match(
-            r".*CMakeLists.*.txt", file, re.IGNORECASE
-        ) is not None or file.endswith((".cmake", ".cmake.in")):
+        if re.match(r".*CMakeLists.*.txt", file, re.IGNORECASE) is not None or file.endswith((".cmake", ".cmake.in")):
             self.lang_cmake.append(file)
             return 0
 
@@ -186,9 +162,7 @@ def check_correct_copyright_embedded(
 
 def check_copyrights(files_to_check: FilesToCheck) -> int:
     fail_count = 0
-    for file in list(
-        files_to_check.lang_c + files_to_check.lang_python + files_to_check.lang_sh
-    ):
+    for file in list(files_to_check.lang_c + files_to_check.lang_python + files_to_check.lang_sh):
         if (
             check_correct_copyright_embedded(
                 file,
@@ -265,9 +239,7 @@ def check_copyright_before_fix(file: str, fix_stats: FixStats) -> int:
     return 0
 
 
-def fix_copyright_common(
-    file: str, fix_stats: FixStats, copyright_string: str, check_shebang: bool = True
-) -> None:
+def fix_copyright_common(file: str, fix_stats: FixStats, copyright_string: str, check_shebang: bool = True) -> None:
     with fileinput.input(files=file, inplace=True) as f:
         for line in f:
             if f.isfirstline():
@@ -288,9 +260,7 @@ def fix_copyright_year(file: str, fix_stats: FixStats) -> None:
     with fileinput.input(files=file, inplace=True) as f:
         for line in f:
             if not copyright_fixed:
-                [line, modification_count] = re.subn(
-                    COPYRIGHT_CHECK_REGEX, COPYRIGHT_ADD_STRING, line
-                )
+                [line, modification_count] = re.subn(COPYRIGHT_CHECK_REGEX, COPYRIGHT_ADD_STRING, line)
                 if modification_count > 0:
                     copyright_fixed = True
             print(line, end="")
@@ -319,9 +289,7 @@ def fix_copyright_lang_cmake(file: str, fix_stats: FixStats) -> None:
 
 
 def fix_copyright_lang_other(file: str, fix_stats: FixStats) -> None:
-    print(
-        PRINT_PREFIX + " fix copyright not supported for this file extension: " + file
-    )
+    print(PRINT_PREFIX + " fix copyright not supported for this file extension: " + file)
     fix_stats.unsupported_extensions_count += 1
 
 
@@ -415,10 +383,7 @@ def main() -> None:
 
     if args.fix:
         if fix_copyrights(files_to_check):
-            print(
-                PRINT_PREFIX
-                + " Copyright fix ended with warnings. Not all files were fixed."
-            )
+            print(PRINT_PREFIX + " Copyright fix ended with warnings. Not all files were fixed.")
         sys.exit(0)
 
     sys.exit(check_copyrights(files_to_check))
