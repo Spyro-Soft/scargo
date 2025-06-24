@@ -104,9 +104,6 @@ exclude = [
 [tool.isort]
 profile = "black"
 
-[tool.black]
-line-length = 120
-
 [tool.pylint]
 ignore-paths = ["example_project", "tests"]
 max-line-length = 120
