@@ -7,6 +7,9 @@ from xml.etree import ElementTree
 
 import matplotlib.pyplot as plt
 import typer
+from matplotlib.axes import Axes
+from matplotlib.patches import Circle
+from matplotlib.ticker import FormatStrFormatter
 
 
 @dataclass
@@ -75,59 +78,50 @@ def parse_junitxml(junitxml_path: Path) -> TestData:
     skipped = sum(int(suite.attrib["skipped"]) for suite in root)
     total_time = sum(float(suite.attrib["time"]) for suite in root)
     total_time_ms = int(total_time * 1000)
-    test_cases = [
-        TestCase.from_element(testcase) for suite in root for testcase in suite
-    ]
+    test_cases = [TestCase.from_element(testcase) for suite in root for testcase in suite]
     return TestData(tests, failures, errors, skipped, total_time_ms, test_cases)
 
 
 def parse_cobertura(cubertura_path: Path) -> CoverageData:
     tree = ElementTree.parse(cubertura_path)
     root = tree.getroot()
-    return CoverageData(
-        float(root.attrib["line-rate"]), float(root.attrib["branch-rate"])
-    )
+    return CoverageData(float(root.attrib["line-rate"]), float(root.attrib["branch-rate"]))
 
 
-def add_test_info(ax: plt.Axes, test_data: TestData) -> None:  # type: ignore[no-any-unimported]
+def add_test_info(ax: Axes, test_data: TestData) -> None:
     ax.set_axis_off()
     ax.text(0, 0.6, f"{test_data.tests} test cases", fontsize=20)
     ax.text(0, 0.2, f"Total duration: {test_data.total_duration_ms} ms", fontsize=13)
 
 
-def add_test_pie_chart(ax: plt.Axes, test_data: TestData) -> None:  # type: ignore[no-any-unimported]
+def add_test_pie_chart(ax: Axes, test_data: TestData) -> None:
     ax.set_title("Test Case Status")
     marks = [test_data.passed, test_data.failures, test_data.errors, test_data.skipped]
     colors = ["green", "red", "yellow", "grey"]
-    patches, _ = ax.pie(marks, colors=colors)
-    white_circle = plt.Circle((0, 0), 0.7, color="white")
+    patches, *_ = ax.pie(marks, colors=colors)
+    white_circle = Circle((0, 0), 0.7, color="white")
     ax.add_artist(white_circle)
     labels = ["passed", "failed", "errors", "skipped"]
-    percents = [
-        f"{mark / test_data.tests * 100:.0f}% {label}"
-        for label, mark in zip(labels, marks)
-    ]
+    percents = [f"{mark / test_data.tests * 100:.0f}% {label}" for label, mark in zip(labels, marks)]
     ax.legend(patches, percents, prop={"size": 7}, bbox_to_anchor=(0.9, 1))
-    plt.Circle((0, 0), 0.7, color="white")
+    Circle((0, 0), 0.7, color="white")
 
 
-def add_coverage_info(ax: plt.Axes, coverage_data: CoverageData) -> None:  # type: ignore[no-any-unimported]
+def add_coverage_info(ax: Axes, coverage_data: CoverageData) -> None:
     ax.set_axis_off()
     fontsize = 9
     ax.text(0, 0.8, "Line coverage:", fontsize=fontsize)
     ax.text(0.75, 0.8, f"{coverage_data.line_coverage * 100:.1f}%", fontsize=fontsize)
     ax.text(0, 0.65, "Branch coverage:", fontsize=fontsize)
-    ax.text(
-        0.75, 0.65, f"{coverage_data.branch_coverage * 100:.1f}%", fontsize=fontsize
-    )
+    ax.text(0.75, 0.65, f"{coverage_data.branch_coverage * 100:.1f}%", fontsize=fontsize)
 
 
-def add_test_duration_histogram(ax: plt.Axes, test_data: TestData) -> None:  # type: ignore[no-any-unimported]
+def add_test_duration_histogram(ax: Axes, test_data: TestData) -> None:
     ax.set_title("Test Case Durations")
     ax.hist(test_data.test_case_durations_ms)
     ax.spines["top"].set_visible(False)
     ax.spines["right"].set_visible(False)
-    ax.xaxis.set_major_formatter(plt.FormatStrFormatter("%d ms"))
+    ax.xaxis.set_major_formatter(FormatStrFormatter("%d ms"))
 
 
 if __name__ == "__main__":
