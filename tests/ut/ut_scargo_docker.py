@@ -74,9 +74,7 @@ def test_docker_run(
     assert mock_subprocess_run.call_args.args[0] == called_subprocess_cmd
 
 
-def test_docker_run_with_command(
-    mock_subprocess_run: MagicMock, scargo_docker_test_setup: Config
-) -> None:
+def test_docker_run_with_command(mock_subprocess_run: MagicMock, scargo_docker_test_setup: Config) -> None:
     rm = "--rm"
     command = 'bash -c "pwd"'
 

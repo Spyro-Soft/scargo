@@ -89,9 +89,7 @@ def test_publish(config: Config, fp: FakeProcess, fs: FakeFilesystem) -> None:
     assert list(fp.calls) == CONAN_SETUP_CALLS + subprocess_commands
 
 
-def test_create_package_fail(
-    config: Config, caplog: LogCaptureFixture, fp: FakeProcess, fs: FakeFilesystem
-) -> None:
+def test_create_package_fail(config: Config, caplog: LogCaptureFixture, fp: FakeProcess, fs: FakeFilesystem) -> None:
     # ARRANGE
     target = config.project.default_target
     build_path = Path(config.project_root, target.get_profile_build_dir("Release"))

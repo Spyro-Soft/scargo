@@ -20,8 +20,7 @@ def log_contains(log_data: List[Tuple[str, str]], expected_messages: List[str]) 
     log_messages = [message for _, message in log_data]
     # Check that each expected message is in the log messages
     return all(
-        any(expected_message in log_message for log_message in log_messages)
-        for expected_message in expected_messages
+        any(expected_message in log_message for log_message in log_messages) for expected_message in expected_messages
     )
 
 

@@ -57,9 +57,7 @@ def extract_grouped_line_comments(content: str) -> List[str]:
 
     for comment, line_number in finditer_with_line_numbers(pattern, content):
         if current_section and line_number > current_section[-1][1] + 1:
-            grouped_comments.append(
-                "\n".join(comment[0] for comment in current_section)
-            )
+            grouped_comments.append("\n".join(comment[0] for comment in current_section))
             current_section = []
         current_section.append((comment.group(), line_number))
 

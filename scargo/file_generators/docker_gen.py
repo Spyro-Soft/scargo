@@ -26,9 +26,7 @@ class _DockerComposeTemplate:
 
     def get_scargo_path(self) -> Path:
         try:
-            result = subprocess.run(
-                ["pip", "show", "scargo"], capture_output=True, text=True, check=True
-            )
+            result = subprocess.run(["pip", "show", "scargo"], capture_output=True, text=True, check=True)
             for line in result.stdout.splitlines():
                 if line.startswith("Location:"):
                     scargo_path = Path(line.split("Location:")[1].strip()) / "scargo"

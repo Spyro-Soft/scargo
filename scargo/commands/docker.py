@@ -16,9 +16,7 @@ from scargo.logger import get_logger
 logger = get_logger()
 
 
-def scargo_docker_build(
-    docker_opts: Sequence[str], project_root: Optional[Path] = None
-) -> None:
+def scargo_docker_build(docker_opts: Sequence[str], project_root: Optional[Path] = None) -> None:
     """
     Build docker
 
@@ -103,9 +101,7 @@ def scargo_docker_exec(docker_opts: List[str]) -> None:
         sys.exit(1)
 
     client = docker.from_env()
-    newest_container = client.containers.list(
-        limit=1, filters={"ancestor": image, "status": "running"}
-    )
+    newest_container = client.containers.list(limit=1, filters={"ancestor": image, "status": "running"})
     if not newest_container:
         logger.error("No running containers using image `%s` to attach to!", image)
         logger.info("Use scargo docker run to run container.")

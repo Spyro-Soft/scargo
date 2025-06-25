@@ -9,9 +9,7 @@ from typing import Sequence
 from pylint.lint import Run
 
 
-def run_pylint_on_specific_directory(
-    directory: str, score: float, exclude: Sequence[str]
-) -> int:
+def run_pylint_on_specific_directory(directory: str, score: float, exclude: Sequence[str]) -> int:
     ignore_pattern = []
 
     for ex in exclude:
@@ -72,9 +70,7 @@ def get_cmdline_arguments() -> argparse.Namespace:
 def main() -> None:
     args = get_cmdline_arguments()
 
-    result = run_pylint_on_specific_directory(
-        args.directory, args.score, args.exclude or []
-    )
+    result = run_pylint_on_specific_directory(args.directory, args.score, args.exclude or [])
     sys.exit(result)
 
 

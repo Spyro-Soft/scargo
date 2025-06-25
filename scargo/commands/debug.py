@@ -25,28 +25,20 @@ EMEDDED_GDB_SETTINGS = "--eval-command=target extended-remote localhost:3333"
 class _ScargoDebug:
     SUPPORTED_TARGETS = ["x86", "stm32", "esp32", "atsam"]
 
-    def __init__(
-        self, config: Config, bin_path: Optional[Path], target: Optional[ScargoTarget]
-    ):
+    def __init__(self, config: Config, bin_path: Optional[Path], target: Optional[ScargoTarget]):
         self._config = config
         self._target = get_target_or_default(config, target)
 
         logger.info(f"Running scargo debug for {self._target.id} target")
         if self._target.id not in self.SUPPORTED_TARGETS:
             logger.error("Debugging currently not supported for %s", self._target)
-            logger.info(
-                "Scargo currently supports debug for %s", self.SUPPORTED_TARGETS
-            )
+            logger.info("Scargo currently supports debug for %s", self.SUPPORTED_TARGETS)
             sys.exit(1)
 
-        self._bin_path = bin_path or config.project_root / self._target.get_bin_path(
-            config.project.name.lower()
-        )
+        self._bin_path = bin_path or config.project_root / self._target.get_bin_path(config.project.name.lower())
         if not self._bin_path.exists():
             logger.error("Binary %s does not exist", self._bin_path)
-            logger.info(
-                "Did you run scargo build --profile Debug --target %s?", self._target.id
-            )
+            logger.info("Did you run scargo build --profile Debug --target %s?", self._target.id)
             sys.exit(1)
 
     def run_debugger(self) -> None:

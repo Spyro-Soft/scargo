@@ -14,9 +14,7 @@ CPPCHECK_COMMAND = [
 ]
 
 
-def test_cppcheck_checker_pass(
-    config: Config, fake_process: FakeProcess, caplog: pytest.LogCaptureFixture
-) -> None:
+def test_cppcheck_checker_pass(config: Config, fake_process: FakeProcess, caplog: pytest.LogCaptureFixture) -> None:
     fake_process.register(CPPCHECK_COMMAND)
 
     result = CppcheckChecker(config=config).check()
@@ -28,9 +26,7 @@ def test_cppcheck_checker_pass(
     assert log_contains(get_log_data(caplog.records), expected_messages)
 
 
-def test_cppcheck_checker_fail(
-    config: Config, fake_process: FakeProcess, caplog: pytest.LogCaptureFixture
-) -> None:
+def test_cppcheck_checker_fail(config: Config, fake_process: FakeProcess, caplog: pytest.LogCaptureFixture) -> None:
     fake_process.register(CPPCHECK_COMMAND, returncode=1)
 
     result = CppcheckChecker(config=config).check()

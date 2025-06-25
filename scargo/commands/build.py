@@ -17,9 +17,7 @@ from scargo.utils.conan_utils import conan_add_remote, conan_source
 logger = get_logger()
 
 
-def scargo_build(
-    profile: str, target: Optional[ScargoTarget], all_targets: bool = False
-) -> None:
+def scargo_build(profile: str, target: Optional[ScargoTarget], all_targets: bool = False) -> None:
     """
     Build project exec file.
 

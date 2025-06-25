@@ -53,21 +53,15 @@ class Config(BaseModel):
     project: "ProjectConfig"
     profiles: Dict[str, "ProfileConfig"] = Field(..., alias="profile")
     check: "ChecksConfig"
-    fix: "FixesConfig" = Field(
-        default_factory=lambda: FixesConfig()  # pylint: disable=unnecessary-lambda
-    )
-    doc: "DocConfig" = Field(
-        default_factory=lambda: DocConfig()  # pylint: disable=unnecessary-lambda
-    )
+    fix: "FixesConfig" = Field(default_factory=lambda: FixesConfig())  # pylint: disable=unnecessary-lambda
+    doc: "DocConfig" = Field(default_factory=lambda: DocConfig())  # pylint: disable=unnecessary-lambda
     tests: "TestConfig"
     dependencies: "Dependencies"
     conan: "ConanConfig"
     atsam: Optional["ATSAMConfig"]
     stm32: Optional["Stm32Config"]
     esp32: Optional["Esp32Config"]
-    scargo: "ScargoConfig" = Field(
-        default_factory=lambda: ScargoConfig()  # pylint: disable=unnecessary-lambda
-    )
+    scargo: "ScargoConfig" = Field(default_factory=lambda: ScargoConfig())  # pylint: disable=unnecessary-lambda
     docker_compose: "DockerComposeConfig" = Field(
         default_factory=lambda: DockerComposeConfig(),  # pylint: disable=unnecessary-lambda
         alias="docker-compose",
@@ -103,9 +97,7 @@ class Config(BaseModel):
         return self.esp32
 
     @root_validator
-    def validate_special_configs(  # pylint: disable=no-self-argument
-        cls, values: Dict[str, Any]
-    ) -> Dict[str, Any]:
+    def validate_special_configs(cls, values: Dict[str, Any]) -> Dict[str, Any]:  # pylint: disable=no-self-argument
         if "project" in values:
             target_id = values["project"].target_id
             targets_for_validation = [
@@ -171,9 +163,7 @@ class ProjectConfig(BaseModel):
     @property
     def default_target(self) -> "Target":
         if isinstance(self.target_id, List):
-            return Target.get_target_by_id(
-                self.target_id[0]  # pylint: disable=unsubscriptable-object
-            )
+            return Target.get_target_by_id(self.target_id[0])  # pylint: disable=unsubscriptable-object
         return Target.get_target_by_id(self.target_id)
 
     def is_docker_buildenv(self) -> bool:
@@ -236,15 +226,9 @@ TARGETS = {
         cc="gcc",
         cxx="g++",
     ),
-    ScargoTarget.stm32.value: Target(
-        id=ScargoTarget.stm32.value, elf_file_extension=".elf"
-    ),
-    ScargoTarget.esp32.value: Target(
-        id=ScargoTarget.esp32.value, elf_file_extension=".elf"
-    ),
-    ScargoTarget.atsam.value: Target(
-        id=ScargoTarget.atsam.value, elf_file_extension=""
-    ),
+    ScargoTarget.stm32.value: Target(id=ScargoTarget.stm32.value, elf_file_extension=".elf"),
+    ScargoTarget.esp32.value: Target(id=ScargoTarget.esp32.value, elf_file_extension=".elf"),
+    ScargoTarget.atsam.value: Target(id=ScargoTarget.atsam.value, elf_file_extension=""),
 }
 
 
@@ -257,11 +241,7 @@ class ProfileConfig(BaseModel, extra=Extra.allow):
 
     @property
     def extras(self) -> Dict[str, Any]:
-        return {
-            key: value
-            for key, value in dict(self).items()
-            if key not in self.__fields__
-        }
+        return {key: value for key, value in dict(self).items() if key not in self.__fields__}
 
 
 class LicenseCheckConfig(BaseModel):
@@ -285,9 +265,7 @@ class ChecksConfig(BaseModel):
 
 
 class FixesConfig(BaseModel):
-    copyright: "FixConfig" = Field(
-        default_factory=lambda: FixConfig()  # pylint: disable=unnecessary-lambda
-    )
+    copyright: "FixConfig" = Field(default_factory=lambda: FixConfig())  # pylint: disable=unnecessary-lambda
 
 
 class CheckConfig(BaseModel):
@@ -325,11 +303,7 @@ class TestConfig(BaseModel, extra=Extra.allow):
 
     @property
     def extras(self) -> Dict[str, Any]:
-        return {
-            key: value
-            for key, value in dict(self).items()
-            if key not in self.__fields__
-        }
+        return {key: value for key, value in dict(self).items() if key not in self.__fields__}
 
 
 class Dependencies(BaseModel):

@@ -51,14 +51,10 @@ def mock_path_rglob(mocker: MockerFixture) -> MagicMock:
 
 
 @pytest.fixture
-def mock_path_is_file(
-    request: pytest.FixtureRequest, mocker: MockerFixture
-) -> MagicMock:
+def mock_path_is_file(request: pytest.FixtureRequest, mocker: MockerFixture) -> MagicMock:
     return mocker.patch.object(Path, "is_file", return_value=request.param)
 
 
 @pytest.fixture
 def mock_glob_glob(mocker: MockerFixture) -> MagicMock:
-    return mocker.patch(
-        f"{find_files.__module__}.glob.glob", return_value=["foo/bar.hpp"]
-    )
+    return mocker.patch(f"{find_files.__module__}.glob.glob", return_value=["foo/bar.hpp"])

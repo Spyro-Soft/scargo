@@ -22,9 +22,7 @@ from scargo.utils.conan_utils import conan_add_remote, conan_source
 logger = get_logger()
 
 
-def scargo_test(
-    verbose: bool, profile: str = "Debug", detailed_coverage: bool = False
-) -> None:
+def scargo_test(verbose: bool, profile: str = "Debug", detailed_coverage: bool = False) -> None:
     """
     Run test
     :param bool verbose: if verbose
@@ -103,9 +101,7 @@ def _gcov_json_create_empty_record(fpath: Path) -> Union[Dict[str, Any], None]:
     return record
 
 
-def _gcov_get_uncovered_src_files(
-    config: Config, output_json: Dict[str, Any]
-) -> List[Any]:
+def _gcov_get_uncovered_src_files(config: Config, output_json: Dict[str, Any]) -> List[Any]:
     covered_files: List[Path] = []
     for ff in output_json["files"]:
         covered_files.append(config.project_root / ff["file"])
@@ -113,12 +109,8 @@ def _gcov_get_uncovered_src_files(
     accepted_extensions = config.project.src_extensions
     if not accepted_extensions:
         accepted_extensions = SCARGO_SRC_EXTENSIONS_DEFAULT
-        logger.warning(
-            "scargo: test: source file extensions not defined in the config file 'scargo.toml'."
-        )
-        logger.warning(
-            f"scargo: test: default extensions in use: '{SCARGO_SRC_EXTENSIONS_DEFAULT}'"
-        )
+        logger.warning("scargo: test: source file extensions not defined in the config file 'scargo.toml'.")
+        logger.warning(f"scargo: test: default extensions in use: '{SCARGO_SRC_EXTENSIONS_DEFAULT}'")
 
     uncovered_files: List[Path] = []
     for ff in config.source_dir_path.rglob("*"):

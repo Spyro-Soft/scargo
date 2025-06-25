@@ -23,9 +23,7 @@ class _CicdTemplate:
         self._config = config
 
     @classmethod
-    def merge_dictionaries(
-        cls, dict1: Dict[str, Any], dict2: Dict[str, Any]
-    ) -> Dict[str, Any]:
+    def merge_dictionaries(cls, dict1: Dict[str, Any], dict2: Dict[str, Any]) -> Dict[str, Any]:
         """Marge two dictionaries recursively
 
         Args:
@@ -36,11 +34,7 @@ class _CicdTemplate:
             dict: merged dictionary
         """
         for key in dict2:
-            if (
-                key in dict1
-                and isinstance(dict1[key], dict)
-                and isinstance(dict2[key], dict)
-            ):
+            if key in dict1 and isinstance(dict1[key], dict) and isinstance(dict2[key], dict):
                 cls.merge_dictionaries(dict1[key], dict2[key])
             else:
                 dict1[key] = dict2[key]
@@ -70,9 +64,7 @@ class _CicdTemplate:
         # Merge custom_cicd with base_cicd
         base_cicd = self._get_cicd_content(self._config.project_root, ".gitlab-ci.yml")
         merged_dict = self.merge_dictionaries(base_cicd, custom_cicd_dict)
-        with open(
-            self._config.project_root / ".gitlab-ci.yml", "w", encoding="utf-8"
-        ) as f:
+        with open(self._config.project_root / ".gitlab-ci.yml", "w", encoding="utf-8") as f:
             yaml.dump(merged_dict, f, sort_keys=False)
 
     def generate_cicd_env(self) -> None:

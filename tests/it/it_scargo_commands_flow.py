@@ -46,9 +46,7 @@ class ActiveTestState:
             self.obj_dump_path = "xtensa-esp32-elf-objdump"
             self.expected_bin_file_format = "elf32-xtensa-le"
         else:
-            raise ValueError(
-                f"Objdump path not defined for target id {self.target_id.value}"
-            )
+            raise ValueError(f"Objdump path not defined for target id {self.target_id.value}")
 
     def assert_bin_file_format_is_correct(self, profile: str) -> None:
         config = get_scargo_config_or_exit()
@@ -101,8 +99,7 @@ class ActiveTestState:
                 assert profile_config.cxxflags in command
                 assert default_toml_cxx_flags in command
                 assert (
-                    f"-std=c++{cpp_toml_std}" in command
-                    or f"-std=gnu++{cpp_toml_std}" in command
+                    f"-std=c++{cpp_toml_std}" in command or f"-std=gnu++{cpp_toml_std}" in command
                 ), f"Neither -std=c++{cpp_toml_std} or -std=gnu++{cpp_toml_std} not found in compile command: {command}"
 
 
@@ -179,9 +176,7 @@ def active_state_atsam_path() -> ActiveTestState:
 
 
 @pytest.fixture
-def test_state(
-    request: FixtureRequest, tmp_path_factory: TempPathFactory, use_local_scargo: None
-) -> Any:
+def test_state(request: FixtureRequest, tmp_path_factory: TempPathFactory, use_local_scargo: None) -> Any:
     test_state = request.param
     test_state.proj_path = tmp_path_factory.mktemp(test_state.proj_name)
     os.chdir(test_state.proj_path)
@@ -196,9 +191,7 @@ def setup_project(test_state: ActiveTestState) -> None:
         copytree(test_state.proj_to_copy_path, test_state.proj_name, dirs_exist_ok=True)
     else:
         # Create new project
-        result = test_state.runner.invoke(
-            cli, ["new", test_state.proj_name, f"--target={test_state.target_id.value}"]
-        )
+        result = test_state.runner.invoke(cli, ["new", test_state.proj_name, f"--target={test_state.target_id.value}"])
         assert result.exit_code == 0
 
     os.chdir(test_state.proj_name)
@@ -207,9 +200,7 @@ def setup_project(test_state: ActiveTestState) -> None:
 
 
 @pytest.fixture
-def setup_project_build_release(
-    test_state: ActiveTestState, setup_project: None
-) -> None:
+def setup_project_build_release(test_state: ActiveTestState, setup_project: None) -> None:
     """Build project which was set up using Release profile"""
     result = test_state.runner.invoke(cli, ["build", "--profile", "Release"])
     assert result.exit_code == 0
@@ -270,15 +261,11 @@ def dummy_lib_h() -> Path:
 )
 @pytest.mark.xdist_group(name="TestBinProjectFlow")
 class TestBinProjectFlow:
-    def test_cli_docker_run(
-        self, test_state: ActiveTestState, setup_project: None
-    ) -> None:
+    def test_cli_docker_run(self, test_state: ActiveTestState, setup_project: None) -> None:
         result = test_state.runner.invoke(cli, ["docker", "run"])
         assert result.exit_code == 0
 
-    def test_cli_build_profile_debug(
-        self, test_state: ActiveTestState, setup_project: None
-    ) -> None:
+    def test_cli_build_profile_debug(self, test_state: ActiveTestState, setup_project: None) -> None:
         """Test scargo build --profile=Debug command is succesfull and bin file has correct
         format and compile_commands.json file contains correct cflags and cxxflags"""
         result = test_state.runner.invoke(cli, ["build", "--profile", "Debug"])
@@ -288,31 +275,23 @@ class TestBinProjectFlow:
         test_state.assert_bin_file_format_is_correct(profile="Debug")
         test_state.assert_compile_commands(profile="Debug")
 
-    def test_cli_build_profile_release(
-        self, test_state: ActiveTestState, setup_project_build_release: None
-    ) -> None:
+    def test_cli_build_profile_release(self, test_state: ActiveTestState, setup_project_build_release: None) -> None:
         """Test scargo build --profile=Release command is succesfull and bin file has correct
         format and compile_commands.json file contains correct cflags and cxxflags"""
         test_state.assert_build_result_files_paths(profile="Release")
         test_state.assert_bin_file_format_is_correct(profile="Release")
         test_state.assert_compile_commands(profile="Release")
 
-    def test_cli_build_profile_new(
-        self, test_state: ActiveTestState, setup_project_new_profile: str
-    ) -> None:
+    def test_cli_build_profile_new(self, test_state: ActiveTestState, setup_project_new_profile: str) -> None:
         """This test check if call of scargo build command for newly added profile will finish without error and
         compile_commands.json file contains correct cflags and cxxflags"""
-        result = test_state.runner.invoke(
-            cli, ["build", "--profile", setup_project_new_profile]
-        )
+        result = test_state.runner.invoke(cli, ["build", "--profile", setup_project_new_profile])
 
         assert result.exit_code == 0
         test_state.assert_build_result_files_paths(profile=setup_project_new_profile)
         test_state.assert_compile_commands(profile=setup_project_new_profile)
 
-    def test_cli_run_new_proj(
-        self, test_state: ActiveTestState, setup_project_build_release: None
-    ) -> None:
+    def test_cli_run_new_proj(self, test_state: ActiveTestState, setup_project_build_release: None) -> None:
         """This test check if call of scargo run command will finish succesfully and with output 'Hello World!'"""
         if test_state.target_id != ScargoTarget.x86:
             pytest.skip("Test only for x86 target")
@@ -413,21 +392,15 @@ class TestBinProjectFlow:
         assert result.exit_code == 0
         assert "100% tests passed, 0 tests failed out of 1" in result.output
 
-    def test_cli_gen_unit_test_subdirectories(
-        self, test_state: ActiveTestState, setup_project: None
-    ) -> None:
+    def test_cli_gen_unit_test_subdirectories(self, test_state: ActiveTestState, setup_project: None) -> None:
         """Test generates first the unit test for a test subdirectory and then the root test directory to see, whether
         the add_directory(x) statement is still available in the CMakeLists.txt file of the root test directory.
         """
         config = get_scargo_config_or_exit()
         src_dir_name = config.source_dir_path.name
         tests_path = config.project_root / "tests/ut"
-        copytree(
-            SUBDIRECTORY_TEST_FILES_PATH, config.source_dir_path, dirs_exist_ok=True
-        )
-        result = test_state.runner.invoke(
-            cli, ["gen", "-u", src_dir_name + "/fs2/test2/"]
-        )
+        copytree(SUBDIRECTORY_TEST_FILES_PATH, config.source_dir_path, dirs_exist_ok=True)
+        result = test_state.runner.invoke(cli, ["gen", "-u", src_dir_name + "/fs2/test2/"])
 
         assert result.exit_code == 0
         assert checkCMakeListsContent(tests_path / "fs2", "add_subdirectory(test2)")
@@ -448,9 +421,7 @@ class TestBinProjectFlow:
         assert not new_dir_cmake_file.exists()
         assert not checkCMakeListsContent(tests_path / "fs2", "add_subdirectory(test1)")
 
-    def test_cli_gen_mock(
-        self, test_state: ActiveTestState, setup_project: None, dummy_lib_h: Path
-    ) -> None:
+    def test_cli_gen_mock(self, test_state: ActiveTestState, setup_project: None, dummy_lib_h: Path) -> None:
         """Test gen --mock option will finish without error and if expected mock files were generated"""
         config = get_scargo_config_or_exit()
         mocks_dir = config.project_root / "tests/mocks"
@@ -466,9 +437,7 @@ class TestBinProjectFlow:
         for file_path in expected_mock_files_path:
             assert file_path.is_file(), f"File '{file_path}' not exist"
 
-    def test_cli_gen_certs(
-        self, test_state: ActiveTestState, setup_project: None
-    ) -> None:
+    def test_cli_gen_certs(self, test_state: ActiveTestState, setup_project: None) -> None:
         """Test scargo gen -c "device_id" command will finish without error and
         expected cert files under build/fs and build/cert directories were created"""
         device_id = "DUMMY:DEVICE:ID:12345"
@@ -485,9 +454,7 @@ class TestBinProjectFlow:
         for file_path in expected_files_paths_in_fs_dir:
             assert file_path.is_file(), f"File '{file_path}' not exist"
 
-    def test_cli_gen_filesystem(
-        self, test_state: ActiveTestState, setup_project: None
-    ) -> None:
+    def test_cli_gen_filesystem(self, test_state: ActiveTestState, setup_project: None) -> None:
         """Test scargo gen -fs command will finish without error and if expected files under build/fs"""
         if test_state.target_id != ScargoTarget.esp32:
             pytest.skip("Test only for esp32 target")
@@ -524,8 +491,6 @@ def test_project_x86_scargo_from_pypi(tmp_path: Path) -> None:
     os.chdir(tmp_path)
     runner = ScargoTestRunner()
 
-    with patch.object(
-        _DockerComposeTemplate, "_set_up_package_version", return_value="scargo"
-    ):
+    with patch.object(_DockerComposeTemplate, "_set_up_package_version", return_value="scargo"):
         result = runner.invoke(cli, ["new", "test_proj", "--target=x86"])
         assert result.exit_code == 0

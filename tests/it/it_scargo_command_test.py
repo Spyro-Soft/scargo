@@ -49,9 +49,7 @@ class ScargoCommandTestState:
         errmsg = f"Build directory '{test_build_dir}' does not exist"
         assert test_build_dir.is_dir(), errmsg
 
-        gcov_report_htmlfile = test_build_dir / Path(
-            f"{SCARGO_UT_COV_FILES_PREFIX}.html"
-        )
+        gcov_report_htmlfile = test_build_dir / Path(f"{SCARGO_UT_COV_FILES_PREFIX}.html")
 
         errmsg = f"File '{gcov_report_htmlfile}' does not exist"
         assert gcov_report_htmlfile.is_file(), errmsg
@@ -59,16 +57,12 @@ class ScargoCommandTestState:
         if not detailed_coverage:
             return
 
-        gcov_report_htmlfile = test_build_dir / Path(
-            f"{SCARGO_UT_COV_FILES_PREFIX}.details.html"
-        )
+        gcov_report_htmlfile = test_build_dir / Path(f"{SCARGO_UT_COV_FILES_PREFIX}.details.html")
 
         errmsg = f"File '{gcov_report_htmlfile}' does not exist"
         assert gcov_report_htmlfile.is_file(), errmsg
 
-        gcov_report_jsonfile = test_build_dir / Path(
-            f"{SCARGO_UT_COV_FILES_PREFIX}.json"
-        )
+        gcov_report_jsonfile = test_build_dir / Path(f"{SCARGO_UT_COV_FILES_PREFIX}.json")
 
         errmsg = f"File '{gcov_report_jsonfile}' does not exist"
         assert gcov_report_jsonfile.is_file(), errmsg
@@ -148,9 +142,7 @@ def active_state_atsam_path() -> ScargoCommandTestState:
 
 
 @pytest.fixture
-def test_state(
-    request: FixtureRequest, tmp_path_factory: TempPathFactory, use_local_scargo: None
-) -> Any:
+def test_state(request: FixtureRequest, tmp_path_factory: TempPathFactory, use_local_scargo: None) -> Any:
     test_state = request.param
     test_state.proj_path = tmp_path_factory.mktemp(test_state.proj_name)
     os.chdir(test_state.proj_path)
@@ -164,9 +156,7 @@ def setup_project(test_state: ScargoCommandTestState) -> None:
     """
     errmsg = f"setup_project(): project in '{test_state.proj_to_copy_path}' "
     errmsg += "does not exists - accepted only existing projects"
-    is_valid = (
-        test_state.proj_to_copy_path and Path(test_state.proj_to_copy_path).exists()
-    )
+    is_valid = test_state.proj_to_copy_path and Path(test_state.proj_to_copy_path).exists()
     assert is_valid, errmsg
 
     # Copy existing project, backward compatibility tests
@@ -178,15 +168,9 @@ def setup_project(test_state: ScargoCommandTestState) -> None:
 
     # Copy fake tests to check GCOV coverage
     dest_test_dir = Path(test_state.proj_name) / "tests/ut"
-    shutil.copytree(
-        src=UT_FILES_PATH / "pow3", dst=dest_test_dir / "pow3", dirs_exist_ok=True
-    )
-    shutil.copytree(
-        src=UT_FILES_PATH / "square", dst=dest_test_dir / "square", dirs_exist_ok=True
-    )
-    shutil.copytree(
-        src=UT_FILES_PATH / "twice", dst=dest_test_dir / "twice", dirs_exist_ok=True
-    )
+    shutil.copytree(src=UT_FILES_PATH / "pow3", dst=dest_test_dir / "pow3", dirs_exist_ok=True)
+    shutil.copytree(src=UT_FILES_PATH / "square", dst=dest_test_dir / "square", dirs_exist_ok=True)
+    shutil.copytree(src=UT_FILES_PATH / "twice", dst=dest_test_dir / "twice", dirs_exist_ok=True)
 
     # Copy fake sources
     shutil.copytree(
@@ -226,9 +210,7 @@ class TestFlowScargoCommandTest:
         ]
         return expected_files
 
-    def test_cli_basic(
-        self, test_state: ScargoCommandTestState, setup_project: None
-    ) -> None:
+    def test_cli_basic(self, test_state: ScargoCommandTestState, setup_project: None) -> None:
         result = test_state.runner.invoke(cli, ["update"])
         assert result.exit_code == 0
 
@@ -244,9 +226,7 @@ class TestFlowScargoCommandTest:
 
         test_state.assert_gcov_output_files(detailed_coverage=True)
 
-    def test_cli_detailed_coverage(
-        self, test_state: ScargoCommandTestState, setup_project: None
-    ) -> None:
+    def test_cli_detailed_coverage(self, test_state: ScargoCommandTestState, setup_project: None) -> None:
         result = test_state.runner.invoke(cli, ["update"])
         assert result.exit_code == 0
 
@@ -265,9 +245,7 @@ class TestFlowScargoCommandTest:
         expected_files.extend(EXPECTED_UT_COVERED_SRC_FILES)
         test_state.assert_gcov_detailed_coverage(expected_files)
 
-    def test_cli_detailed_coverage_filtering(
-        self, test_state: ScargoCommandTestState, setup_project: None
-    ) -> None:
+    def test_cli_detailed_coverage_filtering(self, test_state: ScargoCommandTestState, setup_project: None) -> None:
         expected_extensions = [".s", ".cxx"]
         test_state.set_config_src_extensions(expected_extensions)
 

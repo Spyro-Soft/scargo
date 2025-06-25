@@ -8,9 +8,7 @@ from scargo.target_helpers.esp32_helper import gen_fs_esp32, gen_single_binary_e
 from tests.ut.ut_scargo_gen import mock_prepare_config_esp32  # noqa: F401
 
 
-def test_gen_fs_esp32(
-    fp: FakeProcess, mock_prepare_config_esp32: MagicMock  # noqa: F811
-) -> None:
+def test_gen_fs_esp32(fp: FakeProcess, mock_prepare_config_esp32: MagicMock) -> None:  # noqa: F811
     project_dir = Path.cwd()
 
     fp.register(
@@ -25,9 +23,7 @@ def test_gen_fs_esp32(
     gen_fs_esp32(mock_prepare_config_esp32.return_value)
 
 
-def test_gen_fs_esp32_fails(
-    fp: FakeProcess, mock_prepare_config_esp32: MagicMock  # noqa: F811
-) -> None:
+def test_gen_fs_esp32_fails(fp: FakeProcess, mock_prepare_config_esp32: MagicMock) -> None:  # noqa: F811
     project_dir = Path.cwd()
 
     fp.register(

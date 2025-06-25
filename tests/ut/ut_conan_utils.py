@@ -41,9 +41,7 @@ def test_conan_add_remote_fail(
     # ARRANGE
     fp.register(["conan", "remote", "list-users"])
     fp.register(["conan", "remote", "add", REMOTE_REPO_NAME_1, EXAMPLE_URL])
-    fp.register(
-        ["conan", "remote", "add", REMOTE_REPO_NAME_2, EXAMPLE_URL], returncode=1
-    )
+    fp.register(["conan", "remote", "add", REMOTE_REPO_NAME_2, EXAMPLE_URL], returncode=1)
 
     # ACT
     conan_add_remote(Path("some_path"), config)
@@ -129,9 +127,7 @@ def test_conan_remote_login_env_vars(fp: FakeProcess) -> None:
     assert fp.calls.popleft() == add_user_cmd
 
 
-def test_conan_remote_login_fail(
-    caplog: pytest.LogCaptureFixture, fp: FakeProcess
-) -> None:
+def test_conan_remote_login_fail(caplog: pytest.LogCaptureFixture, fp: FakeProcess) -> None:
     # ARRANGE
     add_user_cmd = [
         "conan",
@@ -152,9 +148,7 @@ def test_conan_remote_login_fail(
     assert "Unable to log in to conan remote repo_name" in caplog.text
 
 
-def test_conan_source_fails(
-    config: Config, caplog: pytest.LogCaptureFixture, fp: FakeProcess
-) -> None:
+def test_conan_source_fails(config: Config, caplog: pytest.LogCaptureFixture, fp: FakeProcess) -> None:
     # ARRANGE
     fp.register(["conan", "source", "."], returncode=1)
 

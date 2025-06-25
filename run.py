@@ -172,9 +172,7 @@ def run_all_code_checkers() -> bool:
         command.extend(CHECKERS_EXCLUSIONS)
         subprocess.check_call(command)
     except subprocess.CalledProcessError:
-        checker_exception_message += (
-            "Copyrights check failed run: " + " ".join(command) + "\n"
-        )
+        checker_exception_message += "Copyrights check failed run: " + " ".join(command) + "\n"
 
     try:
         command = [
@@ -187,53 +185,39 @@ def run_all_code_checkers() -> bool:
         command.extend(CHECKERS_EXCLUSIONS)
         subprocess.check_call(command)
     except subprocess.CalledProcessError:
-        checker_exception_message += (
-            "TODO check failed run: " + " ".join(command) + "\n"
-        )
+        checker_exception_message += "TODO check failed run: " + " ".join(command) + "\n"
 
     try:
         run_isort(check=True)
     except subprocess.CalledProcessError:
-        checker_exception_message += (
-            "Sort order check fail run: " + " ".join(command) + "\n"
-        )
+        checker_exception_message += "Sort order check fail run: " + " ".join(command) + "\n"
 
     try:
         run_black(check=True)
     except subprocess.CalledProcessError:
-        checker_exception_message += (
-            "Format check fail run: " + " ".join(command) + "\n"
-        )
+        checker_exception_message += "Format check fail run: " + " ".join(command) + "\n"
 
     try:
         command = [SCRIPT_DIR + "/common_dev/scripts/cyclomatic.py"]
         subprocess.check_call(command)
     except subprocess.CalledProcessError:
-        checker_exception_message += (
-            "Cyclomatic check fail run: " + " ".join(command) + "\n"
-        )
+        checker_exception_message += "Cyclomatic check fail run: " + " ".join(command) + "\n"
 
     try:
         command = ["make", "-C./docs", "html"]
         subprocess.check_call(command)
     except subprocess.CalledProcessError:
-        checker_exception_message += (
-            "Docu generation fail run: " + " ".join(command) + "\n"
-        )
+        checker_exception_message += "Docu generation fail run: " + " ".join(command) + "\n"
 
     try:
         run_pylint()
     except subprocess.CalledProcessError:
-        checker_exception_message += (
-            "Pylint check failed run: " + " ".join(command) + "\n"
-        )
+        checker_exception_message += "Pylint check failed run: " + " ".join(command) + "\n"
 
     try:
         run_mypy()
     except subprocess.CalledProcessError:
-        checker_exception_message += (
-            "Mypy check failed run: " + " ".join(command) + "\n"
-        )
+        checker_exception_message += "Mypy check failed run: " + " ".join(command) + "\n"
 
     if checker_exception_message:
         print("Check exception message:\n" + checker_exception_message)
@@ -319,9 +303,7 @@ def main() -> None:  # pylint: disable=R0912
     if args.target:
         # -k could be replaced with -m as markers will be introduced in integration tests in the future
         # GitHub runner for linux is 2 processor machine, so -n is equal 2
-        result = perform_tests(
-            IT_DIR, "it", ["-n 2", f"-k {args.target[0]}", "--dist=loadgroup"]
-        )
+        result = perform_tests(IT_DIR, "it", ["-n 2", f"-k {args.target[0]}", "--dist=loadgroup"])
         if result:
             sys.exit(1)
 

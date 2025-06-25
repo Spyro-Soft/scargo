@@ -13,9 +13,7 @@ from tests.ut.utils import get_log_data, get_test_project_config
 
 
 @pytest.fixture
-def mock_debug_config(
-    request: pytest.FixtureRequest, tmpdir: Path, mocker: MockerFixture
-) -> MagicMock:
+def mock_debug_config(request: pytest.FixtureRequest, tmpdir: Path, mocker: MockerFixture) -> MagicMock:
     os.chdir(tmpdir)
 
     mocker.patch("os.system")
@@ -23,14 +21,10 @@ def mock_debug_config(
     test_config = get_test_project_config(target_id)
     test_config.project_root = Path(tmpdir)
 
-    return mocker.patch(
-        f"{scargo_flash.__module__}.prepare_config", return_value=test_config
-    )
+    return mocker.patch(f"{scargo_flash.__module__}.prepare_config", return_value=test_config)
 
 
-def test_flash_project_unsupported_target(
-    mock_debug_config: MagicMock, caplog: pytest.LogCaptureFixture
-) -> None:
+def test_flash_project_unsupported_target(mock_debug_config: MagicMock, caplog: pytest.LogCaptureFixture) -> None:
     with pytest.raises(SystemExit):
         scargo_flash("Debug", None, None, False, False, False, None)
     assert (
@@ -39,9 +33,7 @@ def test_flash_project_unsupported_target(
     ) in get_log_data(caplog.records)
 
 
-def test_flash_unsupported_target_argument(
-    mock_debug_config: MagicMock, caplog: pytest.LogCaptureFixture
-) -> None:
+def test_flash_unsupported_target_argument(mock_debug_config: MagicMock, caplog: pytest.LogCaptureFixture) -> None:
     with pytest.raises(SystemExit):
         scargo_flash("Debug", None, ScargoTarget.x86, False, False, False, None)
     assert (
@@ -50,9 +42,7 @@ def test_flash_unsupported_target_argument(
     ) in get_log_data(caplog.records)
 
 
-def test_flash_target_argument_not_in_config(
-    mock_debug_config: MagicMock, caplog: pytest.LogCaptureFixture
-) -> None:
+def test_flash_target_argument_not_in_config(mock_debug_config: MagicMock, caplog: pytest.LogCaptureFixture) -> None:
     with pytest.raises(SystemExit):
         scargo_flash("Debug", None, ScargoTarget.stm32, False, False, False, None)
     assert (
@@ -63,9 +53,7 @@ def test_flash_target_argument_not_in_config(
 
 @pytest.mark.parametrize("mock_debug_config", ["stm32"], indirect=True)
 @pytest.mark.parametrize("profile", DEFAULT_PROFILES)
-def test_flash_stm32(
-    mock_debug_config: MagicMock, profile: str, fp: FakeProcess
-) -> None:
+def test_flash_stm32(mock_debug_config: MagicMock, profile: str, fp: FakeProcess) -> None:
     config = mock_debug_config.return_value
     target = config.project.default_target
     elf_path = Path(target.get_bin_path(config.project.name.lower(), profile))
@@ -98,9 +86,7 @@ def test_flash_stm32(
 
 
 @pytest.mark.parametrize("mock_debug_config", ["stm32"], indirect=True)
-def test_flash_stm32_port_defined(
-    mock_debug_config: MagicMock, fp: FakeProcess
-) -> None:
+def test_flash_stm32_port_defined(mock_debug_config: MagicMock, fp: FakeProcess) -> None:
     profile = "Debug"
     port = "/dev/ttyUSB0"
     config = mock_debug_config.return_value
@@ -136,9 +122,7 @@ def test_flash_stm32_port_defined(
 
 
 @pytest.mark.parametrize("mock_debug_config", ["stm32"], indirect=True)
-def test_flash_stm32_erase_memory(
-    mock_debug_config: MagicMock, fp: FakeProcess
-) -> None:
+def test_flash_stm32_erase_memory(mock_debug_config: MagicMock, fp: FakeProcess) -> None:
     profile = "Debug"
     config = mock_debug_config.return_value
     target = config.project.default_target
@@ -173,9 +157,7 @@ def test_flash_stm32_erase_memory(
 
 
 @pytest.mark.parametrize("mock_debug_config", ["stm32"], indirect=True)
-def test_flash_stm32_erase_memory_port_defined(
-    mock_debug_config: MagicMock, fp: FakeProcess
-) -> None:
+def test_flash_stm32_erase_memory_port_defined(mock_debug_config: MagicMock, fp: FakeProcess) -> None:
     port = "/dev/ttyUSB0"
     profile = "Debug"
     config = mock_debug_config.return_value
@@ -213,9 +195,7 @@ def test_flash_stm32_erase_memory_port_defined(
 
 @pytest.mark.parametrize("mock_debug_config", ["atsam"], indirect=True)
 @pytest.mark.parametrize("profile", DEFAULT_PROFILES)
-def test_flash_atsam(
-    mock_debug_config: MagicMock, profile: str, fp: FakeProcess
-) -> None:
+def test_flash_atsam(mock_debug_config: MagicMock, profile: str, fp: FakeProcess) -> None:
     config = mock_debug_config.return_value
     target = config.project.default_target
     elf_path = Path(target.get_bin_path(config.project.name.lower(), profile))
@@ -250,9 +230,7 @@ def test_flash_atsam(
 
 @pytest.mark.parametrize("profile", DEFAULT_PROFILES)
 @pytest.mark.parametrize("mock_debug_config", ["esp32"], indirect=True)
-def test_flash_esp32_default(
-    mock_debug_config: MagicMock, profile: str, fp: FakeProcess
-) -> None:
+def test_flash_esp32_default(mock_debug_config: MagicMock, profile: str, fp: FakeProcess) -> None:
     fp.register(["esptool.py", "--chip", "esp32", "write_flash", "@flash_args"])
 
     scargo_flash(
@@ -267,9 +245,7 @@ def test_flash_esp32_default(
 
 
 @pytest.mark.parametrize("mock_debug_config", ["esp32"], indirect=True)
-def test_flash_esp32_port_defined(
-    mock_debug_config: MagicMock, fp: FakeProcess
-) -> None:
+def test_flash_esp32_port_defined(mock_debug_config: MagicMock, fp: FakeProcess) -> None:
     port = "/dev/ttyUSB0"
     fp.register(
         [

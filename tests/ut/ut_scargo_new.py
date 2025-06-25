@@ -41,9 +41,7 @@ def test_test_content_dir(tmpdir: Path) -> None:
     assert len(dir_list) == 3
     for file in dir_list:
         if file not in list_of_expecting_dir:
-            pytest.fail(
-                f"Incorrect file: {file}. Files expected: {list_of_expecting_dir}"
-            )
+            pytest.fail(f"Incorrect file: {file}. Files expected: {list_of_expecting_dir}")
 
 
 def test_with_git_dir_exist(tmpdir: Path) -> None:

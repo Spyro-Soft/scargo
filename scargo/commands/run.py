@@ -16,9 +16,7 @@ from scargo.logger import get_logger
 logger = get_logger()
 
 
-def scargo_run(
-    bin_path: Optional[Path], profile: str, params: List[str], skip_build: bool
-) -> None:
+def scargo_run(bin_path: Optional[Path], profile: str, params: List[str], skip_build: bool) -> None:
     """
     Run command from CLI
 
@@ -32,9 +30,7 @@ def scargo_run(
     config = prepare_config()
 
     if not config.project.is_x86():
-        logger.info(
-            "Running non x86 projects on x86 architecture is not implemented yet."
-        )
+        logger.info("Running non x86 projects on x86 architecture is not implemented yet.")
         sys.exit(1)
 
     if params is None:

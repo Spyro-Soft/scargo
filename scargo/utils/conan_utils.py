@@ -62,18 +62,13 @@ def conan_source(project_dir: Path) -> None:
 
 
 def _get_remotes_without_user(conan_remotes: Dict[str, str]) -> List[str]:
-    result = subprocess.run(
-        ["conan", "remote", "list-users"], check=True, stdout=subprocess.PIPE
-    )
+    result = subprocess.run(["conan", "remote", "list-users"], check=True, stdout=subprocess.PIPE)
     user_list_stdout = result.stdout.decode().splitlines()
 
     no_users = []
     for index, line in enumerate(user_list_stdout):
         if remote_line := line.strip().split(":")[0]:
-            if (
-                remote_line in conan_remotes
-                and "No user" in user_list_stdout[index + 1]
-            ):
+            if remote_line in conan_remotes and "No user" in user_list_stdout[index + 1]:
                 no_users.append(remote_line)
 
     return no_users
