@@ -73,7 +73,7 @@ def run_command_in_docker(  # type: ignore[no-any-unimported]
     output = container.attach(stdout=True, stream=True, logs=True, stderr=True)
     output_str = ""
     for line in output:
-        print(line.decode(), end="")
+        logger.info(line.decode().removesuffix("\n"))
         output_str += line.decode()
     result = container.wait()
     container.remove()

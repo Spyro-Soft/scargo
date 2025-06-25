@@ -12,7 +12,10 @@ from scargo import __version__
 from scargo.config import Config
 from scargo.file_generators.base_gen import create_file_from_template
 from scargo.global_values import SCARGO_PKG_PATH
+from scargo.logger import get_logger
 from scargo.target_helpers import atsam_helper, stm32_helper
+
+logger = get_logger()
 
 
 class _DockerComposeTemplate:
@@ -32,13 +35,13 @@ class _DockerComposeTemplate:
                     scargo_path = Path(line.split("Location:")[1].strip()) / "scargo"
                     if scargo_path.exists():
                         return scargo_path
-                    print(f"Error: The scargo path {scargo_path} does not exist.")
+                    logger.error(f"Error: The scargo path {scargo_path} does not exist.")
         except subprocess.CalledProcessError as e:
-            print(f"Subprocess error while retrieving scargo path: {e}")
+            logger.error(f"Subprocess error while retrieving scargo path: {e}")
         except FileNotFoundError as e:
-            print(f"File not found: {e}")
+            logger.error(f"File not found: {e}")
         except OSError as e:
-            print(f"OS error occurred: {e}")
+            logger.error(f"OS error occurred: {e}")
 
         return Path()
 
