@@ -73,6 +73,9 @@ def run_command_in_docker(  # type: ignore[no-any-unimported]
     output = container.attach(stdout=True, stream=True, logs=True, stderr=True)
     output_str = ""
     for line in output:
+        # INFO: IT tests and their checks rely on stdout value and this cannot be removed.
+        # INFO: tests/it/it_scargo_commands_flow.py should be rewritten, to not rely on stdout.
+        print(line.decode(), end="")
         logger.info(line.decode().removesuffix("\n"))
         output_str += line.decode()
     result = container.wait()
