@@ -42,7 +42,7 @@ def scargo_test(verbose: bool, profile: str = "Debug", detailed_coverage: bool =
 
     if not Path(tests_src_dir, "CMakeLists.txt").exists():
         logger.error("Directory `tests`: File `CMakeLists.txt` does not exist.")
-        logger.info("Did you run `scargo update`?")
+        logger.error("Did you run `scargo update`?")
         sys.exit(1)
 
     test_build_dir.mkdir(parents=True, exist_ok=True)
@@ -176,7 +176,7 @@ def run_ut(config: Config, verbose: bool, cwd: Path, detailed_coverage: bool) ->
             cmd.append("--json")
             cmd.append(output_json_filename)
 
-        print(cmd)
+        logger.info(cmd)
 
         gcov_executable = config.tests.gcov_executable
         if gcov_executable != "":
@@ -213,7 +213,7 @@ def run_ut(config: Config, verbose: bool, cwd: Path, detailed_coverage: bool) ->
             "--json-add-tracefile",
             str(output_json_fpath),
         ]
-        print(cmd)
+        logger.info(cmd)
 
         gcov_executable = config.tests.gcov_executable
         if gcov_executable != "":
