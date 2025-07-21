@@ -98,9 +98,9 @@ class ActiveTestState:
             elif src_file.suffix == ".cpp":
                 assert profile_config.cxxflags in command
                 assert default_toml_cxx_flags in command
-                assert (
-                    f"-std=c++{cpp_toml_std}" in command or f"-std=gnu++{cpp_toml_std}" in command
-                ), f"Neither -std=c++{cpp_toml_std} or -std=gnu++{cpp_toml_std} not found in compile command: {command}"
+                assert any(
+                    std_flag in command for std_flag in (f"-std=c++{cpp_toml_std}", f"-std=gnu++{cpp_toml_std}")
+                ), f"Neither -std=c++{cpp_toml_std} nor -std=gnu++{cpp_toml_std} found in compile command: {command}"
 
 
 @pytest.fixture
