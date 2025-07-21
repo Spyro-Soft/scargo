@@ -9,9 +9,7 @@ from scargo.file_generators.base_gen import create_file_from_template
 from scargo.file_generators.cpp_gen import generate_cpp
 
 
-def test_generate_cpp_bin_only(
-    config: Config, mock_create_file_from_template: MagicMock
-) -> None:
+def test_generate_cpp_bin_only(config: Config, mock_create_file_from_template: MagicMock) -> None:
     config.project.bin_name = "test_bin"
     config.project.lib_name = None
 
@@ -33,9 +31,7 @@ def test_generate_cpp_bin_only(
     ]
 
 
-def test_generate_cpp_lib_only(
-    config: Config, mock_create_file_from_template: MagicMock
-) -> None:
+def test_generate_cpp_lib_only(config: Config, mock_create_file_from_template: MagicMock) -> None:
     config.project.bin_name = None
     config.project.lib_name = "test_lib"
 
@@ -81,9 +77,7 @@ def test_generate_cpp_lib_only(
     ]
 
 
-def test_generate_cpp_bin_and_lib(
-    config: Config, mock_create_file_from_template: MagicMock
-) -> None:
+def test_generate_cpp_bin_and_lib(config: Config, mock_create_file_from_template: MagicMock) -> None:
     config.project.bin_name = "test_bin"
     config.project.lib_name = "test_lib"
 
@@ -137,6 +131,4 @@ def test_generate_cpp_bin_and_lib(
 
 @pytest.fixture
 def mock_create_file_from_template(mocker: MockerFixture) -> MagicMock:
-    return mocker.patch(
-        f"{generate_cpp.__module__}.{create_file_from_template.__name__}"
-    )
+    return mocker.patch(f"{generate_cpp.__module__}.{create_file_from_template.__name__}")

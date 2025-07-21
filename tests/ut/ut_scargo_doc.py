@@ -72,9 +72,7 @@ def mock_prepare_config(mocker: MockerFixture, config: Config) -> MagicMock:
 
 @pytest.fixture
 def mock_find_program_path(mocker: MockerFixture) -> MagicMock:
-    return mocker.patch(
-        f"{scargo_doc.__module__}.find_program_path", return_value="doxygen"
-    )
+    return mocker.patch(f"{scargo_doc.__module__}.find_program_path", return_value="doxygen")
 
 
 @pytest.fixture

@@ -38,9 +38,7 @@ def test_scargo_test_no_cmake_file(
     assert "Directory `tests`: File `CMakeLists.txt` does not exist." in caplog.text
 
 
-def test_scargo_test(
-    config: Config, fp: FakeProcess, fs: FakeFilesystem, mock_prepare_config: MagicMock
-) -> None:
+def test_scargo_test(config: Config, fp: FakeProcess, fs: FakeFilesystem, mock_prepare_config: MagicMock) -> None:
     config.project_root = Path(".")
     subprocess_commands = [
         ["conan", "profile", "list"],

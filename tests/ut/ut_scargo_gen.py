@@ -19,9 +19,7 @@ def mock_prepare_config(tmpdir: Path, mocker: MockerFixture) -> MagicMock:
     x86_config = get_test_project_config("x86")
     x86_config.project_root = Path(tmpdir)
 
-    return mocker.patch(
-        f"{scargo_gen.__module__}.prepare_config", return_value=x86_config
-    )
+    return mocker.patch(f"{scargo_gen.__module__}.prepare_config", return_value=x86_config)
 
 
 @pytest.fixture
@@ -32,9 +30,7 @@ def mock_prepare_config_esp32(tmpdir: Path, mocker: MockerFixture) -> MagicMock:
     esp_config = get_test_project_config("esp32")
     esp_config.project_root = Path(tmpdir)
 
-    return mocker.patch(
-        f"{scargo_gen.__module__}.prepare_config", return_value=esp_config
-    )
+    return mocker.patch(f"{scargo_gen.__module__}.prepare_config", return_value=esp_config)
 
 
 # -------------- Gen unit_tests tests --------------
@@ -57,15 +53,11 @@ def test_gen_ut(mock_prepare_config: MagicMock, mocker: MockerFixture) -> None:
         single_bin=False,
     )
 
-    mocked_generate_ut.assert_called_once_with(
-        path_to_srcs, mock_prepare_config.return_value
-    )
+    mocked_generate_ut.assert_called_once_with(path_to_srcs, mock_prepare_config.return_value)
 
 
 # -------------- Gen mocks tests --------------
-def test_gen_mocknot_header(
-    mock_prepare_config: MagicMock, caplog: pytest.LogCaptureFixture
-) -> None:
+def test_gen_mocknot_header(mock_prepare_config: MagicMock, caplog: pytest.LogCaptureFixture) -> None:
     some_path = Path("not_header_file")
 
     with pytest.raises(SystemExit):
@@ -107,9 +99,7 @@ def test_gen_mock(
         single_bin=False,
     )
 
-    mocked_generate_ut.assert_called_once_with(
-        path_to_hdr, mock_prepare_config.return_value
-    )
+    mocked_generate_ut.assert_called_once_with(path_to_hdr, mock_prepare_config.return_value)
     assert f"Generated: {path_to_hdr}" in caplog.text
 
 
@@ -118,9 +108,7 @@ def test_gen_mock_fails(
     mocker: MockerFixture,
     caplog: pytest.LogCaptureFixture,
 ) -> None:
-    mocked_generate_ut = mocker.patch(
-        f"{scargo_gen.__module__}.generate_mocks", return_value=False
-    )
+    mocked_generate_ut = mocker.patch(f"{scargo_gen.__module__}.generate_mocks", return_value=False)
     path_to_hdr = Path("header.h")
 
     scargo_gen(
@@ -135,9 +123,7 @@ def test_gen_mock_fails(
         single_bin=False,
     )
 
-    mocked_generate_ut.assert_called_once_with(
-        path_to_hdr, mock_prepare_config.return_value
-    )
+    mocked_generate_ut.assert_called_once_with(path_to_hdr, mock_prepare_config.return_value)
     assert f"Skipping: {path_to_hdr}" in caplog.text
 
 
@@ -157,9 +143,7 @@ def mock_create_certs(process: fake_popen.FakePopen, certs_dir: Path) -> None:
         cert_file.touch()
 
 
-def test_gen_certs_files_not_exist(
-    fp: FakeProcess, mock_prepare_config: MagicMock
-) -> None:
+def test_gen_certs_files_not_exist(fp: FakeProcess, mock_prepare_config: MagicMock) -> None:
     fp.register([fp.any()])
 
     with pytest.raises(SystemExit):
@@ -238,9 +222,7 @@ def test_gen_certs(
 
 
 # -------------- Gen fs tests --------------
-def test_gen_fs_unsupored_target(
-    caplog: pytest.LogCaptureFixture, mock_prepare_config: MagicMock
-) -> None:
+def test_gen_fs_unsupored_target(caplog: pytest.LogCaptureFixture, mock_prepare_config: MagicMock) -> None:
     scargo_gen(
         profile="Debug",
         gen_ut=None,
@@ -273,9 +255,7 @@ def test_gen_fs_esp32(fp: FakeProcess, mock_prepare_config_esp32: MagicMock) -> 
 
 
 # -------------- Gen single bin tests --------------
-def test_gen_single_bin_unsupored_target(
-    caplog: pytest.LogCaptureFixture, mock_prepare_config: MagicMock
-) -> None:
+def test_gen_single_bin_unsupored_target(caplog: pytest.LogCaptureFixture, mock_prepare_config: MagicMock) -> None:
     scargo_gen(
         profile="Debug",
         gen_ut=None,

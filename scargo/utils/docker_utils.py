@@ -31,9 +31,7 @@ def prepare_docker(project_config: ProjectConfig, project_path: Path) -> Dict[st
     }
 
 
-def run_scargo_again_in_docker(
-    project_config: ProjectConfig, project_path: Path
-) -> None:
+def run_scargo_again_in_docker(project_config: ProjectConfig, project_path: Path) -> None:
     """
     Run command in docker
 
@@ -50,9 +48,7 @@ def run_scargo_again_in_docker(
         if val in ("-B", "--base-dir"):
             cmd_args[idx + 1] = "."
 
-    result = run_command_in_docker(
-        command=["scargo", *cmd_args], **prepare_docker(project_config, project_path)
-    )
+    result = run_command_in_docker(command=["scargo", *cmd_args], **prepare_docker(project_config, project_path))
     sys.exit(result["StatusCode"])
 
 
@@ -77,7 +73,10 @@ def run_command_in_docker(  # type: ignore[no-any-unimported]
     output = container.attach(stdout=True, stream=True, logs=True, stderr=True)
     output_str = ""
     for line in output:
+        # INFO: IT tests and their checks rely on stdout value and this cannot be removed.
+        # INFO: tests/it/it_scargo_commands_flow.py should be rewritten, to not rely on stdout.
         print(line.decode(), end="")
+        logger.info(line.decode().removesuffix("\n"))
         output_str += line.decode()
     result = container.wait()
     container.remove()

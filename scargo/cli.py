@@ -21,6 +21,7 @@ from scargo.commands.docker import (
 from scargo.commands.fix import scargo_fix
 from scargo.commands.flash import scargo_flash
 from scargo.commands.gen import scargo_gen
+from scargo.commands.license_check import scargo_license_check
 from scargo.commands.monitor import scargo_monitor
 from scargo.commands.new import scargo_new
 from scargo.commands.publish import scargo_publish
@@ -161,21 +162,15 @@ def doc(
 docker = Typer(help="Manage the docker environment for the project")
 
 
-@docker.command(
-    "build", context_settings={"allow_extra_args": True, "ignore_unknown_options": True}
-)
-def docker_build(
-    docker_opts: List[str] = Argument(None), base_dir: Optional[Path] = BASE_DIR_OPTION
-) -> None:
+@docker.command("build", context_settings={"allow_extra_args": True, "ignore_unknown_options": True})
+def docker_build(docker_opts: List[str] = Argument(None), base_dir: Optional[Path] = BASE_DIR_OPTION) -> None:
     """Build docker layers for this project depending on the target"""
     if base_dir:
         os.chdir(base_dir)
     scargo_docker_build(docker_opts)
 
 
-@docker.command(
-    "run", context_settings={"allow_extra_args": True, "ignore_unknown_options": True}
-)
+@docker.command("run", context_settings={"allow_extra_args": True, "ignore_unknown_options": True})
 def docker_run(
     command: str = Option(
         "bash",
@@ -193,12 +188,8 @@ def docker_run(
     scargo_docker_run(docker_opts=docker_opts, command=command)
 
 
-@docker.command(
-    "exec", context_settings={"allow_extra_args": True, "ignore_unknown_options": True}
-)
-def docker_exec(
-    base_dir: Optional[Path] = BASE_DIR_OPTION, docker_opts: List[str] = Argument(None)
-) -> None:
+@docker.command("exec", context_settings={"allow_extra_args": True, "ignore_unknown_options": True})
+def docker_exec(base_dir: Optional[Path] = BASE_DIR_OPTION, docker_opts: List[str] = Argument(None)) -> None:
     """Attach to existing docker environment"""
     if base_dir:
         os.chdir(base_dir)
@@ -213,9 +204,7 @@ cli.add_typer(docker, name="docker")
 
 @cli.command()
 def fix(
-    clang_format: bool = Option(
-        False, "--clang-format", help="Fix clang-format violations"
-    ),
+    clang_format: bool = Option(False, "--clang-format", help="Fix clang-format violations"),
     copy_right: bool = Option(False, "--copyright", help="Fix copyrights violations"),
     pragma: bool = Option(False, "--pragma", help="Fix pragma violations"),
     base_dir: Optional[Path] = BASE_DIR_OPTION,
@@ -240,8 +229,7 @@ def flash(
     ),
     port: Optional[str] = Option(
         None,
-        help="(esp32 only) port where the target device of the command is"
-        " connected to, e.g. /dev/ttyUSB0",
+        help="(esp32 only) port where the target device of the command is" " connected to, e.g. /dev/ttyUSB0",
     ),
     target: Optional[ScargoTarget] = Option(
         None,
@@ -274,8 +262,7 @@ def monitor(
         ...,
         "-p",
         "--port",
-        help="port where the serial monitor will be run"
-        " connected to, e.g. /dev/ttyUSB0",
+        help="port where the serial monitor will be run" " connected to, e.g. /dev/ttyUSB0",
     ),
     baudrate: Optional[int] = Option(
         None,
@@ -341,27 +328,16 @@ def gen(
         metavar="<PASSWORD>",
         help="Password to be set for generated certificates",
     ),
-    file_system: bool = Option(
-        False, "--fs", "-f", help="Build the filesystem, base on spiffs dir content."
-    ),
-    single_bin: bool = Option(
-        False, "--bin", "-b", help="Generate single binary image."
-    ),
+    file_system: bool = Option(False, "--fs", "-f", help="Build the filesystem, base on spiffs dir content."),
+    single_bin: bool = Option(False, "--bin", "-b", help="Generate single binary image."),
     base_dir: Optional[Path] = BASE_DIR_OPTION,
 ) -> None:
     """Manage the auto file generator"""
     if base_dir:
         os.chdir(base_dir)
-    if (
-        gen_ut is None
-        and gen_mock is None
-        and certs is None
-        and not (file_system or single_bin)
-    ):
-        logger.warning(
-            "Please add one of the following options to the command:"
-            "\n--unit-test\n--mock\n--certs\n--fs\n--bin"
-        )
+    if gen_ut is None and gen_mock is None and certs is None and not (file_system or single_bin):
+        logger.warning("Please add one of the following options to the command:")
+        logger.warning("--unit-test\n--mock\n--certs\n--fs\n--bin")
         sys.exit(1)
 
     scargo_gen(
@@ -399,9 +375,7 @@ def new(
         prompt=True,
         prompt_required=False,
     ),
-    targets: List[ScargoTarget] = Option(
-        [], "-t", "--target", help="Specify targets for a project."
-    ),
+    targets: List[ScargoTarget] = Option([], "-t", "--target", help="Specify targets for a project."),
     chip: List[str] = Option(
         [],
         "-c",
@@ -411,9 +385,7 @@ def new(
         prompt=True,
         prompt_required=False,
     ),
-    create_docker: bool = Option(
-        True, "-d/-nd", "--docker/--no-docker", help="Initialize docker environment."
-    ),
+    create_docker: bool = Option(True, "-d/-nd", "--docker/--no-docker", help="Initialize docker environment."),
     git: bool = Option(True, "--git/--no-git", help="Initialize git repository."),
     base_dir: Optional[Path] = BASE_DIR_OPTION,
 ) -> None:
@@ -479,12 +451,8 @@ def run(
 @cli.command()
 def test(
     verbose: bool = Option(False, "--verbose", "-v", help="Verbose mode."),
-    profile: str = Option(
-        "Debug", "-p", "--profile", metavar="PROFILE", help="CMake profile to use"
-    ),
-    detailed_coverage: bool = Option(
-        False, help="Generate detailed coverage HTML files"
-    ),
+    profile: str = Option("Debug", "-p", "--profile", metavar="PROFILE", help="CMake profile to use"),
+    detailed_coverage: bool = Option(False, help="Generate detailed coverage HTML files"),
     base_dir: Optional[Path] = BASE_DIR_OPTION,
 ) -> None:
     """Compile and run all tests in directory `test`."""
@@ -518,6 +486,28 @@ def update(
             logger.error("Config file not found.")
             sys.exit(1)
     scargo_update(config_file_path)
+
+
+###############################################################################
+
+
+@cli.command()
+def license_check(
+    path: Optional[Path] = Option(
+        None,
+        "--path",
+        "-p",
+        exists=True,
+        resolve_path=True,
+        help="Optional path to scan (default: src/ or main/).",
+    ),
+    base_dir: Optional[Path] = BASE_DIR_OPTION,
+) -> None:
+    """Check project licenses against license policy."""
+    if base_dir:
+        os.chdir(base_dir)
+
+    scargo_license_check(path)
 
 
 ###############################################################################

@@ -31,18 +31,12 @@ def create_file_from_template(
     """Creates file using jinja template on output path, creates dirs if necessary"""
     project_path = config.project_root
     output_path = Path(project_path, output_path)
-    if (
-        _is_file_excluded(output_path, project_path, config)
-        or output_path.exists()
-        and not overwrite
-    ):
+    if _is_file_excluded(output_path, project_path, config) or output_path.exists() and not overwrite:
         return
     write_template(output_path, template_path, template_params)
 
 
-def write_template(
-    output_path: Path, template_path: str, template_params: Dict[str, Any]
-) -> None:
+def write_template(output_path: Path, template_path: str, template_params: Dict[str, Any]) -> None:
     output_path.parent.mkdir(parents=True, exist_ok=True)
     content = _JINJA_ENV.get_template(template_path).render(template_params)
     output_path.write_text(content, encoding="utf-8")

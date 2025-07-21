@@ -129,13 +129,9 @@ def mock_prepare_multitarget_config(tmpdir: Path, mocker: MockerFixture) -> Magi
     multitarget_config = get_test_project_config("multitarget")
     multitarget_config.project_root = Path(tmpdir)
 
-    return mocker.patch(
-        f"{scargo_build.__module__}.prepare_config", return_value=multitarget_config
-    )
+    return mocker.patch(f"{scargo_build.__module__}.prepare_config", return_value=multitarget_config)
 
 
 @pytest.fixture
 def mock_prepare_config(mocker: MockerFixture, config: Config) -> MagicMock:
-    return mocker.patch(
-        f"{scargo_build.__module__}.prepare_config", return_value=config
-    )
+    return mocker.patch(f"{scargo_build.__module__}.prepare_config", return_value=config)

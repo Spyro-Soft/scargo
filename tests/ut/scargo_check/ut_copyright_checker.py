@@ -66,9 +66,7 @@ def test_check_copyright_fail(
     assert ("WARNING", f"Missing copyright line in {test_on_tempfile}.") in log_data
 
 
-def test_check_copyright_no_description(
-    config: Config, caplog: pytest.LogCaptureFixture
-) -> None:
+def test_check_copyright_no_description(config: Config, caplog: pytest.LogCaptureFixture) -> None:
     config.check.copyright.description = None
 
     result = CopyrightChecker(config).check()
@@ -91,9 +89,7 @@ def test_check_copyright_no_description(
     ids=["4digit_year", "5digit_year"],
     indirect=["test_on_tempfile"],
 )
-def test_check_copyright_with_regex(
-    test_on_tempfile: Path, check_regex: str, expected_result: int
-) -> None:
+def test_check_copyright_with_regex(test_on_tempfile: Path, check_regex: str, expected_result: int) -> None:
     test_config = get_test_project_config()
     test_config.check.copyright.description = check_regex
 
@@ -107,9 +103,7 @@ def test_check_copyright_with_regex(
     ids=["invalid_regex"],
     indirect=["test_on_tempfile"],
 )
-def test_check_copyright_invalid_regex(
-    test_on_tempfile: Path, caplog: pytest.LogCaptureFixture
-) -> None:
+def test_check_copyright_invalid_regex(test_on_tempfile: Path, caplog: pytest.LogCaptureFixture) -> None:
     get_logger().setLevel("DEBUG")
     test_config = get_test_project_config()
     test_config.check.copyright.description = "["

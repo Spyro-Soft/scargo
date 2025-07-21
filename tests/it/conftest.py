@@ -1,6 +1,7 @@
 import os
 import re
 import subprocess
+from pathlib import Path
 from typing import List
 
 import pytest
@@ -8,6 +9,12 @@ from _pytest.config import Config
 from _pytest.nodes import Item
 
 from scargo.global_values import SCARGO_PKG_PATH
+
+TEST_DATA_PATH = Path(__file__).parent.parent / "test_data"
+FIX_TEST_FILES_PATH = TEST_DATA_PATH / "test_projects/test_files/fix_test_files"
+SUBDIRECTORY_TEST_FILES_PATH = TEST_DATA_PATH / "test_projects/test_files/subdirectories_test_files"
+
+UT_FILES_PATH = TEST_DATA_PATH / "test_projects/test_files/ut_files"
 
 
 @pytest.fixture(scope="session")
@@ -41,7 +48,5 @@ def use_local_scargo() -> None:
 def pytest_collection_modifyitems(config: Config, items: List[Item]) -> None:
     for item in items:
         if "copy_project_stm32" in str(item.nodeid):
-            marker = pytest.mark.skip(
-                reason="Known issue with copy_project_stm32 parameter"
-            )
+            marker = pytest.mark.skip(reason="Known issue with copy_project_stm32 parameter")
             item.add_marker(marker)

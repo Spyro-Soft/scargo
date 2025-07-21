@@ -51,19 +51,13 @@ def list_files(path: str) -> Optional[List[str]]:
     if path:
         if os.path.isdir(path):
             return [path]
-        raise argparse.ArgumentTypeError(
-            f"readable_dir:schemas/{path} is not a valid path"
-        )
+        raise argparse.ArgumentTypeError(f"readable_dir:schemas/{path} is not a valid path")
     return None
 
 
 def clean(output_file_names: Sequence[str]) -> None:
     try:
-        command = (
-            ["pyclean", ".", "--debris", "--erase"]
-            + list(output_file_names)
-            + ["--verbose", "--dry-run"]
-        )
+        command = ["pyclean", ".", "--debris", "--erase"] + list(output_file_names) + ["--verbose", "--dry-run"]
         subprocess.check_call(command)
     except subprocess.CalledProcessError:
         print("Pyclean fail")

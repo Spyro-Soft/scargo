@@ -85,9 +85,7 @@ def scargo_check(  # pylint: disable=too-many-branches
         logger.info("Summary:")
         if any(count > 0 for _, count in problem_counts):
             for checker_class, problem_count in problem_counts:
-                logger.info(
-                    f"{checker_class.check_name}: {problem_count} problems found"
-                )
+                logger.info(f"{checker_class.check_name}: {problem_count} problems found")
             sys.exit(1)
         else:
             logger.info("No problems found!")
@@ -103,9 +101,7 @@ class CheckerFixer(abc.ABC):
     headers_only = False
     can_fix = False
 
-    def __init__(
-        self, config: Config, fix_errors: bool = False, verbose: bool = False
-    ) -> None:
+    def __init__(self, config: Config, fix_errors: bool = False, verbose: bool = False) -> None:
         self._config = config
         self._fix_errors = fix_errors
         self._verbose = verbose
@@ -125,12 +121,7 @@ class CheckerFixer(abc.ABC):
         ):
             result = self.check_file(file_path)
             error_counter += result.problems_found
-            if (
-                result.problems_found > 0
-                and self._fix_errors
-                and self.can_fix
-                and result.fix
-            ):
+            if result.problems_found > 0 and self._fix_errors and self.can_fix and result.fix:
                 logger.info("Fixing...")
                 self.fix_file(file_path)
         return error_counter
@@ -152,9 +143,7 @@ class CheckerFixer(abc.ABC):
         return [*self._config.check.exclude, *self.get_check_config().exclude]
 
     def get_check_config(self) -> CheckConfig:
-        return getattr(  # type: ignore[no-any-return]
-            self._config.check, self.check_name.replace("-", "_")
-        )
+        return getattr(self._config.check, self.check_name.replace("-", "_"))  # type: ignore[no-any-return]
 
     @abc.abstractmethod
     def check_file(self, file_path: Path) -> CheckResult:
@@ -198,9 +187,7 @@ class CopyrightChecker(CheckerFixer):
 
     def check(self) -> int:
         if not self.copyright_desc:
-            logger.warning(
-                "No copyright line defined in scargo.toml at check.copyright.description"
-            )
+            logger.warning("No copyright line defined in scargo.toml at check.copyright.description")
             return 0
         return super().check()
 
@@ -245,17 +232,13 @@ class TodoChecker(CheckerFixer):
 
     def check_file(self, file_path: Path) -> CheckResult:
         keywords = self.get_check_config().keywords
-        keyword_patterns = [
-            re.compile(rf"\b{re.escape(keyword)}\b") for keyword in keywords
-        ]
+        keyword_patterns = [re.compile(rf"\b{re.escape(keyword)}\b") for keyword in keywords]
         error_counter = 0
         for line_number, line in get_comment_lines(file_path):
             for keyword, keyword_pattern in zip(keywords, keyword_patterns):
                 if keyword_pattern.search(line):
                     error_counter += 1
-                    logger.warning(
-                        f"Found {keyword} in {file_path} at line {line_number}"
-                    )
+                    logger.warning(f"Found {keyword} in {file_path} at line {line_number}")
         return CheckResult(error_counter)
 
     def get_check_config(self) -> TodoCheckConfig:
@@ -287,9 +270,7 @@ class ClangFormatChecker(CheckerFixer):
         return CheckResult(0)
 
     def fix_file(self, file_path: Path) -> None:
-        subprocess.check_call(
-            ["/usr/bin/clang-format", "-style=file", "-i", str(file_path)]
-        )
+        subprocess.check_call(["/usr/bin/clang-format", "-style=file", "-i", str(file_path)])
 
 
 class ClangTidyChecker(CheckerFixer):
@@ -299,9 +280,7 @@ class ClangTidyChecker(CheckerFixer):
     def check_file(self, file_path: Path) -> CheckResult:
         target = self._config.project.default_target
         for profile in self._config.profiles:
-            profile_build_dir = (
-                self._config.project_root / target.get_profile_build_dir(profile)
-            )
+            profile_build_dir = self._config.project_root / target.get_profile_build_dir(profile)
             if profile_build_dir.is_dir():
                 self.build_path = profile_build_dir
                 break
@@ -346,19 +325,13 @@ class ClangTidyChecker(CheckerFixer):
             "-fno-shrink-wrap",
         ]
 
-        with open(
-            str(self.build_path) + "/compile_commands.json", encoding="utf-8"
-        ) as fin:
+        with open(str(self.build_path) + "/compile_commands.json", encoding="utf-8") as fin:
             file_contents = fin.read()
 
         for string in strings_to_substitute:
             file_contents = file_contents.replace(string, "")
 
-        db_path_for_check = (
-            str(self.build_path)
-            + "/compilation_db_for_check"
-            + "/compile_commands.json"
-        )
+        db_path_for_check = str(self.build_path) + "/compilation_db_for_check" + "/compile_commands.json"
 
         os.makedirs(os.path.dirname(db_path_for_check), exist_ok=True)
         with open(db_path_for_check, "w", encoding="utf-8") as fout:
@@ -389,14 +362,10 @@ class ClangTidyChecker(CheckerFixer):
         return cmd
 
 
-def find_files(
-    dir_path: Path, glob_patterns: Sequence[str], exclude_patterns: Sequence[str]
-) -> Iterable[Path]:
+def find_files(dir_path: Path, glob_patterns: Sequence[str], exclude_patterns: Sequence[str]) -> Iterable[Path]:
     exclude_list = [path for pattern in exclude_patterns for path in glob.glob(pattern)]
 
-    for file_path in chain.from_iterable(
-        dir_path.rglob(pattern) for pattern in glob_patterns
-    ):
+    for file_path in chain.from_iterable(dir_path.rglob(pattern) for pattern in glob_patterns):
         if file_path.is_file():
             if any(exclude in str(file_path) for exclude in exclude_list):
                 logger.info("Skipping %s", file_path)
@@ -529,18 +498,14 @@ class CppcheckChecker(CheckerFixer):
         Retrieve the suppression rules from the config.
         """
         cppcheck_config = self._config.check.cppcheck
-        return (
-            cppcheck_config.suppress
-        )  # Ensure this attribute exists and is a List[str]
+        return cppcheck_config.suppress  # Ensure this attribute exists and is a List[str]
 
     def get_directories_to_check(self) -> List[str]:
         """
         Retrieve the directories to check from the config.
         """
         cppcheck_config = self._config.check.cppcheck
-        return (
-            cppcheck_config.directories
-        )  # Ensure this attribute exists and is a List[str]
+        return cppcheck_config.directories  # Ensure this attribute exists and is a List[str]
 
     def check_file(self, file_path: Path) -> CheckResult:
         raise NotImplementedError

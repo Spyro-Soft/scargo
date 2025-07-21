@@ -23,9 +23,7 @@ def test_clean_build(
     monkeypatch: pytest.MonkeyPatch,
     mock_shutil_rm: MagicMock,
 ) -> None:
-    monkeypatch.setattr(
-        "scargo.commands.clean.get_scargo_config_or_exit", lambda: config
-    )
+    monkeypatch.setattr("scargo.commands.clean.get_scargo_config_or_exit", lambda: config)
     build_path = Path(build_path_str)
     build_path.mkdir(parents=True)
     random_file = Path(build_path, "file1.txt")

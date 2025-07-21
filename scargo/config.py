@@ -3,7 +3,7 @@
 # #
 from enum import Enum
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Union
+from typing import Any, Dict, List, Optional, Sequence, Union
 
 import toml
 from pydantic import BaseModel, Extra, Field, root_validator
@@ -53,21 +53,15 @@ class Config(BaseModel):
     project: "ProjectConfig"
     profiles: Dict[str, "ProfileConfig"] = Field(..., alias="profile")
     check: "ChecksConfig"
-    fix: "FixesConfig" = Field(
-        default_factory=lambda: FixesConfig()  # pylint: disable=unnecessary-lambda
-    )
-    doc: "DocConfig" = Field(
-        default_factory=lambda: DocConfig()  # pylint: disable=unnecessary-lambda
-    )
+    fix: "FixesConfig" = Field(default_factory=lambda: FixesConfig())  # pylint: disable=unnecessary-lambda
+    doc: "DocConfig" = Field(default_factory=lambda: DocConfig())  # pylint: disable=unnecessary-lambda
     tests: "TestConfig"
     dependencies: "Dependencies"
     conan: "ConanConfig"
     atsam: Optional["ATSAMConfig"]
     stm32: Optional["Stm32Config"]
     esp32: Optional["Esp32Config"]
-    scargo: "ScargoConfig" = Field(
-        default_factory=lambda: ScargoConfig()  # pylint: disable=unnecessary-lambda
-    )
+    scargo: "ScargoConfig" = Field(default_factory=lambda: ScargoConfig())  # pylint: disable=unnecessary-lambda
     docker_compose: "DockerComposeConfig" = Field(
         default_factory=lambda: DockerComposeConfig(),  # pylint: disable=unnecessary-lambda
         alias="docker-compose",
@@ -103,9 +97,7 @@ class Config(BaseModel):
         return self.esp32
 
     @root_validator
-    def validate_special_configs(  # pylint: disable=no-self-argument
-        cls, values: Dict[str, Any]
-    ) -> Dict[str, Any]:
+    def validate_special_configs(cls, values: Dict[str, Any]) -> Dict[str, Any]:  # pylint: disable=no-self-argument
         if "project" in values:
             target_id = values["project"].target_id
             targets_for_validation = [
@@ -156,6 +148,9 @@ class ProjectConfig(BaseModel):
     cflags: str
     cxxflags: str
 
+    src_extensions: Optional[Sequence[str]]
+    header_extensions: Optional[Sequence[str]]
+
     max_build_jobs: Optional[int] = Field(default=None, alias="max-build-jobs")
     cmake_variables: Dict[str, str] = Field(default={}, alias="cmake-variables")
 
@@ -168,9 +163,7 @@ class ProjectConfig(BaseModel):
     @property
     def default_target(self) -> "Target":
         if isinstance(self.target_id, List):
-            return Target.get_target_by_id(
-                self.target_id[0]  # pylint: disable=unsubscriptable-object
-            )
+            return Target.get_target_by_id(self.target_id[0])  # pylint: disable=unsubscriptable-object
         return Target.get_target_by_id(self.target_id)
 
     def is_docker_buildenv(self) -> bool:
@@ -233,15 +226,9 @@ TARGETS = {
         cc="gcc",
         cxx="g++",
     ),
-    ScargoTarget.stm32.value: Target(
-        id=ScargoTarget.stm32.value, elf_file_extension=".elf"
-    ),
-    ScargoTarget.esp32.value: Target(
-        id=ScargoTarget.esp32.value, elf_file_extension=".elf"
-    ),
-    ScargoTarget.atsam.value: Target(
-        id=ScargoTarget.atsam.value, elf_file_extension=""
-    ),
+    ScargoTarget.stm32.value: Target(id=ScargoTarget.stm32.value, elf_file_extension=".elf"),
+    ScargoTarget.esp32.value: Target(id=ScargoTarget.esp32.value, elf_file_extension=".elf"),
+    ScargoTarget.atsam.value: Target(id=ScargoTarget.atsam.value, elf_file_extension=""),
 }
 
 
@@ -254,11 +241,15 @@ class ProfileConfig(BaseModel, extra=Extra.allow):
 
     @property
     def extras(self) -> Dict[str, Any]:
-        return {
-            key: value
-            for key, value in dict(self).items()
-            if key not in self.__fields__
-        }
+        return {key: value for key, value in dict(self).items() if key not in self.__fields__}
+
+
+class LicenseCheckConfig(BaseModel):
+    blacklist: List[str] = Field(default_factory=list)
+    whitelist: List[str] = Field(default_factory=list)
+    allow_no_license_if_copyright_match: List[str] = Field(
+        default_factory=list, alias="allow-no-license-if-copyright-match"
+    )
 
 
 class ChecksConfig(BaseModel):
@@ -270,12 +261,11 @@ class ChecksConfig(BaseModel):
     clang_format: "CheckConfig" = Field(..., alias="clang-format")
     clang_tidy: "CheckConfig" = Field(..., alias="clang-tidy")
     cyclomatic: "CheckConfig"
+    license: Optional[LicenseCheckConfig] = None
 
 
 class FixesConfig(BaseModel):
-    copyright: "FixConfig" = Field(
-        default_factory=lambda: FixConfig()  # pylint: disable=unnecessary-lambda
-    )
+    copyright: "FixConfig" = Field(default_factory=lambda: FixConfig())  # pylint: disable=unnecessary-lambda
 
 
 class CheckConfig(BaseModel):
@@ -313,11 +303,7 @@ class TestConfig(BaseModel, extra=Extra.allow):
 
     @property
     def extras(self) -> Dict[str, Any]:
-        return {
-            key: value
-            for key, value in dict(self).items()
-            if key not in self.__fields__
-        }
+        return {key: value for key, value in dict(self).items() if key not in self.__fields__}
 
 
 class Dependencies(BaseModel):
@@ -369,6 +355,7 @@ FixesConfig.update_forward_refs()
 FixConfig.update_forward_refs()
 Stm32Config.update_forward_refs()
 Esp32Config.update_forward_refs()
+LicenseCheckConfig.update_forward_refs()
 
 
 def parse_config(config_file_path: Path) -> Config:

@@ -7,10 +7,11 @@ from typing import List, Sequence
 from scargo.config import Config
 from scargo.file_generators.base_gen import create_file_from_template
 from scargo.file_generators.clang_parser.header_parser import parse_file
+from scargo.global_values import (
+    SCARGO_HEADER_EXTENSIONS_DEFAULT,
+    SCARGO_SRC_EXTENSIONS_DEFAULT,
+)
 from scargo.utils.sys_utils import removeprefix
-
-HEADER_EXTENSIONS = (".h", ".hpp")
-SRC_EXTENSIONS = (".c", ".cpp")
 
 
 class _UnitTestsGen:
@@ -31,7 +32,7 @@ class _UnitTestsGen:
             self._generate_cmake(input_path.parent, ut_path.parent)
 
         elif input_path.is_dir():
-            headers = self._get_paths_with_ext(input_path, HEADER_EXTENSIONS)
+            headers = self._get_paths_with_ext(input_path, SCARGO_HEADER_EXTENSIONS_DEFAULT)
             ut_path = None
             for hdr in headers:
                 ut_path = self._get_unit_test_path(hdr)
@@ -39,9 +40,7 @@ class _UnitTestsGen:
             if ut_path:
                 self._generate_cmake(input_path, ut_path.parent)
 
-    def _generate_unit_test(
-        self, input_file_path: Path, output_file_path: Path, overwrite: bool
-    ) -> None:
+    def _generate_unit_test(self, input_file_path: Path, output_file_path: Path, overwrite: bool) -> None:
         """Generates unit test source file
 
         :param Path input_file_path: Path to src file
@@ -69,9 +68,7 @@ class _UnitTestsGen:
             cmake_dir_path = cmake_dir_path.parent
 
         ut_name = self._get_cmake_tests_name(ut_dir_path)
-        ut_files = [
-            p.name for p in self._get_paths_with_ext(ut_dir_path, SRC_EXTENSIONS)
-        ]
+        ut_files = [p.name for p in self._get_paths_with_ext(ut_dir_path, SCARGO_SRC_EXTENSIONS_DEFAULT)]
 
         src_path = removeprefix(
             str(src_dir_path.absolute()),
@@ -79,15 +76,11 @@ class _UnitTestsGen:
         )
 
         # Exclude main from srcs to test
-        main_cpp = (
-            f"{self._config.project.bin_name}.cpp"
-            if self._config.project.bin_name
-            else None
-        )
+        main_cpp = f"{self._config.project.bin_name}.cpp" if self._config.project.bin_name else None
 
         src_files = [
             p.relative_to(self._project_path)
-            for p in self._get_paths_with_ext(src_dir_path, SRC_EXTENSIONS)
+            for p in self._get_paths_with_ext(src_dir_path, SCARGO_SRC_EXTENSIONS_DEFAULT)
             if p.name != main_cpp
         ]
 
@@ -122,9 +115,7 @@ class _UnitTestsGen:
         :return Path: output path for unit test
         """
         relative_to_src = input_src_path.relative_to(self._config.source_dir_path)
-        return Path(self._ut_dir, relative_to_src).with_name(
-            f"ut_{input_src_path.stem}.cpp"
-        )
+        return Path(self._ut_dir, relative_to_src).with_name(f"ut_{input_src_path.stem}.cpp")
 
     def _get_cmake_tests_name(self, test_dir_path: Path) -> str:
         """Get tests name for cmake

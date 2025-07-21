@@ -14,7 +14,12 @@ from scargo.config import CHIP_DEFAULTS, TARGETS, ScargoTarget, Target
 from scargo.config_utils import get_scargo_config_or_exit
 from scargo.file_generators.cpp_gen import generate_cpp
 from scargo.file_generators.toml_gen import generate_toml
-from scargo.global_values import SCARGO_DEFAULT_CONFIG_FILE, SCARGO_DOCKER_ENV
+from scargo.global_values import (
+    SCARGO_DEFAULT_CONFIG_FILE,
+    SCARGO_DOCKER_ENV,
+    SCARGO_HEADER_EXTENSIONS_DEFAULT,
+    SCARGO_SRC_EXTENSIONS_DEFAULT,
+)
 from scargo.logger import get_logger
 from scargo.target_helpers.atsam_helper import create_atsam_config
 from scargo.target_helpers.esp32_helper import create_esp32_config
@@ -76,10 +81,9 @@ def scargo_new(
     :raises FileExistsError: if project with provided name exist
     """
     if not re.match(r"[a-zA-Z][\w-]*$", name):
-        logger.error(
-            "Name must consist of letters, digits, dash and undescore only,"
-            " and the first character must be a letter"
-        )
+        _errmsg = "Name must consist of letters, digits, dash and undescore only,"
+        _errmsg += " and the first character must be a letter"
+        logger.error(_errmsg)
         sys.exit(1)
 
     targets_chips: Dict[str, str] = process_chips(chip, targets)
@@ -116,6 +120,8 @@ def scargo_new(
         docker_image_tag=f"{name.lower()}-dev:1.0",
         lib_name=lib_name,
         bin_name=bin_name,
+        src_extensions=SCARGO_SRC_EXTENSIONS_DEFAULT,
+        header_extensions=SCARGO_HEADER_EXTENSIONS_DEFAULT,
         atsam_config=create_atsam_config(targets_chips.get("atsam")),
         esp32_config=create_esp32_config(targets_chips.get("esp32")),
         stm32_config=create_stm32_config(targets_chips.get("stm32")),

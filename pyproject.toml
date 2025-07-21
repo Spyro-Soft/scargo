@@ -53,8 +53,9 @@ dev = [
     "flake8>=6.1.0",
     "flit==3.8.0",
     "isort==5.11.4",
-    "matplotlib",
+    "matplotlib==3.7.5",
     "mypy==1.14.1",
+    "numpy>=1.26.0",
     "pre-commit",
     "pyclean==3.0.0",
     "pyelftools",
@@ -73,6 +74,7 @@ dev = [
     "pyopenssl==23.2.0",
     "types-pyOpenSSL==23.2.0",
     "types-PyYAML==6.0.12.12",
+    "pip-tools==7.4.1",
 ]
 doc = [
     "recommonmark",
@@ -103,6 +105,9 @@ exclude = [
 
 [tool.isort]
 profile = "black"
+
+[tool.black]
+line-length = 120
 
 [tool.pylint]
 ignore-paths = ["example_project", "tests"]

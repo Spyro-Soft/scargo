@@ -11,9 +11,7 @@ from tests.ut.utils import get_log_data, get_test_project_config
 
 
 @pytest.fixture
-def mock_debug_config(
-    request: pytest.FixtureRequest, tmpdir: Path, mocker: MockerFixture
-) -> MagicMock:
+def mock_debug_config(request: pytest.FixtureRequest, tmpdir: Path, mocker: MockerFixture) -> MagicMock:
     os.chdir(tmpdir)
 
     mocker.patch("os.system")
@@ -23,9 +21,7 @@ def mock_debug_config(
     test_config = get_test_project_config(target_id)
     test_config.project_root = Path(tmpdir)
 
-    return mocker.patch(
-        f"{scargo_debug.__module__}.prepare_config", return_value=test_config
-    )
+    return mocker.patch(f"{scargo_debug.__module__}.prepare_config", return_value=test_config)
 
 
 def test_debug_x86(mock_debug_config: MagicMock, fp: FakeProcess) -> None:
@@ -93,9 +89,7 @@ def test_debug_esp32(mock_debug_config: MagicMock, fp: FakeProcess) -> None:
     scargo_debug(None, None)
 
 
-def test_debug_bin_not_exists(
-    mock_debug_config: MagicMock, caplog: pytest.LogCaptureFixture
-) -> None:
+def test_debug_bin_not_exists(mock_debug_config: MagicMock, caplog: pytest.LogCaptureFixture) -> None:
     config = mock_debug_config.return_value
     target = config.project.default_target
     bin_path = Path(target.get_bin_path(config.project.name.lower()))

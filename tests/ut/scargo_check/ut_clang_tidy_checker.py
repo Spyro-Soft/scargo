@@ -29,14 +29,10 @@ def test_check_clang_tidy_pass(
     compilation_db_path = Path(build_path, "compile_commands.json")
     compilation_db_path.touch(exist_ok=True)
 
-    fake_process.register(
-        CLANG_TIDY_COMMAND + ["-p", build_path], stdout=CLANG_TIDY_NORMAL_OUTPUT
-    )
+    fake_process.register(CLANG_TIDY_COMMAND + ["-p", build_path], stdout=CLANG_TIDY_NORMAL_OUTPUT)
     result = ClangTidyChecker(config).check()
     assert result == 0
-    assert all(
-        level not in ("WARNING", "ERROR") for level, msg in get_log_data(caplog.records)
-    )
+    assert all(level not in ("WARNING", "ERROR") for level, msg in get_log_data(caplog.records))
 
 
 @pytest.mark.parametrize(

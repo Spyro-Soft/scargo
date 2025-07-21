@@ -79,9 +79,7 @@ class _ScargoFlash:
 
     def _get_binary_and_elf_paths(self) -> Tuple[Path, Path]:
         project_root = self._config.project_root
-        elf_path = project_root / self._target.get_bin_path(
-            self._config.project.name.lower(), self._flash_profile
-        )
+        elf_path = project_root / self._target.get_bin_path(self._config.project.name.lower(), self._flash_profile)
         bin_path = elf_path.with_suffix(".bin")
         return bin_path, elf_path
 
@@ -193,29 +191,19 @@ class _ScargoFlash:
     def _flash_esp32_app(self) -> None:
         bin_dir_path = self._target.get_bin_dir_path(self._flash_profile)
         bin_path = Path(bin_dir_path, f"{self._config.project.name}.bin")
-        command = self._build_esp32_flash_command(
-            "parttool.py", "ota_0", [f"--input={bin_path}"]
-        )
+        command = self._build_esp32_flash_command("parttool.py", "ota_0", [f"--input={bin_path}"])
         subprocess.run(command, cwd=self._config.project_root, check=True)
 
     def _flash_esp32_fs(self) -> None:
-        command = self._build_esp32_flash_command(
-            "parttool.py", "spiffs", ["--input=build/spiffs.bin"]
-        )
+        command = self._build_esp32_flash_command("parttool.py", "spiffs", ["--input=build/spiffs.bin"])
         subprocess.run(command, cwd=self._config.project_root, check=True)
 
     def _flash_esp32_default(self) -> None:
-        command = self._build_esp32_flash_command(
-            "esptool.py", None, ["write_flash", "@flash_args"]
-        )
-        bin_dir = self._config.project_root / self._target.get_bin_dir_path(
-            self._flash_profile
-        )
+        command = self._build_esp32_flash_command("esptool.py", None, ["write_flash", "@flash_args"])
+        bin_dir = self._config.project_root / self._target.get_bin_dir_path(self._flash_profile)
         subprocess.run(command, cwd=bin_dir, check=True)
 
-    def _build_esp32_flash_command(
-        self, tool: str, partition_name: Optional[str], extra_args: List[str]
-    ) -> List[str]:
+    def _build_esp32_flash_command(self, tool: str, partition_name: Optional[str], extra_args: List[str]) -> List[str]:
         command = [tool]
         if self._port:
             command.append(f"--port={self._port}")
@@ -250,7 +238,5 @@ def scargo_flash(
     erase_memory: bool,
     bank: Optional[int] = None,
 ) -> None:
-    flasher = _ScargoFlash(
-        flash_profile, port, target, app, file_system, erase_memory, bank
-    )
+    flasher = _ScargoFlash(flash_profile, port, target, app, file_system, erase_memory, bank)
     flasher.flash_target()

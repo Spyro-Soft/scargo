@@ -13,9 +13,7 @@ file_extensions = (".py", ".md", ".txt", ".sh", "Dockerfile")
 
 
 def option_parser_init() -> Tuple[Namespace, List[str]]:
-    parser = ArgumentParser(
-        epilog="The scripts checks if there are any TODOs in the repository."
-    )
+    parser = ArgumentParser(epilog="The scripts checks if there are any TODOs in the repository.")
     parser.add_argument(
         "-e",
         "--exclude",
@@ -36,9 +34,7 @@ def option_parser_init() -> Tuple[Namespace, List[str]]:
     return parser.parse_known_args()
 
 
-def search_multiple_strings_in_file(
-    file_name: str, search_strings: List[str]
-) -> List[Tuple[str, int, str]]:
+def search_multiple_strings_in_file(file_name: str, search_strings: List[str]) -> List[Tuple[str, int, str]]:
     """Get line from the file along with line numbers, which contains any string from the list"""
     line_number = 0
     results = []

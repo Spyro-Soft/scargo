@@ -48,8 +48,7 @@ def _extract_cxx_methods(cursor: Cursor) -> List[FunctionDescriptor]:
     return [
         _extract_method_params(descendant)
         for descendant in cursor.walk_preorder()
-        if descendant.kind == CursorKind.CXX_METHOD
-        and descendant.access_specifier.name == "PUBLIC"
+        if descendant.kind == CursorKind.CXX_METHOD and descendant.access_specifier.name == "PUBLIC"
     ]
 
 
