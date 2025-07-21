@@ -19,12 +19,6 @@ from tests.it.conftest import (
     SUBDIRECTORY_TEST_FILES_PATH,
     TEST_DATA_PATH,
 )
-from tests.it.utils import (
-    ScargoTestRunner,
-    add_profile_to_toml,
-    run_custom_command_in_docker,
-)
-
 
 @dataclass
 class ActiveTestState:
