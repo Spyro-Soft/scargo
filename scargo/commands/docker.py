@@ -60,8 +60,8 @@ def scargo_docker_run(
     docker_path = _get_docker_path(config.project_root)
     project_config_name = config.project.name
 
-    if docker_opts is None:
-        docker_opts = []
+    if not docker_opts:
+        docker_opts = ["--remove-orphans"]
 
     cmd = get_docker_compose_command()
     cmd.extend(
