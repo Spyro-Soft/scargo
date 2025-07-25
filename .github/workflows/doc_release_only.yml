@@ -1,0 +1,71 @@
+name: DocReleaseOnly
+on:
+  pull_request:
+    branches:
+      - main
+    types: [closed]
+
+# Sets permissions of the GITHUB_TOKEN to allow deployment to GitHub Pages
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+env:
+  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  PYPI_API_TOKEN: ${{ secrets.PYPI_API_TOKEN }}
+
+jobs:
+  documentation-release:
+    needs: create-release
+    if: ${{ github.event.pull_request.merged }}
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-22.04
+    container:
+        image: spyrosoftsa/scargo-dev:1.4
+        options: --user root
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+      - name: Generate HTML documentation
+        run: ./run.py --doc
+      - name: Setup Pages
+        uses: actions/configure-pages@v3
+
+      - name: Upload documentation artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: github-pages
+          path: ./build/src_doc/html
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v3
+        with:
+          artifact_name: github-pages
+
+  create-release:
+    runs-on: ubuntu-22.04
+    permissions:
+      contents: write
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+      with:
+          fetch-depth: 0
+    - name: Get tag from source code
+      id: source-code-tag
+      run: echo "TAG_NAME=release_$(grep -w __version__ scargo/__init__.py | grep -Eo "[[:digit:]]+\.[[:digit:]]+\.[[:digit:]]+")" >> $GITHUB_ENV
+
+    - name: Create Release
+      uses: softprops/action-gh-release@v1
+      env:
+        GITHUB_TOKEN: ${{ env.GITHUB_TOKEN }}
+      with:
+        tag_name: ${{ env.TAG_NAME }}
+        draft: false
+        prerelease: false
+        generate_release_notes: true
