@@ -1,7 +1,5 @@
-# #
-# @copyright Copyright (C) 2023 SpyroSoft Solutions S.A. All rights reserved.
-# #
 """Format project code using formatter"""
+
 import os
 from typing import List, Type
 

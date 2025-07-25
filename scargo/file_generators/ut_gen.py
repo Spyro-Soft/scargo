@@ -1,6 +1,3 @@
-# #
-# @copyright Copyright (C) 2023 SpyroSoft Solutions S.A. All rights reserved.
-# #
 from pathlib import Path
 from typing import List, Sequence
 
@@ -132,7 +129,7 @@ class _UnitTestsGen:
 
 
 COPYRIGHT = """# #
-# Copyright (C) 2022 Spyrosoft Solutions. All rights reserved.
+# Copyright (C).
 # #\n\n"""
 
 

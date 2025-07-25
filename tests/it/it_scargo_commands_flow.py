@@ -315,10 +315,16 @@ class TestBinProjectFlow:
         # need for clang-tidy
         test_state.runner.invoke(cli, ["build"])
 
+        # Check should initially fail due to missing copyright
         result = test_state.runner.invoke(cli, ["check"])
+        assert result.exit_code != 0
+        assert "copyright" in result.output
+
+        # After fix, it should pass
+        result = test_state.runner.invoke(cli, ["fix"])
         assert result.exit_code == 0
 
-        result = test_state.runner.invoke(cli, ["fix"])
+        result = test_state.runner.invoke(cli, ["check"])
         assert result.exit_code == 0
 
     def test_cli_check_and_fix_copy_problematic_files(

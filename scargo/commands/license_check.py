@@ -1,7 +1,3 @@
-# #
-# @copyright Copyright (C) 2025 SpyroSoft Solutions S.A. All rights reserved.
-# #
-
 import json
 import subprocess
 import sys

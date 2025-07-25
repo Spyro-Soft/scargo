@@ -1,9 +1,5 @@
-# #
-# @copyright Copyright (C) 2023 SpyroSoft Solutions S.A. All rights reserved.
-# #
-
-
 """Publish conan package into repository"""
+
 import subprocess
 import sys
 from pathlib import Path

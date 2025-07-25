@@ -1,7 +1,3 @@
-###
-# @copyright Copyright (C) 2022 Spyrosoft Solutions. All rights reserved.
-# THIS FILE WAS GENERATED AUTOMATICALLY. DO NOT CHANGE IT.
-###
 services:
   {{ config.project.name }}_dev:
     image: {{ config.project.docker_image_tag }}
@@ -21,9 +17,6 @@ services:
     volumes:
       - ..:/workspace
       - /dev:/dev
-    {% if scargo_path %}
-      - {{ scargo_path }}:/usr/local/lib/python3.10/dist-packages/scargo
-    {% endif%}
     command: sleep infinity
   {% if config.docker_compose.ports %}
     ports:

@@ -1,7 +1,3 @@
-/**
- * @copyright Copyright (C) 2021 Spyrosoft Solutions. All rights reserved.
- */
-
 #pragma once
 
 #include <iostream>

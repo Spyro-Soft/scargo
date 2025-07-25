@@ -1,5 +1,4 @@
 ###
-# @copyright Copyright (C) 2022 Spyrosoft Solutions. All rights reserved.
 # THIS FILE WAS GENERATED AUTOMATICALLY. DO NOT CHANGE IT.
 ###
 lizard~=1.7.9
