@@ -71,8 +71,7 @@ def test_docker_run(
     service_name = f"{scargo_docker_test_setup.project.name}_dev"
     called_subprocess_cmd = get_docker_compose_command()
     called_subprocess_cmd.extend(["run"])
-    if not command_args:
-        called_subprocess_cmd.append("--remove-orphans")
+
     called_subprocess_cmd.extend(command_args)
     called_subprocess_cmd.append(service_name)
     assert mock_subprocess_run.call_args.args[0] == called_subprocess_cmd
