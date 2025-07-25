@@ -1,4 +1,4 @@
-name: Release
+name: DocReleaseOnly
 on:
   pull_request:
     branches:
@@ -69,34 +69,3 @@ jobs:
         draft: false
         prerelease: false
         generate_release_notes: true
-
-
-  release-to-pypi:
-    needs: create-release
-    runs-on: ubuntu-22.04
-    container:
-        image: spyrosoftsa/scargo-dev:1.4
-        options: --user root
-    steps:
-    - name: Checkout code
-      uses: actions/checkout@v2
-      with:
-          fetch-depth: 0
-#    - name: Set up Python environment
-#      uses: actions/setup-python@v2
-#      with:
-#        python-version: 3.8
-    - name: Install dependencies
-      run: |
-        pip install --upgrade pip
-        pip install flit
-
-    - name: Build and upload to PyPI
-      run: |
-        git config --global --add safe.directory /__w/scargo/scargo
-        flit build
-        flit publish
-      env:
-        FLIT_USERNAME: __token__
-        FLIT_PASSWORD: ${{ secrets.PYPI_API_TOKEN }}
-
