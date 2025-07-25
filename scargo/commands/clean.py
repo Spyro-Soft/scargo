@@ -1,4 +1,5 @@
 """Clean project from unnecessary files"""
+
 import shutil
 from pathlib import Path
 from typing import Optional

@@ -1,4 +1,5 @@
 """Format project code using formatter"""
+
 import os
 from typing import List, Type
 

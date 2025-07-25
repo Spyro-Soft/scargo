@@ -1,4 +1,5 @@
 """Run test from project"""
+
 import json
 import subprocess
 import sys

@@ -1,4 +1,5 @@
 """Build project bin/lib exec file"""
+
 import subprocess
 import sys
 from pathlib import Path

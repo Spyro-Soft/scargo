@@ -1,4 +1,5 @@
 """Generate cmake for test dir"""
+
 from pathlib import Path
 from shutil import copytree
 

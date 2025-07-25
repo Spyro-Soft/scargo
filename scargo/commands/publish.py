@@ -1,4 +1,5 @@
 """Publish conan package into repository"""
+
 import subprocess
 import sys
 from pathlib import Path

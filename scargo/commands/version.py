@@ -1,4 +1,5 @@
 """feature function for scargo"""
+
 from scargo import __version__
 from scargo.logger import get_logger
 

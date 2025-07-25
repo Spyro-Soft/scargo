@@ -1,4 +1,5 @@
 """Check written code with formatters"""
+
 import abc
 import glob
 import os

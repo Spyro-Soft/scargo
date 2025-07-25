@@ -1,4 +1,5 @@
 """Handle docker for project"""
+
 import shutil
 import subprocess
 import sys

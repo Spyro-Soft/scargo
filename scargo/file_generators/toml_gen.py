@@ -1,4 +1,5 @@
 """Generate toml for scargo project"""
+
 from pathlib import Path
 from typing import Any
 
