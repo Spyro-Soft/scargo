@@ -1,8 +1,5 @@
-# #
-# @copyright Copyright (C) 2023 SpyroSoft Solutions S.A. All rights reserved.
-# #
-
 """Global values for scargo"""
+
 import importlib.util
 from pathlib import Path
 

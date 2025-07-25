@@ -1,7 +1,4 @@
 #!/usr/bin/env python3
-# #
-# @copyright Copyright (C) 2023 SpyroSoft Solutions S.A. All rights reserved.
-# #
 
 import datetime
 import fileinput
@@ -41,7 +38,7 @@ COPYRIGHT_DOXYGEN = "@copyright "
 # text before year
 COPYRIGHT_BEGIN_STRING = "Copyright (C) "
 # text after year
-COPYRIGHT_END_STRING = " SpyroSoft Solutions S.A. All rights reserved."
+COPYRIGHT_END_STRING = ""
 # merged text with current year (default copyright that will be inserted in fix mode)
 COPYRIGHT_ADD_STRING = COPYRIGHT_BEGIN_STRING + str(datetime.datetime.now().year) + COPYRIGHT_END_STRING
 # with doxygen tag

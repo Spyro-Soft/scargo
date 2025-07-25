@@ -1,8 +1,5 @@
-# #
-# @copyright Copyright (C) 2023 SpyroSoft Solutions S.A. All rights reserved.
-# #
-
 """Clean project from unnecessary files"""
+
 import shutil
 from pathlib import Path
 from typing import Optional

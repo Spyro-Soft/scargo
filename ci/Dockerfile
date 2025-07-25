@@ -1,7 +1,3 @@
-# #
-# @copyright Copyright (C) 2022 SpyroSoft Solutions S.A. All rights reserved.
-# #
-
 ARG DOCKER_IMAGE_ROOT
 FROM ${DOCKER_IMAGE_ROOT} as base
 

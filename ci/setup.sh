@@ -1,7 +1,4 @@
 #!/bin/bash
-# #
-# @copyright Copyright (C) 2022 SpyroSoft Solutions S.A. All rights reserved.
-# #
 
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"/..
 

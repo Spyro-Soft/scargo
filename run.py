@@ -1,7 +1,4 @@
 #!/usr/bin/env python3
-# #
-# @copyright Copyright (C) 2022 SpyroSoft Solutions. All rights reserved.
-# #
 
 import argparse
 import os

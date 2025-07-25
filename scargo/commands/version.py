@@ -1,8 +1,5 @@
-# #
-# @copyright Copyright (C) 2023 SpyroSoft Solutions S.A. All rights reserved.
-# #
-
 """feature function for scargo"""
+
 from scargo import __version__
 from scargo.logger import get_logger
 

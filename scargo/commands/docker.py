@@ -1,7 +1,5 @@
-# #
-# @copyright Copyright (C) 2023 SpyroSoft Solutions S.A. All rights reserved.
-# #
 """Handle docker for project"""
+
 import shutil
 import subprocess
 import sys
@@ -60,7 +58,14 @@ def scargo_docker_run(
     docker_path = _get_docker_path(config.project_root)
     project_config_name = config.project.name
 
-    if docker_opts is None:
+    down_cmd = get_docker_compose_command()
+    down_cmd.extend(["down", "--remove-orphans", "--timeout", "0"])
+    try:
+        subprocess.run(down_cmd, cwd=docker_path, check=True)
+    except subprocess.CalledProcessError:
+        logger.warning("Failed to clean orphan containers.")
+
+    if not docker_opts:
         docker_opts = []
 
     cmd = get_docker_compose_command()

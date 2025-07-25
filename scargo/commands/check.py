@@ -1,7 +1,5 @@
-# #
-# @copyright Copyright (C) 2023 SpyroSoft Solutions S.A. All rights reserved.
-# #
 """Check written code with formatters"""
+
 import abc
 import glob
 import os

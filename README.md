@@ -18,6 +18,27 @@ scargo can:
 - Work with the predefined docker environment depending on the chosen architecture
 
 # Installation
+## Installing scargo on Ubuntu 24.04+ (PEP 668-compliant systems)
+
+Ubuntu 24.04 and newer follow PEP 668, which restricts the use of pip in the system Python environment to prevent accidental damage to system-managed packages.
+
+To safely install scargo, use a virtual environment:
+
+```
+python3.12 -m venv .venv
+source .venv/bin/activate
+pip install --upgrade pip
+pip install scargo==3.2.0
+```
+
+This ensures isolated and conflict-free usage of scargo without requiring elevated privileges or --break-system-packages.
+
+Alternatively, you may use pipx for global CLI installation:
+
+```
+pipx install scargo==3.2.0
+```
+## Install on ubuntu <=22.04, windows or macos
 Scargo is available on [pypi](https://pypi.org/project/scargo/), so you can install it with pip:
 
 ```pip install scargo```

@@ -5,7 +5,10 @@ build-backend = "flit_core.buildapi"
 [project]
 name = "scargo"
 description = "C/C++ package and software development life cycle manager inspired by RUST cargo idea."
-authors = [{ name = "Spyrosoft Solutions S.A.", email = "aak@spyro-soft.com" }]
+authors = [
+    { name = "Spyrosoft Solutions S.A.", email = "aak@spyro-soft.com" },
+    { name = "Andrzej Aksenczuk", email = "andrzej.aksenczuk@gmail.com" },
+]
 readme = "README.md"
 requires-python = ">=3.8"
 license = { file = "LICENSE" }
@@ -131,7 +134,7 @@ disable = [
 extension-pkg-whitelist = ["pydantic"]
 
 [tool.mypy]
-python_version=3.8
+python_version = 3.8
 strict = true
 disallow_any_unimported = true
 no_implicit_optional = true

@@ -1,7 +1,3 @@
-# #
-# @copyright Copyright (C) 2023 SpyroSoft Solutions S.A. All rights reserved.
-# #
-
 import getpass
 import os
 from dataclasses import dataclass

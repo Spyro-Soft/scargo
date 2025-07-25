@@ -1,6 +1,3 @@
-# #
-# @copyright Copyright (C) 2023 SpyroSoft Solutions S.A. All rights reserved.
-# #
 from enum import Enum
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Sequence, Union
@@ -339,7 +336,7 @@ class Esp32Config(BaseModel):
 
 class ScargoConfig(BaseModel):
     console_log_level: str = Field(default="INFO", alias="console-log-level")
-    file_log_level: str = Field(default="WARNING", alias="file-log-level")
+    file_log_level: str = Field(default="ERROR", alias="file-log-level")
     update_exclude: List[str] = Field(alias="update-exclude", default_factory=list)
     version: Optional[str] = None
 
