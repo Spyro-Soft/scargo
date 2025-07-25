@@ -19,7 +19,7 @@ Flashing the Atmel SAM series is currently supported by using openocd in the bac
 Run the :doc:`scargo flash command </scargo/scargo-flash>` to flash the board.
 
 This flashing procedure might not work for all boards.
-If you have any problems you can  `open issue on github <https://github.com/Spyro-Soft/scargo/issues/new/choose>`_ or contact Spyrosoft members via email (e.g. aak@spyro-soft.com).
+If you have any problems you can  `open issue on github <https://github.com/Spyro-Soft/scargo/issues/new/choose>`_.
 
 Debugging
 ---------

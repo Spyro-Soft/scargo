@@ -1,8 +1,4 @@
 #!/bin/bash
-# #
-# @copyright Copyright (C) 2023 SpyroSoft Solutions S.A. All rights reserved.
-# #
-
 
 RED='\033[0;31m'
 YELLOW='\033[1;33m'

@@ -1,7 +1,3 @@
-//
-// Copyright (C) 2022 SpyroSoft Solutions S.A. All rights reserved.
-//
-
 #include <cstdio>
 /**
  * @brief This is example function doc

@@ -1,7 +1,3 @@
-# #
-# @copyright Copyright (C) 2022 SpyroSoft Solutions S.A. All rights reserved.
-# #
-
 echo -e '\e[33m'"docker installation"
 
 apt-get update > /dev/null

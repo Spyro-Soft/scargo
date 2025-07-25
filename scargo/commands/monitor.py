@@ -1,7 +1,3 @@
-# #
-# @copyright Copyright (C) 2024 SpyroSoft Solutions S.A. All rights reserved.
-# #
-
 import atexit
 import os
 import signal

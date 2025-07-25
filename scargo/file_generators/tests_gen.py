@@ -1,7 +1,3 @@
-# #
-# @copyright Copyright (C) 2023 SpyroSoft Solutions S.A. All rights reserved.
-# #
-
 """Generate cmake for test dir"""
 from pathlib import Path
 from shutil import copytree

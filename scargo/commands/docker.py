@@ -1,6 +1,3 @@
-# #
-# @copyright Copyright (C) 2023 SpyroSoft Solutions S.A. All rights reserved.
-# #
 """Handle docker for project"""
 import shutil
 import subprocess

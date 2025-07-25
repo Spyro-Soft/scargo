@@ -1,6 +1,3 @@
-# #
-# @copyright Copyright (C) 2023 SpyroSoft Solutions S.A. All rights reserved.
-# #
 from typing import Any, Dict
 
 from scargo.config import Config

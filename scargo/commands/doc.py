@@ -1,7 +1,3 @@
-# #
-# @copyright Copyright (C) 2023 SpyroSoft Solutions S.A. All rights reserved.
-# #
-
 """Create project documentation"""
 import subprocess
 import sys

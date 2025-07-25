@@ -1,7 +1,5 @@
 #!/usr/bin/env python3
-# #
-# @copyright Copyright (C) 2022 SpyroSoft Solutions S.A. All rights reserved.
-# #
+
 import argparse
 import sys
 from typing import Sequence

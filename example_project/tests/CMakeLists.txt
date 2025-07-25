@@ -1,7 +1,3 @@
-# #
-# Copyright (C) 2022 SpyroSoft Solutions. All rights reserved.
-# #
-
 cmake_minimum_required(VERSION 3.22)
 
 set(CMAKE_C_COMPILER   "gcc")
