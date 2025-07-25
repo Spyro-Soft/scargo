@@ -1,9 +1,6 @@
 name: DocReleaseOnly
 on:
-  pull_request:
-    branches:
-      - main
-    types: [closed]
+  workflow_dispatch
 
 # Sets permissions of the GITHUB_TOKEN to allow deployment to GitHub Pages
 permissions:
