@@ -88,7 +88,7 @@ class SerialReadThread(threading.Thread):
         try:
             s = self.ser.read(self.read_block_size)
             if s:
-                logger.info(s.decode())
+                print(s.decode())
             self.error_count = 0
         except serial.SerialTimeoutException as e:
             # Handle timeout specifically
