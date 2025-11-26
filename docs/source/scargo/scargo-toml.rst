@@ -102,6 +102,7 @@ This section describes possible options which can be set in the scargo.toml file
 
 [check.cyclomatic]
 ------------------
+**complexity** = (int)(max complexity e.g. 25)
 **exclude** = (string list)(path to excluded dirs e.g. [])
 
 [doc]

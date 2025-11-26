@@ -25,6 +25,7 @@ def test_cyclomatic_checker_pass(config: Config, fake_process: FakeProcess, capl
 def test_cyclomatic_checker_exclude(
     config: Config, fake_process: FakeProcess, caplog: pytest.LogCaptureFixture
 ) -> None:
+    config.check.cyclomatic.complexity = 25
     config.check.cyclomatic.exclude = ["foo/*"]
     command_with_exclude = LIZARD_COMMAND + ["-x", "foo/*"]
     fake_process.register(command_with_exclude)

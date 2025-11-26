@@ -58,6 +58,7 @@ exclude = []
 exclude = []
 
 [check.cyclomatic]
+complexity = 25
 exclude = []
 
 [tests]

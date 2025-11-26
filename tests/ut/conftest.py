@@ -12,6 +12,7 @@ from scargo.config import (
     ConanConfig,
     Config,
     CppCheckConfig,
+    CyclomaticCheckConfig,
     Dependencies,
     DocConfig,
     ProfileConfig,
@@ -73,7 +74,7 @@ def config(fs: FakeFilesystem) -> Config:
                 "cppcheck": CppCheckConfig(description=None, suppress=[], directories=[]),
                 "clang-format": CheckConfig(description=None, exclude=[]),
                 "clang-tidy": CheckConfig(description=None, exclude=[]),
-                "cyclomatic": CheckConfig(description=None, exclude=[]),
+                "cyclomatic": CyclomaticCheckConfig(description=None, exclude=[], complexity=25),
             }
         ),
         doc=DocConfig(exclude=[]),

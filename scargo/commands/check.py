@@ -10,7 +10,7 @@ from itertools import chain
 from pathlib import Path
 from typing import Iterable, List, NamedTuple, Optional, Sequence, Type
 
-from scargo.config import CheckConfig, Config, TodoCheckConfig
+from scargo.config import CheckConfig, Config, CyclomaticCheckConfig, TodoCheckConfig
 from scargo.config_utils import prepare_config
 from scargo.logger import get_logger
 from scargo.utils.clang_utils import get_comment_lines
@@ -379,7 +379,8 @@ class CyclomaticChecker(CheckerFixer):
         """
         Run lizard with the configured parameters and collect all cyclomatic complexity issues.
         """
-        cmd = ["lizard", str(self._config.source_dir_path), "-C", "25", "-w"]
+        complexity = self.get_check_config().complexity
+        cmd = ["lizard", str(self._config.source_dir_path), "-C", str(complexity), "-w"]
 
         for exclude_pattern in self.get_exclude_patterns():
             cmd.extend(["-x", exclude_pattern])
@@ -419,6 +420,9 @@ class CyclomaticChecker(CheckerFixer):
 
     def check_file(self, file_path: Path) -> CheckResult:
         raise NotImplementedError
+
+    def get_check_config(self) -> CyclomaticCheckConfig:
+        return self._config.check.cyclomatic
 
 
 class CppcheckChecker(CheckerFixer):
